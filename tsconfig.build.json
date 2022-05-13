@@ -1,0 +1,35 @@
+{
+    "exclude": [
+        "**/*.test.ts",
+        "**/*.stub.ts",
+        "node_modules",
+        "**/tests/",
+        "**/dist/**/*"
+    ],
+    "compilerOptions": {
+        // We will use esbuild to make the actual js files.
+        // We don't use tsc because it will not map imports for us so if we write
+        // `import foo from "./bar"` it does not get translated to `import foo from "./bar.js"`
+        // which means it cannot be imported via node.
+        "emitDeclarationOnly": true,
+        "composite": true,
+        "outDir": "./dist",
+        "noImplicitAny": true,
+        "strictNullChecks": true,
+        "module": "es6",
+        "target": "es6",
+        "jsx": "react",
+        "allowJs": true,
+        "allowSyntheticDefaultImports": true,
+        "esModuleInterop": true,
+        "strict": true,
+        "sourceMap": true,
+        "declaration": true,
+        "declarationMap": true,
+        "moduleResolution": "node",
+        "resolveJsonModule": true,
+        "paths": {
+            "@unified-latex/*": ["./packages/*"]
+        }
+    }
+}
