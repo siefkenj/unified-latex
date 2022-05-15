@@ -22,6 +22,22 @@ If you are converting LaTeX to plain text or HTML.
 function createMatchers(): { isMacro: (node: any) => node is Ast.Macro; isWhitespace: (node: any) => node is Ast.Whitespace; isRecognized: (nodes: Ast.Node[], whitespaceAllowed?: boolean) => Ast.String; isSplitable: (node: Ast.Node) => boolean; split: (node: Ast.String) => { ...; }[]; }
 ```
 
+## `expandUnicodeLigatures(tree)`
+
+Turn all ligatures into their unicode equivalent. For example,
+`---` -> an em-dash and `\^o` to `ô`. This only applies in non-math mode,
+since programs like katex will process math ligatures.
+
+```typescript
+function expandUnicodeLigatures(tree: Ast.Ast): void;
+```
+
+**Parameters**
+
+| Param | Type      |
+| :---- | :-------- |
+| tree  | `Ast.Ast` |
+
 ## `parseLigatures(ast)`
 
 Parse for recognized ligatures like `---` and `\:o`, etc. These are

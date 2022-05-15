@@ -80,32 +80,6 @@ PluginOptions
 function unifiedLatexFromStringMinimal(options: PluginOptions): void;
 ```
 
-## `unifiedLatexStringComplier`
-
-Unified complier plugin that prints a LaTeX AST as a string.
-
-### Usage
-
-`unified().use(unifiedLatexStringComplier[, options])`
-
-#### options
-
-```typescript
-{ pretty?: boolean; printWidth?: number; useTabs?: boolean; }
-```
-
-### Type
-
-`Plugin<{ pretty?: boolean; printWidth?: number; useTabs?: boolean; }[], Ast.Root, string>`
-
-```typescript
-function unifiedLatexStringComplier(options: {
-  pretty?: boolean;
-  printWidth?: number;
-  useTabs?: boolean;
-}): void;
-```
-
 # Functions
 
 ## `parse(str)`
@@ -171,13 +145,6 @@ function parseMinimal(str: String): Ast.Root;
 | Param | Type     |
 | :---- | :------- |
 | str   | `String` |
-
-# Constants
-
-| Name                          | Type                                        | Description                                                                                                                                   |
-| :---------------------------- | :------------------------------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------- |
-| `processLatexToAstViaUnified` | `() => Processor<Root, Root, Root, void>`   | Use `unified()` to a string to an `Ast.Ast` and then return it. This function&#xA;will not print/pretty-print the `Ast.Ast` back to a string. |
-| `processLatexViaUnified`      | `() => Processor<Root, Root, Root, string>` | Use `unified()` to a string to an `Ast.Ast` and then pretty-print it.                                                                         |
 
 # Types
 

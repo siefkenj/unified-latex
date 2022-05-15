@@ -81,6 +81,53 @@ function replaceNode(
 | ast     | `Ast.Ast`                         |
 | visitor | <span color='gray'>Omitted</span> |
 
+## `replaceNodeDuringVisit(replacement, info)`
+
+Replaces the current node with `replacement`. It is assumed that the current
+node is in an array that is a child of a parent element. If this is not the case,
+the function will error.
+
+```typescript
+function replaceNodeDuringVisit(
+  replacement: Ast.Node | Ast.Argument | (Ast.Node | Ast.Argument)[],
+  info: VisitInfo
+): void;
+```
+
+**Parameters**
+
+| Param       | Type                              |
+| :---------- | :-------------------------------- |
+| replacement | <span color='gray'>Omitted</span> |
+| info        | `VisitInfo`                       |
+
+where
+
+```typescript
+type VisitInfo = {
+  /**
+   * If the element was accessed via an attribute, the attribute key is specified.
+   */
+  readonly key: string | undefined;
+  /**
+   * If the element was accessed in an array, the index is specified.
+   */
+  readonly index: number | undefined;
+  /**
+   * A list of ancestor nodes, `[parent, grandparent, great-grandparent, ...]`
+   */
+  readonly parents: (Ast.Node | Ast.Argument)[];
+  /**
+   * If the element was accessed in an array, the array that it is part of.
+   */
+  readonly containingArray: (Ast.Node | Ast.Argument)[] | undefined;
+  /**
+   * The LaTeX context of the current match.
+   */
+  readonly context: VisitorContext;
+};
+```
+
 ## `replaceStreamingCommand(ast, isStreamingCommand, replacer)`
 
 Given a group or a node array, look for streaming commands (e.g., `\bfseries`) and replace them

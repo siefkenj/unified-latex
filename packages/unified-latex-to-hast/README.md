@@ -74,6 +74,29 @@ function attachNeededRenderInfo(ast: Ast.Ast): void;
 | :---- | :-------- |
 | ast   | `Ast.Ast` |
 
+## `convertToHtml(tree)`
+
+Convert the `unified-latex` AST `tree` into an HTML string. If you need
+more precise control or further processing, consider using `unified`
+directly with the `unifiedLatexToHast` plugin.
+
+For example,
+
+    unified()
+         .use(unifiedLatexToHast)
+         .use(rehypeStringify)
+         .processSync("\\LaTeX to convert")
+
+```typescript
+function convertToHtml(tree: Ast.Node | Ast.Node[]): string;
+```
+
+**Parameters**
+
+| Param | Type                     |
+| :---- | :----------------------- |
+| tree  | `Ast.Node \| Ast.Node[]` |
+
 ## `wrapPars(nodes, options)`
 
 Wrap paragraphs in `<p>...</p>` tags.

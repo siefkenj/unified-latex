@@ -6,7 +6,7 @@
 
 ## What is this?
 
-Linting functions for `unified-latex` ASTs. Lints are found in the `rules` subdirectory. Lints
+Linting functions for `unified-latex` ASTs. Lints are found in the `rules/` subdirectory. Lints
 that can be fixed accept an optional `{fix: boolean}` argument.
 
 ## When should I use this?
