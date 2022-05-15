@@ -1,7 +1,6 @@
 import util from "util";
 import { strToNodes } from "../../test-common";
-import * as Ast from "../../unified-latex-types";
-import { attachMacroArgs } from "../../unified-latex-util-arguments";
+import { attachMacroArgs } from "@unified-latex/unified-latex-util-arguments";
 import { splitOnMacro } from "../libs/split-on-macro";
 import { unsplitOnMacro } from "../libs/unsplit-on-macro";
 

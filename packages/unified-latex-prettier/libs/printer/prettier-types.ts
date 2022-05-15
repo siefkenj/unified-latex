@@ -7,7 +7,7 @@ import type {
     ParserOptions,
     Printer,
 } from "prettier";
-import * as Ast from "../../../unified-latex-types";
+import * as Ast from "@unified-latex/unified-latex-types";
 export { Doc, Options };
 
 // Make a non-generic `AstPath`

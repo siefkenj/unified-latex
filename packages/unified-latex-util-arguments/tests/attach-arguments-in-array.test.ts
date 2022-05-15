@@ -1,6 +1,5 @@
 import util from "util";
 import { strToNodes } from "../../test-common";
-import * as Ast from "../../unified-latex-types";
 import { attachMacroArgsInArray } from "../libs/attach-arguments";
 
 /* eslint-env jest */

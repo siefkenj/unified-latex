@@ -1,7 +1,6 @@
+import { processLatexViaUnified } from "@unified-latex/unified-latex";
 import { VFile } from "unified-lint-rule/lib";
 import util from "util";
-import * as Ast from "../../unified-latex-types";
-import { processLatexViaUnified } from "../../unified-latex-util-parse";
 import { unifiedLatexWrapPars } from "../libs/unified-latex-wrap-pars";
 
 /* eslint-env jest */
@@ -44,8 +43,10 @@ describe("unified-latex-to-hast:unified-latex-wrap-pars", () => {
         expect(file.value).toEqual(
             "\\html-tag:p{a b}\n\\begin{foo}\n\tx\n\\end{foo}\\html-tag:p{c}"
         );
-        
+
         file = process("a\\begin{document}b\\end{document}");
-        expect(file.value).toEqual("a\n\\begin{document}\n\t\\html-tag:p{b}\n\\end{document}");
+        expect(file.value).toEqual(
+            "a\n\\begin{document}\n\t\\html-tag:p{b}\n\\end{document}"
+        );
     });
 });

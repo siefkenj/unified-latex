@@ -1,4 +1,4 @@
-import * as Ast from "../../unified-latex-types";
+import * as Ast from "@unified-latex/unified-latex-types";
 
 type Printable = Ast.Node | Ast.Argument | string;
 type PrintToken = string | typeof linebreak;

@@ -1,12 +1,9 @@
-import { position, pointStart, pointEnd } from "unist-util-position";
+import { pointStart, pointEnd } from "unist-util-position";
 import { lintRule } from "unified-lint-rule";
-import { arg, m } from "../../../unified-latex-builder";
-import * as Ast from "../../../unified-latex-types";
-import { extractFormattedGlue } from "../../../unified-latex-util-glue";
-import { match, math } from "../../../unified-latex-util-match";
-import { printRaw } from "../../../unified-latex-util-print-raw";
-import { prefixMatch, scan, Trie } from "../../../unified-latex-util-scan";
-import { visit } from "../../../unified-latex-util-visit";
+import * as Ast from "@unified-latex/unified-latex-types";
+import { match} from "@unified-latex/unified-latex-util-match";
+import { prefixMatch, Trie } from "@unified-latex/unified-latex-util-scan";
+import { visit } from "@unified-latex/unified-latex-util-visit";
 
 const OPERATOR_NAMES = [
     "Pr",

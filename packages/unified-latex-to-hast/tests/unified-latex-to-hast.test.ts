@@ -1,8 +1,7 @@
 import Prettier from "prettier";
 import rehypeStringify from "rehype-stringify";
 import util from "util";
-import * as Ast from "../../unified-latex-types";
-import { processLatexViaUnified } from "../../unified-latex-util-parse";
+import { processLatexViaUnified } from "@unified-latex/unified-latex";
 import { unifiedLatexToHast } from "../libs/unified-latex-plugin-to-hast";
 
 function normalizeHtml(str: string) {

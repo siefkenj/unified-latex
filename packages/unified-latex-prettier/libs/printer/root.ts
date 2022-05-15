@@ -1,8 +1,8 @@
 import type { Doc } from "prettier";
-import * as Ast from "../../../unified-latex-types";
+import * as Ast from "@unified-latex/unified-latex-types";
 import * as PrettierTypes from "./prettier-types";
 import { getNodeInfo, fill, formatDocArray } from "./common";
-import { match } from "../../../unified-latex-util-match";
+import { match } from "@unified-latex/unified-latex-util-match";
 
 /**
  * Returns true if a `\documentclass` macro is detected,

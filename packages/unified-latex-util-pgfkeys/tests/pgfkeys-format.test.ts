@@ -1,6 +1,5 @@
 import Prettier from "prettier/standalone";
 import { prettierPluginLatex } from "../../unified-latex-prettier";
-import * as Ast from "../../unified-latex-types";
 import "../../test-common";
 
 /* eslint-env jest */

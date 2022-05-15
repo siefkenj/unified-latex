@@ -1,6 +1,6 @@
-import * as Ast from "../../unified-latex-types";
-import { match } from "../../unified-latex-util-match";
-import { printRaw } from "../../unified-latex-util-print-raw";
+import * as Ast from "@unified-latex/unified-latex-types";
+import { match } from "@unified-latex/unified-latex-util-match";
+import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 import { parsePgfkeys } from "./pgfkeys-parser";
 
 /**

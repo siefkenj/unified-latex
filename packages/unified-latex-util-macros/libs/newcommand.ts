@@ -1,9 +1,9 @@
-import { structuredClone } from "../../structured-clone";
-import * as Ast from "../../unified-latex-types";
-import { match } from "../../unified-latex-util-match";
-import { printRaw } from "../../unified-latex-util-print-raw";
-import { replaceNode } from "../../unified-latex-util-replace";
-import { visit } from "../../unified-latex-util-visit";
+import { structuredClone } from "@unified-latex/structured-clone";
+import * as Ast from "@unified-latex/unified-latex-types";
+import { match } from "@unified-latex/unified-latex-util-match";
+import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
+import { replaceNode } from "@unified-latex/unified-latex-util-replace";
+import { visit } from "@unified-latex/unified-latex-util-visit";
 import {
     HashNumber,
     parseMacroSubstitutions,

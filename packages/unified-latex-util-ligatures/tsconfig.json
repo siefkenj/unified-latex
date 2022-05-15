@@ -1,0 +1,9 @@
+{
+    "extends": "../../tsconfig.build.json",
+    "compilerOptions": {
+        "outDir": "./dist/",
+        "rootDir": "."
+    },
+    "include": ["./**/*.ts", "libs/ligature-macros.json"],
+    "references": [{ "path": "../unified-latex-types" }]
+}

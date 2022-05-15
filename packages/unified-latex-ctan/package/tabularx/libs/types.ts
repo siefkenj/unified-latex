@@ -1,4 +1,4 @@
-import * as LatexAst from "../../../../unified-latex-types";
+import * as LatexAst from "@unified-latex/unified-latex-types";
 
 export type Ast = Node | Node[];
 export type Node = Column | BasicAlignment | ParboxAlignment | Code | Divider;

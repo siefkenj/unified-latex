@@ -1,6 +1,6 @@
-import * as Ast from "../../../unified-latex-types";
-import { match } from "../../../unified-latex-util-match";
-import { trimStart } from "../../../unified-latex-util-trim";
+import * as Ast from "@unified-latex/unified-latex-types";
+import { match } from "@unified-latex/unified-latex-util-match";
+import { trimStart } from "@unified-latex/unified-latex-util-trim";
 
 /**
  * Is the node space-like? I.e., is it whitespace or

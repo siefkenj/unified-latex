@@ -1,10 +1,10 @@
-import * as Ast from "../../unified-latex-types";
-import { match } from "../../unified-latex-util-match";
+import * as Ast from "@unified-latex/unified-latex-types";
+import { match } from "@unified-latex/unified-latex-util-match";
 import {
     splitOnCondition,
     unsplitOnMacro,
-} from "../../unified-latex-util-split";
-import { trim, trimEnd, trimStart } from "../../unified-latex-util-trim";
+} from "@unified-latex/unified-latex-util-split";
+import { trim, trimEnd, trimStart } from "@unified-latex/unified-latex-util-trim";
 import { firstSignificantNode } from "./utils/first-significant-node";
 import { replaceStreamingCommandInArray } from "./utils/replace-streaming-command-in-array";
 import { wrapSignificantContent } from "./utils/wrap-significant-content";

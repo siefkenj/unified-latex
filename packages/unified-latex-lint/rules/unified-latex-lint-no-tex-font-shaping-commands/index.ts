@@ -1,10 +1,10 @@
 import { lintRule } from "unified-lint-rule";
-import { m } from "../../../unified-latex-builder";
-import { printRaw } from "../../../unified-latex-util-print-raw";
-import * as Ast from "../../../unified-latex-types";
-import { match } from "../../../unified-latex-util-match";
-import { visit } from "../../../unified-latex-util-visit";
-import { replaceNodeDuringVisit } from "../../utils/replace-node";
+import { m } from "@unified-latex/unified-latex-builder";
+import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
+import * as Ast from "@unified-latex/unified-latex-types";
+import { match } from "@unified-latex/unified-latex-util-match";
+import { visit } from "@unified-latex/unified-latex-util-visit";
+import { replaceNodeDuringVisit } from "@unified-latex/unified-latex-util-replace";
 
 const REPLACEMENTS: Record<string, string> = {
     bf: "bfseries",

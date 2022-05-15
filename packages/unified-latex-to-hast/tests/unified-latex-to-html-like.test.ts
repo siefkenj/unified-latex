@@ -1,7 +1,6 @@
+import { processLatexViaUnified } from "@unified-latex/unified-latex";
 import { VFile } from "unified-lint-rule/lib";
 import util from "util";
-import * as Ast from "../../unified-latex-types";
-import { processLatexViaUnified } from "../../unified-latex-util-parse";
 import { unifiedLatexToHtmlLike } from "../libs/unified-latex-plugin-to-html-like";
 
 /* eslint-env jest */

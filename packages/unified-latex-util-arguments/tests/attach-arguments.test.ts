@@ -1,5 +1,4 @@
 import util from "util";
-import * as Ast from "../../unified-latex-types";
 import { attachMacroArgs } from "../libs/attach-arguments";
 import { strToNodes } from "../../test-common";
 

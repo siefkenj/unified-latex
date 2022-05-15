@@ -1,6 +1,6 @@
-import * as Ast from "../../unified-latex-types";
-import { match } from "../../unified-latex-util-match";
-import { visit } from "../../unified-latex-util-visit";
+import * as Ast from "@unified-latex/unified-latex-types";
+import { match } from "@unified-latex/unified-latex-util-match";
+import { visit } from "@unified-latex/unified-latex-util-visit";
 import { processCommaSeparatedList } from "./arguments";
 
 const isUseOrRequirePackageMacro = match.createMacroMatcher([

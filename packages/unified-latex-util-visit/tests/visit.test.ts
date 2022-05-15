@@ -1,9 +1,6 @@
-import { strictEqual } from "assert";
 import { VFile } from "unified-lint-rule/lib";
 import util from "util";
-import { trimRenderInfo } from "../../unified-latex-util-render-info";
-import * as Ast from "../../unified-latex-types";
-import { printRaw } from "../../unified-latex-util-print-raw";
+import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 import { parse } from "../../unified-latex-util-parse";
 import { visit } from "../libs/visit";
 

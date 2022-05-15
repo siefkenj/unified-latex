@@ -1,0 +1,9 @@
+{
+    "extends": "../../tsconfig.build.json",
+    "compilerOptions": {
+        "outDir": "./dist/",
+        "rootDir": "."
+    },
+    "include": ["./**/*.ts"],
+    "references": [{ "path": "../unified-latex-types" }]
+}

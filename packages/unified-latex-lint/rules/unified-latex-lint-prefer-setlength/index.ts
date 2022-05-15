@@ -1,11 +1,11 @@
 import { lintRule } from "unified-lint-rule";
-import { arg, m } from "../../../unified-latex-builder";
-import * as Ast from "../../../unified-latex-types";
-import { extractFormattedGlue } from "../../../unified-latex-util-glue";
-import { match } from "../../../unified-latex-util-match";
-import { printRaw } from "../../../unified-latex-util-print-raw";
-import { scan } from "../../../unified-latex-util-scan";
-import { visit } from "../../../unified-latex-util-visit";
+import { arg, m } from "@unified-latex/unified-latex-builder";
+import * as Ast from "@unified-latex/unified-latex-types";
+import { extractFormattedGlue } from "@unified-latex/unified-latex-util-glue";
+import { match } from "@unified-latex/unified-latex-util-match";
+import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
+import { scan } from "@unified-latex/unified-latex-util-scan";
+import { visit } from "@unified-latex/unified-latex-util-visit";
 
 const LENGTH_MACROS = [
     "abovecaptionskip",

@@ -1,7 +1,7 @@
-import { ArgSpecAst as ArgSpec } from "../../unified-latex-util-argspec";
-import * as Ast from "../../unified-latex-types";
-import { match } from "../../unified-latex-util-match";
-import { arg } from "../../unified-latex-builder";
+import { ArgSpecAst as ArgSpec } from "@unified-latex/unified-latex-util-argspec";
+import * as Ast from "@unified-latex/unified-latex-types";
+import { match } from "@unified-latex/unified-latex-util-match";
+import { arg } from "@unified-latex/unified-latex-builder";
 
 /**
  * Gobbles an argument of whose type is specified

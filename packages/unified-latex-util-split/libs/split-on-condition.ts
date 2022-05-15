@@ -1,4 +1,4 @@
-import * as Ast from "../../unified-latex-types";
+import * as Ast from "@unified-latex/unified-latex-types";
 
 /**
  * Split a list of nodes based on whether `splitFunc` returns `true`.

@@ -1,4 +1,4 @@
-import { printRaw as latexPrintRaw } from "../../../../unified-latex-util-print-raw";
+import { printRaw as latexPrintRaw } from "@unified-latex/unified-latex-util-print-raw";
 import * as SystemeSpec from "./types";
 
 /**

@@ -1,15 +1,15 @@
 import * as Hast from "hast";
 import { Plugin, unified } from "unified";
-import { unifiedLatexLintNoTexFontShapingCommands } from "../../unified-latex-lint/rules/unified-latex-lint-no-tex-font-shaping-commands";
-import * as Ast from "../../unified-latex-types";
-import { deleteComments } from "../../unified-latex-util-comments";
-import { match } from "../../unified-latex-util-match";
-import { printRaw } from "../../unified-latex-util-print-raw";
+import { unifiedLatexLintNoTexFontShapingCommands } from "@unified-latex/unified-latex-lint/rules/unified-latex-lint-no-tex-font-shaping-commands";
+import * as Ast from "@unified-latex/unified-latex-types";
+import { deleteComments } from "@unified-latex/unified-latex-util-comments";
+import { match } from "@unified-latex/unified-latex-util-match";
+import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 import {
     replaceNode,
     unifiedLatexReplaceStreamingCommands,
-} from "../../unified-latex-util-replace";
-import { visit } from "../../unified-latex-util-visit";
+} from "@unified-latex/unified-latex-util-replace";
+import { visit } from "@unified-latex/unified-latex-util-visit";
 import { environmentReplacements } from "./pre-html-subs/environment-subs";
 import {
     attachNeededRenderInfo,

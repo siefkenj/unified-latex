@@ -3,5 +3,9 @@
     "compilerOptions": {
         "baseUrl": "./"
     },
-    "include": ["./packages/*/index.ts"]
+    "include": [
+        "./packages/*/index.ts",
+        "./packages/**/libs/**/*.ts",
+        "packages/support-tables/**/*.json",
+    ]
 }

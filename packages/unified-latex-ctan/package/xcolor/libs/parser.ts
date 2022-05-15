@@ -1,4 +1,4 @@
-import { XColorPegParser } from "../../../../unified-latex-util-pegjs/libs/pegjs-parsers";
+import { XColorPegParser } from "@unified-latex/unified-latex-util-pegjs";
 import * as XColorSpec from "./types";
 
 const parseCache: Record<string, XColorSpec.Ast> = {};
@@ -11,6 +11,7 @@ const parseCache: Record<string, XColorSpec.Ast> = {};
  * @returns - AST for LaTeX string
  */
 export function parse(str = ""): XColorSpec.Ast {
-    parseCache[str] = parseCache[str] || XColorPegParser.parse(str);
+    parseCache[str] =
+        parseCache[str] || (XColorPegParser.parse(str) as XColorSpec.Ast);
     return parseCache[str];
 }

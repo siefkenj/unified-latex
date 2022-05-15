@@ -1,0 +1,14 @@
+{
+    "extends": "../../tsconfig.build.json",
+    "compilerOptions": {
+        "outDir": "./dist/",
+        "rootDir": "."
+    },
+    "include": ["./**/*.ts", "./libs/**/*.json"],
+    "references": [
+        { "path": "../unified-latex-types" },
+        { "path": "../unified-latex-lint" },
+        { "path": "../unified-latex-ctan" },
+        { "path": "../support-tables" }
+    ]
+}

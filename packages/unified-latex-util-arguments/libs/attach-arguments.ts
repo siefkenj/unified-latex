@@ -1,9 +1,9 @@
-import * as Ast from "../../unified-latex-types";
-import { match } from "../../unified-latex-util-match";
-import { MacroInfoRecord } from "../../unified-latex-types";
-import { updateRenderInfo } from "../../unified-latex-util-render-info";
+import * as Ast from "@unified-latex/unified-latex-types";
+import { match } from "@unified-latex/unified-latex-util-match";
+import { MacroInfoRecord } from "@unified-latex/unified-latex-types";
+import { updateRenderInfo } from "@unified-latex/unified-latex-util-render-info";
 import { gobbleArguments } from "./gobble-arguments";
-import { visit } from "../../unified-latex-util-visit";
+import { visit } from "@unified-latex/unified-latex-util-visit";
 
 /**
  * Search (in a right-associative way) through the array for instances of

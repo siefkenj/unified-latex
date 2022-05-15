@@ -1,10 +1,10 @@
 import util from "util";
-import { m } from "../../unified-latex-builder";
-import * as Ast  from "../../unified-latex-types";
+import { m } from "@unified-latex/unified-latex-builder";
+import * as Ast  from "@unified-latex/unified-latex-types";
 import { attachMacroArgsInArray } from "../../unified-latex-util-arguments/libs/attach-arguments";
 
-import * as latexParser from "../../unified-latex-util-parse";
-import { printRaw } from "../../unified-latex-util-print-raw";
+import * as latexParser from "@unified-latex/unified-latex-util-parse";
+import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 import { expandMacros } from "../libs/expand-macros";
 import { createMacroExpander } from "../libs/newcommand";
 

@@ -1,7 +1,6 @@
 import { VFile } from "unified-lint-rule/lib";
 import util from "util";
 import { parseTexGlue } from "..";
-import { processLatexViaUnified } from "../../unified-latex-util-parse";
 
 /* eslint-env jest */
 

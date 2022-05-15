@@ -1,7 +1,6 @@
-import { VFile } from "unified-lint-rule/lib";
 import util from "util";
 import { prefixMatch } from "..";
-import * as Ast from "../../unified-latex-types";
+import * as Ast from "@unified-latex/unified-latex-types";
 
 /* eslint-env jest */
 

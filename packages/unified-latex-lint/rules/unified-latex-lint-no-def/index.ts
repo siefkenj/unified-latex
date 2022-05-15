@@ -1,7 +1,7 @@
 import { lintRule } from "unified-lint-rule";
-import * as Ast from "../../../unified-latex-types";
-import { match } from "../../../unified-latex-util-match";
-import { visit } from "../../../unified-latex-util-visit";
+import * as Ast from "@unified-latex/unified-latex-types";
+import { match } from "@unified-latex/unified-latex-util-match";
+import { visit } from "@unified-latex/unified-latex-util-visit";
 
 const isDefMacro = match.createMacroMatcher(["def"]);
 

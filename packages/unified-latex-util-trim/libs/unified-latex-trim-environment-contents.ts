@@ -1,7 +1,7 @@
-import { Plugin } from "unified";
-import * as Ast from "../../unified-latex-types";
-import { match } from "../../unified-latex-util-match";
-import { visit } from "../../unified-latex-util-visit";
+import type { Plugin } from "unified";
+import * as Ast from "@unified-latex/unified-latex-types";
+import { match } from "@unified-latex/unified-latex-util-match";
+import { visit } from "@unified-latex/unified-latex-util-visit";
 import { trim, trimEnd, trimStart } from "./trim";
 
 type PluginOptions = void;

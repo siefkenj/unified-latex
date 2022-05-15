@@ -1,9 +1,9 @@
 import util from "util";
 import { strToNodesRaw } from "../../test-common";
-import { arg, m } from "../../unified-latex-builder";
-import * as Ast from "../../unified-latex-types";
-import { match } from "../../unified-latex-util-match";
-import { printRaw } from "../../unified-latex-util-print-raw";
+import { arg, m } from "@unified-latex/unified-latex-builder";
+import * as Ast from "@unified-latex/unified-latex-types";
+import { match } from "@unified-latex/unified-latex-util-match";
+import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 import {
     replaceStreamingCommand,
     replaceStreamingCommandInGroup,

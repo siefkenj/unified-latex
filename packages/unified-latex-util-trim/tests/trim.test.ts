@@ -1,7 +1,7 @@
 import util from "util";
 import { trim } from "..";
 import { strToNodes } from "../../test-common";
-import * as Ast from "../../unified-latex-types";
+import * as Ast from "@unified-latex/unified-latex-types";
 
 /* eslint-env jest */
 

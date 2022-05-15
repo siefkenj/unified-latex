@@ -1,8 +1,8 @@
 import Prettier from "prettier/standalone";
 import { Plugin } from "unified";
-import { printLatexAst } from "../../unified-latex-prettier";
-import * as Ast from "../../unified-latex-types";
-import { printRaw } from "../../unified-latex-util-print-raw";
+import { printLatexAst } from "@unified-latex/unified-latex-prettier";
+import * as Ast from "@unified-latex/unified-latex-types";
+import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 
 type ComplierOptions =
     | { pretty?: boolean; printWidth?: number; useTabs?: boolean }
@@ -11,11 +11,11 @@ type ComplierOptions =
 /**
  * Unified complier plugin that prints a LaTeX AST as a string.
  */
-export const unifiedLatexStringComplier: Plugin<
+export const unifiedLatexStringCompiler: Plugin<
     ComplierOptions[],
     Ast.Root,
     string
-> = function unifiedLatexStringComplier(options) {
+> = function unifiedLatexStringCompiler(options) {
     const prettyPrinter = (ast: Ast.Root) => {
         // We have already processed the AST. All we want prettier to do is the final
         // text formatting. We create a dummy parser and directly return the ast.

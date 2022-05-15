@@ -1,8 +1,8 @@
 import { Plugin } from "unified";
-import * as Ast from "../../unified-latex-types";
-import { match } from "../../unified-latex-util-match";
-import { printRaw } from "../../unified-latex-util-print-raw";
-import { visit } from "../../unified-latex-util-visit";
+import * as Ast from "@unified-latex/unified-latex-types";
+import { match } from "@unified-latex/unified-latex-util-match";
+import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
+import { visit } from "@unified-latex/unified-latex-util-visit";
 import { parseMathMinimal } from "./parse-minimal";
 
 type PluginOptions =

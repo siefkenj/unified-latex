@@ -1,5 +1,5 @@
-import * as Ast from "../../../unified-latex-types";
-import { match } from "../../../unified-latex-util-match";
+import * as Ast from "@unified-latex/unified-latex-types";
+import { match } from "@unified-latex/unified-latex-util-match";
 
 /**
  * Wraps `content` in the specified wrapper. This command is roughly equivalent to

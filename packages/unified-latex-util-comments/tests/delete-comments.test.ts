@@ -1,6 +1,5 @@
 import util from "util";
-import * as Ast from "../../unified-latex-types";
-import { printRaw } from "../../unified-latex-util-print-raw";
+import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 import { deleteComments } from "../libs/delete-comments";
 import { strToNodes } from "../../test-common";
 

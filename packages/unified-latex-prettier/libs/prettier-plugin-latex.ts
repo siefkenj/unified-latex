@@ -1,6 +1,6 @@
 import type { Plugin, Printer } from "prettier";
-import * as Ast from "../../unified-latex-types";
-import { parse } from "../../unified-latex-util-parse";
+import * as Ast from "@unified-latex/unified-latex-types";
+import { parse } from "@unified-latex/unified-latex-util-parse";
 import { printLatexAst } from "./printer";
 
 const languages = [

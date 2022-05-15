@@ -1,9 +1,8 @@
 import util from "util";
-import * as Ast from "../../unified-latex-types";
-import { match } from "../../unified-latex-util-match";
+import { match } from "@unified-latex/unified-latex-util-match";
 import { replaceNode } from "../libs/replace-node";
-import { s } from "../../unified-latex-builder";
-import { printRaw } from "../../unified-latex-util-print-raw";
+import { s } from "@unified-latex/unified-latex-builder";
+import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 import { strToNodes } from "../../test-common";
 
 /* eslint-env jest */

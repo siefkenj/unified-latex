@@ -1,5 +1,5 @@
 import * as TabularSpec from "./types";
-import { printRaw as latexPrintRaw } from "../../../../unified-latex-util-print-raw";
+import { printRaw as latexPrintRaw } from "@unified-latex/unified-latex-util-print-raw";
 
 /**
  * Print a tabular/tabularx argument specification AST to a string.

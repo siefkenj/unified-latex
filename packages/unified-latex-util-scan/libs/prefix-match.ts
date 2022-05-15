@@ -1,6 +1,6 @@
 import Trie from "trie-prefix-tree";
-import * as Ast from "../../unified-latex-types";
-import { match } from "../../unified-latex-util-match";
+import * as Ast from "@unified-latex/unified-latex-types";
+import { match } from "@unified-latex/unified-latex-util-match";
 
 export { Trie };
 

@@ -1,4 +1,5 @@
 export * from "./libs/parse";
+export * from "./libs/expand-unicode-ligatures";
 
 // NOTE: The docstring comment must be the last item in the index.ts file!
 /**

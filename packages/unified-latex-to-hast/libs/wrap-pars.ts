@@ -1,5 +1,5 @@
-import { htmlLike } from "../../unified-latex-html-like";
-import * as Ast from "../../unified-latex-types";
+import { htmlLike } from "@unified-latex/unified-latex-util-html-like";
+import * as Ast from "@unified-latex/unified-latex-types";
 import { splitForPars } from "./split-for-pars";
 
 /**

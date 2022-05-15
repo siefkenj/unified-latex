@@ -3,9 +3,9 @@ import { h } from "hastscript";
 import {
     extractFromHtmlLike,
     isHtmlLikeTag,
-} from "../../../unified-latex-html-like";
-import * as Ast from "../../../unified-latex-types";
-import { printRaw } from "../../../unified-latex-util-print-raw";
+} from "@unified-latex/unified-latex-util-html-like";
+import * as Ast from "@unified-latex/unified-latex-types";
+import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 
 type HastNode = Hast.Element | Hast.Text | Hast.Comment;
 

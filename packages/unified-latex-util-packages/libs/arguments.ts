@@ -1,6 +1,6 @@
-import * as Ast from "../../unified-latex-types";
-import { printRaw } from "../../unified-latex-util-print-raw";
-import { trim } from "../../unified-latex-util-trim";
+import * as Ast from "@unified-latex/unified-latex-types";
+import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
+import { trim } from "@unified-latex/unified-latex-util-trim";
 
 function stripComments(nodes: Ast.Node[]): Ast.Node[] {
     return nodes.filter((node) => node.type !== "comment");

@@ -1,0 +1,16 @@
+{
+    "extends": "../../tsconfig.build.json",
+    "compilerOptions": {
+        "outDir": "./dist/",
+        "rootDir": "."
+    },
+    "include": ["./**/*.ts", "./package/**/*.ts"],
+    "references": [
+        { "path": "../unified-latex-types" },
+        { "path": "../unified-latex-util-match" },
+        { "path": "../unified-latex-util-print-raw" },
+        { "path": "../unified-latex-util-render-info" },
+        { "path": "../unified-latex-util-arguments" },
+        { "path": "../unified-latex-util-visit" }
+    ]
+}

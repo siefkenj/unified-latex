@@ -1,5 +1,5 @@
-import { arg } from "../../../../unified-latex-builder";
-import * as Ast from "../../../../unified-latex-types";
+import { arg } from "@unified-latex/unified-latex-builder";
+import * as Ast from "@unified-latex/unified-latex-types";
 
 /**
  * Create a `\textcolor` macro. Color arguments are taken from `origMacro`.

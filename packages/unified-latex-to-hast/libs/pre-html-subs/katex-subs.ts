@@ -1,10 +1,10 @@
 import {
     attachSystemeSettingsAsRenderInfo,
     systemeContentsToArray,
-} from "../../../unified-latex-ctan/package/systeme/libs/systeme";
-import * as Ast from "../../../unified-latex-types";
-import { getArgsContent } from "../../../unified-latex-util-arguments";
-import KATEX_SUPPORT_LIST from "../../../support-tables/katex-support.json";
+} from "@unified-latex/unified-latex-ctan/package/systeme";
+import * as Ast from "@unified-latex/unified-latex-types";
+import { getArgsContent } from "@unified-latex/unified-latex-util-arguments";
+import KATEX_SUPPORT_LIST from "../katex-support.json";
 
 const LEFT: Ast.Macro = { type: "macro", content: "left" };
 const RIGHT: Ast.Macro = { type: "macro", content: "right" };

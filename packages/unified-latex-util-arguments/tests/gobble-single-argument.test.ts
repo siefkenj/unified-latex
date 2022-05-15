@@ -1,10 +1,10 @@
 import { VFile } from "unified-lint-rule/lib";
 import util from "util";
 import { trimRenderInfo } from "../../unified-latex-util-render-info";
-import * as Ast from "../../unified-latex-types";
+import * as Ast from "@unified-latex/unified-latex-types";
 import { parse as parseArgspec } from "../../unified-latex-util-argspec";
-import { processLatexToAstViaUnified } from "../../unified-latex-util-parse";
 import { gobbleSingleArgument } from "../libs/gobble-single-argument";
+import { processLatexToAstViaUnified } from "@unified-latex/unified-latex";
 
 /* eslint-env jest */
 

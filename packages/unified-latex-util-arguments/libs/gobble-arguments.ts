@@ -1,10 +1,9 @@
 import {
     ArgSpecAst as ArgSpec,
     parse as parseArgspec,
-} from "../../unified-latex-util-argspec";
-import * as Ast from "../../unified-latex-types";
-import { match } from "../../unified-latex-util-match";
-import { arg } from "../../unified-latex-builder";
+} from "@unified-latex/unified-latex-util-argspec";
+import * as Ast from "@unified-latex/unified-latex-types";
+import { arg } from "@unified-latex/unified-latex-builder";
 import { gobbleSingleArgument } from "./gobble-single-argument";
 
 /**

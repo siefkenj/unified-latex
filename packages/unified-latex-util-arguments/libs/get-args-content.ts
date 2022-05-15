@@ -1,4 +1,4 @@
-import * as Ast from "../../unified-latex-types";
+import * as Ast from "@unified-latex/unified-latex-types";
 
 /**
  * Returns the content of `args` for a macro or environment as an array. If an argument

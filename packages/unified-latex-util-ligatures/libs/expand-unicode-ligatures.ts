@@ -1,5 +1,5 @@
-import * as Ast from "../../unified-latex-types";
-import { visit } from "../../unified-latex-util-visit";
+import * as Ast from "@unified-latex/unified-latex-types";
+import { visit } from "@unified-latex/unified-latex-util-visit";
 import { parseLigatures } from "./parse";
 
 /**

@@ -1,7 +1,7 @@
 import * as Hast from "hast";
 import { h } from "hastscript";
-import * as Ast from "../../../unified-latex-types";
-import { printRaw } from "../../../unified-latex-util-print-raw";
+import * as Ast from "@unified-latex/unified-latex-types";
+import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 
 /**
  * Direct and un-intelligent conversion of `Ast.Node` to a HAST element.

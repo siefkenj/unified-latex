@@ -1,5 +1,5 @@
 import util from "util";
-import * as Ast from "../../unified-latex-types";
+import * as Ast from "@unified-latex/unified-latex-types";
 import { processEnvironments } from "../libs/process-environment";
 import { strToNodes } from "../../test-common";
 

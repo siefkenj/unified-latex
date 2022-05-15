@@ -1,6 +1,6 @@
+import { processLatexViaUnified } from "@unified-latex/unified-latex";
 import { VFile } from "unified-lint-rule/lib";
 import util from "util";
-import { processLatexViaUnified } from "../../unified-latex-util-parse";
 import { unifiedLatexLintArgumentColorCommands } from "../rules/unified-latex-lint-argument-color-commands";
 
 /* eslint-env jest */

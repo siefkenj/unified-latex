@@ -1,6 +1,6 @@
-import * as Ast from "../../unified-latex-types";
-import { match } from "../../unified-latex-util-match";
-import { replaceNode } from "../../unified-latex-util-replace";
+import * as Ast from "@unified-latex/unified-latex-types";
+import { match } from "@unified-latex/unified-latex-util-match";
+import { replaceNode } from "@unified-latex/unified-latex-util-replace";
 import { createMacroExpander } from "./newcommand";
 
 /**

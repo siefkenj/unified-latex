@@ -15,7 +15,7 @@ import {
 import {
     linebreak,
     printRaw,
-} from "../../../unified-latex-util-print-raw";
+} from "@unified-latex/unified-latex-util-print-raw";
 import { ReferenceMap } from "../reference-map";
 
 export function printLatexAst(

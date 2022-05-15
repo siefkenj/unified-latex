@@ -1,11 +1,11 @@
 import * as Hast from "hast";
 import { h } from "hastscript";
 import { Plugin, unified } from "unified";
-import * as Ast from "../../unified-latex-types";
-import { TypeGuard } from "../../unified-latex-types";
-import { expandUnicodeLigatures } from "../../unified-latex-util-ligatures/libs/expand-unicode-ligatures";
-import { match } from "../../unified-latex-util-match";
-import { visit } from "../../unified-latex-util-visit";
+import * as Ast from "@unified-latex/unified-latex-types";
+import { TypeGuard } from "@unified-latex/unified-latex-types";
+import { expandUnicodeLigatures } from "@unified-latex/unified-latex-util-ligatures";
+import { match } from "@unified-latex/unified-latex-util-match";
+import { visit } from "@unified-latex/unified-latex-util-visit";
 import { toHastWithLoggerFactory } from "./html-subs/to-hast";
 import { unifiedLatexToHtmlLike } from "./unified-latex-plugin-to-html-like";
 

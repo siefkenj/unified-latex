@@ -1,6 +1,6 @@
 import { unified } from "unified";
-import * as Ast from "../../unified-latex-types";
-import { printRaw } from "../../unified-latex-util-print-raw";
+import * as Ast from "@unified-latex/unified-latex-types";
+import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 import { unifiedLatexAstComplier } from "./compiler-ast";
 import { unifiedLatexFromString } from "./plugin-from-string";
 

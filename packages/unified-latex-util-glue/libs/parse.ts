@@ -1,4 +1,4 @@
-import { GluePegParser } from "../../unified-latex-util-pegjs";
+import { GluePegParser } from "@unified-latex/unified-latex-util-pegjs";
 import { Glue } from "./types";
 
 /**

@@ -2,7 +2,7 @@ import type { Doc } from "prettier";
 import * as PrettierTypes from "./prettier-types";
 import { getNodeInfo, fill, ESCAPE, indent } from "./common";
 import { zip } from "../zip";
-import * as Ast from "../../../unified-latex-types";
+import * as Ast from "@unified-latex/unified-latex-types";
 
 export function printMacro(
     path: PrettierTypes.AstPath,
@@ -17,7 +17,7 @@ export function printMacro(
 
     const content =
         (node.escapeToken != null ? node.escapeToken : ESCAPE) + node.content;
-    const args = node.args ? path.map(print, "args") : [];
+    const args = node.args ? path.map(print, "args" as any) : [];
 
     // Some of the arguments want to be printed "inline".
     // We loop through the arguments and unwrap the inline ones.

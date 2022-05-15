@@ -1,6 +1,6 @@
 export * from "./libs/decorate-array-for-pegjs";
 export * from "./libs/split-strings";
-export * from "./libs/pegjs-parsers";
+export * from "./libs/pegjs-parsers.js";
 
 // NOTE: The docstring comment must be the last item in the index.ts file!
 /**

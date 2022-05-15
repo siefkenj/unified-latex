@@ -1,6 +1,6 @@
-import { arg, m } from "../../../unified-latex-builder";
-import { colorToTextcolorMacro } from "../../../unified-latex-ctan/package/xcolor";
-import * as Ast from "../../../unified-latex-types";
+import { arg, m } from "@unified-latex/unified-latex-builder";
+import { colorToTextcolorMacro } from "@unified-latex/unified-latex-ctan/package/xcolor";
+import * as Ast from "@unified-latex/unified-latex-types";
 
 /**
  * Factory function that generates a macro with bound arguments.

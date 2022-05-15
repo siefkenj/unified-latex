@@ -1,5 +1,5 @@
-import { LatexPegParser } from "../../unified-latex-util-pegjs/libs/pegjs-parsers";
-import * as Ast from "../../unified-latex-types";
+import { LatexPegParser } from "@unified-latex/unified-latex-util-pegjs";
+import * as Ast from "@unified-latex/unified-latex-types";
 
 /**
  * Parse `str` to an AST with minimal processing. E.g., macro

@@ -1,5 +1,5 @@
 import util from "util";
-import * as Ast from "../../unified-latex-types";
+import * as Ast from "@unified-latex/unified-latex-types";
 import { parse } from "../../unified-latex-util-parse";
 import * as xcolorParser from "../package/xcolor";
 import {

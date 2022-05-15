@@ -1,6 +1,6 @@
+import { processLatexToAstViaUnified } from "@unified-latex/unified-latex";
 import { VFile } from "unified-lint-rule/lib";
 import * as Ast from "../unified-latex-types";
-import { processLatexToAstViaUnified } from "../unified-latex-util-parse";
 import { trimRenderInfo } from "../unified-latex-util-render-info";
 
 declare global {

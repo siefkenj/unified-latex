@@ -1,6 +1,6 @@
 import { lintRule } from "unified-lint-rule";
-import * as Ast from "../../../unified-latex-types";
-import { listPackages } from "../../../unified-latex-util-packages";
+import * as Ast from "@unified-latex/unified-latex-types";
+import { listPackages } from "@unified-latex/unified-latex-util-packages";
 
 const OBSOLETE: Record<string, string> = {
     a4: "Use `geometry` or `typearea` instead",

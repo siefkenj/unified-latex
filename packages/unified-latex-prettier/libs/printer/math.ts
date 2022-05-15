@@ -1,5 +1,5 @@
 import type { Doc } from "prettier";
-import * as Ast from "../../../unified-latex-types";
+import * as Ast from "@unified-latex/unified-latex-types";
 import * as PrettierTypes from "./prettier-types";
 import {
     getNodeInfo,

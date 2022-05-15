@@ -2,13 +2,13 @@ import cssesc from "cssesc";
 import {
     parseTabularSpec,
     TabularColumn,
-} from "../../../unified-latex-ctan/package/tabularx";
-import { htmlLike } from "../../../unified-latex-html-like";
-import * as Ast from "../../../unified-latex-types";
-import { parseAlignEnvironment } from "../../../unified-latex-util-align";
-import { getArgsContent } from "../../../unified-latex-util-arguments";
-import { match } from "../../../unified-latex-util-match";
-import { printRaw } from "../../../unified-latex-util-print-raw";
+} from "@unified-latex/unified-latex-ctan/package/tabularx";
+import { htmlLike } from "@unified-latex/unified-latex-util-html-like";
+import * as Ast from "@unified-latex/unified-latex-types";
+import { parseAlignEnvironment } from "@unified-latex/unified-latex-util-align";
+import { getArgsContent } from "@unified-latex/unified-latex-util-arguments";
+import { match } from "@unified-latex/unified-latex-util-match";
+import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 import { wrapPars } from "../wrap-pars";
 
 function enumerateFactory(parentTag = "ol", className = "enumerate") {

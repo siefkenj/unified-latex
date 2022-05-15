@@ -1,8 +1,8 @@
-import { arg } from "../../unified-latex-builder";
-import * as Ast from "../../unified-latex-types";
-import { updateRenderInfo } from "../../unified-latex-util-render-info";
-import { splitOnMacro } from "../../unified-latex-util-split";
-import { trim } from "../../unified-latex-util-trim";
+import { arg } from "@unified-latex/unified-latex-builder";
+import * as Ast from "@unified-latex/unified-latex-types";
+import { updateRenderInfo } from "@unified-latex/unified-latex-util-render-info";
+import { splitOnMacro } from "@unified-latex/unified-latex-util-split";
+import { trim } from "@unified-latex/unified-latex-util-trim";
 
 /**
  * Clean up any whitespace issues in an enumerate environment. In particular,

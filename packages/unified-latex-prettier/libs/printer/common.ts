@@ -1,10 +1,10 @@
 import { builders } from "prettier/doc";
 import type { Doc } from "prettier";
-import * as Ast from "../../../unified-latex-types";
+import * as Ast from "@unified-latex/unified-latex-types";
 import * as PrettierTypes from "./prettier-types";
-import { printRaw } from "../../../unified-latex-util-print-raw";
+import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 import { ReferenceMap } from "../reference-map";
-import { match } from "../../../unified-latex-util-match";
+import { match } from "@unified-latex/unified-latex-util-match";
 
 /**
  * Computes the environment name, start/end, and args.

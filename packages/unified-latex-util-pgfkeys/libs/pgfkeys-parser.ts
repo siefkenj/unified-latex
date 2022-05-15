@@ -1,7 +1,7 @@
-import { PgfkeysPegParser } from "../../unified-latex-util-pegjs/libs/pegjs-parsers";
-import * as Ast from "../../unified-latex-types";
-import { match } from "../../unified-latex-util-match";
-import { decorateArrayForPegjs } from "../../unified-latex-util-pegjs";
+import { PgfkeysPegParser } from "@unified-latex/unified-latex-util-pegjs";
+import * as Ast from "@unified-latex/unified-latex-types";
+import { match } from "@unified-latex/unified-latex-util-match";
+import { decorateArrayForPegjs } from "@unified-latex/unified-latex-util-pegjs";
 
 // The types returned by the grammar
 
@@ -44,5 +44,5 @@ export function parsePgfkeys(ast: Ast.Node[]): Item[] {
     ast = decorateArrayForPegjs([...ast]);
     // matchers are passed in via the second argument (the `options` argument)
     // so they are available from within the Pegjs grammar.
-    return PgfkeysPegParser.parse(ast, createMatchers());
+    return PgfkeysPegParser.parse(ast, createMatchers()) as Item[];
 }

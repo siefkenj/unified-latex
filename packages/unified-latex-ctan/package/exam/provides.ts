@@ -1,4 +1,4 @@
-import { MacroInfoRecord, EnvInfoRecord } from "../../../unified-latex-types";
+import { MacroInfoRecord, EnvInfoRecord } from "@unified-latex/unified-latex-types";
 import { cleanEnumerateBody } from "../../utils/enumerate";
 
 export const macros: MacroInfoRecord = {

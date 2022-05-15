@@ -1,6 +1,5 @@
 import util from "util";
-import * as Ast from "../../unified-latex-types";
-import { printRaw } from "../../unified-latex-util-print-raw";
+import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 import { expandUnicodeLigatures } from "../libs/expand-unicode-ligatures";
 import { parseLigatures } from "../libs/parse";
 import { strToNodes } from "../../test-common";

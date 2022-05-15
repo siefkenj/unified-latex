@@ -1,15 +1,17 @@
 import { lintRule } from "unified-lint-rule";
-import { m, s } from "../../../unified-latex-builder";
-import { printRaw } from "../../../unified-latex-util-print-raw";
-import * as Ast from "../../../unified-latex-types";
-import { match } from "../../../unified-latex-util-match";
-import { visit } from "../../../unified-latex-util-visit";
+import { m, s } from "@unified-latex/unified-latex-builder";
+import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
+import * as Ast from "@unified-latex/unified-latex-types";
+import { match } from "@unified-latex/unified-latex-util-match";
+import { visit } from "@unified-latex/unified-latex-util-visit";
 import { singleArgMacroFactory } from "../../utils/macro-factory";
-import { firstSignificantNode } from "../../../unified-latex-util-replace/libs/utils/first-significant-node";
-import { replaceStreamingCommand } from "../../../unified-latex-util-replace/libs/replace-streaming-command";
-import { replaceNodeDuringVisit } from "../../utils/replace-node";
+import {
+    firstSignificantNode,
+    replaceNodeDuringVisit,
+} from "@unified-latex/unified-latex-util-replace";
+import { replaceStreamingCommand } from "@unified-latex/unified-latex-util-replace";
 import { hasParbreak } from "../../utils/has-parbreak";
-import { trimEnd, trimStart } from "../../../unified-latex-util-trim";
+import { trimEnd, trimStart } from "@unified-latex/unified-latex-util-trim";
 
 const REPLACEMENTS: Record<
     string,

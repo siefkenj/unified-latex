@@ -32,7 +32,6 @@
         }
     }
 }
-
 body
     = (comment_only_line / row_with_end / row_without_end)+
     / EOL { return []; }

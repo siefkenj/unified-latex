@@ -1,10 +1,10 @@
 import { Plugin } from "unified";
-import { replaceNodeDuringVisit } from "../../unified-latex-lint/utils/replace-node";
-import * as Ast from "../../unified-latex-types";
-import { match } from "../../unified-latex-util-match";
-import { trimEnd, trimStart } from "../../unified-latex-util-trim";
-import { visit } from "../../unified-latex-util-visit";
+import * as Ast from "@unified-latex/unified-latex-types";
+import { match } from "@unified-latex/unified-latex-util-match";
+import { trimEnd, trimStart } from "@unified-latex/unified-latex-util-trim";
+import { visit } from "@unified-latex/unified-latex-util-visit";
 import { replaceStreamingCommand } from "./replace-streaming-command";
+import { replaceNodeDuringVisit } from "./replace-node-during-visit";
 
 type PluginOptions = {
     replacers: Record<

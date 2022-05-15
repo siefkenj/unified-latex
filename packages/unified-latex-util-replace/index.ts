@@ -1,6 +1,8 @@
 export * from "./libs/replace-node";
 export * from "./libs/unified-latex-streaming-command";
 export * from "./libs/replace-streaming-command";
+export * from "./libs/replace-node-during-visit";
+export { firstSignificantNode } from "./libs/utils/first-significant-node";
 
 // NOTE: The docstring comment must be the last item in the index.ts file!
 /**

@@ -13,10 +13,10 @@ import {
     joinWithSoftline,
     formatDocArray,
 } from "./common";
-import { printRaw } from "../../../unified-latex-util-print-raw";
-import { parseAlignEnvironment } from "../../../unified-latex-util-align";
-import * as Ast from "../../../unified-latex-types";
-import { trim } from "../../../unified-latex-util-trim";
+import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
+import { parseAlignEnvironment } from "@unified-latex/unified-latex-util-align";
+import * as Ast from "@unified-latex/unified-latex-types";
+import { trim } from "@unified-latex/unified-latex-util-trim";
 
 export function printVerbatimEnvironment(
     path: PrettierTypes.AstPath,
@@ -41,7 +41,7 @@ export function printEnvironment(
         options
     );
 
-    const args = node.args ? path.map(print, "args") : [];
+    const args = node.args ? path.map(print, "args" as any) : [];
     const env = formatEnvSurround(node);
 
     let content = path.map(print, "content");
@@ -80,7 +80,7 @@ export function printAlignedEnvironment(
         options
     );
 
-    const args = node.args ? path.map(print, "args") : [];
+    const args = node.args ? path.map(print, "args" as any) : [];
     const env = formatEnvSurround(node);
 
     // If an aligned environment starts with a same-line comment, we want

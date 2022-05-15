@@ -1,15 +1,14 @@
-import * as Ast from "../../unified-latex-types";
-import { EnvInfoRecord, MacroInfoRecord } from "../../unified-latex-types";
+import * as Ast from "@unified-latex/unified-latex-types";
+import { EnvInfoRecord, MacroInfoRecord } from "@unified-latex/unified-latex-types";
 import { Plugin } from "unified";
-import { visit } from "../../unified-latex-util-visit";
-import { match } from "../../unified-latex-util-match";
-import { printRaw } from "../../unified-latex-util-print-raw";
+import { visit } from "@unified-latex/unified-latex-util-visit";
+import { match } from "@unified-latex/unified-latex-util-match";
+import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 import {
-    unifiedLatexReparseMath,
     unifiedLatexReparseMathConstructPlugin,
 } from "./reparse-math";
-import { attachMacroArgsInArray } from "../../unified-latex-util-arguments/libs/attach-arguments";
-import { processEnvironment } from "../../unified-latex-util-environments";
+import { attachMacroArgsInArray } from "@unified-latex/unified-latex-util-arguments";
+import { processEnvironment } from "@unified-latex/unified-latex-util-environments";
 
 type PluginOptions =
     | { environments: EnvInfoRecord; macros: MacroInfoRecord }

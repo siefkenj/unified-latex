@@ -1,5 +1,5 @@
-import * as Ast from "../../../unified-latex-types";
-import { trimEnd, trimStart } from "../../../unified-latex-util-trim";
+import * as Ast from "@unified-latex/unified-latex-types";
+import { trimEnd, trimStart } from "@unified-latex/unified-latex-util-trim";
 import { joinWithoutExcessWhitespace } from "./join-without-excess-whitespace";
 import { wrapSignificantContent } from "./wrap-significant-content";
 

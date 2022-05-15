@@ -1,5 +1,4 @@
 import util from "util";
-import * as Ast from "../../unified-latex-types";
 import { parseAlignEnvironment } from "../libs/parse-align-environment";
 import { strToNodes } from "../../test-common";
 

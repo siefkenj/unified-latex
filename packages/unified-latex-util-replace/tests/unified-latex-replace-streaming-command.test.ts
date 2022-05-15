@@ -1,10 +1,9 @@
 import { VFile } from "unified-lint-rule/lib";
 import util from "util";
-import { strToNodesRaw } from "../../test-common";
-import { arg, m } from "../../unified-latex-builder";
-import * as Ast from "../../unified-latex-types";
-import { processLatexViaUnified } from "../../unified-latex-util-parse";
+import { arg, m } from "@unified-latex/unified-latex-builder";
+import * as Ast from "@unified-latex/unified-latex-types";
 import { unifiedLatexReplaceStreamingCommands } from "../libs/unified-latex-streaming-command";
+import { processLatexViaUnified } from "@unified-latex/unified-latex";
 
 /* eslint-env jest */
 

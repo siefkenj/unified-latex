@@ -1,10 +1,10 @@
-import * as Ast from "../../unified-latex-types";
-import { EnvInfo, EnvInfoRecord } from "../../unified-latex-types";
-import { updateRenderInfo } from "../../unified-latex-util-render-info";
-import { gobbleArguments } from "../../unified-latex-util-arguments";
-import { match } from "../../unified-latex-util-match";
-import { visit } from "../../unified-latex-util-visit";
-import { printRaw } from "../../unified-latex-util-print-raw";
+import * as Ast from "@unified-latex/unified-latex-types";
+import { EnvInfo, EnvInfoRecord } from "@unified-latex/unified-latex-types";
+import { updateRenderInfo } from "@unified-latex/unified-latex-util-render-info";
+import { gobbleArguments } from "@unified-latex/unified-latex-util-arguments";
+import { match } from "@unified-latex/unified-latex-util-match";
+import { visit } from "@unified-latex/unified-latex-util-visit";
+import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 
 /**
  * Performs any needed processing on the environment (as specified by `envInfo`)

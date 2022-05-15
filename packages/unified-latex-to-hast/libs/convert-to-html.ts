@@ -1,8 +1,6 @@
 import rehypeStringify from "rehype-stringify";
-import { htmlLike } from "../../unified-latex-html-like";
-import * as Ast from "../../unified-latex-types";
-import { processLatexViaUnified } from "../../unified-latex-util-parse";
-import { splitForPars } from "./split-for-pars";
+import * as Ast from "@unified-latex/unified-latex-types";
+import { processLatexViaUnified } from "@unified-latex/unified-latex";
 import { unifiedLatexToHast } from "./unified-latex-plugin-to-hast";
 
 const processor = processLatexViaUnified()
@@ -12,8 +10,8 @@ const processor = processLatexViaUnified()
 /**
  * Convert the `unified-latex` AST `tree` into an HTML string. If you need
  * more precise control or further processing, consider using `unified`
- * directly with the `unifiedLatexToHast` plugin. 
- * 
+ * directly with the `unifiedLatexToHast` plugin.
+ *
  * For example,
  * ```
  * unified()
