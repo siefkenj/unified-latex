@@ -72,6 +72,22 @@ npx esr scripts/build-docs.ts
 npx esr scripts/package-consistency.ts
 ```
 
+### Publishing
+
+Version management is done with `lerna`. Run
+
+```
+npx lerna version
+```
+
+to update the version of all packages. Run
+
+```
+npm publish -ws
+```
+
+to publish all workspaces.
+
 ## Playground
 
 You use the [Playground](https://siefkenj.github.io/latex-parser-playground) to view
