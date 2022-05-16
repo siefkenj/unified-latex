@@ -13,6 +13,15 @@ Functions to report on/manipulate environments in a `unified-latex` Abstract Syn
 If you are working on the internals of `unified-latex-util-parse` or need to make a custom parser
 that treats environments differently.
 
+## Install
+
+```bash
+npm install @unified-latex/unified-latex-util-environments
+```
+
+This package contains both esm and commonjs exports. To explicitly access the esm export,
+import the `.js` file. To explicitly access the commonjs export, import the `.cjs` file.
+
 # Plugins
 
 ## `unifiedLatexProcessEnvironments`

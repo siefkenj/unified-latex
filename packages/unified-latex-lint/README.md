@@ -13,6 +13,15 @@ that can be fixed accept an optional `{fix: boolean}` argument.
 
 If you are building a linter for LaTeX code.
 
+## Install
+
+```bash
+npm install @unified-latex/unified-latex-lint
+```
+
+This package contains both esm and commonjs exports. To explicitly access the esm export,
+import the `.js` file. To explicitly access the commonjs export, import the `.cjs` file.
+
 # Constants
 
 | Name    | Type                                                                                                                                                                                                                                      | Description                           |

@@ -13,6 +13,15 @@ Functions parse strings to a `unified-latex` Abstract Syntax Tree (AST).
 If you have a string that you would like to parse to a `unified-latex` `Ast.Ast`, or
 if you are building a plugin for `unified()` that manipulates LaTeX.
 
+## Install
+
+```bash
+npm install @unified-latex/unified-latex
+```
+
+This package contains both esm and commonjs exports. To explicitly access the esm export,
+import the `.js` file. To explicitly access the commonjs export, import the `.cjs` file.
+
 # Constants
 
 | Name                          | Type                                                    | Description                                                                                                                                   |

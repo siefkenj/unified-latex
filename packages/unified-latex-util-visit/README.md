@@ -13,6 +13,15 @@ very similar to [estree-util-visit](https://github.com/syntax-tree/estree-util-v
 
 If you want to recursively replace particular AST nodes.
 
+## Install
+
+```bash
+npm install @unified-latex/unified-latex-util-visit
+```
+
+This package contains both esm and commonjs exports. To explicitly access the esm export,
+import the `.js` file. To explicitly access the commonjs export, import the `.cjs` file.
+
 # Functions
 
 ## `visit(tree, visitor, options)`

@@ -13,6 +13,15 @@ Functions to parse an analyze "align" environments like `\begin{align}...\end{al
 
 If you need to process the contents of an align environment for, e.g., pretty-printing.
 
+## Install
+
+```bash
+npm install @unified-latex/unified-latex-util-align
+```
+
+This package contains both esm and commonjs exports. To explicitly access the esm export,
+import the `.js` file. To explicitly access the commonjs export, import the `.cjs` file.
+
 # Functions
 
 ## `createMatchers(rowSepMacros, colSep)`

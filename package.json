@@ -4,6 +4,7 @@
         "./packages/*"
     ],
     "scripts": {
+        "build": "npm run build -ws",
         "test": "jest"
     },
     "jest": {

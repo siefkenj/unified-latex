@@ -12,6 +12,15 @@ Functions to print a `unified-latex` Abstract Syntax Tree (AST) to a string.
 
 If you want to directly print an `Ast.Ast` to a string without any pretty printing or formatting.
 
+## Install
+
+```bash
+npm install @unified-latex/unified-latex-util-print-raw
+```
+
+This package contains both esm and commonjs exports. To explicitly access the esm export,
+import the `.js` file. To explicitly access the commonjs export, import the `.cjs` file.
+
 # Functions
 
 ## `printRaw(node, options)`

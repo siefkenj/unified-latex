@@ -16,6 +16,15 @@ Note that whitespace can come from a `Ast.Whitespace` node or from an
 `Ast.Comment` node that has leading whitespace. These functions take care
 to deal with both situations.
 
+## Install
+
+```bash
+npm install @unified-latex/unified-latex-util-trim
+```
+
+This package contains both esm and commonjs exports. To explicitly access the esm export,
+import the `.js` file. To explicitly access the commonjs export, import the `.cjs` file.
+
 # Plugins
 
 ## `unifiedLatexTrimEnvironmentContents`

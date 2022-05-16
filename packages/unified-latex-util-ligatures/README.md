@@ -12,6 +12,15 @@ Functions to find and replace ligatures in a `unified-latex` Abstract Syntax Tre
 
 If you are converting LaTeX to plain text or HTML.
 
+## Install
+
+```bash
+npm install @unified-latex/unified-latex-util-ligatures
+```
+
+This package contains both esm and commonjs exports. To explicitly access the esm export,
+import the `.js` file. To explicitly access the commonjs export, import the `.cjs` file.
+
 # Functions
 
 ## `createMatchers()`

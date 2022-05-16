@@ -14,6 +14,15 @@ nodes as pgfkeys will produce a new (incompatible) AST.
 
 If you want to parse or manipulate macros/environments with pgfkeys-style arguments.
 
+## Install
+
+```bash
+npm install @unified-latex/unified-latex-util-pgfkeys
+```
+
+This package contains both esm and commonjs exports. To explicitly access the esm export,
+import the `.js` file. To explicitly access the commonjs export, import the `.cjs` file.
+
 # Functions
 
 ## `createMatchers()`

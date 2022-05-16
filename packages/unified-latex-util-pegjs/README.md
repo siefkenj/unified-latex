@@ -18,6 +18,15 @@ a string. This allows for complex second-pass parsing.
 If you are building libraries to parse specific LaTeX syntax (e.g., to parse `tabular` environments or
 `systeme` environments, etc.).
 
+## Install
+
+```bash
+npm install @unified-latex/unified-latex-util-pegjs
+```
+
+This package contains both esm and commonjs exports. To explicitly access the esm export,
+import the `.js` file. To explicitly access the commonjs export, import the `.cjs` file.
+
 # Functions
 
 ## `decorateArrayForPegjs(array)`

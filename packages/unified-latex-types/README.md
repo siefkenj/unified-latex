@@ -13,6 +13,15 @@ but instead of a `children` attribute, they have a `content` attribute.
 
 If you're working with `unified-latex` ASTs.
 
+## Install
+
+```bash
+npm install @unified-latex/unified-latex-types
+```
+
+This package contains both esm and commonjs exports. To explicitly access the esm export,
+import the `.js` file. To explicitly access the commonjs export, import the `.cjs` file.
+
 # Types
 
 ## `Ast`

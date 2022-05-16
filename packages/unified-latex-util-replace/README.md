@@ -12,6 +12,15 @@ Functions to help modify a `unified-latex` Abstract Syntax Tree (AST).
 
 If you want to recursively replace particular AST nodes.
 
+## Install
+
+```bash
+npm install @unified-latex/unified-latex-util-replace
+```
+
+This package contains both esm and commonjs exports. To explicitly access the esm export,
+import the `.js` file. To explicitly access the commonjs export, import the `.cjs` file.
+
 # Plugins
 
 ## `unifiedLatexReplaceStreamingCommands`

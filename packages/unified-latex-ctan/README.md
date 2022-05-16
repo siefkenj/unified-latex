@@ -16,6 +16,15 @@ this is technically not a CTAN "package".
 If you want information about special functions/macros from particular CTAN packages, or
 you need to parse special environments.
 
+## Install
+
+```bash
+npm install @unified-latex/unified-latex-ctan
+```
+
+This package contains both esm and commonjs exports. To explicitly access the esm export,
+import the `.js` file. To explicitly access the commonjs export, import the `.cjs` file.
+
 # Constants
 
 | Name              | Type                                                                                                                                                                             | Description                                                                                                          |

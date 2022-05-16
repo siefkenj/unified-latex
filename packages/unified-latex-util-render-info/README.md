@@ -14,6 +14,15 @@ If you want to compare the structure of an AST without position information or e
 that is kept for pretty-printing, these functions can be used to remove/modify the `_renderInfo`
 of an `Ast.Node`.
 
+## Install
+
+```bash
+npm install @unified-latex/unified-latex-util-render-info
+```
+
+This package contains both esm and commonjs exports. To explicitly access the esm export,
+import the `.js` file. To explicitly access the commonjs export, import the `.cjs` file.
+
 # Functions
 
 ## `trimRenderInfo(ast)`

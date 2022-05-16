@@ -13,6 +13,15 @@ argument).
 
 If you are working on the internals of `unified-latex`.
 
+## Install
+
+```bash
+npm install @unified-latex/unified-latex-util-argspec
+```
+
+This package contains both esm and commonjs exports. To explicitly access the esm export,
+import the `.js` file. To explicitly access the commonjs export, import the `.cjs` file.
+
 # Functions
 
 ## `parse(str)`

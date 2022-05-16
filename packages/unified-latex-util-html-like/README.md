@@ -16,6 +16,15 @@ These macros are created programmatically, so special characters can be inserted
 
 If you are converting LaTeX to HTML, these functions may be used as an intermediate format.
 
+## Install
+
+```bash
+npm install @unified-latex/unified-latex-util-html-like
+```
+
+This package contains both esm and commonjs exports. To explicitly access the esm export,
+import the `.js` file. To explicitly access the commonjs export, import the `.cjs` file.
+
 # Functions
 
 ## `extractFromHtmlLike(macro)`

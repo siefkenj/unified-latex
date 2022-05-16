@@ -13,6 +13,15 @@ Functions to manipulate `unified-latex` Abstract Syntax Tree (AST).
 If you want break apart or join an array of nodes based on a condition. For example,
 this is used to split on `&` characters in the `align` environment.
 
+## Install
+
+```bash
+npm install @unified-latex/unified-latex-util-split
+```
+
+This package contains both esm and commonjs exports. To explicitly access the esm export,
+import the `.js` file. To explicitly access the commonjs export, import the `.cjs` file.
+
 # Functions
 
 ## `arrayJoin(array, sep)`

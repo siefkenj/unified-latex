@@ -13,6 +13,15 @@ with [hyperscript](https://github.com/dominictarr/hyperscript)-like syntax.
 
 If you want to programmatically create `Ast.Node` nodes.
 
+## Install
+
+```bash
+npm install @unified-latex/unified-latex-builder
+```
+
+This package contains both esm and commonjs exports. To explicitly access the esm export,
+import the `.js` file. To explicitly access the commonjs export, import the `.cjs` file.
+
 # Functions
 
 ## `arg(args, special)`

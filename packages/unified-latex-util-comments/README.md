@@ -12,6 +12,15 @@ Functions to help modify comments in a `unified-latex` Abstract Syntax Tree (AST
 
 If you want to process comments in a `unified-latex` AST.
 
+## Install
+
+```bash
+npm install @unified-latex/unified-latex-util-comments
+```
+
+This package contains both esm and commonjs exports. To explicitly access the esm export,
+import the `.js` file. To explicitly access the commonjs export, import the `.cjs` file.
+
 # Functions
 
 ## `deleteComments(ast)`

@@ -13,6 +13,15 @@ tree.
 
 If you want to convert LaTeX to HTML.
 
+## Install
+
+```bash
+npm install @unified-latex/unified-latex-to-hast
+```
+
+This package contains both esm and commonjs exports. To explicitly access the esm export,
+import the `.js` file. To explicitly access the commonjs export, import the `.cjs` file.
+
 # Plugins
 
 ## `unifiedLatexToHast`

@@ -11,3 +11,12 @@ Functions to match different `Ast.Node` types in a `unified-latex` Abstract Synt
 ## When should I use this?
 
 If you need a type-guard to ensure a node is of a certain type; for example, during a call to `unified-latex-until-visit`.
+
+## Install
+
+```bash
+npm install @unified-latex/unified-latex-util-match
+```
+
+This package contains both esm and commonjs exports. To explicitly access the esm export,
+import the `.js` file. To explicitly access the commonjs export, import the `.cjs` file.

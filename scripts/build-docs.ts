@@ -17,6 +17,14 @@ const README_COMMENT: string = `<!-- DO NOT MODIFY -->
 <!-- rather than editing this file directly. -->
 `;
 
+async function exists(filepath): Promise<boolean> {
+    try {
+        await fs.access(filepath);
+        return true;
+    } catch {}
+    return false;
+}
+
 // We can only import ESM modules via async import, so all the action happens here.
 (async function () {
     const chalk = await (await import("chalk")).default;
@@ -60,7 +68,7 @@ const README_COMMENT: string = `<!-- DO NOT MODIFY -->
 
         const outPath = path.join(file.getDirectoryPath(), "README.md");
 
-        const readme = generateReadme(file.getFilePath());
+        const readme = await generateReadme(file.getFilePath());
 
         console.log(
             chalk.gray("       Writing to", path.relative(__dirname, outPath))
@@ -77,8 +85,14 @@ const README_COMMENT: string = `<!-- DO NOT MODIFY -->
     //"./packages/unified-latex/unified-latex-util-visit/index.ts";
     */
 
-    function generateReadme(filename): string {
+    async function generateReadme(filename): Promise<string> {
         const sourceFile = project.getSourceFileOrThrow(filename);
+        const packageJsonPath = path.join(filename, "../package.json");
+        const packageJson = JSON.parse(
+            (await exists(packageJsonPath))
+                ? await fs.readFile(packageJsonPath, "utf-8")
+                : "{}"
+        );
 
         const accumulatedExports = getDataOnAllExports(sourceFile);
         const constantsMd = makeConstantsSection(accumulatedExports.constants);
@@ -97,6 +111,13 @@ const README_COMMENT: string = `<!-- DO NOT MODIFY -->
         let skeletonReadme = `# ${directoryName}`;
         if (introText) {
             skeletonReadme += "\n\n" + introText;
+        }
+        if (packageJson.name) {
+            skeletonReadme +=
+                "\n\n## Install\n\n```bash\nnpm install " +
+                packageJson.name +
+                "\n```";
+            skeletonReadme += `\nThis package contains both esm and commonjs exports. To explicitly access the esm export,\nimport the \`.js\` file. To explicitly access the commonjs export, import the \`.cjs\` file.`;
         }
         if (accumulatedExports.plugins.length > 0) {
             skeletonReadme += "\n\n# Plugins";

@@ -12,6 +12,15 @@ Functions to manipulate macros and their arguments in a `unified-latex` Abstract
 
 If you want to expand macros or get a list of macros defined via `\newcommand`.
 
+## Install
+
+```bash
+npm install @unified-latex/unified-latex-util-macros
+```
+
+This package contains both esm and commonjs exports. To explicitly access the esm export,
+import the `.js` file. To explicitly access the commonjs export, import the `.cjs` file.
+
 # Functions
 
 ## `createMacroExpander(substitution)`

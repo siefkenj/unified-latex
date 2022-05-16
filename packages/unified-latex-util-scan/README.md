@@ -12,6 +12,15 @@ Functions to analyze `unified-latex` Abstract Syntax Tree (AST).
 
 If you want to look for particular AST nodes in an array; useful when making plugins.
 
+## Install
+
+```bash
+npm install @unified-latex/unified-latex-util-scan
+```
+
+This package contains both esm and commonjs exports. To explicitly access the esm export,
+import the `.js` file. To explicitly access the commonjs export, import the `.cjs` file.
+
 # Functions
 
 ## `prefixMatch(nodes, prefixes, options)`

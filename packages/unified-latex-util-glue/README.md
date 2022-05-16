@@ -13,6 +13,15 @@ Functions to parse TeX glue (e.g. `1in plus 3cm minus .2pt`).
 If you need access to the values of glue to analyze `\setlength` commands or write
 linters.
 
+## Install
+
+```bash
+npm install @unified-latex/unified-latex-util-glue
+```
+
+This package contains both esm and commonjs exports. To explicitly access the esm export,
+import the `.js` file. To explicitly access the commonjs export, import the `.cjs` file.
+
 # Functions
 
 ## `extractFormattedGlue(nodes, startIndex)`

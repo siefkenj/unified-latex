@@ -13,3 +13,12 @@ A [Prettier](https://prettier.io/) plugin for formatting and pretty-printing LaT
 If you want to construct a `Prettier` instance that has LaTeX parsing abilities.
 
 You should probably use the `prettier-plugin-latex` package instead of directly accessing this package.
+
+## Install
+
+```bash
+npm install @unified-latex/unified-latex-prettier
+```
+
+This package contains both esm and commonjs exports. To explicitly access the esm export,
+import the `.js` file. To explicitly access the commonjs export, import the `.cjs` file.

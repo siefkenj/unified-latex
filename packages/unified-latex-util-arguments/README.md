@@ -20,6 +20,15 @@ If you have custom macros that you want arguments attached to.
 If you know ahead of time which macros need arguments attached to them, use `unified-latex-util-parse`
 and pass in the appropriate macro info instead.
 
+## Install
+
+```bash
+npm install @unified-latex/unified-latex-util-arguments
+```
+
+This package contains both esm and commonjs exports. To explicitly access the esm export,
+import the `.js` file. To explicitly access the commonjs export, import the `.cjs` file.
+
 # Plugins
 
 ## `unifiedLatexAttachMacroArguments`
