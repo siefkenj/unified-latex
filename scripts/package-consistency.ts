@@ -44,7 +44,7 @@ async function getImportsInDir(dirname): Promise<string[]> {
             await fs.readFile(packageJsonFile, "utf-8")
         );
         const projectDir = path.dirname(packageJsonFile);
-        const jsonImports = Object.keys(packageJson.dependencies);
+        const jsonImports = Object.keys(packageJson.dependencies || {});
         const trueImports = await getImportsInDir(projectDir);
         jsonImports.sort();
         trueImports.sort();
@@ -85,5 +85,38 @@ async function getImportsInDir(dirname): Promise<string[]> {
             console.log(chalk.blue("     " + excessImport.join("\n     ")));
         }
 
+        try {
+            // Check that the proper references are included in the tsconfig.json file
+            const tsconfigFile = `${projectDir}/tsconfig.json`;
+            const tsconfig = JSON.parse(
+                await fs.readFile(tsconfigFile, "utf-8")
+            );
+            const tsconfigRefs = tsconfig.references.map(
+                (r) => r.path
+            ) as string[];
+            const neededRefs = jsonImports
+                .filter((i) => i.startsWith("@unified-latex"))
+                .map((i) => (i.match(/@unified-latex\/(.*)/) || [])[1])
+                .map((i) => `../${i}`) as string[];
+            const missingRefs = neededRefs.filter(
+                (r) => !tsconfigRefs.includes(r)
+            );
+            if (missingRefs.length > 0) {
+                console.log(
+                    chalk.gray(
+                        "   The following refs are missing from",
+                        tsconfigFile
+                    )
+                );
+                console.log(
+                    chalk.green(
+                        "     " +
+                            missingRefs
+                                .map((r) => `{ "path": "${r}" }`)
+                                .join(",\n     ")
+                    )
+                );
+            }
+        } catch {}
     }
 })();

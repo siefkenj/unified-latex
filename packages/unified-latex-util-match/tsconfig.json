@@ -5,5 +5,8 @@
         "rootDir": "."
     },
     "include": ["./**/*.ts"],
-    "references": [{"path": "../unified-latex-types"}]
+    "references": [
+        { "path": "../unified-latex-types" },
+        { "path": "../unified-latex-util-print-raw" }
+    ]
 }

@@ -15,7 +15,6 @@ import { nodeExternalsPlugin } from "esbuild-node-externals";
         // yet, and we want to be able to import as an esm.
         (d) => d !== "prettier"
     );
-    console.log(explicitDeps)
 
     const commonConfig = {
         entryPoints: ["./index.ts"],
@@ -37,7 +36,7 @@ import { nodeExternalsPlugin } from "esbuild-node-externals";
         .build({
             ...commonConfig,
             outfile: "./dist/index.cjs",
-            format: "cjs"
+            format: "cjs",
         })
         .catch(() => process.exit(1));
 })();

@@ -5,5 +5,12 @@
         "rootDir": "."
     },
     "include": ["./**/*.ts"],
-    "references": [{ "path": "../unified-latex-types" }]
+    "references": [
+        { "path": "../unified-latex-types" },
+        { "path": "../unified-latex-builder" },
+        { "path": "../unified-latex-util-argspec" },
+        { "path": "../unified-latex-util-match" },
+        { "path": "../unified-latex-util-render-info" },
+        { "path": "../unified-latex-util-visit" }
+    ]
 }

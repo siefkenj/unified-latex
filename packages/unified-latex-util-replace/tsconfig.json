@@ -5,5 +5,11 @@
         "rootDir": "."
     },
     "include": ["./**/*.ts"],
-    "references": [{"path": "../unified-latex-types"}]
+    "references": [
+        { "path": "../unified-latex-types" },
+        { "path": "../unified-latex-util-match" },
+        { "path": "../unified-latex-util-split" },
+        { "path": "../unified-latex-util-trim" },
+        { "path": "../unified-latex-util-visit" }
+    ]
 }

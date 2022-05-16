@@ -11,6 +11,10 @@
         { "path": "../unified-latex-util-print-raw" },
         { "path": "../unified-latex-util-render-info" },
         { "path": "../unified-latex-util-arguments" },
-        { "path": "../unified-latex-util-visit" }
+        { "path": "../unified-latex-util-visit" },
+        { "path": "../unified-latex-ctan" },
+        { "path": "../unified-latex-util-environments" },
+        { "path": "../unified-latex-util-pegjs" },
+        { "path": "../unified-latex-util-trim" }
     ]
 }

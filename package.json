@@ -5,7 +5,7 @@
     ],
     "scripts": {
         "build": "npm run build -ws",
-        "test": "jest"
+        "test": "jest --maxConcurrency=4"
     },
     "jest": {
         "projects": [
