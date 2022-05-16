@@ -5,9 +5,9 @@
     "main": "dist/index.js",
     "type": "module",
     "dependencies": {
-        "@unified-latex/unified-latex-types": "*",
-        "@unified-latex/unified-latex-ctan": "*",
         "@unified-latex/unified-latex-builder": "*",
+        "@unified-latex/unified-latex-ctan": "*",
+        "@unified-latex/unified-latex-types": "*",
         "@unified-latex/unified-latex-util-glue": "*",
         "@unified-latex/unified-latex-util-match": "*",
         "@unified-latex/unified-latex-util-packages": "*",
@@ -15,7 +15,9 @@
         "@unified-latex/unified-latex-util-replace": "*",
         "@unified-latex/unified-latex-util-scan": "*",
         "@unified-latex/unified-latex-util-trim": "*",
-        "@unified-latex/unified-latex-util-visit": "*"
+        "@unified-latex/unified-latex-util-visit": "*",
+        "unified-lint-rule": "^2.1.1",
+        "unist-util-position": "^4.0.3"
     },
     "files": [
         "dist/**/*.ts",

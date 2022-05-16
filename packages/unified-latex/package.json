@@ -6,14 +6,8 @@
     "type": "module",
     "dependencies": {
         "@unified-latex/unified-latex-types": "*",
-        "@unified-latex/unified-latex-util-arguments": "*",
-        "@unified-latex/unified-latex-util-match": "*",
-        "@unified-latex/unified-latex-util-align": "*",
-        "@unified-latex/unified-latex-util-pegjs": "*",
-        "@unified-latex/unified-latex-util-print-raw": "*",
-        "@unified-latex/unified-latex-util-render-info": "*",
-        "@unified-latex/unified-latex-util-trim": "*",
-        "prettier": "^2.6.2",
+        "@unified-latex/unified-latex-util-parse": "*",
+        "@unified-latex/unified-latex-util-to-string": "*",
         "unified": "^10.1.2"
     },
     "files": [

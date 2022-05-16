@@ -6,7 +6,9 @@
     "type": "module",
     "dependencies": {
         "@unified-latex/unified-latex-types": "*",
-        "@unified-latex/unified-latex-util-match": "*"
+        "@unified-latex/unified-latex-util-match": "*",
+        "@unified-latex/unified-latex-util-visit": "*",
+        "unified": "^10.1.2"
     },
     "files": [
         "dist/**/*.ts",

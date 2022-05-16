@@ -5,7 +5,6 @@
     "main": "dist/index.js",
     "type": "module",
     "dependencies": {
-        "@unified-latex/unified-latex-types": "^1.0.0"
     },
     "files": [
         "dist/**/*.ts",

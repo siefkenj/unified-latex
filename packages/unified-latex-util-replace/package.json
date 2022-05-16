@@ -9,7 +9,8 @@
         "@unified-latex/unified-latex-util-match": "*",
         "@unified-latex/unified-latex-util-split": "*",
         "@unified-latex/unified-latex-util-trim": "*",
-        "@unified-latex/unified-latex-util-visit": "*"
+        "@unified-latex/unified-latex-util-visit": "*",
+        "unified": "^10.1.2"
     },
     "files": [
         "dist/**/*.ts",
