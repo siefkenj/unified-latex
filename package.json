@@ -20,6 +20,8 @@
         "esbuild-node-externals": "^1.4.1",
         "esbuild-runner": "^2.2.1",
         "jest": "^28.1.0",
+        "lerna": "^4.0.0",
+        "lerna-update-wizard": "^1.1.2",
         "mdast-builder": "^1.1.1",
         "mdast-util-inject": "^1.1.0",
         "mkdirp": "^1.0.4",
@@ -44,5 +46,6 @@
         "unified": "^10.1.2",
         "unified-lint-rule": "^2.1.1",
         "unist-util-position": "^4.0.3"
-    }
+    },
+    "name": "unified-latex"
 }
