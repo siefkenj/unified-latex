@@ -6,7 +6,7 @@ cache:
   - node_modules
 script:
   - npm install && npm run build -ws
-  - npm run test
+  - npm run test:ci
 after_failure: cat /home/travis/.npm/_logs/*-debug.log
 warnings_are_errors: false
 env:
