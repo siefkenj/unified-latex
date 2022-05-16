@@ -1,10 +1,8 @@
 {
     "name": "@unified-latex/support-tables",
-    "version": "1.0.0",
+    "version": "1.0.5",
     "description": "Lists of special data needed for the internals of unified-latex",
     "type": "module",
-    "dependencies": {
-    },
     "files": [
         "dist/**/*.ts",
         "dist/**/*.js",
