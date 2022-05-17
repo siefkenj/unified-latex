@@ -43,6 +43,14 @@ async function getImportsInDir(dirname): Promise<string[]> {
         const packageJson = JSON.parse(
             await fs.readFile(packageJsonFile, "utf-8")
         );
+        // XXX This code is temporary for batch operations
+        //packageJson.private = true;
+        //await fs.writeFile(
+        //    packageJsonFile,
+        //    JSON.stringify(packageJson, null, 4),
+        //    "utf-8"
+        //);
+
         const projectDir = path.dirname(packageJsonFile);
         const jsonImports = Object.keys(packageJson.dependencies || {});
         const trueImports = await getImportsInDir(projectDir);

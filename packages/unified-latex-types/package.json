@@ -37,5 +37,6 @@
     "bugs": {
         "url": "https://github.com/siefkenj/unified-latex/issues"
     },
-    "homepage": "https://github.com/siefkenj/unified-latex#readme"
+    "homepage": "https://github.com/siefkenj/unified-latex#readme",
+    "private": true
 }

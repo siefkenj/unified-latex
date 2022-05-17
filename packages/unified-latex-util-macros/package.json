@@ -63,5 +63,6 @@
             "\\.pegjs$": "<rootDir>/../../tests/pegjs-preprocessor.js",
             "^.+\\.tsx?$": "ts-jest"
         }
-    }
+    },
+    "private": true
 }
