@@ -40,6 +40,13 @@
             "require": "./dist/*/index.cjs"
         }
     },
+    "typesVersions": {
+        "*": {
+            "rules/*": [
+                "dist/rules/*"
+            ]
+        }
+    },
     "scripts": {
         "build": "npm run clean && mkdirp ./dist && npm run compile",
         "clean": "rm -rf ./dist && rm -rf tsconfig.tsbuildinfo",
