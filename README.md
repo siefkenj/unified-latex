@@ -83,7 +83,8 @@ npx lerna version
 to update the version of all packages. Run
 
 ```
-npm publish -ws
+npm run package
+npm run publish
 ```
 
 to publish all workspaces.

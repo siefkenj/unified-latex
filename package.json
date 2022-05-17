@@ -6,9 +6,9 @@
     "scripts": {
         "build": "npm run build -ws",
         "package": "npm run package -ws",
-        "publish": "npm run package -ws && npm run publish -ws",
+        "publish": "npm run publish -ws",
         "test": "jest",
-        "test:ci": "jest --maxWorkers=2"
+        "test:ci": "jest --maxWorkers=1"
     },
     "jest": {
         "projects": [
