@@ -12,7 +12,7 @@
     },
     "jest": {
         "transformIgnorePatterns": [
-            "node_modules/(?!unified|bail|is-plain-obj|trough|vfile.*|unist.*|hast.*|property-information|html-void-elements|.*-separated-tokens|.*entities.*|ccount|rehype*|string-width|strip-ansi|ansi-regex|supports-color)"
+            "node_modules/(?!unified|bail|is-plain-obj|trough|vfile.*|unist.*|hast.*|property-information|html-void-elements|.*-separated-tokens|.*entities.*|ccount|rehype*|string-width|strip-ansi|ansi-regex|supports-color|rehype|web-namespaces|zwitch)"
         ],
         "transform": {
             "\\.m?jsx?$": "esbuild-jest",
@@ -23,7 +23,9 @@
         "haste": {
             "forceNodeFilesystemAPI": true
         },
-        "modulePathIgnorePatterns": ["/dist/"]
+        "modulePathIgnorePatterns": [
+            "/dist/"
+        ]
     },
     "devDependencies": {
         "@types/jest": "^27.5.1",
