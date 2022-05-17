@@ -44,7 +44,7 @@ async function getImportsInDir(dirname): Promise<string[]> {
         // XXX This code is temporary for batch operations
         //packageJson.private = true;
         //packageJson.scripts.compile =
-        //    "tsc -b tsconfig.json & node build.js & wait && mv dist/tsconfig.tsbuildinfo ./";
+        //    "tsc -b tsconfig.json & node build.js & wait";
         //packageJson.scripts.package = "node ../../scripts/make-package.mjs";
         //packageJson.scripts.publish = "cd dist && npm publish";
         //await fs.writeFile(

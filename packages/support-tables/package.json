@@ -25,7 +25,8 @@
         "build": "npm run clean && mkdirp ./dist && npm run compile",
         "clean": "rm -rf ./dist && rm -rf tsconfig.tsbuildinfo",
         "compile": "tsc -b tsconfig.json & node build.js & wait",
-        "test": "jest"
+        "package": "node ../../scripts/make-package.mjs",
+        "publish": "cd dist && npm publish"
     },
     "repository": {
         "type": "git",

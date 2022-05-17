@@ -13,6 +13,7 @@
         // which means it cannot be imported via node.
         "emitDeclarationOnly": true,
         "composite": true,
+        "incremental": true,
         "outDir": "./dist",
         "noImplicitAny": true,
         "strictNullChecks": true,

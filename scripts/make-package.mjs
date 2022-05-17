@@ -46,6 +46,7 @@ import fs from "node:fs/promises";
         },
     };
     distPackage.main = "index.js";
+    distPackage.files = ["**/*.ts", "**/*.js", "**/*.map", "**/*.json"];
 
     await fs.mkdir("dist", { recursive: true });
     const filename = "dist/package.json";
