@@ -1,10 +1,8 @@
 /**
- * Autogenerate documentation for source files. This assumes a very specific format.
- *
- * run with
- * ```
- * npx esr scripts/build-docs.ts
- * ```
+ * Copy the `package.json` file and rewrite its rules so it is suitable for publishing on npm.
+ * 
+ * Re-routing module requests to the `dist/` folder, thought possible, causes lots of issues and
+ * requires annoying workarounds for the end user! So, we give up and just publish everything in a "root" folder.
  */
 
 import * as fs from "node:fs/promises";
@@ -45,6 +43,10 @@ async function getImportsInDir(dirname): Promise<string[]> {
         );
         // XXX This code is temporary for batch operations
         //packageJson.private = true;
+        //packageJson.scripts.compile =
+        //    "tsc -b tsconfig.json & node build.js & wait && mv dist/tsconfig.tsbuildinfo ./";
+        //packageJson.scripts.package = "node ../../scripts/make-package.mjs";
+        //packageJson.scripts.publish = "cd dist && npm publish";
         //await fs.writeFile(
         //    packageJsonFile,
         //    JSON.stringify(packageJson, null, 4),

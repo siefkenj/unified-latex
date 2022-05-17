@@ -27,7 +27,9 @@
     "scripts": {
         "build": "npm run clean && mkdirp ./dist && npm run compile",
         "clean": "rm -rf ./dist && rm -rf tsconfig.tsbuildinfo",
-        "compile": "tsc -b tsconfig.json & node build.js & wait"
+        "compile": "tsc -b tsconfig.json & node build.js & wait && mv dist/tsconfig.tsbuildinfo ./",
+        "package": "node ../../scripts/make-package.mjs",
+        "publish": "cd dist && npm publish"
     },
     "repository": {
         "type": "git",
