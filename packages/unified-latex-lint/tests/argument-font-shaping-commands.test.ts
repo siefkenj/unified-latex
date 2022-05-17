@@ -122,4 +122,14 @@ describe("unified-latex-lint:argument-font-shaping-commands", () => {
             .processSync({ value });
         expect(file.value).toEqual("a {\\bfseries x\n\nb}");
     });
+
+    it("replaces command inside enumerate", () => {
+        value = "\\begin{enumerate}\\item\\bfseries b\\end{enumerate}";
+        file = processLatexViaUnified()
+            .use(unifiedLatexLintArgumentFontShapingCommands, { fix: true })
+            .processSync({ value });
+        expect(file.value).toEqual(
+            "\\begin{enumerate}\n\t\\item \\textbf{b}\n\\end{enumerate}"
+        );
+    });
 });

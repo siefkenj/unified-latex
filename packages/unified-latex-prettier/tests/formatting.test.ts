@@ -599,4 +599,12 @@ describe("unified-latex-prettier", () => {
             expect(formatted).toEqual(outStr);
         }
     });
+
+    it("no excess newlines between comments separated by pars", () => {
+        const STRINGS = [{ inStr: "%\n\n%", outStr: "%\n\n%" }];
+
+        for (const { inStr, outStr } of STRINGS) {
+            expect(inStr).toFormatAs(outStr, formatter);
+        }
+    });
 });

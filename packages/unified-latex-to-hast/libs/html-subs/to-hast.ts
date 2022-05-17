@@ -83,7 +83,7 @@ export function toHastWithLoggerFactory(
                 );
             case "macro":
                 logger(
-                    `Unknown environment when converting to HTML "${JSON.stringify(
+                    `Unknown macro when converting to HTML "${JSON.stringify(
                         node
                     )}"`,
                     node

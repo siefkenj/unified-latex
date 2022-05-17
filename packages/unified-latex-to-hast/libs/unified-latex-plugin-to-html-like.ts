@@ -46,6 +46,7 @@ export const unifiedLatexToHtmlLike: Plugin<
     );
 
     return (tree) => {
+        const originalTree = tree;
         // NOTE: These operations need to be done in a particular order.
 
         // We _could_ keep comments around in html, but that can complicate dealing with whitespace,
@@ -63,19 +64,28 @@ export const unifiedLatexToHtmlLike: Plugin<
         if (shouldBeWrappedInPars(tree)) {
             processor = processor.use(unifiedLatexWrapPars);
         }
-        processor.run(tree);
+        tree = processor.runSync(tree);
 
-        // Replace text-mode macros
+        // Replace text-mode environments and then macros. Environments *must* be processed first, since
+        // environments like tabular use `\\` as a newline indicator, but a `\\` macro gets replaced with
+        // a `<br />` during macro replacement.
+        replaceNode(tree, (node, context) => {
+            // Children of math-mode are rendered by KaTeX/MathJax and so we shouldn't touch them!
+            if (context.hasMathModeAncestor) {
+                return;
+            }
+            if (isReplaceableEnvironment(node)) {
+                return environmentReplacements[printRaw(node.env)](node);
+            }
+        });
         replaceNode(tree, (node, context) => {
             // Children of math-mode are rendered by KaTeX/MathJax and so we shouldn't touch them!
             if (context.hasMathModeAncestor) {
                 return;
             }
             if (isReplaceableMacro(node)) {
-                return macroReplacements[node.content](node);
-            }
-            if (isReplaceableEnvironment(node)) {
-                return environmentReplacements[printRaw(node.env)](node);
+                const replacement = macroReplacements[node.content](node);
+                return replacement;
             }
         });
 
@@ -91,6 +101,9 @@ export const unifiedLatexToHtmlLike: Plugin<
                 );
             }
         });
+
+        // Make sure we are actually mutating the current tree.
+        originalTree.content = tree.content;
     };
 };
 

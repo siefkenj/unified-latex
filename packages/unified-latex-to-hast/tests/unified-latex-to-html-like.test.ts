@@ -13,13 +13,12 @@ console.log = (...args) => {
 
 describe("unified-latex-to-hast:unified-latex-to-html-like", () => {
     let file: VFile;
+    const process = (value: string) =>
+        processLatexViaUnified()
+            .use(unifiedLatexToHtmlLike)
+            .processSync({ value });
 
     it("wrap pars and streaming commands", () => {
-        const process = (value: string) =>
-            processLatexViaUnified()
-                .use(unifiedLatexToHtmlLike)
-                .processSync({ value });
-
         file = process("a\n\nb");
         expect(file.value).toEqual("\\html-tag:p{a}\\html-tag:p{b}");
 

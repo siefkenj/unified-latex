@@ -25,6 +25,7 @@
         "hast-util-to-html": "^8.0.3",
         "hastscript": "^7.0.2",
         "prettier": "^2.6.2",
+        "rehype-raw": "^6.1.1",
         "rehype-stringify": "^9.0.3",
         "unified": "^10.1.2"
     },
@@ -72,7 +73,7 @@
     "homepage": "https://github.com/siefkenj/unified-latex#readme",
     "jest": {
         "transformIgnorePatterns": [
-            "node_modules/(?!unified|bail|is-plain-obj|trough|vfile.*|unist.*|hast.*|property-information|html-void-elements|.*-separated-tokens|.*entities.*|ccount|rehype*|string-width|strip-ansi|ansi-regex|supports-color)"
+            "node_modules/(?!unified|bail|is-plain-obj|trough|vfile.*|unist.*|hast.*|property-information|html-void-elements|.*-separated-tokens|.*entities.*|ccount|rehype*|string-width|strip-ansi|ansi-regex|supports-color|rehype|web-namespaces|zwitch)"
         ],
         "transform": {
             "\\.m?jsx?$": "esbuild-jest",
