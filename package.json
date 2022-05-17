@@ -7,13 +7,23 @@
         "build": "npm run build -ws",
         "package": "npm run package -ws",
         "publish": "npm run publish -ws",
-        "test": "jest",
-        "test:ci": "jest --maxWorkers=1"
+        "test": "jest ./packages",
+        "test:ci": "jest ./packages --maxWorkers=1"
     },
     "jest": {
-        "projects": [
-            "<rootDir>/packages/unified-latex*"
-        ]
+        "transformIgnorePatterns": [
+            "node_modules/(?!unified|bail|is-plain-obj|trough|vfile.*|unist.*|hast.*|property-information|html-void-elements|.*-separated-tokens|.*entities.*|ccount|rehype*|string-width|strip-ansi|ansi-regex|supports-color)"
+        ],
+        "transform": {
+            "\\.m?jsx?$": "esbuild-jest",
+            "latex.pegjs$": "<rootDir>/tests/pegjs-preprocessor-latex.js",
+            "\\.pegjs$": "<rootDir>/tests/pegjs-preprocessor.js",
+            "^.+\\.tsx?$": "ts-jest"
+        },
+        "haste": {
+            "forceNodeFilesystemAPI": true
+        },
+        "modulePathIgnorePatterns": ["/dist/"]
     },
     "devDependencies": {
         "@types/jest": "^27.5.1",
