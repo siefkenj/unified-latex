@@ -1,6 +1,6 @@
 {
     "name": "@unified-latex/unified-latex-types",
-    "version": "1.0.6",
+    "version": "1.0.7",
     "description": "type definitions for unified-latex",
     "main": "dist/index.js",
     "type": "module",
