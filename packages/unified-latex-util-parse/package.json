@@ -68,7 +68,10 @@
             "latex.pegjs$": "<rootDir>/../../tests/pegjs-preprocessor-latex.js",
             "\\.pegjs$": "<rootDir>/../../tests/pegjs-preprocessor.js",
             "^.+\\.tsx?$": "ts-jest"
-        }
+        },
+        "modulePathIgnorePatterns": [
+            "/dist/"
+        ]
     },
     "private": true
 }

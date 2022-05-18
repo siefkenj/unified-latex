@@ -62,7 +62,10 @@
             "latex.pegjs$": "<rootDir>/../../tests/pegjs-preprocessor-latex.js",
             "\\.pegjs$": "<rootDir>/../../tests/pegjs-preprocessor.js",
             "^.+\\.tsx?$": "ts-jest"
-        }
+        },
+        "modulePathIgnorePatterns": [
+            "/dist/"
+        ]
     },
     "devDependencies": {
         "@types/trie-prefix-tree": "^1.5.0"

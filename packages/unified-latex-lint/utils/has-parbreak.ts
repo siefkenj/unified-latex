@@ -10,3 +10,46 @@ export function hasParbreak(nodes: Ast.Node[]) {
         (node) => match.parbreak(node) || match.macro(node, "par")
     );
 }
+
+/**
+ * Is there a parbreak or a macro/environment that acts like a parbreak (e.g. \section{...})
+ * in the array?
+ */
+export function hasBreakingNode(
+    nodes: Ast.Node[],
+    options?: {
+        macrosThatBreakPars?: string[];
+        environmentsThatDontBreakPars?: string[];
+    }
+): boolean {
+    if (hasParbreak(nodes)) {
+        return true;
+    }
+
+    const {
+        macrosThatBreakPars = [
+            "part",
+            "chapter",
+            "section",
+            "subsection",
+            "subsubsection",
+            "vspace",
+            "smallskip",
+            "medskip",
+            "bigskip",
+            "hfill",
+        ],
+        environmentsThatDontBreakPars = [],
+    } = options || {};
+
+    const macroMatcher = match.createMacroMatcher(macrosThatBreakPars);
+    const envMatcher = match.createEnvironmentMatcher(
+        environmentsThatDontBreakPars
+    );
+
+    return nodes.some(
+        (node) =>
+            macroMatcher(node) ||
+            (match.anyEnvironment(node) && !envMatcher(node))
+    );
+}
