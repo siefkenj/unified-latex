@@ -213,17 +213,38 @@ export const macros: MacroInfoRecord = {
     },
     rule: { signature: "o m m" },
     // Sectioning
-    part: { signature: "s o m", renderInfo: { breakAround: true } },
-    chapter: { signature: "s o m", renderInfo: { breakAround: true } },
-    section: { signature: "s o m", renderInfo: { breakAround: true } },
-    subsection: { signature: "s o m", renderInfo: { breakAround: true } },
-    subsubsection: { signature: "s o m", renderInfo: { breakAround: true } },
-    paragraph: { signature: "s o m", renderInfo: { breakAround: true } },
-    subparagraph: { signature: "s o m", renderInfo: { breakAround: true } },
-    appendix: { renderInfo: { breakAround: true } },
-    frontmatter: { renderInfo: { breakAround: true } },
-    mainmatter: { renderInfo: { breakAround: true } },
-    backmatter: { renderInfo: { breakAround: true } },
+    part: {
+        signature: "s o m",
+        renderInfo: { breakAround: true, inParMode: true },
+    },
+    chapter: {
+        signature: "s o m",
+        renderInfo: { breakAround: true, inParMode: true },
+    },
+    section: {
+        signature: "s o m",
+        renderInfo: { breakAround: true, inParMode: true },
+    },
+    subsection: {
+        signature: "s o m",
+        renderInfo: { breakAround: true, inParMode: true },
+    },
+    subsubsection: {
+        signature: "s o m",
+        renderInfo: { breakAround: true, inParMode: true },
+    },
+    paragraph: {
+        signature: "s o m",
+        renderInfo: { breakAround: true, inParMode: true },
+    },
+    subparagraph: {
+        signature: "s o m",
+        renderInfo: { breakAround: true, inParMode: true },
+    },
+    appendix: { renderInfo: { breakAround: true, inParMode: true } },
+    frontmatter: { renderInfo: { breakAround: true, inParMode: true } },
+    mainmatter: { renderInfo: { breakAround: true, inParMode: true } },
+    backmatter: { renderInfo: { breakAround: true, inParMode: true } },
     // Citing and references
     bibitem: { signature: "o m", renderInfo: { hangingIndent: true } },
     cite: { signature: "o m" },

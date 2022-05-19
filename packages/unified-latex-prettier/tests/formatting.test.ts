@@ -25,19 +25,19 @@ describe("unified-latex-prettier", () => {
                     "\n" +
                     "\\begin{enumerate}  \\item hi there this \\emph{is stuff $\\mathbb 4somegoodstuff$ is really, really great!}\\item and other stuff\\end{enumerate}\n",
                 outStr:
-                    "\\documentclass[foo]{bar}\n" +
-                    "a\n" +
-                    "b\n" +
-                    "c\n" +
-                    "\n" +
-                    "\\begin{enumerate}\n" +
-                    "\t\\item hi there this \\emph{is\n" +
-                    "\t\tstuff $\\mathbb{4}somegoodst\n" +
-                    "\t\tuff$ is really, really\n" +
-                    "\t\tgreat!}\n" +
-                    "\n" +
-                    "\t\\item and other stuff\n" +
-                    "\\end{enumerate}",
+                    `\\documentclass[foo]{bar}
+a
+b
+c
+
+\\begin{enumerate}
+\t\\item hi there this \\emph{is
+\t\tstuff
+\t\t$\\mathbb{4}somegoodstuff$
+\t\tis really, really great!}
+
+\t\\item and other stuff
+\\end{enumerate}`,
             },
             {
                 inStr: "\\begin{xx}\\begin{yy}x\\end{yy}\\end{xx}",
@@ -639,7 +639,24 @@ describe("unified-latex-prettier", () => {
     });
 
     it("preamble macros aren't forced to be broken", () => {
-        const STRINGS = [{ inStr: "\\documentclass{a}\\emph{x y}", outStr: "\\documentclass{a}\n\\emph{x y}" }];
+        const STRINGS = [
+            {
+                inStr: "\\documentclass{a}\\emph{x y}",
+                outStr: "\\documentclass{a}\n\\emph{x y}",
+            },
+        ];
+
+        for (const { inStr, outStr } of STRINGS) {
+            expect(inStr).toFormatAs(outStr, formatter);
+        }
+    });
+    it("macro arguments wrap paragraph-style by default", () => {
+        const STRINGS = [
+            {
+                inStr: "\\clap{foooooo, barooooo, bazooooo, bangoooo}",
+                outStr: "\\clap{foooooo, barooooo,\nbazooooo, bangoooo}",
+            },
+        ];
 
         for (const { inStr, outStr } of STRINGS) {
             expect(inStr).toFormatAs(outStr, formatter);

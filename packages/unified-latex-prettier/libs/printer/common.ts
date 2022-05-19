@@ -62,7 +62,7 @@ export function getNodeInfo(
     node: any,
     options: PrettierTypes.Options & { referenceMap?: ReferenceMap }
 ): {
-    renderInfo: any;
+    renderInfo: Record<string, any>;
     renderCache?: object;
     previousNode?: Ast.Node;
     nextNode?: Ast.Node;
