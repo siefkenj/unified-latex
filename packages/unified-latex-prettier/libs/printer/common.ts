@@ -218,6 +218,8 @@ export function formatDocArray(
                         if (match.whitespace(nextNode)) {
                             ret.push(hardline);
                             i++;
+                        } else if (match.parbreak(nextNode)) {
+                            // If the next node is a parbreak, it will insert its own newline
                         } else if (!match.comment(nextNode)) {
                             ret.push(hardline);
                         }

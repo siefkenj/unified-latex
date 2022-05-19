@@ -411,6 +411,19 @@ describe("unified-latex-prettier", () => {
         }
     });
 
+    it.skip("matrix environment with parbreak", () => {
+        const STRINGS = [
+            {
+                inStr: "\\begin{matrix}a\n\nb\\end{matrix}",
+                outStr: "\\begin{matrix}\n\ta\n\n\tb\n\\end{matrix}",
+            },
+        ];
+
+        for (const { inStr, outStr } of STRINGS) {
+            expect(inStr).toFormatAs(outStr, formatter);
+        }
+    });
+
     it("comments at the end of an arguments list get a closing newline", () => {
         const STRINGS = [
             {
@@ -602,6 +615,31 @@ describe("unified-latex-prettier", () => {
 
     it("no excess newlines between comments separated by pars", () => {
         const STRINGS = [{ inStr: "%\n\n%", outStr: "%\n\n%" }];
+
+        for (const { inStr, outStr } of STRINGS) {
+            expect(inStr).toFormatAs(outStr, formatter);
+        }
+    });
+
+    it("no excess newlines between breakAround arguments separated by pars", () => {
+        const STRINGS = [
+            {
+                inStr: "\\section{x}\n\n\\section{y}",
+                outStr: "\\section{x}\n\n\\section{y}",
+            },
+            {
+                inStr: "\\section{x}\n\n\\begin{y}\\end{y}",
+                outStr: "\\section{x}\n\n\\begin{y}\n\\end{y}",
+            },
+        ];
+
+        for (const { inStr, outStr } of STRINGS) {
+            expect(inStr).toFormatAs(outStr, formatter);
+        }
+    });
+
+    it("preamble macros aren't forced to be broken", () => {
+        const STRINGS = [{ inStr: "\\documentclass{a}\\emph{x y}", outStr: "\\documentclass{a}\n\\emph{x y}" }];
 
         for (const { inStr, outStr } of STRINGS) {
             expect(inStr).toFormatAs(outStr, formatter);

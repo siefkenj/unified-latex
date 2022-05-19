@@ -210,4 +210,5 @@ export const environments: EnvInfoRecord = {
     corollary: { signature: "o" },
     remark: { signature: "!o" },
     example: { signature: "!o" },
+    proof: { signature: "o" },
 };

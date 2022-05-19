@@ -225,7 +225,7 @@ export const macros: MacroInfoRecord = {
     mainmatter: { renderInfo: { breakAround: true } },
     backmatter: { renderInfo: { breakAround: true } },
     // Citing and references
-    bibitem: { signature: "o m" },
+    bibitem: { signature: "o m", renderInfo: { hangingIndent: true } },
     cite: { signature: "o m" },
     // Fonts
     textrm: { signature: "m", renderInfo: { inParMode: true } },
@@ -286,7 +286,10 @@ export const environments: EnvInfoRecord = {
     table: { signature: "o" },
     tabular: { signature: "o m", renderInfo: { alignContent: true } },
     "tabular*": { signature: "m o m", renderInfo: { alignContent: true } },
-    thebibliography: { signature: "m" },
+    thebibliography: {
+        signature: "m",
+        processContent: (nodes) => cleanEnumerateBody(nodes, "bibitem"),
+    },
     // Math
     math: { renderInfo: { inMathMode: true } },
 };
