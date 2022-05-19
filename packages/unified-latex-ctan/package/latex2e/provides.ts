@@ -194,8 +194,9 @@ export const macros: MacroInfoRecord = {
         signature: "m",
         renderInfo: { breakAround: true, inParMode: true },
     },
+    // amsart document class adds an optional argument
     title: {
-        signature: "m",
+        signature: "o m",
         renderInfo: { breakAround: true, inParMode: true },
     },
     pagenumbering: { signature: "m", renderInfo: { breakAround: true } },

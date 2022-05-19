@@ -24,6 +24,7 @@ const REPLACEMENTS: Record<
     sffamily: singleArgMacroFactory("textsf"),
     slshape: singleArgMacroFactory("textsl"),
     ttfamily: singleArgMacroFactory("texttt"),
+    em: singleArgMacroFactory("emph"),
 };
 
 const isReplaceable = match.createMacroMatcher(REPLACEMENTS);

@@ -662,4 +662,16 @@ c
             expect(inStr).toFormatAs(outStr, formatter);
         }
     });
+    it("preamble math doesn't have extra hardlines", () => {
+        const STRINGS = [
+            {
+                inStr: "\\documentclass{a}\\[a\\begin{x}y\\end{x}\\]",
+                outStr: "\\documentclass{a}\n\\[\n\ta\n\t\\begin{x}\n\t\ty\n\t\\end{x}\n\\]",
+            },
+        ];
+
+        for (const { inStr, outStr } of STRINGS) {
+            expect(inStr).toFormatAs(outStr, formatter);
+        }
+    });
 });

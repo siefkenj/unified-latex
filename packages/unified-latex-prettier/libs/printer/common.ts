@@ -31,6 +31,23 @@ export function formatEnvSurround(node: Ast.Environment) {
 }
 
 /**
+ * Determine if `elm` is a line type (softline/hardline/etc). If `elm` is an
+ * array or a concat, the first element is checked.
+ */
+function isLineType(elm: Doc): boolean {
+    if (elm == null || typeof elm === "string") {
+        return false;
+    }
+    if (Array.isArray(elm)) {
+        return isLineType(elm[0]);
+    }
+    if (elm.type === "concat") {
+        return isLineType(elm.parts);
+    }
+    return elm.type === "line";
+}
+
+/**
  * Join an array with `softline`. However, if a `line` is
  * found, do not insert an additional softline. For example
  * `[a, b, c]` -> `[a, softline, b, softline, c]`
@@ -42,7 +59,7 @@ export function formatEnvSurround(node: Ast.Environment) {
  * @param {*} arr
  * @returns
  */
-export function joinWithSoftline(arr: any[]) {
+export function joinWithSoftline(arr: Doc[]) {
     if (arr.length === 0 || arr.length === 1) {
         return arr;
     }
@@ -50,7 +67,7 @@ export function joinWithSoftline(arr: any[]) {
     for (let i = 1; i < arr.length; i++) {
         const prevNode = arr[i - 1];
         const nextNode = arr[i];
-        if (nextNode.type !== "line" && prevNode.type !== "line") {
+        if (!isLineType(prevNode) && !isLineType(nextNode)) {
             ret.push(softline);
         }
         ret.push(nextNode);
@@ -90,7 +107,6 @@ export const ESCAPE = "\\";
 
 // Commands to build the prettier syntax tree
 export const {
-    concat,
     group,
     fill,
     ifBreak,
