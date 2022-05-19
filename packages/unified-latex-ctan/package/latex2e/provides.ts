@@ -1,4 +1,7 @@
-import { MacroInfoRecord, EnvInfoRecord } from "@unified-latex/unified-latex-types";
+import {
+    MacroInfoRecord,
+    EnvInfoRecord,
+} from "@unified-latex/unified-latex-types";
 import { trim } from "@unified-latex/unified-latex-util-trim";
 import { cleanEnumerateBody } from "../../utils/enumerate";
 
@@ -165,19 +168,36 @@ export const macros: MacroInfoRecord = {
     footnote: { signature: "o m", renderInfo: { inParMode: true } },
     footnotemark: { signature: "o" },
     footnotetext: { signature: "o m", renderInfo: { inParMode: true } },
+    caption: {
+        signature: "o m",
+        renderInfo: { inParMode: true, breakAround: true },
+    },
     // Math Commands
     sqrt: { signature: "o m", renderInfo: { inMathMode: true } },
     frac: { signature: "m m", renderInfo: { inMathMode: true } },
     stackrel: { signature: "m m" },
     ensuremath: { signature: "m", renderInfo: { inMathMode: true } },
     // Layout commands
+    abstract: {
+        signature: "m",
+        renderInfo: { breakAround: true, inParMode: true },
+    },
     maketitle: { renderInfo: { breakAround: true } },
     doublespacing: { renderInfo: { breakAround: true } },
     singlespacing: { renderInfo: { breakAround: true } },
-    author: { signature: "m", renderInfo: { breakAround: true } },
+    author: {
+        signature: "m",
+        renderInfo: { breakAround: true, inParMode: true },
+    },
     date: { signature: "m", renderInfo: { breakAround: true } },
-    thanks: { signature: "m", renderInfo: { breakAround: true } },
-    title: { signature: "m", renderInfo: { breakAround: true } },
+    thanks: {
+        signature: "m",
+        renderInfo: { breakAround: true, inParMode: true },
+    },
+    title: {
+        signature: "m",
+        renderInfo: { breakAround: true, inParMode: true },
+    },
     pagenumbering: { signature: "m", renderInfo: { breakAround: true } },
     pagestyle: { signature: "m", renderInfo: { breakAround: true } },
     thispagestyle: { signature: "m", renderInfo: { breakAround: true } },
@@ -237,7 +257,6 @@ export const macros: MacroInfoRecord = {
     contentsline: { signature: "m m m", renderInfo: { breakAround: true } },
     bibliography: { signature: "m", renderInfo: { breakAround: true } },
     bibliographystyle: { signature: "m", renderInfo: { breakAround: true } },
-    caption: { signature: "m", renderInfo: { breakAround: true } },
 };
 
 export const environments: EnvInfoRecord = {
