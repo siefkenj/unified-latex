@@ -1,13 +1,13 @@
 {
     "name": "@unified-latex/unified-latex-util-align",
-    "version": "1.0.7",
+    "version": "1.0.8",
     "description": "Tools for manipulating unified-latex ASTs",
     "main": "dist/index.js",
     "type": "module",
     "dependencies": {
         "@unified-latex/unified-latex-types": "^1.0.7",
-        "@unified-latex/unified-latex-util-match": "^1.0.7",
-        "@unified-latex/unified-latex-util-pegjs": "^1.0.7"
+        "@unified-latex/unified-latex-util-match": "^1.0.8",
+        "@unified-latex/unified-latex-util-pegjs": "^1.0.8"
     },
     "files": [
         "dist/**/*.ts",

@@ -1,6 +1,6 @@
 {
     "name": "@unified-latex/unified-latex-util-print-raw",
-    "version": "1.0.7",
+    "version": "1.0.8",
     "description": "Print a unified-latex AST with no fancy formatting",
     "main": "dist/index.js",
     "type": "module",
