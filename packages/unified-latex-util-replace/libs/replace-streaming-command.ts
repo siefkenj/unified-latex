@@ -9,7 +9,7 @@ import {
     trimEnd,
     trimStart,
 } from "@unified-latex/unified-latex-util-trim";
-import { firstSignificantNode } from "./utils/first-significant-node";
+import { firstSignificantNode } from "./utils/significant-node";
 import { replaceStreamingCommandInArray } from "./utils/replace-streaming-command-in-array";
 import { wrapSignificantContent } from "./utils/wrap-significant-content";
 

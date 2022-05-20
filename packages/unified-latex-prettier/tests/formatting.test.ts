@@ -24,8 +24,7 @@ describe("unified-latex-prettier", () => {
                     "\\documentclass[foo]{bar} a b c\n" +
                     "\n" +
                     "\\begin{enumerate}  \\item hi there this \\emph{is stuff $\\mathbb 4somegoodstuff$ is really, really great!}\\item and other stuff\\end{enumerate}\n",
-                outStr:
-                    `\\documentclass[foo]{bar}
+                outStr: `\\documentclass[foo]{bar}
 a
 b
 c
@@ -667,6 +666,44 @@ c
             {
                 inStr: "\\documentclass{a}\\[a\\begin{x}y\\end{x}\\]",
                 outStr: "\\documentclass{a}\n\\[\n\ta\n\t\\begin{x}\n\t\ty\n\t\\end{x}\n\\]",
+            },
+        ];
+
+        for (const { inStr, outStr } of STRINGS) {
+            expect(inStr).toFormatAs(outStr, formatter);
+        }
+    });
+
+    it("enumerate with comment only inserts one newline", () => {
+        const STRINGS = [
+            {
+                inStr: "\\begin{enumerate}a%\n\\item\\end{enumerate}",
+                outStr: `\\begin{enumerate}
+\ta%
+
+\t\\item
+\\end{enumerate}`,
+            },
+            {
+                inStr: "\\begin{enumerate}\\item%\n\\item\\end{enumerate}",
+                outStr: `\\begin{enumerate}
+\t\\item %
+
+\t\\item
+\\end{enumerate}`,
+            },
+            {
+                inStr: "\\begin{enumerate} %\n\\end{enumerate}",
+                outStr: `\\begin{enumerate} %
+\\end{enumerate}`,
+            },
+            {
+                inStr: "\\begin{enumerate}\\item%\n\n%\n\\end{enumerate}",
+                outStr: `\\begin{enumerate}
+\t\\item %
+
+\t%
+\\end{enumerate}`,
             },
         ];
 
