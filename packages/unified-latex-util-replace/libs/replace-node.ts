@@ -19,36 +19,38 @@ export function replaceNode(
         | undefined
         | void
 ) {
-    visit(ast, (node, info) => {
-        let replacement = visitor(node, info.context);
-        // Returning `undefined` or the same node means we shouldn't replace that node
-        if (typeof replacement === "undefined" || replacement === node) {
-            return;
-        }
+    visit(ast, {
+        leave: (node, info) => {
+            let replacement = visitor(node, info.context);
+            // Returning `undefined` or the same node means we shouldn't replace that node
+            if (typeof replacement === "undefined" || replacement === node) {
+                return;
+            }
 
-        if (!info.containingArray || info.index == null) {
-            throw new Error(
-                "Trying to delete node, but cannot find containing array"
-            );
-        }
+            if (!info.containingArray || info.index == null) {
+                throw new Error(
+                    "Trying to delete node, but cannot find containing array"
+                );
+            }
 
-        if (
-            replacement === null ||
-            (Array.isArray(replacement) && replacement.length === 0)
-        ) {
-            // A null return means that we delete the current node
-            info.containingArray.splice(info.index, 1);
-            return info.index;
-        }
+            if (
+                replacement === null ||
+                (Array.isArray(replacement) && replacement.length === 0)
+            ) {
+                // A null return means that we delete the current node
+                info.containingArray.splice(info.index, 1);
+                return info.index;
+            }
 
-        if (!Array.isArray(replacement)) {
-            replacement = [replacement];
-        }
+            if (!Array.isArray(replacement)) {
+                replacement = [replacement];
+            }
 
-        info.containingArray.splice(info.index, 1, ...replacement);
-        // We don't want to *reprocess* the nodes we just inserted into the array,
-        // lest we get stuck in a recursive loop if the replacement contains the original.
-        // Thus we jump to the index after our replacements.
-        return info.index + replacement.length;
+            info.containingArray.splice(info.index, 1, ...replacement);
+            // We don't want to *reprocess* the nodes we just inserted into the array,
+            // lest we get stuck in a recursive loop if the replacement contains the original.
+            // Thus we jump to the index after our replacements.
+            return info.index + replacement.length;
+        },
     });
 }

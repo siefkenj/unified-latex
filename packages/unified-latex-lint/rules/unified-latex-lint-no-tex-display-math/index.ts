@@ -18,25 +18,29 @@ CTAN l2tabuen Section 1.7`;
 export const unifiedLatexLintNoTexDisplayMath = lintRule<
     Ast.Root,
     PluginOptions
->({ origin: "unified-latex-lint:no-tex-display-math" }, (tree, file, options) => {
-    visit(
-        tree,
-        (node) => {
-            if (node.type !== "displaymath" || node.position == null) {
-                return;
-            }
-            if (
-                file.value.slice(
-                    node.position.start.offset,
-                    node.position.start.offset + 2
-                ) === "$$"
-            ) {
-                file.message(
-                    `Avoid using $$..$$ for display math; prefer \\[..\\]`,
-                    node
-                );
-            }
-        },
-        { test: match.math }
-    );
-});
+>(
+    { origin: "unified-latex-lint:no-tex-display-math" },
+    (tree, file, options) => {
+        visit(
+            tree,
+            (node) => {
+                if (node.type !== "displaymath" || node.position == null) {
+                    return;
+                }
+                if (
+                    file.value &&
+                    file.value.slice(
+                        node.position.start.offset,
+                        node.position.start.offset + 2
+                    ) === "$$"
+                ) {
+                    file.message(
+                        `Avoid using $$...$$ for display math; prefer \\[...\\]`,
+                        node
+                    );
+                }
+            },
+            { test: match.math }
+        );
+    }
+);

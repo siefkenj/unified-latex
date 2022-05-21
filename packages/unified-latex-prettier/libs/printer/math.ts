@@ -63,7 +63,7 @@ export function printDisplayMath(
 
     return [
         ESCAPE + "[",
-        indent(bodyStartToken.concat(content)),
+        indent(fill(bodyStartToken.concat(content))),
         hardline,
         ESCAPE + "]",
     ];

@@ -1,4 +1,7 @@
-import { MacroInfoRecord, EnvInfoRecord } from "@unified-latex/unified-latex-types";
+import {
+    MacroInfoRecord,
+    EnvInfoRecord,
+} from "@unified-latex/unified-latex-types";
 import { trim } from "@unified-latex/unified-latex-util-trim";
 import { cleanEnumerateBody } from "../../utils/enumerate";
 
@@ -165,19 +168,37 @@ export const macros: MacroInfoRecord = {
     footnote: { signature: "o m", renderInfo: { inParMode: true } },
     footnotemark: { signature: "o" },
     footnotetext: { signature: "o m", renderInfo: { inParMode: true } },
+    caption: {
+        signature: "o m",
+        renderInfo: { inParMode: true, breakAround: true },
+    },
     // Math Commands
     sqrt: { signature: "o m", renderInfo: { inMathMode: true } },
     frac: { signature: "m m", renderInfo: { inMathMode: true } },
     stackrel: { signature: "m m" },
     ensuremath: { signature: "m", renderInfo: { inMathMode: true } },
     // Layout commands
+    abstract: {
+        signature: "m",
+        renderInfo: { breakAround: true, inParMode: true },
+    },
     maketitle: { renderInfo: { breakAround: true } },
     doublespacing: { renderInfo: { breakAround: true } },
     singlespacing: { renderInfo: { breakAround: true } },
-    author: { signature: "m", renderInfo: { breakAround: true } },
+    author: {
+        signature: "m",
+        renderInfo: { breakAround: true, inParMode: true },
+    },
     date: { signature: "m", renderInfo: { breakAround: true } },
-    thanks: { signature: "m", renderInfo: { breakAround: true } },
-    title: { signature: "m", renderInfo: { breakAround: true } },
+    thanks: {
+        signature: "m",
+        renderInfo: { breakAround: true, inParMode: true },
+    },
+    // amsart document class adds an optional argument
+    title: {
+        signature: "o m",
+        renderInfo: { breakAround: true, inParMode: true },
+    },
     pagenumbering: { signature: "m", renderInfo: { breakAround: true } },
     pagestyle: { signature: "m", renderInfo: { breakAround: true } },
     thispagestyle: { signature: "m", renderInfo: { breakAround: true } },
@@ -193,19 +214,40 @@ export const macros: MacroInfoRecord = {
     },
     rule: { signature: "o m m" },
     // Sectioning
-    part: { signature: "s o m", renderInfo: { breakAround: true } },
-    chapter: { signature: "s o m", renderInfo: { breakAround: true } },
-    section: { signature: "s o m", renderInfo: { breakAround: true } },
-    subsection: { signature: "s o m", renderInfo: { breakAround: true } },
-    subsubsection: { signature: "s o m", renderInfo: { breakAround: true } },
-    paragraph: { signature: "s o m", renderInfo: { breakAround: true } },
-    subparagraph: { signature: "s o m", renderInfo: { breakAround: true } },
-    appendix: { renderInfo: { breakAround: true } },
-    frontmatter: { renderInfo: { breakAround: true } },
-    mainmatter: { renderInfo: { breakAround: true } },
-    backmatter: { renderInfo: { breakAround: true } },
+    part: {
+        signature: "s o m",
+        renderInfo: { breakAround: true, inParMode: true },
+    },
+    chapter: {
+        signature: "s o m",
+        renderInfo: { breakAround: true, inParMode: true },
+    },
+    section: {
+        signature: "s o m",
+        renderInfo: { breakAround: true, inParMode: true },
+    },
+    subsection: {
+        signature: "s o m",
+        renderInfo: { breakAround: true, inParMode: true },
+    },
+    subsubsection: {
+        signature: "s o m",
+        renderInfo: { breakAround: true, inParMode: true },
+    },
+    paragraph: {
+        signature: "s o m",
+        renderInfo: { breakAround: true, inParMode: true },
+    },
+    subparagraph: {
+        signature: "s o m",
+        renderInfo: { breakAround: true, inParMode: true },
+    },
+    appendix: { renderInfo: { breakAround: true, inParMode: true } },
+    frontmatter: { renderInfo: { breakAround: true, inParMode: true } },
+    mainmatter: { renderInfo: { breakAround: true, inParMode: true } },
+    backmatter: { renderInfo: { breakAround: true, inParMode: true } },
     // Citing and references
-    bibitem: { signature: "o m" },
+    bibitem: { signature: "o m", renderInfo: { hangingIndent: true } },
     cite: { signature: "o m" },
     // Fonts
     textrm: { signature: "m", renderInfo: { inParMode: true } },
@@ -237,7 +279,6 @@ export const macros: MacroInfoRecord = {
     contentsline: { signature: "m m m", renderInfo: { breakAround: true } },
     bibliography: { signature: "m", renderInfo: { breakAround: true } },
     bibliographystyle: { signature: "m", renderInfo: { breakAround: true } },
-    caption: { signature: "m", renderInfo: { breakAround: true } },
 };
 
 export const environments: EnvInfoRecord = {
@@ -267,7 +308,10 @@ export const environments: EnvInfoRecord = {
     table: { signature: "o" },
     tabular: { signature: "o m", renderInfo: { alignContent: true } },
     "tabular*": { signature: "m o m", renderInfo: { alignContent: true } },
-    thebibliography: { signature: "m" },
+    thebibliography: {
+        signature: "m",
+        processContent: (nodes) => cleanEnumerateBody(nodes, "bibitem"),
+    },
     // Math
     math: { renderInfo: { inMathMode: true } },
 };

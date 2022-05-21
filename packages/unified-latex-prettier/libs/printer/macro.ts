@@ -1,6 +1,6 @@
 import type { Doc } from "prettier";
 import * as PrettierTypes from "./prettier-types";
-import { getNodeInfo, fill, ESCAPE, indent } from "./common";
+import { getNodeInfo, fill, ESCAPE, indent, group } from "./common";
 import { zip } from "../zip";
 import * as Ast from "@unified-latex/unified-latex-types";
 
@@ -39,5 +39,5 @@ export function printMacro(
         return indent(fill([content, ...rawArgs]));
     }
 
-    return [content, ...rawArgs];
+    return group([content, ...rawArgs]);
 }

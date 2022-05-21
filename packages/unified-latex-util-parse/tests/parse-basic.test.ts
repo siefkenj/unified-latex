@@ -127,4 +127,9 @@ describe("unified-latex-util-parse", () => {
         const parsed = parse("\\mathbb X");
         expect(printRaw(parsed)).toEqual("\\mathbb{X}");
     });
+
+    it("Can parse trailing \\", () => {
+        const parsed = parse("\\");
+        expect(printRaw(parsed)).toEqual("\\");
+    });
 });

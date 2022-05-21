@@ -1,4 +1,5 @@
 import * as Hast from "hast";
+import rehypeRaw from "rehype-raw";
 import { h } from "hastscript";
 import { Plugin, unified } from "unified";
 import * as Ast from "@unified-latex/unified-latex-types";
@@ -41,13 +42,17 @@ export const unifiedLatexToHast: Plugin<PluginOptions[], Ast.Root, Hast.Root> =
             );
 
             const toHast = toHastWithLoggerFactory(file.message.bind(file));
-            let converted = toHast(tree);
+            let converted = toHast({ type: "root", content });
             if (!Array.isArray(converted)) {
                 converted = [converted];
             }
             // Wrap everything in a Hast.Root node
-            const ret = h();
+            let ret = h();
             ret.children = converted;
+            // We never want to produce invalid HTML, so we reparse the HTML we have generated.
+            // Ideally, any invalid HTML generation should be caught and fixed where it is, but
+            // we don't want to upset library users with invalid HTML
+            ret = unified().use(rehypeRaw).runSync(ret);
             return ret;
         };
     };

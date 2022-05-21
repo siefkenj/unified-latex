@@ -30,6 +30,7 @@ export const unifiedLatexReplaceStreamingCommands: Plugin<
     const { replacers = {} } = options || {};
     const isReplaceable = match.createMacroMatcher(replacers);
     return (tree) => {
+        // We traverse all groups before we replace nodes in other contexts
         visit(
             tree,
             (group, info) => {

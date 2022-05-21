@@ -24,20 +24,19 @@ describe("unified-latex-prettier", () => {
                     "\\documentclass[foo]{bar} a b c\n" +
                     "\n" +
                     "\\begin{enumerate}  \\item hi there this \\emph{is stuff $\\mathbb 4somegoodstuff$ is really, really great!}\\item and other stuff\\end{enumerate}\n",
-                outStr:
-                    "\\documentclass[foo]{bar}\n" +
-                    "a\n" +
-                    "b\n" +
-                    "c\n" +
-                    "\n" +
-                    "\\begin{enumerate}\n" +
-                    "\t\\item hi there this \\emph{is\n" +
-                    "\t\tstuff $\\mathbb{4}somegoodst\n" +
-                    "\t\tuff$ is really, really\n" +
-                    "\t\tgreat!}\n" +
-                    "\n" +
-                    "\t\\item and other stuff\n" +
-                    "\\end{enumerate}",
+                outStr: `\\documentclass[foo]{bar}
+a
+b
+c
+
+\\begin{enumerate}
+\t\\item hi there this \\emph{is
+\t\tstuff
+\t\t$\\mathbb{4}somegoodstuff$
+\t\tis really, really great!}
+
+\t\\item and other stuff
+\\end{enumerate}`,
             },
             {
                 inStr: "\\begin{xx}\\begin{yy}x\\end{yy}\\end{xx}",
@@ -411,6 +410,19 @@ describe("unified-latex-prettier", () => {
         }
     });
 
+    it.skip("matrix environment with parbreak", () => {
+        const STRINGS = [
+            {
+                inStr: "\\begin{matrix}a\n\nb\\end{matrix}",
+                outStr: "\\begin{matrix}\n\ta\n\n\tb\n\\end{matrix}",
+            },
+        ];
+
+        for (const { inStr, outStr } of STRINGS) {
+            expect(inStr).toFormatAs(outStr, formatter);
+        }
+    });
+
     it("comments at the end of an arguments list get a closing newline", () => {
         const STRINGS = [
             {
@@ -597,6 +609,106 @@ describe("unified-latex-prettier", () => {
                 plugins: [prettierPluginLatex],
             });
             expect(formatted).toEqual(outStr);
+        }
+    });
+
+    it("no excess newlines between comments separated by pars", () => {
+        const STRINGS = [{ inStr: "%\n\n%", outStr: "%\n\n%" }];
+
+        for (const { inStr, outStr } of STRINGS) {
+            expect(inStr).toFormatAs(outStr, formatter);
+        }
+    });
+
+    it("no excess newlines between breakAround arguments separated by pars", () => {
+        const STRINGS = [
+            {
+                inStr: "\\section{x}\n\n\\section{y}",
+                outStr: "\\section{x}\n\n\\section{y}",
+            },
+            {
+                inStr: "\\section{x}\n\n\\begin{y}\\end{y}",
+                outStr: "\\section{x}\n\n\\begin{y}\n\\end{y}",
+            },
+        ];
+
+        for (const { inStr, outStr } of STRINGS) {
+            expect(inStr).toFormatAs(outStr, formatter);
+        }
+    });
+
+    it("preamble macros aren't forced to be broken", () => {
+        const STRINGS = [
+            {
+                inStr: "\\documentclass{a}\\emph{x y}",
+                outStr: "\\documentclass{a}\n\\emph{x y}",
+            },
+        ];
+
+        for (const { inStr, outStr } of STRINGS) {
+            expect(inStr).toFormatAs(outStr, formatter);
+        }
+    });
+    it("macro arguments wrap paragraph-style by default", () => {
+        const STRINGS = [
+            {
+                inStr: "\\clap{foooooo, barooooo, bazooooo, bangoooo}",
+                outStr: "\\clap{foooooo, barooooo,\nbazooooo, bangoooo}",
+            },
+        ];
+
+        for (const { inStr, outStr } of STRINGS) {
+            expect(inStr).toFormatAs(outStr, formatter);
+        }
+    });
+    it("preamble math doesn't have extra hardlines", () => {
+        const STRINGS = [
+            {
+                inStr: "\\documentclass{a}\\[a\\begin{x}y\\end{x}\\]",
+                outStr: "\\documentclass{a}\n\\[\n\ta\n\t\\begin{x}\n\t\ty\n\t\\end{x}\n\\]",
+            },
+        ];
+
+        for (const { inStr, outStr } of STRINGS) {
+            expect(inStr).toFormatAs(outStr, formatter);
+        }
+    });
+
+    it("enumerate with comment only inserts one newline", () => {
+        const STRINGS = [
+            {
+                inStr: "\\begin{enumerate}a%\n\\item\\end{enumerate}",
+                outStr: `\\begin{enumerate}
+\ta%
+
+\t\\item
+\\end{enumerate}`,
+            },
+            {
+                inStr: "\\begin{enumerate}\\item%\n\\item\\end{enumerate}",
+                outStr: `\\begin{enumerate}
+\t\\item %
+
+\t\\item
+\\end{enumerate}`,
+            },
+            {
+                inStr: "\\begin{enumerate} %\n\\end{enumerate}",
+                outStr: `\\begin{enumerate} %
+\\end{enumerate}`,
+            },
+            {
+                inStr: "\\begin{enumerate}\\item%\n\n%\n\\end{enumerate}",
+                outStr: `\\begin{enumerate}
+\t\\item %
+
+\t%
+\\end{enumerate}`,
+            },
+        ];
+
+        for (const { inStr, outStr } of STRINGS) {
+            expect(inStr).toFormatAs(outStr, formatter);
         }
     });
 });

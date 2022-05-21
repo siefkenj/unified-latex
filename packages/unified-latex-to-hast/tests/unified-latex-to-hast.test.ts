@@ -5,7 +5,12 @@ import { processLatexViaUnified } from "@unified-latex/unified-latex";
 import { unifiedLatexToHast } from "../libs/unified-latex-plugin-to-hast";
 
 function normalizeHtml(str: string) {
-    return Prettier.format(str, { parser: "html" });
+    try {
+        return Prettier.format(str, { parser: "html" });
+    } catch {
+        console.warn("Could not format HTML string", str);
+        return str;
+    }
 }
 /* eslint-env jest */
 
@@ -237,6 +242,37 @@ describe("unified-latex-to-hast:unified-latex-to-hast", () => {
         ast = process(`$a\\text{\\#}b$`);
         expect(normalizeHtml(ast)).toEqual(
             normalizeHtml(`<span class="inline-math">a\\text{\\#}b</span>`)
+        );
+    });
+
+    it("Pars are broken at display math", () => {
+        let ast;
+
+        ast = process(`x\n\ny\\[a\\\\b\\]z`);
+        expect(normalizeHtml(ast)).toEqual(
+            normalizeHtml(
+                `<p>x</p><p>y</p><div class="display-math">a\\\\b</div><p>z</p>`
+            )
+        );
+    });
+    it("replaces command inside argument", () => {
+        let ast;
+
+        ast = process(`\\emph{\\bfseries b}`);
+        expect(normalizeHtml(ast)).toEqual(
+            normalizeHtml('<em class="emph"><b class="textbf">b</b></em>')
+        );
+    });
+    it("replaces command inside enumerate", () => {
+        let ast;
+
+        ast = process(`\\begin{enumerate}\\item\\bfseries b\\end{enumerate}`);
+        expect(normalizeHtml(ast)).toEqual(
+            normalizeHtml(`<ol class=\"enumerate\">
+        <li>
+          <p><b class=\"textbf\">b</b></p>
+        </li>
+      </ol>`)
         );
     });
 });

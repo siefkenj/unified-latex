@@ -4,8 +4,12 @@ import {
     splitOnCondition,
     unsplitOnMacro,
 } from "@unified-latex/unified-latex-util-split";
-import { trim, trimEnd, trimStart } from "@unified-latex/unified-latex-util-trim";
-import { firstSignificantNode } from "./utils/first-significant-node";
+import {
+    trim,
+    trimEnd,
+    trimStart,
+} from "@unified-latex/unified-latex-util-trim";
+import { firstSignificantNode } from "./utils/significant-node";
 import { replaceStreamingCommandInArray } from "./utils/replace-streaming-command-in-array";
 import { wrapSignificantContent } from "./utils/wrap-significant-content";
 
@@ -21,7 +25,11 @@ export function replaceStreamingCommandInGroup(
     replacer: (
         content: Ast.Node[],
         streamingCommand: Ast.Macro
-    ) => Ast.Node | Ast.Node[]
+    ) => Ast.Node | Ast.Node[],
+    options?: {
+        macrosThatBreakPars?: string[];
+        environmentsThatDontBreakPars?: string[];
+    }
 ): Ast.Node[] {
     const content = group.content;
     // If the group started with a streaming command, we want to pop
@@ -31,7 +39,8 @@ export function replaceStreamingCommandInGroup(
     let innerProcessed = replaceStreamingCommand(
         content,
         isStreamingCommand,
-        replacer
+        replacer,
+        options
     );
 
     // If the group consisted of just streaming commands (for some reason...)
@@ -54,6 +63,8 @@ export function replaceStreamingCommandInGroup(
  *
  * By default, this command will split at parbreaks (since commands like `\textbf{...} do not accept parbreaks in their
  * contents) and call `replacer` multiple times, once per paragraph.
+ *
+ * Commands are also split at environments and at any macros listed in `macrosThatBreakPars`.
  */
 export function replaceStreamingCommand(
     ast: Ast.Group | Ast.Node[],
@@ -61,13 +72,34 @@ export function replaceStreamingCommand(
     replacer: (
         content: Ast.Node[],
         streamingCommand: Ast.Macro
-    ) => Ast.Node | Ast.Node[]
+    ) => Ast.Node | Ast.Node[],
+    options?: {
+        macrosThatBreakPars?: string[];
+        environmentsThatDontBreakPars?: string[];
+    }
 ): Ast.Node[] {
     if (typeof isStreamingCommand !== "function") {
         throw new Error(
             `'isStreamingCommand' must be a function, not '${typeof isStreamingCommand}'`
         );
     }
+
+    const {
+        macrosThatBreakPars = [
+            "part",
+            "chapter",
+            "section",
+            "subsection",
+            "subsubsection",
+            "vspace",
+            "smallskip",
+            "medskip",
+            "bigskip",
+            "hfill",
+        ],
+        environmentsThatDontBreakPars = [],
+    } = options || {};
+
     let processedContent: Ast.Node[] = [];
     if (match.group(ast)) {
         processedContent = replaceStreamingCommandInGroup(
@@ -97,18 +129,31 @@ export function replaceStreamingCommand(
             nodes.splice(sliceIndex);
         }
 
+        const macroThatBreaks = match.createMacroMatcher(macrosThatBreakPars);
+        const envThatDoesntBreak = match.createEnvironmentMatcher(
+            environmentsThatDontBreakPars
+        );
+        // A "par" is anything that a streaming command shouldn't wrap and breaks the stream.
+        // This includes regular pars, but also environments and special macros like \section
         const isPar = (node: Ast.Node) =>
-            match.parbreak(node) || match.macro(node, "par");
+            match.parbreak(node) ||
+            match.macro(node, "par") ||
+            macroThatBreaks(node) ||
+            (match.environment(node) && !envThatDoesntBreak(node)) ||
+            node.type === "displaymath";
 
         // We split on both a parbreak and a literal `\par`. But we will
         // normalize everything to be parbreaks
         const splitByPar = splitOnCondition(nodes, isPar);
         splitByPar.separators = splitByPar.separators.map((sep) =>
-            match.parbreak(sep) ? sep : { type: "parbreak" }
+            match.macro(sep, "par") ? { type: "parbreak" } : sep
         );
 
         const replacers: Replacer[] = [];
         let segments = splitByPar.segments.map((segment) => {
+            if (segment.length === 0) {
+                return segment;
+            }
             function applyAccumulatedReplacers(nodes: Ast.Node[]): Ast.Node[] {
                 if (replacers.length === 0) {
                     return nodes;

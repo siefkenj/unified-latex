@@ -12,6 +12,7 @@ import {
     group,
     indent,
     softline,
+    fill,
 } from "./common";
 import {
     linebreak,
@@ -32,6 +33,15 @@ export function printArgument(
         options
     );
 
+    // We can return early for empty arguments (this is common for omitted optional arguments)
+    if (
+        node.openMark === "" &&
+        node.closeMark === "" &&
+        node.content.length === 0
+    ) {
+        return [];
+    }
+
     const openMark = node.openMark;
     const closeMark = node.closeMark;
     let content = path.map(print, "content");
@@ -42,7 +52,11 @@ export function printArgument(
         content.push(hardline);
     }
 
-    const rawRet = [openMark, ...content, closeMark];
+    let rawRet: Doc[] = [openMark, fill(content), closeMark];
+    if (renderInfo.inParMode) {
+        // In paragraph node, arguments should flow just like text
+        rawRet = [openMark, ...content, closeMark];
+    }
     if (referenceMap) {
         // Save the raw rendered data in case a renderer higher up
         // wants to unwrap it

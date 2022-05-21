@@ -1,14 +1,14 @@
 {
     "name": "@unified-latex/unified-latex-util-html-like",
-    "version": "1.0.7",
+    "version": "1.0.8",
     "description": "Tools working with HTML-like nodes via unified-latex ASTs",
     "main": "dist/index.js",
     "type": "module",
     "dependencies": {
-        "@unified-latex/unified-latex-builder": "^1.0.7",
+        "@unified-latex/unified-latex-builder": "^1.0.8",
         "@unified-latex/unified-latex-types": "^1.0.7",
-        "@unified-latex/unified-latex-util-match": "^1.0.7",
-        "@unified-latex/unified-latex-util-print-raw": "^1.0.7"
+        "@unified-latex/unified-latex-util-match": "^1.0.8",
+        "@unified-latex/unified-latex-util-print-raw": "^1.0.8"
     },
     "files": [
         "dist/**/*.ts",
@@ -61,7 +61,10 @@
             "latex.pegjs$": "<rootDir>/../../tests/pegjs-preprocessor-latex.js",
             "\\.pegjs$": "<rootDir>/../../tests/pegjs-preprocessor.js",
             "^.+\\.tsx?$": "ts-jest"
-        }
+        },
+        "modulePathIgnorePatterns": [
+            "/dist/"
+        ]
     },
     "private": true
 }

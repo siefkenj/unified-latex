@@ -189,6 +189,7 @@ export const environments: EnvInfoRecord = {
     // amsmath
     "align*": { renderInfo: { inMathMode: true, alignContent: true } },
     align: { renderInfo: { inMathMode: true, alignContent: true } },
+    aligned: { renderInfo: { inMathMode: true, alignContent: true } },
     "alignat*": { renderInfo: { inMathMode: true, alignContent: true } },
     alignat: { renderInfo: { inMathMode: true, alignContent: true } },
     "equation*": { renderInfo: { inMathMode: true } },
@@ -210,4 +211,5 @@ export const environments: EnvInfoRecord = {
     corollary: { signature: "o" },
     remark: { signature: "!o" },
     example: { signature: "!o" },
+    proof: { signature: "o" },
 };

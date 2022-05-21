@@ -49,6 +49,12 @@ export function splitForPars(
             ret.push({ content: [node], wrapInPar: false });
             continue;
         }
+        // Display-math should always break pars
+        if (node.type === "displaymath") {
+            pushBody();
+            ret.push({ content: [node], wrapInPar: false });
+            continue;
+        }
         if (match.parbreak(node) || match.macro(node, "par")) {
             pushBody();
             continue;

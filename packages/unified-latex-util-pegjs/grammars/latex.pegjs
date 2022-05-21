@@ -51,6 +51,7 @@ token "token"
     / begin_group
     / end_group
     / math_shift
+    / s:. { return createNode("string", { content: s }); }
 
 parbreak "parbreak"
     = (

@@ -1,9 +1,10 @@
 import util from "util";
 import { match } from "@unified-latex/unified-latex-util-match";
 import { replaceNode } from "../libs/replace-node";
-import { s } from "@unified-latex/unified-latex-builder";
+import { arg, s, SP } from "@unified-latex/unified-latex-builder";
 import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 import { strToNodes } from "../../test-common";
+import * as Ast from "@unified-latex/unified-latex-types";
 
 /* eslint-env jest */
 
@@ -85,6 +86,28 @@ describe("unified-latex-replace", () => {
         replaceNode(ast, (node) => {
             if (match.macro(node, "raw")) {
                 return insertNode;
+            }
+        });
+
+        expect(ast).toEqual(targetAst);
+    });
+
+    it("can recursively replace in macro args", () => {
+        let targetAst = strToNodes("\\emph{X \\emph{X y}}");
+        let ast = strToNodes("\\emph{\\emph{y}}");
+        replaceNode(ast, (node) => {
+            if (match.macro(node, "emph")) {
+                // Copy the old node but insert an "X " at the front of its contents.
+                // It is important that the contents are copied rather than modified directly.
+                const newNode = { ...node } as Ast.Macro;
+                const oldArg = JSON.parse(
+                    JSON.stringify(node.args![0])
+                ) as Ast.Argument;
+                oldArg.content.unshift(SP);
+                oldArg.content.unshift(s("X"));
+
+                newNode.args = [oldArg];
+                return newNode;
             }
         });
 

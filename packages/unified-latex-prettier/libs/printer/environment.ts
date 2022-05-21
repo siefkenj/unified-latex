@@ -5,7 +5,6 @@ import {
     softline,
     fill,
     indent,
-    concat,
     hardline,
     line,
     ESCAPE,
@@ -60,13 +59,13 @@ export function printEnvironment(
         bodyStartToken.pop();
     }
 
-    return concat([
+    return [
         env.start,
         ...args,
         indent(fill(bodyStartToken.concat(content))),
         hardline,
         env.end,
-    ]);
+    ];
 }
 
 export function printAlignedEnvironment(

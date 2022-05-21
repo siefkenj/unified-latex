@@ -10,7 +10,7 @@ import {
     replaceNodeDuringVisit,
 } from "@unified-latex/unified-latex-util-replace";
 import { replaceStreamingCommand } from "@unified-latex/unified-latex-util-replace";
-import { hasParbreak } from "../../utils/has-parbreak";
+import { hasBreakingNode } from "../../utils/has-parbreak";
 import { trimEnd, trimStart } from "@unified-latex/unified-latex-util-trim";
 
 const REPLACEMENTS: Record<
@@ -24,6 +24,7 @@ const REPLACEMENTS: Record<
     sffamily: singleArgMacroFactory("textsf"),
     slshape: singleArgMacroFactory("textsl"),
     ttfamily: singleArgMacroFactory("texttt"),
+    em: singleArgMacroFactory("emph"),
 };
 
 const isReplaceable = match.createMacroMatcher(REPLACEMENTS);
@@ -39,7 +40,7 @@ function groupStartsWithMacroAndHasNoParbreak(
     }
     // Find the first non-whitespace non-comment node
     let firstNode: Ast.Node | null = firstSignificantNode(group.content);
-    return isReplaceable(firstNode) && !hasParbreak(group.content);
+    return isReplaceable(firstNode) && !hasBreakingNode(group.content);
 }
 
 type PluginOptions =
@@ -134,7 +135,7 @@ export const unifiedLatexLintArgumentFontShapingCommands = lintRule<
         visit(
             tree,
             (nodes) => {
-                if (hasParbreak(nodes)) {
+                if (hasBreakingNode(nodes)) {
                     return;
                 }
 
