@@ -7,6 +7,13 @@ import {
 import * as Ast from "@unified-latex/unified-latex-types";
 import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 
+function formatNodeForError(node: Ast.Node | any): string {
+    try {
+        return printRaw(node);
+    } catch {}
+    return JSON.stringify(node);
+}
+
 type HastNode = Hast.Element | Hast.Text | Hast.Comment;
 
 /**
@@ -71,9 +78,9 @@ export function toHastWithLoggerFactory(
                 return node.content.flatMap(toHast);
             case "environment":
                 logger(
-                    `Unknown environment when converting to HTML "${printRaw(
+                    `Unknown environment when converting to HTML \`${formatNodeForError(
                         node.env
-                    )}"`,
+                    )}\``,
                     node
                 );
                 return h(
@@ -83,9 +90,9 @@ export function toHastWithLoggerFactory(
                 );
             case "macro":
                 logger(
-                    `Unknown macro when converting to HTML "${JSON.stringify(
+                    `Unknown macro when converting to HTML \`${formatNodeForError(
                         node
-                    )}"`,
+                    )}\``,
                     node
                 );
                 return h(

@@ -4,14 +4,22 @@ import {
     unifiedLatexAstComplier,
     unifiedLatexFromString,
 } from "@unified-latex/unified-latex-util-parse";
-import { unifiedLatexStringCompiler } from "@unified-latex/unified-latex-util-to-string";
+import {
+    unifiedLatexStringCompiler,
+    PluginOptions as StringCompilerPluginOptions,
+} from "@unified-latex/unified-latex-util-to-string";
 /**
  * Use `unified()` to a string to an `Ast.Ast` and then pretty-print it.
  */
-export const processLatexViaUnified = () => {
+export const processLatexViaUnified = (
+    options?: StringCompilerPluginOptions
+) => {
     return unified()
         .use(unifiedLatexFromString)
-        .use(unifiedLatexStringCompiler, { pretty: true });
+        .use(
+            unifiedLatexStringCompiler,
+            Object.assign({ pretty: true }, options)
+        );
 };
 
 /**
