@@ -1,6 +1,6 @@
 {
     "name": "@unified-latex/unified-latex-util-replace",
-    "version": "1.0.8",
+    "version": "1.0.9",
     "description": "Functions for modifying a unified-latex AST",
     "main": "dist/index.js",
     "type": "module",
