@@ -24,7 +24,7 @@ import the `.js` file. To explicitly access the commonjs export, import the `.cj
 
 # Constants
 
-| Name                          | Type                                                    | Description                                                                                                                                   |
-| :---------------------------- | :------------------------------------------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------- |
-| `processLatexToAstViaUnified` | `() => Processor<Ast.Root, Ast.Root, Ast.Root, void>`   | Use `unified()` to a string to an `Ast.Ast` and then return it. This function&#xA;will not print/pretty-print the `Ast.Ast` back to a string. |
-| `processLatexViaUnified`      | `() => Processor<Ast.Root, Ast.Root, Ast.Root, string>` | Use `unified()` to a string to an `Ast.Ast` and then pretty-print it.                                                                         |
+| Name                          | Type                                                                                         | Description                                                                                                                                   |
+| :---------------------------- | :------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------- |
+| `processLatexToAstViaUnified` | `() => Processor<Ast.Root, Ast.Root, Ast.Root, void>`                                        | Use `unified()` to a string to an `Ast.Ast` and then return it. This function&#xA;will not print/pretty-print the `Ast.Ast` back to a string. |
+| `processLatexViaUnified`      | `(options?: StringCompilerPluginOptions) => Processor<Ast.Root, Ast.Root, Ast.Root, string>` | Use `unified()` to a string to an `Ast.Ast` and then pretty-print it.                                                                         |
