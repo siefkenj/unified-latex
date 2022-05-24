@@ -35,18 +35,19 @@ Unified complier plugin that prints a LaTeX AST as a string.
 #### options
 
 ```typescript
-{ pretty?: boolean; printWidth?: number; useTabs?: boolean; }
+{ pretty?: boolean; printWidth?: number; useTabs?: boolean; forceNewlineEnding?: boolean; }
 ```
 
 ### Type
 
-`Plugin<{ pretty?: boolean; printWidth?: number; useTabs?: boolean; }[], Ast.Root, string>`
+`Plugin<{ pretty?: boolean; printWidth?: number; useTabs?: boolean; forceNewlineEnding?: boolean; }[], Ast.Root, string>`
 
 ```typescript
 function unifiedLatexStringCompiler(options: {
   pretty?: boolean;
   printWidth?: number;
   useTabs?: boolean;
+  forceNewlineEnding?: boolean;
 }): void;
 ```
 
@@ -67,3 +68,21 @@ function toString(ast: Ast.Ast): string;
 | Param | Type      |
 | :---- | :-------- |
 | ast   | `Ast.Ast` |
+
+# Types
+
+## `PluginOptions`
+
+```typescript
+export type PluginOptions =
+    | {
+          pretty?: boolean;
+          printWidth?: number;
+          useTabs?: boolean;
+          /**
+           * If true, formatted code always ends with a newline character.
+           */
+          forceNewlineEnding?: boolean;
+      }
+    | undefined;
+```

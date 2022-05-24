@@ -31,8 +31,8 @@ import fs from "node:fs/promises";
     // having to change the package type away from "module"
     distPackage.exports = {
         ".": {
-            import: "index.js",
-            require: "index.cjs",
+            import: "./index.js",
+            require: "./index.cjs",
         },
         "./*js": "./*js",
         "./*": {
@@ -52,6 +52,17 @@ import fs from "node:fs/promises";
     const filename = "dist/package.json";
     console.log("writing", filename);
     await fs.writeFile(filename, JSON.stringify(distPackage, null, 4), "utf-8");
+
+    // Copy the readme
+    try {
+        const readme = await fs.readFile("./README.md", "utf-8");
+        const filename = "dist/README.md";
+
+        console.log("writing", filename);
+        await fs.writeFile(filename, readme, "utf-8");
+    } catch (e) {
+        console.log("failed to copy readme");
+    }
 })();
 
 export {};

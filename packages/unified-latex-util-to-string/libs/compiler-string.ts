@@ -4,24 +4,40 @@ import { printLatexAst } from "@unified-latex/unified-latex-prettier";
 import * as Ast from "@unified-latex/unified-latex-types";
 import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 
-type ComplierOptions =
-    | { pretty?: boolean; printWidth?: number; useTabs?: boolean }
+export type PluginOptions =
+    | {
+          pretty?: boolean;
+          printWidth?: number;
+          useTabs?: boolean;
+          /**
+           * If true, formatted code always ends with a newline character.
+           */
+          forceNewlineEnding?: boolean;
+      }
     | undefined;
 
 /**
  * Unified complier plugin that prints a LaTeX AST as a string.
  */
 export const unifiedLatexStringCompiler: Plugin<
-    ComplierOptions[],
+    PluginOptions[],
     Ast.Root,
     string
 > = function unifiedLatexStringCompiler(options) {
+    const {
+        pretty = false,
+        printWidth = 80,
+        useTabs = true,
+        forceNewlineEnding = false,
+    } = options || {};
+
     const prettyPrinter = (ast: Ast.Root) => {
         // We have already processed the AST. All we want prettier to do is the final
         // text formatting. We create a dummy parser and directly return the ast.
         // Note: if prettier is asked to format the empty string, it will not call the parsers, so we pass in "_"
-        return Prettier.format("_", {
-            useTabs: true,
+        let formatted = Prettier.format("_", {
+            useTabs,
+            printWidth,
             parser: "latex-dummy-parser",
             plugins: [
                 {
@@ -49,11 +65,17 @@ export const unifiedLatexStringCompiler: Plugin<
             ],
             ...(options || {}),
         });
+
+        if (forceNewlineEnding && !formatted.endsWith("\n")) {
+            formatted += "\n";
+        }
+
+        return formatted;
     };
 
     Object.assign(this, {
         Compiler: (ast: Ast.Root) => {
-            if (!options?.pretty) {
+            if (!pretty) {
                 return printRaw(ast);
             }
             return prettyPrinter(ast);

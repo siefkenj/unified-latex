@@ -54,13 +54,25 @@
     "dependencies": {
         "@types/color": "^3.0.3",
         "@types/cssesc": "^3.0.0",
+        "@types/text-table": "^0.2.2",
+        "camelcase": "^6.3.0",
+        "chokidar": "^3.5.3",
         "color": "^4.2.3",
         "cssesc": "^3.0.0",
+        "fault": "^2.0.1",
         "hastscript": "^7.0.2",
+        "json5": "^2.2.1",
+        "minimist": "^1.2.6",
         "peggy": "^1.2.0",
+        "rehype-format": "^4.0.1",
+        "text-table": "^0.2.0",
         "unified": "^10.1.2",
+        "unified-engine": "^9.1.0",
         "unified-lint-rule": "^2.1.1",
-        "unist-util-position": "^4.0.3"
+        "unist-util-position": "^4.0.3",
+        "vfile-reporter-json": "^3.1.0",
+        "vfile-reporter-position": "^0.1.7",
+        "vfile-reporter-pretty": "^6.1.0"
     },
     "name": "unified-latex"
 }

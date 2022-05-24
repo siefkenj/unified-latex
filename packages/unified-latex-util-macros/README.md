@@ -68,7 +68,7 @@ contents will be wholesale replaced with its substitution AST.
 ```typescript
 function expandMacros(
   tree: Ast.Ast,
-  macros: { name: string; substitution: Ast.Node[] }[]
+  macros: { name: string; body: Ast.Node[] }[]
 ): void;
 ```
 
@@ -78,6 +78,23 @@ function expandMacros(
 | :----- | :-------------------------------- |
 | tree   | `Ast.Ast`                         |
 | macros | <span color='gray'>Omitted</span> |
+
+## `listNewcommands(tree)`
+
+List all new commands defined in `tree`. This lists commands defined LaTeX-style with
+`\newcommand` etc., and defined with xparse-style `\NewDocumentCommand` etc. It does
+**not** find commands defined via `\def` (it is too difficult to parse the argument
+signature of commands defined with `\def`).
+
+```typescript
+function listNewcommands(tree: Ast.Ast): NewCommandSpec[];
+```
+
+**Parameters**
+
+| Param | Type      |
+| :---- | :-------- |
+| tree  | `Ast.Ast` |
 
 ## `newcommandMacroToName(node)`
 
@@ -139,3 +156,10 @@ function parseMacroSubstitutions(ast: Ast.Node[]): (Ast.Node | HashNumber)[];
 | Param | Type         |
 | :---- | :----------- |
 | ast   | `Ast.Node[]` |
+
+# Constants
+
+| Name                | Type          |
+| :------------------ | :------------ |
+| `LATEX_NEWCOMMAND`  | `Set<string>` |
+| `XPARSE_NEWCOMMAND` | `Set<string>` |

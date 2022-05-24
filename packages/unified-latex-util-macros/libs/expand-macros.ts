@@ -12,12 +12,12 @@ import { createMacroExpander } from "./newcommand";
  */
 export function expandMacros(
     tree: Ast.Ast,
-    macros: { name: string; substitution: Ast.Node[] }[]
+    macros: { name: string; body: Ast.Node[] }[]
 ) {
     const expanderCache = new Map(
         macros.map((spec) => [
             spec.name,
-            createMacroExpander(spec.substitution),
+            createMacroExpander(spec.body),
         ])
     );
     replaceNode(tree, (node) => {

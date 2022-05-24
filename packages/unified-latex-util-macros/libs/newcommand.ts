@@ -9,12 +9,12 @@ import {
     parseMacroSubstitutions,
 } from "./parse-macro-substitutions";
 
-const LATEX_NEWCOMMAND = new Set([
+export const LATEX_NEWCOMMAND = new Set([
     "newcommand",
     "renewcommand",
     "providecommand",
 ]);
-const XPARSE_NEWCOMMAND = new Set([
+export const XPARSE_NEWCOMMAND = new Set([
     "NewDocumentCommand",
     "RenewDocumentCommand",
     "ProvideDocumentCommand",
@@ -73,6 +73,14 @@ export function newcommandMacroToSpec(node: Ast.Macro): string {
 }
 
 /**
+ * Trims whitespace and removes the leading `\` from a macro name.
+ */
+function normalizeCommandName(str:string):string {
+    str = str.trim()
+    return str.startsWith("\\")? str.slice(1) : str
+}
+
+/**
  * Get the name of the macro defined with `\newcommand`/`\renewcommand`/etc..
  */
 export function newcommandMacroToName(node: Ast.Macro): string {
@@ -87,9 +95,7 @@ export function newcommandMacroToName(node: Ast.Macro): string {
             console.warn("Could not find macro name defined in", node);
             return "";
         }
-        if (match.macro(definedName) || match.string(definedName)) {
-            return definedName.content;
-        }
+        return normalizeCommandName(printRaw(node.args[1].content))
     }
     if (XPARSE_NEWCOMMAND.has(node.content)) {
         if (!node.args?.length) {
@@ -100,9 +106,7 @@ export function newcommandMacroToName(node: Ast.Macro): string {
             console.warn("Could not find macro name defined in", node);
             return "";
         }
-        if (match.macro(definedName) || match.string(definedName)) {
-            return definedName.content;
-        }
+        return normalizeCommandName(printRaw(node.args[0].content))
     }
 
     return "";

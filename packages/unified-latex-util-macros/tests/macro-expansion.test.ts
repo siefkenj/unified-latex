@@ -1,6 +1,6 @@
 import util from "util";
 import { m } from "@unified-latex/unified-latex-builder";
-import * as Ast  from "@unified-latex/unified-latex-types";
+import * as Ast from "@unified-latex/unified-latex-types";
 import { attachMacroArgsInArray } from "../../unified-latex-util-arguments/libs/attach-arguments";
 
 import * as latexParser from "@unified-latex/unified-latex-util-parse";
@@ -16,16 +16,16 @@ console.log = (...args) => {
     origLog(...args.map((x) => util.inspect(x, false, 10, true)));
 };
 
-const EMPTY_MACRO = m("")
+const EMPTY_MACRO = m("");
 
 /**
  * Parse a macro of the form `\xxx{A}{B}`. The macro
  * signature is assumed to be "m m".
  */
-function parseXxxMacro(str:string): Ast.Macro {
-    const nodes = latexParser.parse(str).content
-    attachMacroArgsInArray(nodes, {xxx:{signature: "m m"}})
-    return nodes[0] as Ast.Macro
+function parseXxxMacro(str: string): Ast.Macro {
+    const nodes = latexParser.parse(str).content;
+    attachMacroArgsInArray(nodes, { xxx: { signature: "m m" } });
+    return nodes[0] as Ast.Macro;
 }
 
 describe("unified-latex-utils-macros", () => {
@@ -34,9 +34,7 @@ describe("unified-latex-utils-macros", () => {
             String.raw`a b ## c ####2 ##1`
         ).content;
         const expander = createMacroExpander(macroBody);
-        expect(printRaw(expander(EMPTY_MACRO))).toEqual(
-            "a b # c ##2 #1"
-        );
+        expect(printRaw(expander(EMPTY_MACRO))).toEqual("a b # c ##2 #1");
     });
 
     it("Can substitute #1 and #2 for arguments", () => {
@@ -76,13 +74,13 @@ describe("unified-latex-utils-macros", () => {
     });
 
     it("Can expand macro", () => {
-        let substitution = latexParser.parse("$x^{#1}_{#2}$").content;
+        let body = latexParser.parse("$x^{#1}_{#2}$").content;
         let nodes = latexParser.parse(
             "Look at \\xxx{A}{B} and \\xxx{me}{you}"
         ).content;
-        attachMacroArgsInArray(nodes, {xxx:{signature: "m m"}})
+        attachMacroArgsInArray(nodes, { xxx: { signature: "m m" } });
 
-        expandMacros(nodes, [{ name: "xxx", substitution }]);
+        expandMacros(nodes, [{ name: "xxx", body }]);
         expect(printRaw(nodes)).toEqual(
             "Look at $x^{A}_{B}$ and $x^{me}_{you}$"
         );

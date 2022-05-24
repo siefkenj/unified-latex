@@ -61,6 +61,82 @@ type PluginOptions = {
 
 # Functions
 
+## `firstSignificantNode(nodes, parbreaksAreInsignificant)`
+
+Returns the first non-whitespace/non-comment node in `nodes`. If there is no such
+node, `null` is returned.
+
+```typescript
+function firstSignificantNode(
+  nodes: Ast.Node[],
+  parbreaksAreInsignificant: Boolean
+): Ast.Node;
+```
+
+**Parameters**
+
+| Param                     | Type         |
+| :------------------------ | :----------- |
+| nodes                     | `Ast.Node[]` |
+| parbreaksAreInsignificant | `Boolean`    |
+
+## `firstSignificantNodeIndex(nodes, parbreaksAreInsignificant)`
+
+Returns the index of the first non-whitespace/non-comment node in `nodes`. If there is no such
+node, `null` is returned.
+
+```typescript
+function firstSignificantNodeIndex(
+  nodes: Ast.Node[],
+  parbreaksAreInsignificant: Boolean
+): number;
+```
+
+**Parameters**
+
+| Param                     | Type         |
+| :------------------------ | :----------- |
+| nodes                     | `Ast.Node[]` |
+| parbreaksAreInsignificant | `Boolean`    |
+
+## `lastSignificantNode(nodes, parbreaksAreInsignificant)`
+
+Returns the last non-whitespace/non-comment node in `nodes`. If there is no such
+node, `null` is returned.
+
+```typescript
+function lastSignificantNode(
+  nodes: Ast.Node[],
+  parbreaksAreInsignificant: Boolean
+): Ast.Node;
+```
+
+**Parameters**
+
+| Param                     | Type         |
+| :------------------------ | :----------- |
+| nodes                     | `Ast.Node[]` |
+| parbreaksAreInsignificant | `Boolean`    |
+
+## `lastSignificantNodeIndex(nodes, parbreaksAreInsignificant)`
+
+Returns the index of the last non-whitespace/non-comment node in `nodes`. If there is no such
+node, `null` is returned.
+
+```typescript
+function lastSignificantNodeIndex(
+  nodes: Ast.Node[],
+  parbreaksAreInsignificant: Boolean
+): number;
+```
+
+**Parameters**
+
+| Param                     | Type         |
+| :------------------------ | :----------- |
+| nodes                     | `Ast.Node[]` |
+| parbreaksAreInsignificant | `Boolean`    |
+
 ## `replaceNode(ast, visitor)`
 
 Recursively replace nodes in `ast`. The `visitor` function is called on each node. If
@@ -137,7 +213,7 @@ type VisitInfo = {
 };
 ```
 
-## `replaceStreamingCommand(ast, isStreamingCommand, replacer)`
+## `replaceStreamingCommand(ast, isStreamingCommand, replacer, options)`
 
 Given a group or a node array, look for streaming commands (e.g., `\bfseries`) and replace them
 with the specified macro. The "arguments" of the streaming command are passed to `replacer` and the return
@@ -146,6 +222,8 @@ value of `replacer` is inserted into the stream.
 By default, this command will split at parbreaks (since commands like `\textbf{...} do not accept parbreaks in their
 contents) and call `replacer\` multiple times, once per paragraph.
 
+Commands are also split at environments and at any macros listed in `macrosThatBreakPars`.
+
 ```typescript
 function replaceStreamingCommand(
   ast: Ast.Group | Ast.Node[],
@@ -153,7 +231,11 @@ function replaceStreamingCommand(
   replacer: (
     content: Ast.Node[],
     streamingCommand: Ast.Macro
-  ) => Ast.Node | Ast.Node[]
+  ) => Ast.Node | Ast.Node[],
+  options: {
+    macrosThatBreakPars?: string[];
+    environmentsThatDontBreakPars?: string[];
+  }
 ): Ast.Node[];
 ```
 
@@ -164,8 +246,9 @@ function replaceStreamingCommand(
 | ast                | `Ast.Group \| Ast.Node[]`         |
 | isStreamingCommand | <span color='gray'>Omitted</span> |
 | replacer           | <span color='gray'>Omitted</span> |
+| options            | <span color='gray'>Omitted</span> |
 
-## `replaceStreamingCommandInGroup(group, isStreamingCommand, replacer)`
+## `replaceStreamingCommandInGroup(group, isStreamingCommand, replacer, options)`
 
 Process streaming commands in a group. If needed, "escape" the group.
 For example, `{\bfseries xx}` -> `\textbf{xx}`, but `{foo \bfseries xx}` -> `{foo \textbf{xx}}`.
@@ -177,7 +260,11 @@ function replaceStreamingCommandInGroup(
   replacer: (
     content: Ast.Node[],
     streamingCommand: Ast.Macro
-  ) => Ast.Node | Ast.Node[]
+  ) => Ast.Node | Ast.Node[],
+  options: {
+    macrosThatBreakPars?: string[];
+    environmentsThatDontBreakPars?: string[];
+  }
 ): Ast.Node[];
 ```
 
@@ -188,3 +275,4 @@ function replaceStreamingCommandInGroup(
 | group              | `Ast.Group`                       |
 | isStreamingCommand | <span color='gray'>Omitted</span> |
 | replacer           | <span color='gray'>Omitted</span> |
+| options            | <span color='gray'>Omitted</span> |
