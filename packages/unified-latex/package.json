@@ -1,13 +1,13 @@
 {
     "name": "@unified-latex/unified-latex",
-    "version": "1.0.9",
+    "version": "1.0.10",
     "description": "Process LaTeX to an AST or a string",
     "main": "dist/index.js",
     "type": "module",
     "dependencies": {
-        "@unified-latex/unified-latex-types": "^1.0.7",
-        "@unified-latex/unified-latex-util-parse": "^1.0.9",
-        "@unified-latex/unified-latex-util-to-string": "^1.0.9",
+        "@unified-latex/unified-latex-types": "^1.0.10",
+        "@unified-latex/unified-latex-util-parse": "^1.0.10",
+        "@unified-latex/unified-latex-util-to-string": "^1.0.10",
         "unified": "^10.1.2"
     },
     "files": [
