@@ -1,13 +1,13 @@
 {
     "name": "@unified-latex/unified-latex-util-trim",
-    "version": "1.0.10",
+    "version": "1.0.11",
     "description": "Functions for modifying a unified-latex AST",
     "main": "dist/index.js",
     "type": "module",
     "dependencies": {
-        "@unified-latex/unified-latex-types": "^1.0.10",
-        "@unified-latex/unified-latex-util-match": "^1.0.10",
-        "@unified-latex/unified-latex-util-visit": "^1.0.10",
+        "@unified-latex/unified-latex-types": "^1.0.11",
+        "@unified-latex/unified-latex-util-match": "^1.0.11",
+        "@unified-latex/unified-latex-util-visit": "^1.0.11",
         "unified": "^10.1.2"
     },
     "files": [
