@@ -1,0 +1,28 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`unified-latex-cli can expand macro 1`] = `
+"% Expand via> tests/needs-expanding.tex --stats -e \\"\\\\\\\\newcommand{foo}[1]{FOO(#1)}\\" -e '{name: \\"bar\\", body: \\"baz\\"}'
+hi FOO(fooArg) and baz!
+"
+`;
+
+exports[`unified-latex-cli can format document 1`] = `
+"\\\\section*{Really Cool Math}
+Below you'll$x$ $x$ find some {\\\\bf really} cool {\\\\em math} {\\\\em foo}.
+
+\\\\def\\\\foo{FOO}
+
+Check it out!
+\\\\begin{enumerate}
+	\\\\item[(a)] Hi there $sin(x)$
+
+	\\\\item $e^{2}$ is math mode!
+		\\\\[
+			\\\\begin{bmatrix}
+				12  & 3^{e} \\\\\\\\
+				\\\\pi & 0
+			\\\\end{bmatrix}
+		\\\\]
+\\\\end{enumerate}
+"
+`;
