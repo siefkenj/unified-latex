@@ -10,7 +10,10 @@ import { nodeExternalsPlugin } from "esbuild-node-externals";
     );
 
     // We want to externalize modules that are explicitly installed as a dependency
-    const explicitDeps = Object.keys(packageJson.dependencies || {}).concat(["node:stream", "node:process"]);
+    const explicitDeps = Object.keys(packageJson.dependencies || {}).concat([
+        "node:stream",
+        "node:process",
+    ]);
 
     const commonConfig = {
         entryPoints: ["./index.ts"],
@@ -42,6 +45,9 @@ import { nodeExternalsPlugin } from "esbuild-node-externals";
             ...commonConfig,
             outfile: "./dist/unified-latex-cli.mjs",
             format: "esm",
+            banner: {
+                js: "#!/usr/bin/env node\n",
+            },
         })
         .catch(() => process.exit(1));
 })();

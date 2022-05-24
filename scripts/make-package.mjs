@@ -31,8 +31,8 @@ import fs from "node:fs/promises";
     // having to change the package type away from "module"
     distPackage.exports = {
         ".": {
-            import: "index.js",
-            require: "index.cjs",
+            import: "./index.js",
+            require: "./index.cjs",
         },
         "./*js": "./*js",
         "./*": {
