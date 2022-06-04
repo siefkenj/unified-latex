@@ -1,9 +1,11 @@
 # unified-latex
+
 Monorepo for `@unified-latex` packages.
 
 These packages provide a JS/TypeScript interface for creating, manipulating, and printing LaTeX Abstract Syntax Trees (ASTs).
 
 Most of the action lies in the
+
   - `packages/`
 directory, where you'll find plugins for [Unifiedjs](https://unifiedjs.com/) and standalone tools for parsing
 LaTeX to an Abstract Syntax Tree (AST). Though *parsing* LaTeX isn't possible
@@ -25,11 +27,14 @@ You should develop in each project's subfolder in the `packages/` directory.
 These packages are set up as `npm` _workspaces_.
 
 If you have `node.js` and `npm` installed, run
-```
+
+```sh
 npm install
 ```
-in **this (the root)** directory. Then you may (for example)
-```
+
+in **this \(the root\)** directory. Then  \-\- after doing a full build as explained below first! \-\- you may build any particular package \(for example\)
+
+```sh
 cd packages/unified-latex
 npm install
 npm run build
@@ -41,9 +46,11 @@ Building is a two-stage process. `esbuild` is used to create bundled packages in
 compiler is used to create the needed type information. All compiled files are stored in the `dist/` directory of a workspace.
 
 To build code for all workspaces, run
-```
+
+```sh
 npm run build -ws
 ```
+
 from the root directory.
 
 If typescript complains about imports not existing in `rootDir`, it probably means that there is not a TypeScript _reference_ to that
@@ -62,13 +69,13 @@ root directory.
 
 `README.md` files for all workspaces are generated automatically by running
 
-```
+```sh
 npx esr scripts/build-docs.ts
 ```
 
 `package.json` files can be checked for naming consistency by running
 
-```
+```sh
 npx esr scripts/package-consistency.ts
 ```
 
@@ -76,13 +83,13 @@ npx esr scripts/package-consistency.ts
 
 Version management is done with `lerna`. Run
 
-```
+```sh
 npx lerna version
 ```
 
 to update the version of all packages. Run
 
-```
+```sh
 npm run package
 npm run publish
 ```
@@ -100,3 +107,4 @@ in the local playground repository. This will mirror your development version of
 
   * Some code was borrowed from Michael Brade's `LaTeX.js` project https://github.com/michael-brade/LaTeX.js
   * Prettier is a code-formatting library https://prettier.io/
+
