@@ -1,7 +1,7 @@
 import { processLatexToAstViaUnified } from "@unified-latex/unified-latex";
 import { VFile } from "unified-lint-rule/lib";
 import * as Ast from "../unified-latex-types";
-import { trimRenderInfo } from "../unified-latex-util-render-info";
+import { trimRenderInfo as _trimRenderInfo } from "../unified-latex-util-render-info";
 
 declare global {
     namespace jest {
@@ -43,13 +43,16 @@ expect.extend({
 /**
  * Parse a string directly into an `Ast.Node[]` array.
  */
-export function strToNodes(str: string) {
+export function strToNodes(str: string, skipTrimRenderInfo = false) {
     let value: string | undefined;
     let file: VFile | undefined;
     value = str;
     file = processLatexToAstViaUnified().processSync({ value });
-    const root = trimRenderInfo(file.result as any) as Ast.Root;
-    return root.content;
+    if (!skipTrimRenderInfo) {
+        const root = _trimRenderInfo(file.result as any) as Ast.Root;
+        return root.content;
+    }
+    return (file.result as Ast.Root).content;
 }
 
 /**
@@ -59,6 +62,6 @@ export function strToNodes(str: string) {
 export function strToNodesRaw(str: string) {
     let file: VFile | undefined;
     file = processLatexToAstViaUnified().processSync({ value: `{${str}}` });
-    const root = trimRenderInfo(file.result as any) as Ast.Root;
+    const root = _trimRenderInfo(file.result as any) as Ast.Root;
     return (root.content[0] as Ast.Group).content;
 }

@@ -3,7 +3,7 @@ import { match } from "@unified-latex/unified-latex-util-match";
 import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 
 /**
- * Scan a `nodes` looking for the first occurrence of `token`.
+ * Scan `nodes` looking for the first occurrence of `token`.
  * If `options.onlySkipWhitespaceAndComments==true`, then the scan
  * will only skip whitespace/comment nodes.
  */

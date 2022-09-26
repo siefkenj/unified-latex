@@ -53,7 +53,7 @@ function unifiedLatexProcessEnvironments(options: {
 ## `processEnvironment(envNode, envInfo)`
 
 Performs any needed processing on the environment (as specified by `envInfo`)
-include attaching arguments and possibly manipulating the environment's body.
+including attaching arguments and possibly manipulating the environment's body.
 
 ```typescript
 function processEnvironment(

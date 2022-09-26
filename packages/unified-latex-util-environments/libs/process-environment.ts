@@ -8,7 +8,7 @@ import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 
 /**
  * Performs any needed processing on the environment (as specified by `envInfo`)
- * include attaching arguments and possibly manipulating the environment's body.
+ * including attaching arguments and possibly manipulating the environment's body.
  */
 export function processEnvironment(envNode: Ast.Environment, envInfo: EnvInfo) {
     if (envInfo.signature && envNode.args == null) {

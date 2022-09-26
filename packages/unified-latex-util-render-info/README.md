@@ -31,7 +31,7 @@ Removes any `_renderInfo` and `position` tags present in the AST. This
 operation is *destructive*.
 
 ```typescript
-function trimRenderInfo(ast: Ast.Ast): Ast.Ast;
+function trimRenderInfo<T extends Ast.Ast>(ast: Ast.Ast): T;
 ```
 
 **Parameters**
