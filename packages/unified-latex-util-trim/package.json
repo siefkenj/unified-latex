@@ -8,6 +8,7 @@
         "@unified-latex/unified-latex-types": "^1.0.12",
         "@unified-latex/unified-latex-util-match": "^1.0.12",
         "@unified-latex/unified-latex-util-visit": "^1.0.12",
+        "@unified-latex/unified-latex-util-render-info": "^1.0.12",
         "unified": "^10.1.2"
     },
     "files": [

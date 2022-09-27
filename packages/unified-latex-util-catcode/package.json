@@ -7,7 +7,6 @@
     "dependencies": {
         "@unified-latex/unified-latex-types": "^1.0.12",
         "@unified-latex/unified-latex-util-match": "^1.0.12",
-        "@unified-latex/unified-latex-util-macros": "^1.0.12",
         "@unified-latex/unified-latex-util-visit": "^1.0.12"
     },
     "files": [

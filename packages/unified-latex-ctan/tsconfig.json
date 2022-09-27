@@ -16,6 +16,7 @@
         { "path": "../unified-latex-util-render-info" },
         { "path": "../unified-latex-util-split" },
         { "path": "../unified-latex-util-trim" },
+        { "path": "../unified-latex-util-replace" },
         { "path": "../unified-latex-util-visit" }
     ]
 }

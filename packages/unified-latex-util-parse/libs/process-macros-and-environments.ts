@@ -22,7 +22,7 @@ export const unifiedLatexProcessMacrosAndEnvironmentsWithMathReparse: Plugin<
     PluginOptions[],
     Ast.Root,
     Ast.Root
-> = function unifiedLatexAttachMacroArguments(options) {
+> = function unifiedLatexProcessMacrosAndEnvironmentsWithMathReparse(options) {
     const { environments = {}, macros = {} } = options || {};
 
     const mathMacros = Object.fromEntries(

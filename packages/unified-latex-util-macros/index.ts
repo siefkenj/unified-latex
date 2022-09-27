@@ -2,7 +2,6 @@ export * from "./libs/expand-macros";
 export * from "./libs/newcommand";
 export * from "./libs/parse-macro-substitutions";
 export * from "./libs/list-newcommands";
-export * from "./libs/reparse-macro-names";
 
 // NOTE: The docstring comment must be the last item in the index.ts file!
 /**

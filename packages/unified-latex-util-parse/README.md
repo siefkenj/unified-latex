@@ -51,18 +51,23 @@ Parse a string to a LaTeX AST.
 #### options
 
 ```typescript
-{ mode?: "math" | "regular"; macros?: Ast.MacroInfoRecord; environments?: Ast.EnvInfoRecord; }
+{ mode?: "math" | "regular"; macros?: Ast.MacroInfoRecord; environments?: Ast.EnvInfoRecord; flags?: { atLetter?: boolean; expl3?: boolean; autodetectExpl3AndAtLetter?: boolean; }; }
 ```
 
 ### Type
 
-`Plugin<{ mode?: "math" | "regular"; macros?: Ast.MacroInfoRecord; environments?: Ast.EnvInfoRecord; }[], string, Ast.Root>`
+`Plugin<{ mode?: "math" | "regular"; macros?: Ast.MacroInfoRecord; environments?: Ast.EnvInfoRecord; flags?: { atLetter?: boolean; expl3?: boolean; autodetectExpl3AndAtLetter?: boolean; }; }[], string, Ast.Root>`
 
 ```typescript
 function unifiedLatexFromString(options: {
   mode?: "math" | "regular";
   macros?: Ast.MacroInfoRecord;
   environments?: Ast.EnvInfoRecord;
+  flags?: {
+    atLetter?: boolean;
+    expl3?: boolean;
+    autodetectExpl3AndAtLetter?: boolean;
+  };
 }): void;
 ```
 
@@ -165,6 +170,21 @@ export type PluginOptions =
           mode?: "math" | "regular";
           macros?: MacroInfoRecord;
           environments?: EnvInfoRecord;
+          flags?: {
+              /**
+               * Whether to parse macros as if `\makeatletter` is set (i.e., parse `@` as a regular macro character)
+               */
+              atLetter?: boolean;
+              /**
+               * Whether to parse macros as if `\ExplSyntaxOn` is set (i.e., parse `_` and `:` as a regular macro character)
+               */
+              expl3?: boolean;
+              /**
+               * Attempt to autodetect whether there are macros that look like they should contain `@`, `_`, or `:`.
+               * Defaults to `false`.
+               */
+              autodetectExpl3AndAtLetter?: boolean;
+          };
       }
     | undefined;
 ```

@@ -1,4 +1,5 @@
 import { processLatexToAstViaUnified } from "@unified-latex/unified-latex";
+import { parseMinimal } from "@unified-latex/unified-latex-util-parse";
 import { VFile } from "unified-lint-rule/lib";
 import * as Ast from "../unified-latex-types";
 import { trimRenderInfo as _trimRenderInfo } from "../unified-latex-util-render-info";
@@ -64,4 +65,16 @@ export function strToNodesRaw(str: string) {
     file = processLatexToAstViaUnified().processSync({ value: `{${str}}` });
     const root = _trimRenderInfo(file.result as any) as Ast.Root;
     return (root.content[0] as Ast.Group).content;
+}
+
+/**
+ * Parse a string directly into an `Ast.Node[]` array without any fancy reparsing/argument attaching, etc.
+ */
+export function strToNodesMinimal(str: string, skipTrimRenderInfo = false) {
+    const parsed = parseMinimal(str);
+    if (!skipTrimRenderInfo) {
+        const root = _trimRenderInfo(parsed) as Ast.Root;
+        return root.content;
+    }
+    return parsed.content;
 }

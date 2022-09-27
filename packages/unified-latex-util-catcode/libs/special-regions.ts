@@ -3,7 +3,7 @@ import { match } from "@unified-latex/unified-latex-util-match";
 import { findRegionInArray } from "./find-region";
 import { refineRegions, Region, splitByRegions } from "./regions";
 import { SKIP, visit } from "@unified-latex/unified-latex-util-visit";
-import { reparseMacroNames } from "@unified-latex/unified-latex-util-macros";
+import { reparseMacroNames } from "./reparse-macro-names";
 
 const expl3Find = {
     start: match.createMacroMatcher(["ExplSyntaxOn"]),

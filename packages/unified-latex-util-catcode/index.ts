@@ -1,5 +1,6 @@
 export * from "./libs/find-region";
 export * from "./libs/special-regions";
+export * from "./libs/reparse-macro-names";
 
 // NOTE: The docstring comment must be the last item in the index.ts file!
 /**

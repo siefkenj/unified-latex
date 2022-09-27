@@ -64,6 +64,46 @@ function findRegionInArray(
 | start | `(node: Ast.Node) => boolean` |
 | end   | `(node: Ast.Node) => boolean` |
 
+## `hasReparsableMacroNames(tree, allowedTokens)`
+
+Checks whether `tree` has a macro that could be reparsed given the `allowedTokens` but
+do not do any reparsing. This function can be used in auto-detection schemes to determine if
+macro names should actually be reparsed.
+
+```typescript
+function hasReparsableMacroNames(
+  tree: Ast.Ast,
+  allowedTokens: string | Set<string>
+): boolean;
+```
+
+**Parameters**
+
+| Param         | Type                    |
+| :------------ | :---------------------- |
+| tree          | `Ast.Ast`               |
+| allowedTokens | `string \| Set<string>` |
+
+## `hasReparsableMacroNamesInArray(tree, allowedTokens)`
+
+Checks whether the array has a macro that could be reparsed given the `allowedTokens` but
+do not do any reparsing. This function can be used in auto-detection schemes to determine if
+macro names should actually be reparsed.
+
+```typescript
+function hasReparsableMacroNamesInArray(
+  tree: Ast.Node[],
+  allowedTokens: Set<string>
+): boolean;
+```
+
+**Parameters**
+
+| Param         | Type          |
+| :------------ | :------------ |
+| tree          | `Ast.Node[]`  |
+| allowedTokens | `Set<string>` |
+
 ## `reparseExpl3AndAtLetterRegions(tree)`
 
 Find regions between `\ExplSyntaxOn...\ExplSyntaxOff` and `\makeatletter...\makeatother`
@@ -79,3 +119,44 @@ function reparseExpl3AndAtLetterRegions(tree: Ast.Ast): void;
 | Param | Type      |
 | :---- | :-------- |
 | tree  | `Ast.Ast` |
+
+## `reparseMacroNames(tree, allowedTokens)`
+
+Reparses all macro names so that they may optionally include characters listed in `allowedTokens`.
+This is used, for example, when parsing expl3 syntax which allows `_` to be used in a macro name (even though
+`_` is normally stops the parsing for a macro name). Thus, a macro `\foo_bar:Nn` would be parsed as having
+the name `foo_bar:Nn` rather than as `foo` followed by the strings `_`, `bar`, `:`, `Nn`.
+
+```typescript
+function reparseMacroNames(
+  tree: Ast.Ast,
+  allowedTokens: string | Set<string>
+): void;
+```
+
+**Parameters**
+
+| Param         | Type                    |
+| :------------ | :---------------------- |
+| tree          | `Ast.Ast`               |
+| allowedTokens | `string \| Set<string>` |
+
+## `reparseMacroNamesInArray(tree, allowedTokens)`
+
+Reparses all macro names in the array so that they may optionally include characters listed in `allowedTokens`.
+This is used, for example, when parsing expl3 syntax which allows `_` to be used in a macro name (even though
+`_` is normally stops the parsing for a macro name).
+
+```typescript
+function reparseMacroNamesInArray(
+  tree: Ast.Node[],
+  allowedTokens: Set<string>
+): void;
+```
+
+**Parameters**
+
+| Param         | Type          |
+| :------------ | :------------ |
+| tree          | `Ast.Node[]`  |
+| allowedTokens | `Set<string>` |
