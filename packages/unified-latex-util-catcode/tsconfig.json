@@ -4,18 +4,12 @@
         "outDir": "./dist/",
         "rootDir": "."
     },
-    "include": ["./**/*.ts", "./package/**/*.ts"],
+    "include": ["./**/*.ts"],
     "references": [
         { "path": "../unified-latex-types" },
-        { "path": "../unified-latex-builder" },
-        { "path": "../unified-latex-util-arguments" },
-        { "path": "../unified-latex-util-comments" },
         { "path": "../unified-latex-util-match" },
         { "path": "../unified-latex-util-pegjs" },
         { "path": "../unified-latex-util-print-raw" },
-        { "path": "../unified-latex-util-render-info" },
-        { "path": "../unified-latex-util-split" },
-        { "path": "../unified-latex-util-trim" },
         { "path": "../unified-latex-util-replace" },
         { "path": "../unified-latex-util-visit" }
     ]

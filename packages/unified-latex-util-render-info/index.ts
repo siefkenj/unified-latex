@@ -22,7 +22,7 @@ export function updateRenderInfo(
  * Removes any `_renderInfo` and `position` tags present in the AST. This
  * operation is _destructive_.
  */
-export function trimRenderInfo(ast: Ast.Ast) {
+export function trimRenderInfo<T extends Ast.Ast>(ast: T) {
     visit(ast, (node) => {
         delete node._renderInfo;
         delete node.position;

@@ -42,7 +42,7 @@ function prefixMatch(nodes: Ast.Node[], prefixes: string | string[] | { dump(spa
 
 ## `scan(nodes, token, options)`
 
-Scan a `nodes` looking for the first occurrence of `token`.
+Scan `nodes` looking for the first occurrence of `token`.
 If `options.onlySkipWhitespaceAndComments==true`, then the scan
 will only skip whitespace/comment nodes.
 
