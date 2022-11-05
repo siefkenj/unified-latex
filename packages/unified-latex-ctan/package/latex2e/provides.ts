@@ -14,11 +14,17 @@ export const macros: MacroInfoRecord = {
     // List can be found in latex2e.pdf "An unofficial reference manual"
     newcommand: {
         signature: "s +m o +o +m",
-        renderInfo: { breakAround: true },
+        renderInfo: {
+            breakAround: true,
+            namedArguments: ["starred", "name", "numArgs", "default", "body"],
+        },
     },
     renewcommand: {
         signature: "s +m o +o +m",
-        renderInfo: { breakAround: true },
+        renderInfo: {
+            breakAround: true,
+            namedArguments: ["starred", "name", "numArgs", "default", "body"],
+        },
     },
     providecommand: {
         signature: "s +m o +o +m",
@@ -154,7 +160,10 @@ export const macros: MacroInfoRecord = {
         signature: "o m",
         renderInfo: { breakAround: true, pgfkeysArgs: true },
     },
-    item: { signature: "o", renderInfo: { hangingIndent: true } },
+    item: {
+        signature: "o",
+        renderInfo: { hangingIndent: true, namedArguments: ["label"] },
+    },
     value: { signature: "m" },
     centering: { renderInfo: { breakAround: true } },
     input: { signature: "m", renderInfo: { breakAround: true } },
@@ -189,7 +198,7 @@ export const macros: MacroInfoRecord = {
         signature: "m",
         renderInfo: { breakAround: true, inParMode: true },
     },
-    date: { signature: "m", renderInfo: { breakAround: true } },
+    date: { signature: "o m", renderInfo: { breakAround: true } },
     thanks: {
         signature: "m",
         renderInfo: { breakAround: true, inParMode: true },
@@ -216,31 +225,59 @@ export const macros: MacroInfoRecord = {
     // Sectioning
     part: {
         signature: "s o m",
-        renderInfo: { breakAround: true, inParMode: true },
+        renderInfo: {
+            breakAround: true,
+            inParMode: true,
+            namedArguments: ["starred", "tocTitle", "title"],
+        },
     },
     chapter: {
         signature: "s o m",
-        renderInfo: { breakAround: true, inParMode: true },
+        renderInfo: {
+            breakAround: true,
+            inParMode: true,
+            namedArguments: ["starred", "tocTitle", "title"],
+        },
     },
     section: {
         signature: "s o m",
-        renderInfo: { breakAround: true, inParMode: true },
+        renderInfo: {
+            breakAround: true,
+            inParMode: true,
+            namedArguments: ["starred", "tocTitle", "title"],
+        },
     },
     subsection: {
         signature: "s o m",
-        renderInfo: { breakAround: true, inParMode: true },
+        renderInfo: {
+            breakAround: true,
+            inParMode: true,
+            namedArguments: ["starred", "tocTitle", "title"],
+        },
     },
     subsubsection: {
         signature: "s o m",
-        renderInfo: { breakAround: true, inParMode: true },
+        renderInfo: {
+            breakAround: true,
+            inParMode: true,
+            namedArguments: ["starred", "tocTitle", "title"],
+        },
     },
     paragraph: {
         signature: "s o m",
-        renderInfo: { breakAround: true, inParMode: true },
+        renderInfo: {
+            breakAround: true,
+            inParMode: true,
+            namedArguments: ["starred", "tocTitle", "title"],
+        },
     },
     subparagraph: {
         signature: "s o m",
-        renderInfo: { breakAround: true, inParMode: true },
+        renderInfo: {
+            breakAround: true,
+            inParMode: true,
+            namedArguments: ["starred", "tocTitle", "title"],
+        },
     },
     appendix: { renderInfo: { breakAround: true, inParMode: true } },
     frontmatter: { renderInfo: { breakAround: true, inParMode: true } },

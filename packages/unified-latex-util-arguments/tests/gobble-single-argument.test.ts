@@ -394,4 +394,54 @@ describe("unified-latex-util-arguments", () => {
             }
         );
     });
+    it("gobbleSingleArgument gobbles optional token", () => {
+        let ast: Ast.Node[];
+
+        // optional argument
+        ast = [
+            { type: "whitespace" },
+            { type: "string", content: "+" },
+            { type: "string", content: "a" },
+            { type: "group", content: [{ type: "string", content: "b" }] },
+            { type: "string", content: "c" },
+            { type: "string", content: ")" },
+            { type: "string", content: "y" },
+        ];
+        expect(gobbleSingleArgument(ast, parseArgspec("t+")[0])).toMatchObject({
+            argument: {
+                type: "argument",
+                content: [{ type: "string", content: "+" }],
+                openMark: "",
+                closeMark: "",
+            },
+            nodesRemoved: 2,
+        });
+        expect(gobbleSingleArgument(ast, parseArgspec("!t+")[0])).toMatchObject(
+            {
+                argument: null,
+                nodesRemoved: 0,
+            }
+        );
+    });
+    it("gobbleSingleArgument gobbles optional group (i.e., optional argument in '{...}' braces)", () => {
+        let ast: Ast.Node[];
+
+        // optional argument
+        ast = [
+            { type: "whitespace" },
+            { type: "group", content: [{ type: "string", content: "b" }] },
+            { type: "string", content: "c" },
+            { type: "string", content: ")" },
+            { type: "string", content: "y" },
+        ];
+        expect(gobbleSingleArgument(ast, parseArgspec("d{}")[0])).toMatchObject({
+            argument: {
+                type: "argument",
+                content: [{ type: "string", content: "b" }],
+                openMark: "{",
+                closeMark: "}",
+            },
+            nodesRemoved: 2,
+        });
+    });
 });

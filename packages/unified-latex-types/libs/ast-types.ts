@@ -1,3 +1,5 @@
+import { EnvInfo, MacroInfo } from "./info-specs";
+
 export type GenericAst = GenericNode | GenericNode[];
 
 export interface GenericNode {
@@ -9,7 +11,8 @@ export interface GenericNode {
 // Abstract nodes
 interface BaseNode {
     type: string;
-    _renderInfo?: any;
+    _renderInfo?: (MacroInfo["renderInfo"] | EnvInfo["renderInfo"]) &
+        Record<string, unknown>;
     position?: {
         start: { offset: number; line: number; column: number };
         end: { offset: number; line: number; column: number };

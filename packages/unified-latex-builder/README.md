@@ -31,7 +31,15 @@ the signature of the open/close marks that each argument uses. For example
 
     arg("a", { braces: "[]" });
 
-will result in arguments `[a]`. Valid braces are `*`, `[`, `{`, and `(`.
+will result in arguments `[a]`. Valid braces are `*`, `[`, `{`, `<`, and `(`.
+
+`null` may be passed as the value of an empty optional argument. If `null` is passed,
+the `openBrace` and `closeBrace` of the argument will be set to empty strings and the
+contents will be set to an empty array. For example,
+
+    args([null, "b"], { braces: "[]{}" });
+
+will produce the same structure as if the the first "optional argument" were omitted in regular parsing.
 
 ```typescript
 function arg(
@@ -64,7 +72,15 @@ the signature of the open/close marks that each argument uses. For example
 
     args(["a", "b"], { braces: "[]{}" });
 
-will result in arguments `[a]{b}`. Valid braces are `*`, `[`, `{`, and `(`.
+will result in arguments `[a]{b}`. Valid braces are `*`, `[`, `{`, `(`, and `<`.
+
+`null` may be passed as the value of an empty optional argument. If `null` is passed,
+the `openBrace` and `closeBrace` of the argument will be set to empty strings and the
+contents will be set to an empty array. For example,
+
+    args([null, "b"], { braces: "[]{}" });
+
+will produce the same structure as if the the first "optional argument" were omitted in regular parsing.
 
 ```typescript
 function args(

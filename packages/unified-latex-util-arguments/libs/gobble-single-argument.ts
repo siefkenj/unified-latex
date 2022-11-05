@@ -51,7 +51,9 @@ export function gobbleSingleArgument(
     // check the open and closing symbols to see if we allow for
     // groups to be accepted as arguments
     const acceptGroup =
-        argSpec.type === "mandatory" && openMark === "{" && closeMark === "}";
+        (argSpec.type === "mandatory" || argSpec.type === "optional") &&
+        openMark === "{" &&
+        closeMark === "}";
 
     // Find the position of the open brace and the closing brace.
     // The position(s) are null if the brace isn't found.
@@ -91,6 +93,9 @@ export function gobbleSingleArgument(
     }
 
     switch (argSpec.type) {
+        // Matching a mandatory argument and an optional argument is the
+        // same for our purposes because we're not going to fail to parse because of a missing argument.
+        case "optional":
         case "mandatory":
             if (acceptGroup) {
                 let content: Ast.Node[] = [currNode];
@@ -105,10 +110,6 @@ export function gobbleSingleArgument(
                 currPos++;
                 break;
             }
-        // The fallthrough here is on purpose! Matching a mandatory
-        // argument and an optional argument is the same for our purposes.
-        // We're not going to fail to parse because of a missing argument.
-        case "optional":
             // We have already gobbled whitespace, so at this point, `currNode`
             // is either an openMark or we don't have an optional argument.
             if (match.string(currNode, openMark)) {
@@ -125,7 +126,13 @@ export function gobbleSingleArgument(
             }
             break;
         case "optionalStar":
-            if (match.string(currNode, "*")) {
+        case "optionalToken":
+            if (
+                match.string(
+                    currNode,
+                    argSpec.type === "optionalStar" ? "*" : argSpec.token
+                )
+            ) {
                 argument = arg([currNode], { openMark: "", closeMark: "" });
                 currPos++;
                 break;

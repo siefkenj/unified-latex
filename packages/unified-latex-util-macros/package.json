@@ -6,6 +6,7 @@
     "type": "module",
     "dependencies": {
         "@unified-latex/unified-latex-types": "^1.0.12",
+        "@unified-latex/unified-latex-util-arguments": "^1.0.12",
         "@unified-latex/unified-latex-util-match": "^1.0.12",
         "@unified-latex/unified-latex-util-pegjs": "^1.0.12",
         "@unified-latex/unified-latex-util-print-raw": "^1.0.12",

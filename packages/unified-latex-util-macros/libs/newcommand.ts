@@ -1,9 +1,9 @@
 import { structuredClone } from "@unified-latex/structured-clone";
 import * as Ast from "@unified-latex/unified-latex-types";
-import { match } from "@unified-latex/unified-latex-util-match";
 import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 import { replaceNode } from "@unified-latex/unified-latex-util-replace";
 import { visit } from "@unified-latex/unified-latex-util-visit";
+import { getNamedArgsContent } from "@unified-latex/unified-latex-util-arguments";
 import {
     HashNumber,
     parseMacroSubstitutions,
@@ -25,6 +25,44 @@ export const XPARSE_NEWCOMMAND = new Set([
     "DeclareExpandableDocumentCommand",
 ]);
 
+const NEWCOMMAND_ARGUMENTS_REG = [
+    "starred",
+    "name",
+    "numArgs",
+    "default",
+    "body",
+] as const;
+const NEWCOMMAND_ARGUMENTS_BEAMER = [
+    "starred",
+    null,
+    "name",
+    "numArgs",
+    "default",
+    "body",
+] as const;
+type NewcommandNamedArgs = Record<
+    typeof NEWCOMMAND_ARGUMENTS_REG[number],
+    Ast.Node[] | null
+>;
+
+/**
+ * Get the named arguments for a `\newcommand` macro.
+ */
+function getNewcommandNamedArgs(node: Ast.Macro): NewcommandNamedArgs {
+    if (!Array.isArray(node.args)) {
+        throw new Error(
+            `Found a '\\newcommand' macro without any arguments "${JSON.stringify(
+                node
+            )}"`
+        );
+    }
+    const argNames =
+        node.args.length === NEWCOMMAND_ARGUMENTS_BEAMER.length
+            ? NEWCOMMAND_ARGUMENTS_BEAMER
+            : NEWCOMMAND_ARGUMENTS_REG;
+    return getNamedArgsContent(node, argNames) as NewcommandNamedArgs;
+}
+
 /**
  * Compute the xparse argument signature of the `\newcommand`/`\renewcommand`/etc. macro.
  */
@@ -41,14 +79,15 @@ export function newcommandMacroToSpec(node: Ast.Macro): string {
             );
             return "";
         }
-        if (match.blankArgument(node.args[2])) {
+        const namedArgs = getNewcommandNamedArgs(node);
+        if (namedArgs.numArgs == null) {
             return "";
         }
-        let numArgsForSig = +printRaw(node.args[2].content);
+        let numArgsForSig = +printRaw(namedArgs.numArgs);
         let sigOptionalArg: string[] = [];
-        // `node.args[3]` determines the default value of the initial optional argument.
+        // `namedArgs.default` determines the default value of the initial optional argument.
         // If it is present, we need to change the signature.
-        if (!match.blankArgument(node.args[3])) {
+        if (namedArgs.default != null) {
             numArgsForSig--;
             sigOptionalArg = ["o"];
         }
@@ -75,9 +114,9 @@ export function newcommandMacroToSpec(node: Ast.Macro): string {
 /**
  * Trims whitespace and removes the leading `\` from a macro name.
  */
-function normalizeCommandName(str:string):string {
-    str = str.trim()
-    return str.startsWith("\\")? str.slice(1) : str
+function normalizeCommandName(str: string): string {
+    str = str.trim();
+    return str.startsWith("\\") ? str.slice(1) : str;
 }
 
 /**
@@ -90,12 +129,13 @@ export function newcommandMacroToName(node: Ast.Macro): string {
         if (!node.args?.length) {
             return "";
         }
-        const definedName = node.args[1]?.content[0];
+        const namedArgs = getNewcommandNamedArgs(node);
+        const definedName = namedArgs.name;
         if (!definedName) {
             console.warn("Could not find macro name defined in", node);
             return "";
         }
-        return normalizeCommandName(printRaw(node.args[1].content))
+        return normalizeCommandName(printRaw(definedName));
     }
     if (XPARSE_NEWCOMMAND.has(node.content)) {
         if (!node.args?.length) {
@@ -106,7 +146,7 @@ export function newcommandMacroToName(node: Ast.Macro): string {
             console.warn("Could not find macro name defined in", node);
             return "";
         }
-        return normalizeCommandName(printRaw(node.args[0].content))
+        return normalizeCommandName(printRaw(node.args[0].content));
     }
 
     return "";
@@ -123,12 +163,13 @@ export function newcommandMacroToSubstitutionAst(node: Ast.Macro): Ast.Node[] {
         if (!node.args?.length) {
             return [];
         }
-        const substitution = node.args[node.args.length - 1];
+        const namedArgs = getNewcommandNamedArgs(node);
+        const substitution = namedArgs.body;
         if (!substitution) {
             console.warn("Could not find macro name defined in", node);
             return [];
         }
-        return substitution.content;
+        return substitution;
     }
     if (XPARSE_NEWCOMMAND.has(node.content)) {
         if (!node.args?.length) {

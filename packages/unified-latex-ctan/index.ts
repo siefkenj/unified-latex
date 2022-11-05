@@ -10,6 +10,7 @@ import * as systeme from "./package/systeme";
 import * as tikz from "./package/tikz";
 import * as xcolor from "./package/xcolor";
 import * as xparse from "./package/xparse";
+import * as beamer from "./package/beamer";
 
 /**
  * Info about the macros for available ctan packages. `latex2e` contains
@@ -28,6 +29,7 @@ export const macroInfo = {
     tikz: tikz.macros,
     xcolor: xcolor.macros,
     xparse: xparse.macros,
+    beamer: beamer.macros,
 };
 
 /**
@@ -47,6 +49,7 @@ export const environmentInfo = {
     tikz: tikz.environments,
     xcolor: xcolor.environments,
     xparse: xparse.environments,
+    beamer: beamer.environments,
 };
 
 // NOTE: The docstring comment must be the last item in the index.ts file!
@@ -62,4 +65,17 @@ export const environmentInfo = {
  *
  * If you want information about special functions/macros from particular CTAN packages, or
  * you need to parse special environments.
+ *
+ * ## Notes
+ *
+ * By default all macros/environments that are exported get processed. If multiple packages
+ * export a macro with the same name, then the later-exported one takes precedence. If two packages
+ * export a macro/environment of the same name but with conflicting argument signatures, this can
+ * cause issues when another unified-latex package processes arguments positionally. For example,
+ * by default `\textbf` takes one argument, but the beamer version of `\textbf` takes two arguments.
+ * During HTML conversion, if arguments are referenced positionally, this may cause previously-working
+ * code to fail with when beamer macro signatures are used. A workaround is provided: `_renderInfo.namedArguments`.
+ * If `_renderInfo.namedArguments` is specified on both the original macro/environment definition
+ * **and** the conflicting one, other unified-latex commands can reference arguments by name instead
+ * of by position.
  */
