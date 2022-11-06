@@ -6,10 +6,43 @@ import {
 import { htmlLike } from "@unified-latex/unified-latex-util-html-like";
 import * as Ast from "@unified-latex/unified-latex-types";
 import { parseAlignEnvironment } from "@unified-latex/unified-latex-util-align";
-import { getArgsContent } from "@unified-latex/unified-latex-util-arguments";
+import {
+    getArgsContent,
+    getNamedArgsContent,
+} from "@unified-latex/unified-latex-util-arguments";
 import { match } from "@unified-latex/unified-latex-util-match";
 import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 import { wrapPars } from "../wrap-pars";
+
+const ITEM_ARG_NAMES_REG = ["label"] as const;
+const ITEM_ARG_NAMES_BEAMER = [null, "label", null] as const;
+type ItemArgs = Record<typeof ITEM_ARG_NAMES_REG[number], Ast.Node[] | null> & {
+    body: Ast.Node[];
+};
+
+/**
+ * Extract the arguments to an `\item` macro.
+ */
+function getItemArgs(node: Ast.Macro): ItemArgs {
+    if (!Array.isArray(node.args)) {
+        throw new Error(
+            `Cannot find \\item macros arguments; you must attach the \\item body to the macro before calling this function ${JSON.stringify(
+                node
+            )}`
+        );
+    }
+    // The "body" has been added as a last argument to the `\item` node. We
+    // ignore this argument when comparing argument signatures.
+    const argNames =
+        node.args.length - 1 === ITEM_ARG_NAMES_BEAMER.length
+            ? ITEM_ARG_NAMES_BEAMER
+            : ITEM_ARG_NAMES_REG;
+    const ret = Object.assign(
+        { body: node.args[node.args.length - 1].content },
+        getNamedArgsContent(node, argNames)
+    );
+    return ret as ItemArgs;
+}
 
 function enumerateFactory(parentTag = "ol", className = "enumerate") {
     return function enumerateToHtml(env: Ast.Environment) {
@@ -25,11 +58,10 @@ function enumerateFactory(parentTag = "ol", className = "enumerate") {
                 {};
             // Figure out if there any manually-specified item labels. If there are,
             // we need to specify a custom list-style-type.
-            // We test the open mark to see if an optional argument was actually supplied
-            // (rather than testing if the arg's contents have length) because
-            // typing `\item[]` is a common way to make a list item without a marker/bullet
-            if (node.args[0].openMark === "[") {
-                const formattedLabel = cssesc(printRaw(node.args[0].content));
+            // We test the open mark to see if an optional argument was actually supplied.
+            const namedArgs = getItemArgs(node);
+            if (namedArgs.label != null) {
+                const formattedLabel = cssesc(printRaw(namedArgs.label || []));
                 attributes.style = {
                     // Note the space after `formattedLabel`. That is on purpose!
                     "list-style-type": formattedLabel
@@ -38,7 +70,7 @@ function enumerateFactory(parentTag = "ol", className = "enumerate") {
                 };
             }
 
-            const body = node.args[1].content;
+            const body = namedArgs.body;
             return htmlLike({
                 tag: "li",
                 content: wrapPars(body),

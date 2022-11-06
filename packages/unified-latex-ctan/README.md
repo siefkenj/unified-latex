@@ -16,6 +16,19 @@ this is technically not a CTAN "package".
 If you want information about special functions/macros from particular CTAN packages, or
 you need to parse special environments.
 
+## Notes
+
+By default all macros/environments that are exported get processed. If multiple packages
+export a macro with the same name, then the later-exported one takes precedence. If two packages
+export a macro/environment of the same name but with conflicting argument signatures, this can
+cause issues when another unified-latex package processes arguments positionally. For example,
+by default `\textbf` takes one argument, but the beamer version of `\textbf` takes two arguments.
+During HTML conversion, if arguments are referenced positionally, this may cause previously-working
+code to fail with when beamer macro signatures are used. A workaround is provided: `_renderInfo.namedArguments`.
+If `_renderInfo.namedArguments` is specified on both the original macro/environment definition
+**and** the conflicting one, other unified-latex commands can reference arguments by name instead
+of by position.
+
 ## Install
 
 ```bash
@@ -27,7 +40,7 @@ import the `.js` file. To explicitly access the commonjs export, import the `.cj
 
 # Constants
 
-| Name              | Type                                                                                                                                                                             | Description                                                                                                          |
-| :---------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------- |
-| `environmentInfo` | `{ cleveref: EnvInfoRecord; exam: EnvInfoRecord; geometry: EnvInfoRecord; hyperref: EnvInfoRecord; latex2e: EnvInfoRecord; ... 6 more ...; xparse: EnvInfoRecord; }`             | Info about the environments for available ctan packages. `latex2e` contains&#xA;the standard environments for LaTeX. |
-| `macroInfo`       | `{ cleveref: MacroInfoRecord; exam: MacroInfoRecord; geometry: MacroInfoRecord; hyperref: MacroInfoRecord; latex2e: MacroInfoRecord; ... 6 more ...; xparse: MacroInfoRecord; }` | Info about the macros for available ctan packages. `latex2e` contains&#xA;the standard macros for LaTeX.             |
+| Name              | Type                                                                                                                                                                               | Description                                                                                                          |
+| :---------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------- |
+| `environmentInfo` | `{ cleveref: EnvInfoRecord; exam: EnvInfoRecord; geometry: EnvInfoRecord; hyperref: EnvInfoRecord; latex2e: EnvInfoRecord; ... 8 more ...; multicol: EnvInfoRecord; }`             | Info about the environments for available ctan packages. `latex2e` contains&#xA;the standard environments for LaTeX. |
+| `macroInfo`       | `{ cleveref: MacroInfoRecord; exam: MacroInfoRecord; geometry: MacroInfoRecord; hyperref: MacroInfoRecord; latex2e: MacroInfoRecord; ... 8 more ...; multicol: MacroInfoRecord; }` | Info about the macros for available ctan packages. `latex2e` contains&#xA;the standard macros for LaTeX.             |

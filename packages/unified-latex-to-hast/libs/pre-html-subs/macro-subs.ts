@@ -19,7 +19,11 @@ function factory(
                 )}`
             );
         }
-        const content = getArgsContent(macro)[0] || [];
+        // Assume the meaningful argument is the last argument. This
+        // ensures that we can convert for default packages as well as
+        // packages like beamer, which may add optional arguments.
+        const args = getArgsContent(macro);
+        const content = args[args.length - 1] || [];
         return htmlLike({ tag, content, attributes });
     };
 }
@@ -33,7 +37,7 @@ function createHeading(tag: string) {
             : {};
         return htmlLike({
             tag,
-            content: args[2] || [],
+            content: args[args.length - 1] || [],
             attributes,
         });
     };
@@ -156,5 +160,5 @@ export const macroReplacements: Record<string, (node: Ast.Macro) => Ast.Node> =
                 content: args[3] || [],
             });
         },
-        noindent: (node) => ({ type: "string", content: "" }),
+        noindent: () => ({ type: "string", content: "" }),
     };

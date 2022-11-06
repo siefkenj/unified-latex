@@ -72,3 +72,23 @@ function getArgsContent(node: Ast.Macro | Ast.Environment): Ast.Node[][];
 | Param | Type                           |
 | :---- | :----------------------------- |
 | node  | `Ast.Macro \| Ast.Environment` |
+
+## `getNamedArgsContent(node, namedArgumentsFallback)`
+
+Returns the content of `args` for a macro or environment as an object whose keys are the "names"
+of each argument. These names of the arguments must be specified in the `_renderInfo` prop. If `_renderInfo`
+does not contain a `namedArguments` array, then an empty object will be returned.
+
+```typescript
+function getNamedArgsContent(
+  node: Ast.Macro | Ast.Environment,
+  namedArgumentsFallback: readonly string[]
+): Record<string, Ast.Node[]>;
+```
+
+**Parameters**
+
+| Param                  | Type                           |
+| :--------------------- | :----------------------------- |
+| node                   | `Ast.Macro \| Ast.Environment` |
+| namedArgumentsFallback | `readonly string[]`            |

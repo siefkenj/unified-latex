@@ -14,10 +14,9 @@ export function replaceNodeDuringVisit(
     if (!parent) {
         throw new Error(`Cannot replace node: parent not found`);
     }
-    const container = parent[info.key as keyof typeof parent] as (
-        | Ast.Node
-        | Ast.Argument
-    )[];
+    const container = parent[info.key as keyof typeof parent] as
+        | (Ast.Node | Ast.Argument)[]
+        | undefined;
     if (!Array.isArray(container)) {
         throw new Error(`Cannot replace node: containing array not found`);
     }

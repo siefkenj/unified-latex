@@ -21,6 +21,17 @@ export type EnvInfo = {
          * @type {boolean}
          */
         pgfkeysArgs?: boolean;
+        /**
+         * A list of names to be given to each argument when processing. This list should
+         * be the same length as the number of arguments. `null` can appear any number of times
+         * for "un-named" arguments.
+         *
+         * This allows a consistent reference to macro arguments even if the macro signatures are redefined between
+         * packages.
+         *
+         * @type {((string|null)[])}
+         */
+        namedArguments?: (string | null)[];
     };
     /**
      * Function to process the body of an environment. The return value of `processContent`
@@ -71,6 +82,17 @@ export type MacroInfo = {
          * @type {boolean}
          */
         hangingIndent?: boolean;
+        /**
+         * A list of names to be given to each argument when processing. This list should
+         * be the same length as the number of arguments. `null` can appear any number of times
+         * for "un-named" arguments.
+         *
+         * This allows a consistent reference to macro arguments even if the macro signatures are redefined between
+         * packages.
+         *
+         * @type {((string|null)[])}
+         */
+        namedArguments?: (string | null)[];
     };
     /**
      * The macro signature as an xparse argument specification string.
