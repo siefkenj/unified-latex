@@ -93,11 +93,10 @@ export function gobbleSingleArgument(
     }
 
     switch (argSpec.type) {
-        // Matching a mandatory argument and an optional argument is the
-        // same for our purposes because we're not going to fail to parse because of a missing argument.
-        case "optional":
         case "mandatory":
             if (acceptGroup) {
+                // We have already gobbled whitespace, so at this point, `currNode`
+                // is either an openMark or we don't have an optional argument.
                 let content: Ast.Node[] = [currNode];
                 if (match.group(currNode)) {
                     // Unwrap a group if there is one.
@@ -110,8 +109,19 @@ export function gobbleSingleArgument(
                 currPos++;
                 break;
             }
-            // We have already gobbled whitespace, so at this point, `currNode`
-            // is either an openMark or we don't have an optional argument.
+        // NOTE: Fallthrough is on purpose.
+        // Matching a mandatory argument and an optional argument is the same for our purposes
+        // because we're not going to fail to parse because of a missing argument.
+        case "optional":
+            // It is possible that an optional argument accepts a group if its open/close braces are `{}`
+            if (acceptGroup && match.group(currNode)) {
+                argument = arg(currNode.content, {
+                    openMark,
+                    closeMark,
+                });
+                currPos++;
+                break;
+            }
             if (match.string(currNode, openMark)) {
                 // If we're here, we have custom braces to match
                 const [openMarkPos, closeMarkPos] = findBracePositions();

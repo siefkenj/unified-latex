@@ -4,6 +4,7 @@ import {
 } from "@unified-latex/unified-latex-types";
 
 export const macros: MacroInfoRecord = {
+    mode: { signature: "s d<> d{}", renderInfo: { breakAround: true } },
     insertnavigation: { signature: "m", renderInfo: { breakAround: true } },
     insertsectionnavigation: {
         signature: "m",
@@ -185,6 +186,15 @@ export const macros: MacroInfoRecord = {
 export const environments: EnvInfoRecord = {
     frame: {
         signature: "!d<> !o !o !d{} !d{}",
+    },
+    block: {
+        signature: "!d<> !d{} !d<>",
+    },
+    alertblock: {
+        signature: "!d<> !d{} !d<>",
+    },
+    exampleblock: {
+        signature: "!d<> !d{} !d<>",
     },
     onlyenv: {
         signature: "!d<>",

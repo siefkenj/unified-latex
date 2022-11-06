@@ -407,7 +407,9 @@ describe("unified-latex-util-arguments", () => {
             { type: "string", content: ")" },
             { type: "string", content: "y" },
         ];
-        expect(gobbleSingleArgument(ast, parseArgspec("t+")[0])).toMatchObject({
+        expect(
+            gobbleSingleArgument([...ast], parseArgspec("t+")[0])
+        ).toMatchObject({
             argument: {
                 type: "argument",
                 content: [{ type: "string", content: "+" }],
@@ -416,12 +418,12 @@ describe("unified-latex-util-arguments", () => {
             },
             nodesRemoved: 2,
         });
-        expect(gobbleSingleArgument(ast, parseArgspec("!t+")[0])).toMatchObject(
-            {
-                argument: null,
-                nodesRemoved: 0,
-            }
-        );
+        expect(
+            gobbleSingleArgument([...ast], parseArgspec("!t+")[0])
+        ).toMatchObject({
+            argument: null,
+            nodesRemoved: 0,
+        });
     });
     it("gobbleSingleArgument gobbles optional group (i.e., optional argument in '{...}' braces)", () => {
         let ast: Ast.Node[];
@@ -434,7 +436,9 @@ describe("unified-latex-util-arguments", () => {
             { type: "string", content: ")" },
             { type: "string", content: "y" },
         ];
-        expect(gobbleSingleArgument(ast, parseArgspec("d{}")[0])).toMatchObject({
+        expect(
+            gobbleSingleArgument([...ast], parseArgspec("d{}")[0])
+        ).toMatchObject({
             argument: {
                 type: "argument",
                 content: [{ type: "string", content: "b" }],
@@ -442,6 +446,59 @@ describe("unified-latex-util-arguments", () => {
                 closeMark: "}",
             },
             nodesRemoved: 2,
+        });
+
+        // The argument shouldn't be gobbled if we forbid whitespace in front of it.
+        expect(
+            gobbleSingleArgument([...ast], parseArgspec("!d{}")[0])
+        ).toMatchObject({
+            argument: null,
+            nodesRemoved: 0,
+        });
+        
+        ast = [
+            { type: "string", content: "a" },
+            { type: "whitespace" },
+            { type: "group", content: [{ type: "string", content: "b" }] },
+            { type: "string", content: "c" },
+            { type: "string", content: ")" },
+            { type: "string", content: "y" },
+        ];
+        // Unlike a mandatory argument, we don't gobble an optional argument without braces.
+        expect(
+            gobbleSingleArgument([...ast], parseArgspec("!d{}")[0])
+        ).toMatchObject({
+            argument: null,
+            nodesRemoved: 0,
+        });
+    });
+    it("gobbleSingleArgument won't gobble if whitespace is not permitted", () => {
+        let ast: Ast.Node[];
+
+        // optional argument
+        ast = [
+            { type: "whitespace" },
+            { type: "string", content: "[" },
+            { type: "string", content: "c" },
+            { type: "string", content: "]" },
+            { type: "string", content: "y" },
+        ];
+        expect(
+            gobbleSingleArgument([...ast], parseArgspec("!o")[0])
+        ).toMatchObject({
+            argument: null,
+            nodesRemoved: 0,
+        });
+        expect(
+            gobbleSingleArgument([...ast], parseArgspec("o")[0])
+        ).toMatchObject({
+            argument: {
+                type: "argument",
+                content: [{ type: "string", content: "c" }],
+                openMark: "[",
+                closeMark: "]",
+            },
+            nodesRemoved: 4,
         });
     });
 });
