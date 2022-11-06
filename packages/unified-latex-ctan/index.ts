@@ -11,6 +11,7 @@ import * as tikz from "./package/tikz";
 import * as xcolor from "./package/xcolor";
 import * as xparse from "./package/xparse";
 import * as beamer from "./package/beamer";
+import * as multicol from "./package/multicol";
 
 /**
  * Info about the macros for available ctan packages. `latex2e` contains
@@ -30,6 +31,7 @@ export const macroInfo = {
     xcolor: xcolor.macros,
     xparse: xparse.macros,
     beamer: beamer.macros,
+    multicol: multicol.macros,
 };
 
 /**
@@ -50,6 +52,7 @@ export const environmentInfo = {
     xcolor: xcolor.environments,
     xparse: xparse.environments,
     beamer: beamer.environments,
+    multicol: multicol.environments,
 };
 
 // NOTE: The docstring comment must be the last item in the index.ts file!
