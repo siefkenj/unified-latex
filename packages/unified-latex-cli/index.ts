@@ -1,11 +1,24 @@
 import { processLatexViaUnified } from "./libs/unified-latex";
 import { unifiedArgs } from "./libs/unified-args";
+import fs from "node:fs";
+
+let version = "unknown (could not read version from package.json)";
+try {
+    // Read the version dynamically on startup
+    type PackageJson = { version: string };
+    const packageJson: PackageJson = JSON.parse(
+        fs.readFileSync(new URL("./package.json", import.meta.url), {
+            encoding: "utf8",
+        })
+    );
+    version = packageJson.version;
+} catch {}
 
 unifiedArgs({
     processor: processLatexViaUnified,
     name: "unified-latex",
     description: "LaTeX processor powered by unified-latex",
-    version: "1.0.8",
+    version,
     extensions: ["tex"],
     ignoreName: ".unifiedlatexignore",
     packageField: "unifiedLatexConfig",

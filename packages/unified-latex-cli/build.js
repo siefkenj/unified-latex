@@ -13,6 +13,7 @@ import { nodeExternalsPlugin } from "esbuild-node-externals";
     const explicitDeps = Object.keys(packageJson.dependencies || {}).concat([
         "node:stream",
         "node:process",
+        "node:fs",
     ]);
 
     const commonConfig = {

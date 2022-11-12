@@ -33,9 +33,18 @@ describe("unified-latex-cli", () => {
         expect(stdout).toMatchSnapshot();
     });
     it("can expand macro", async () => {
-        let { stdout, stderr } = await exec(
-            `node ${exePath} ${examplesPath}/needs-expanding.tex -e '\\newcommand{foo}[1]{FOO(#1)}' -e '{name: "bar", body: "baz"}'`
-        );
-        expect(stdout).toMatchSnapshot();
+        {
+            let { stdout, stderr } = await exec(
+                `node ${exePath} ${examplesPath}/needs-expanding.tex -e '\\newcommand{foo}[1]{FOO(#1)}' -e '{name: "bar", body: "baz"}'`
+            );
+            expect(stdout).toMatchSnapshot();
+        }
+        {
+            // Make sure we don't lose spaces in math mode
+            let { stdout, stderr } = await exec(
+                `node ${exePath} ${examplesPath}/needs-expanding.tex -e '\\newcommand{foo}[1]{$\\x #1$}' -e '{name: "bar", body: "baz"}'`
+            );
+            expect(stdout).toMatchSnapshot();
+        }
     });
 });
