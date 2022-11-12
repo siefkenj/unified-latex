@@ -132,4 +132,10 @@ describe("unified-latex-util-parse", () => {
         const parsed = parse("\\");
         expect(printRaw(parsed)).toEqual("\\");
     });
+
+    it("Keeps whitespace between macro parameter (e.g. `#1`) and surrounding math", () => {
+        let parsed;
+        parsed = parseMath("\\x   #1    y");
+        expect(printRaw(parsed)).toEqual("\\x #1 y");
+    });
 });
