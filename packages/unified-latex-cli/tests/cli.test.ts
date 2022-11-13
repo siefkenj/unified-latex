@@ -33,9 +33,35 @@ describe("unified-latex-cli", () => {
         expect(stdout).toMatchSnapshot();
     });
     it("can expand macro", async () => {
+        {
+            let { stdout, stderr } = await exec(
+                `node ${exePath} ${examplesPath}/needs-expanding.tex -e '\\newcommand{foo}[1]{FOO(#1)}' -e '{name: "bar", body: "baz"}'`
+            );
+            expect(stdout).toMatchSnapshot();
+        }
+        {
+            // Make sure we don't lose spaces in math mode
+            let { stdout, stderr } = await exec(
+                `node ${exePath} ${examplesPath}/needs-expanding.tex -e '\\newcommand{foo}[1]{$\\x #1$}' -e '{name: "bar", body: "baz"}'`
+            );
+            expect(stdout).toMatchSnapshot();
+        }
+    });
+    it("can expand macros defined in document", async () => {
         let { stdout, stderr } = await exec(
-            `node ${exePath} ${examplesPath}/needs-expanding.tex -e '\\newcommand{foo}[1]{FOO(#1)}' -e '{name: "bar", body: "baz"}'`
+            `node ${exePath} ${examplesPath}/has-definition.tex --stats-json`
         );
-        expect(stdout).toMatchSnapshot();
+        const { newcommands } = JSON.parse(stdout) as {
+            newcommands: { name: string }[];
+        };
+        const newcommandNames = newcommands.map((c) => c.name);
+        expect(newcommandNames).toEqual(["foo", "baz"]);
+
+        {
+            let { stdout, stderr } = await exec(
+                `node ${exePath} ${examplesPath}/has-definition.tex --expand-document-macro foo --expand-document-macro baz`
+            );
+            expect(stdout).toMatchSnapshot();
+        }
     });
 });

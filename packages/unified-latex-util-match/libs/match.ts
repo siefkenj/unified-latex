@@ -1,16 +1,20 @@
 import * as Ast from "@unified-latex/unified-latex-types";
-import { EnvInfo, MacroInfo, MacroInfoRecord } from "@unified-latex/unified-latex-types";
+import {
+    EnvInfo,
+    MacroInfo,
+    MacroInfoRecord,
+} from "@unified-latex/unified-latex-types";
 import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 
 /**
  * Creates a macro matching function that uses a `SpecialMacroSpec` or list of macros
  * and generates a hash for quick lookup.
  */
-function createMacroMatcher(
-    macros: Ast.Macro[] | string[] | Record<string, unknown>
+function createMacroMatcher<S extends string>(
+    macros: Ast.Macro[] | S[] | Record<S, unknown>
 ) {
     // We first make sure we have a record type with keys being the macro's contents
-    const macrosHash = Array.isArray(macros)
+    const macrosHash: Record<string, unknown> = Array.isArray(macros)
         ? macros.length > 0
             ? typeof macros[0] === "string"
                 ? Object.fromEntries(
@@ -55,7 +59,7 @@ function createMacroMatcher(
             );
         }
         return true;
-    } as Ast.TypeGuard<Ast.Macro>;
+    } as Ast.TypeGuard<Ast.Macro & { content: S }>;
 }
 
 /**

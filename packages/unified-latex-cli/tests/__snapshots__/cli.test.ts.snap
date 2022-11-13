@@ -6,6 +6,19 @@ hi FOO(fooArg) and baz!
 "
 `;
 
+exports[`unified-latex-cli can expand macro 2`] = `
+"% Expand via> tests/needs-expanding.tex --stats -e "\\\\newcommand{foo}[1]{FOO(#1)}" -e '{name: "bar", body: "baz"}'
+hi $\\x fooArg$ and baz!
+"
+`;
+
+exports[`unified-latex-cli can expand macros defined in document 1`] = `
+"\\newcommand{\\foo}[1]{$BAR #1$}
+\\DeclareDocumentCommand{\\baz}{m}{\\foo{xxx} .#1.}
+We $BAR ME$ and \\foo{xxx} .YOU.
+"
+`;
+
 exports[`unified-latex-cli can format document 1`] = `
 "\\section*{Really Cool Math}
 Below you'll$x$ $x$ find some {\\bf really} cool {\\em math} {\\em foo}.

@@ -17,7 +17,7 @@
         "outDir": "./dist",
         "noImplicitAny": true,
         "strictNullChecks": true,
-        "module": "es6",
+        "module": "ES2020",
         "target": "es6",
         "jsx": "react",
         "allowJs": true,

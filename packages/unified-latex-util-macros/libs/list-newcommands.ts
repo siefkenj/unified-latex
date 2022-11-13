@@ -16,7 +16,7 @@ type NewCommandSpec = {
     definition: Ast.Macro;
 };
 
-const newcommandMatcher = match.createMacroMatcher([
+export const newcommandMatcher = match.createMacroMatcher([
     ...LATEX_NEWCOMMAND,
     ...XPARSE_NEWCOMMAND,
 ]);

@@ -1,5 +1,8 @@
 import * as Ast from "@unified-latex/unified-latex-types";
-import { visit, VisitorContext } from "@unified-latex/unified-latex-util-visit";
+import {
+    visit,
+    VisitInfo,
+} from "@unified-latex/unified-latex-util-visit";
 
 /**
  * Recursively replace nodes in `ast`. The `visitor` function is called on each node. If
@@ -10,7 +13,7 @@ export function replaceNode(
     ast: Ast.Ast,
     visitor: (
         node: Ast.Node | Ast.Argument,
-        context: VisitorContext
+        info: VisitInfo
     ) =>
         | Ast.Node
         | Ast.Argument
@@ -21,7 +24,7 @@ export function replaceNode(
 ) {
     visit(ast, {
         leave: (node, info) => {
-            let replacement = visitor(node, info.context);
+            let replacement = visitor(node, info);
             // Returning `undefined` or the same node means we shouldn't replace that node
             if (typeof replacement === "undefined" || replacement === node) {
                 return;
@@ -29,7 +32,7 @@ export function replaceNode(
 
             if (!info.containingArray || info.index == null) {
                 throw new Error(
-                    "Trying to delete node, but cannot find containing array"
+                    "Trying to replace node, but cannot find containing array"
                 );
             }
 

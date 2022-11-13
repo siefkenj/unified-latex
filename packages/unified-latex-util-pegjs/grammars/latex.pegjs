@@ -68,7 +68,7 @@ math_token "math token"
     / full_comment
     / whitespace* x:group whitespace* { return x; }
     / whitespace* x:alignment_tab whitespace* { return x; }
-    / whitespace* x:macro_parameter whitespace* { return x; }
+    / macro_parameter
     / whitespace* superscript whitespace* {
             return createNode("macro", { content: "^", escapeToken: "" });
         }

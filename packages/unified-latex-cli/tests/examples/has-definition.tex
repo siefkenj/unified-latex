@@ -1,0 +1,3 @@
+\newcommand{\foo}[1]{$BAR #1$}
+\DeclareDocumentCommand{\baz}{m}{\foo{xxx} .#1.}
+We \foo{ME} and \baz{YOU}

@@ -1,14 +1,14 @@
 {
     "name": "@unified-latex/unified-latex-util-html-like",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "description": "Tools working with HTML-like nodes via unified-latex ASTs",
     "main": "dist/index.js",
     "type": "module",
     "dependencies": {
-        "@unified-latex/unified-latex-builder": "^1.1.0",
-        "@unified-latex/unified-latex-types": "^1.1.0",
-        "@unified-latex/unified-latex-util-match": "^1.1.0",
-        "@unified-latex/unified-latex-util-print-raw": "^1.1.0"
+        "@unified-latex/unified-latex-builder": "^1.2.0",
+        "@unified-latex/unified-latex-types": "^1.2.0",
+        "@unified-latex/unified-latex-util-match": "^1.2.0",
+        "@unified-latex/unified-latex-util-print-raw": "^1.2.0"
     },
     "files": [
         "dist/**/*.ts",

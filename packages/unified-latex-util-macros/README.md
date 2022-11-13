@@ -79,6 +79,44 @@ function expandMacros(
 | tree   | `Ast.Ast`                         |
 | macros | <span color='gray'>Omitted</span> |
 
+## `expandMacrosExcludingDefinitions(tree, macros)`
+
+Expands macros in `ast` as specified by `macros`, but do not expand any macros
+that appear in the context of a macro definition. For example, expanding `\foo` to `X` in
+
+    \newcommand{\foo}{Y}
+    \foo
+
+would result in
+
+    \newcommand{\foo}{Y}
+    X
+
+If `expandMacros(...)` were used, macros would be expanded in all contexts and the result
+would be
+
+    \newcommand{X}{Y}
+    X
+
+Each macro in `macros` should provide the substitution AST (i.e., the AST with the #1, etc.
+in it). This function assumes that the appropriate arguments have already been attached
+to each macro specified. If the macro doesn't have it's arguments attached, its
+contents will be wholesale replaced with its substitution AST.
+
+```typescript
+function expandMacrosExcludingDefinitions(
+  tree: Ast.Ast,
+  macros: { name: string; body: Ast.Node[] }[]
+): void;
+```
+
+**Parameters**
+
+| Param  | Type                              |
+| :----- | :-------------------------------- |
+| tree   | `Ast.Ast`                         |
+| macros | <span color='gray'>Omitted</span> |
+
 ## `listNewcommands(tree)`
 
 List all new commands defined in `tree`. This lists commands defined LaTeX-style with
@@ -159,7 +197,8 @@ function parseMacroSubstitutions(ast: Ast.Node[]): (Ast.Node | HashNumber)[];
 
 # Constants
 
-| Name                | Type          |
-| :------------------ | :------------ |
-| `LATEX_NEWCOMMAND`  | `Set<string>` |
-| `XPARSE_NEWCOMMAND` | `Set<string>` |
+| Name                | Type                                           |
+| :------------------ | :--------------------------------------------- |
+| `LATEX_NEWCOMMAND`  | `Set<string>`                                  |
+| `newcommandMatcher` | `Ast.TypeGuard<Ast.Macro & { content: any; }>` |
+| `XPARSE_NEWCOMMAND` | `Set<string>`                                  |

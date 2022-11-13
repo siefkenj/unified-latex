@@ -17,6 +17,7 @@ import { statsJsonPlugin, statsPlugin } from "../stats";
 import { expandMacrosPlugin } from "../macros/expand-macros-plugin";
 import { attachMacroArgsPlugin } from "../macros/attach-macro-args-plugin";
 import { prettyPrintHtmlPlugin } from "../html/format";
+import { expandDocumentMacrosPlugin } from "../macros/expand-document-macros-plugin";
 
 // Fake TTY stream.
 const ttyStream = Object.assign(new stream.Readable(), { isTTY: true });
@@ -122,6 +123,13 @@ export function unifiedArgs(cliConfig: Options) {
         config.plugins.push([
             expandMacrosPlugin,
             { macros: config.expandMacro },
+        ]);
+    }
+
+    if (config.expandDocumentMacro.length > 0) {
+        config.plugins.push([
+            expandDocumentMacrosPlugin,
+            { macros: config.expandDocumentMacro },
         ]);
     }
 
