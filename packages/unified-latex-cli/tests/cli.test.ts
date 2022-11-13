@@ -47,4 +47,21 @@ describe("unified-latex-cli", () => {
             expect(stdout).toMatchSnapshot();
         }
     });
+    it("can expand macros defined in document", async () => {
+        let { stdout, stderr } = await exec(
+            `node ${exePath} ${examplesPath}/has-definition.tex --stats-json`
+        );
+        const { newcommands } = JSON.parse(stdout) as {
+            newcommands: { name: string }[];
+        };
+        const newcommandNames = newcommands.map((c) => c.name);
+        expect(newcommandNames).toEqual(["foo", "baz"]);
+
+        {
+            let { stdout, stderr } = await exec(
+                `node ${exePath} ${examplesPath}/has-definition.tex --expand-document-macro foo --expand-document-macro baz`
+            );
+            expect(stdout).toMatchSnapshot();
+        }
+    });
 });

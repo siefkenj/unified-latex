@@ -148,7 +148,7 @@ function replaceNode(
   ast: Ast.Ast,
   visitor: (
     node: Ast.Node | Ast.Argument,
-    context: VisitorContext
+    info: VisitInfo
   ) =>
     | Ast.Node
     | Ast.Argument

@@ -33,7 +33,7 @@ function createMatchers(
   rowSepMacros: string[],
   colSep: string[]
 ): {
-  isRowSep: Ast.TypeGuard<Ast.Macro>;
+  isRowSep: Ast.TypeGuard<Ast.Macro & { content: string }>;
   isColSep: (node: Ast.Node) => boolean;
   isWhitespace: (node: Ast.Node) => boolean;
   isSameLineComment: (node: Ast.Node) => boolean;

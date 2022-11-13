@@ -1,8 +1,10 @@
 import * as Ast from "@unified-latex/unified-latex-types";
-import { expandMacros } from "@unified-latex/unified-latex-util-macros";
+import {
+    expandMacros,
+    expandMacrosExcludingDefinitions,
+} from "@unified-latex/unified-latex-util-macros";
 import { Plugin } from "unified";
 import { attachMacroArgs } from "@unified-latex/unified-latex-util-arguments";
-import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 
 type PluginOptions = {
     macros: { name: string; signature: string; body: Ast.Node[] }[];

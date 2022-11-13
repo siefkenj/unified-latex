@@ -102,7 +102,9 @@ export function options(flags: string[], configuration: Options) {
     const settings = parseSettings(config.setting as string);
 
     if (config.html && config.statsJson) {
-        throw new Error("Both --html and --stats-json were specified; only one may be used at a time.");
+        throw new Error(
+            "Both --html and --stats-json were specified; only one may be used at a time."
+        );
     }
 
     return {
@@ -146,6 +148,9 @@ export function options(flags: string[], configuration: Options) {
         expandMacro: normalizeToArray(config.expandMacro as string).map(
             parseMacroExpansion
         ),
+        expandDocumentMacro: normalizeToArray(
+            config.expandDocumentMacro as string
+        ),
         macro: normalizeToArray(config.macro as string).map(
             parseMacroExpansion
         ),
@@ -160,6 +165,7 @@ export function options(flags: string[], configuration: Options) {
         stats: boolean;
         statsJson: boolean;
         expandMacro: { name: string; signature: string; body: Ast.Node[] }[];
+        expandDocumentMacro: string[];
         macro: { name: string; signature: string }[];
         html: boolean;
     };

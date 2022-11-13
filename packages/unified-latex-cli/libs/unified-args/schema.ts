@@ -99,6 +99,14 @@ export const schema: Option[] = [
         value: "<rule>",
     },
     {
+        long: "expand-document-macro",
+        description:
+            "Expand the specified macro which is defined in the document. You can use --stats to list all macros defined in the document.",
+        short: "d",
+        type: "string",
+        value: "<name>"
+    },
+    {
         long: "frail",
         description: "Exit with 1 on warnings",
         type: "boolean",

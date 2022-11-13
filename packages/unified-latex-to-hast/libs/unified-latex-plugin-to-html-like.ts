@@ -69,18 +69,18 @@ export const unifiedLatexToHtmlLike: Plugin<
         // Replace text-mode environments and then macros. Environments *must* be processed first, since
         // environments like tabular use `\\` as a newline indicator, but a `\\` macro gets replaced with
         // a `<br />` during macro replacement.
-        replaceNode(tree, (node, context) => {
+        replaceNode(tree, (node, info) => {
             // Children of math-mode are rendered by KaTeX/MathJax and so we shouldn't touch them!
-            if (context.hasMathModeAncestor) {
+            if (info.context.hasMathModeAncestor) {
                 return;
             }
             if (isReplaceableEnvironment(node)) {
                 return environmentReplacements[printRaw(node.env)](node);
             }
         });
-        replaceNode(tree, (node, context) => {
+        replaceNode(tree, (node, info) => {
             // Children of math-mode are rendered by KaTeX/MathJax and so we shouldn't touch them!
-            if (context.hasMathModeAncestor) {
+            if (info.context.hasMathModeAncestor) {
                 return;
             }
             if (isReplaceableMacro(node)) {
