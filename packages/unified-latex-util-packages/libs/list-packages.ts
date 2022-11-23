@@ -18,7 +18,7 @@ export function listPackages(tree: Ast.Ast): Ast.String[] {
     const ret: Ast.String[] = [];
     visit(
         tree,
-        (node) => {
+        (node: Ast.Macro) => {
             if (node.content === "usepackage") {
                 // The \usepackage macro has signature []{}
                 const packages = processCommaSeparatedList(
