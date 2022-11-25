@@ -26,6 +26,8 @@ describe("unified-latex-util-ligatures", () => {
         expect(printRaw(parseLigatures(ast))).toEqual("a‘b");
         ast = strToNodes("a\\$b");
         expect(printRaw(parseLigatures(ast))).toEqual("a$b");
+        ast = strToNodes("<<a>>");
+        expect(printRaw(parseLigatures(ast))).toEqual("«a»");
     });
 
     it("can replace macro ligatures", () => {
