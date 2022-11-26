@@ -113,7 +113,9 @@ export function options(flags: string[], configuration: Options) {
         processor: configuration.processor,
         help: config.help,
         version: config.version,
-        files: config._,
+        // XXX I have no idea why `minimist` is not assigning unknown arguments to "_"
+        // but it appears unknown arguments are being assigned to "" instead...
+        files: config._ || config[""],
         filePath: config.filePath,
         watch: config.watch,
         extensions: ext.length === 0 ? configuration.extensions : ext,
