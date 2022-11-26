@@ -174,7 +174,7 @@ export function unifiedArgs(cliConfig: Options) {
     function subscribe(context: EngineContext) {
         watcher = chokidar
             .watch(context.fileSet?.origins || [], {
-                cwd: config.cwd,
+                cwd: config.cwd != null ? "" + config.cwd : config.cwd,
                 ignoreInitial: true,
             })
             .on("error", done)
