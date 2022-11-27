@@ -56,13 +56,13 @@ export const unifiedLatexFromString: Plugin<PluginOptions[], string, Ast.Root> =
         // Build up a parsing plugin with only unified components
         const allMacroInfo: MacroInfoRecord = Object.assign(
             {},
-            macros,
-            ...Object.values(macroInfo)
+            ...Object.values(macroInfo),
+            macros
         );
         const allEnvInfo: EnvInfoRecord = Object.assign(
             {},
-            environments,
-            ...Object.values(environmentInfo)
+            ...Object.values(environmentInfo),
+            environments
         );
 
         // Build up a parser that will perform all the needed steps
