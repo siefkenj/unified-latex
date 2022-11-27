@@ -64,4 +64,24 @@ describe("unified-latex-cli", () => {
             expect(stdout).toMatchSnapshot();
         }
     });
+    it("can override default macros", async () => {
+        {
+            let { stdout, stderr } = await exec(
+                `node ${exePath} ${examplesPath}/has-existing-definition.tex`
+            );
+            expect(stdout).toMatchSnapshot();
+        }
+        {
+            let { stdout, stderr } = await exec(
+                `node ${exePath} ${examplesPath}/has-existing-definition.tex -e '\\newcommand{mathbb}{\\mathbb}'`
+            );
+            expect(stdout).toMatchSnapshot();
+        }
+        {
+            let { stdout, stderr } = await exec(
+                `node ${exePath} ${examplesPath}/has-existing-definition.tex -e '\\newcommand{mathbb}[2]{\\mathbb{#1}{#2}}'`
+            );
+            expect(stdout).toMatchSnapshot();
+        }
+    });
 });

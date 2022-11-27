@@ -15,7 +15,10 @@ export const processLatexViaUnified = (
     options?: StringCompilerPluginOptions
 ) => {
     return unified()
-        .use(unifiedLatexFromString)
+        .use(
+            unifiedLatexFromString,
+            Object.assign({ environments: {}, macros: {} }, options)
+        )
         .use(
             unifiedLatexStringCompiler,
             Object.assign({ pretty: true, forceNewlineEnding: true }, options)

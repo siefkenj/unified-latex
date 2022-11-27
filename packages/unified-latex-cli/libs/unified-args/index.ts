@@ -18,6 +18,7 @@ import { expandMacrosPlugin } from "../macros/expand-macros-plugin";
 import { attachMacroArgsPlugin } from "../macros/attach-macro-args-plugin";
 import { prettyPrintHtmlPlugin } from "../html/format";
 import { expandDocumentMacrosPlugin } from "../macros/expand-document-macros-plugin";
+import { PluginOptions } from "@unified-latex/unified-latex-util-parse";
 
 // Fake TTY stream.
 const ttyStream = Object.assign(new stream.Readable(), { isTTY: true });
@@ -46,6 +47,12 @@ export function unifiedArgs(cliConfig: Options) {
         const exception = error as Error;
         return fail(exception, true);
     }
+
+    // We want to pass extra options to the processor. Because of that,
+    // we remove it and replace it with one that passes in options.
+    const processorOptions: PluginOptions = { macros: {}, environments: {} };
+    const originalProcessor = config.processor as any;
+    config.processor = () => originalProcessor(processorOptions);
 
     if (config.help) {
         process.stdout.write(
@@ -120,6 +127,18 @@ export function unifiedArgs(cliConfig: Options) {
     }
 
     if (config.expandMacro.length > 0) {
+        // We want to add parsing of these macros directly into the processor.
+        // That way, if there is a name-clash with a builtin macro, the command-line
+        // specified macro will take precedence.
+        processorOptions.macros = Object.assign(
+            processorOptions.macros || {},
+            Object.fromEntries(
+                config.expandMacro.map((m) => [
+                    m.name,
+                    { signature: m.signature },
+                ])
+            )
+        );
         config.plugins.push([
             expandMacrosPlugin,
             { macros: config.expandMacro },

@@ -39,3 +39,18 @@ Check it out!
 \\end{enumerate}
 "
 `;
+
+exports[`unified-latex-cli can override default macros 1`] = `
+"$\\mathbb{X} Y$
+"
+`;
+
+exports[`unified-latex-cli can override default macros 2`] = `
+"$\\mathbb X Y$
+"
+`;
+
+exports[`unified-latex-cli can override default macros 3`] = `
+"$\\mathbb{X}{Y}$
+"
+`;
