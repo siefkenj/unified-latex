@@ -1,11 +1,11 @@
 {
     "name": "@unified-latex/unified-latex-util-print-raw",
-    "version": "1.2.1",
+    "version": "1.2.2",
     "description": "Print a unified-latex AST with no fancy formatting",
     "main": "dist/index.js",
     "type": "module",
     "dependencies": {
-        "@unified-latex/unified-latex-types": "^1.2.1"
+        "@unified-latex/unified-latex-types": "^1.2.2"
     },
     "files": [
         "dist/**/*.ts",
