@@ -20,3 +20,9 @@ npm install @unified-latex/unified-latex-util-match
 
 This package contains both esm and commonjs exports. To explicitly access the esm export,
 import the `.js` file. To explicitly access the commonjs export, import the `.cjs` file.
+
+# Constants
+
+| Name    | Type                                                                                                                                                                                                                                                                                                                              | Description                                  |
+| :------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------- |
+| `match` | `{ macro(node: any, macroName?: string): node is Ast.Macro; anyMacro(node: any): node is Ast.Macro; environment(node: any, envName?: string): node is Ast.Environment; anyEnvironment(node: any): node is Ast.Environment; ... 11 more ...; createEnvironmentMatcher: (macros: string[] \| Record<...>) => Ast.TypeGuard<...>; }` | Functions to match different types of nodes. |

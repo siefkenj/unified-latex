@@ -1,6 +1,6 @@
 {
     "name": "@unified-latex/unified-latex-util-match",
-    "version": "1.2.2",
+    "version": "1.2.3",
     "description": "Match nodes in a unified-latex AST",
     "main": "dist/index.js",
     "type": "module",

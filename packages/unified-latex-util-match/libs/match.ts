@@ -193,3 +193,19 @@ export const match = {
     createMacroMatcher,
     createEnvironmentMatcher,
 };
+
+export const {
+    anyEnvironment,
+    anyMacro,
+    anyString,
+    argument,
+    blankArgument,
+    comment,
+    environment,
+    group,
+    macro,
+    math,
+    parbreak,
+    string,
+    whitespace,
+} = match;

@@ -1,22 +1,4 @@
-import { match } from "./libs/match";
-
-export { match };
-
-export const {
-    anyEnvironment,
-    anyMacro,
-    anyString,
-    argument,
-    blankArgument,
-    comment,
-    environment,
-    group,
-    macro,
-    math,
-    parbreak,
-    string,
-    whitespace,
-} = match;
+export * from "./libs/match";
 
 // NOTE: The docstring comment must be the last item in the index.ts file!
 /**
