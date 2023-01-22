@@ -19,7 +19,7 @@ args_spec_list
 arg_spec
     // Arguments can be preceeded by a `+` to indicated that they are allowed to take
     // multiple paragraphs. We don't use this information, but we allow it in the args string
-    = "+"? spec:(optional / mandatory / verbatim / required / body) {
+    = "+"? spec:(optional / mandatory / verbatim / required / body / until) {
             return spec;
         }
 
@@ -80,6 +80,16 @@ required
             return createNode("mandatory", { ...braceSpec, defaultArg });
         }
     / "r" braceSpec:brace_spec { return createNode("mandatory", braceSpec); }
+
+// An "until" argument gobbles tokens until the specified stop token(s)
+until
+    = "u" stopTokens:until_stop_token {
+            return createNode("until", { stopTokens });
+        }
+
+until_stop_token
+    = ![{ ] x:. { return [x]; }
+    / g:braced_group { return g.content; }
 
 // A mandatory argument is a required argument with the default braces {...}
 mandatory = "m" { return createNode("mandatory"); }

@@ -455,7 +455,7 @@ describe("unified-latex-util-arguments", () => {
             argument: null,
             nodesRemoved: 0,
         });
-        
+
         ast = [
             { type: "string", content: "a" },
             { type: "whitespace" },
@@ -500,5 +500,88 @@ describe("unified-latex-util-arguments", () => {
             },
             nodesRemoved: 4,
         });
+    });
+
+    it("can gobble an 'until' argument", () => {
+        let argspec = parseArgspec("u)")[0];
+        value = "(val)x x";
+        file = processLatexToAstViaUnified().processSync({ value });
+        let nodes = trimRenderInfo((file.result as any).content) as Ast.Node[];
+        expect(gobbleSingleArgument(nodes, argspec)).toEqual({
+            argument: {
+                type: "argument",
+                content: [
+                    { type: "string", content: "(" },
+                    { type: "string", content: "val" },
+                ],
+                openMark: "",
+                closeMark: ")",
+            },
+            nodesRemoved: 3,
+        });
+        expect(nodes).toEqual([
+            { content: "x", type: "string" },
+            { type: "whitespace" },
+            { content: "x", type: "string" },
+        ]);
+
+        value = "(val)";
+        file = processLatexToAstViaUnified().processSync({ value });
+        nodes = trimRenderInfo((file.result as any).content) as Ast.Node[];
+        expect(gobbleSingleArgument(nodes, argspec)).toEqual({
+            argument: {
+                type: "argument",
+                content: [
+                    { type: "string", content: "(" },
+                    { type: "string", content: "val" },
+                ],
+                openMark: "",
+                closeMark: ")",
+            },
+            nodesRemoved: 3,
+        });
+        expect(nodes).toEqual([]);
+    });
+    it("can gobble an 'until' argument with a whitespace stop", () => {
+        let argspec = parseArgspec("u{ }")[0];
+        value = "(val)x x";
+        file = processLatexToAstViaUnified().processSync({ value });
+        let nodes = trimRenderInfo((file.result as any).content) as Ast.Node[];
+        expect(gobbleSingleArgument(nodes, argspec)).toEqual({
+            argument: {
+                type: "argument",
+                content: [
+                    { type: "string", content: "(" },
+                    { type: "string", content: "val" },
+                    { content: ")", type: "string" },
+                    { content: "x", type: "string" },
+                ],
+                openMark: "",
+                closeMark: " ",
+            },
+            nodesRemoved: 5,
+        });
+        expect(nodes).toEqual([{ content: "x", type: "string" }]);
+    });
+    it.skip("can gobble an 'until' that requires splitting a string", () => {
+        let argspec = parseArgspec("ux")[0];
+        value = "(val)mxyx";
+        file = processLatexToAstViaUnified().processSync({ value });
+        let nodes = trimRenderInfo((file.result as any).content) as Ast.Node[];
+        expect(gobbleSingleArgument(nodes, argspec)).toEqual({
+            argument: {
+                type: "argument",
+                content: [
+                    { type: "string", content: "(" },
+                    { type: "string", content: "val" },
+                    { content: ")", type: "string" },
+                    { content: "m", type: "string" },
+                ],
+                openMark: "",
+                closeMark: "x",
+            },
+            nodesRemoved: 3,
+        });
+        expect(nodes).toEqual([{ content: "yx", type: "string" }]);
     });
 });

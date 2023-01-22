@@ -1,5 +1,12 @@
 export type Ast = Node[] | Node;
-export type Node = Optional | Mandatory | Verbatim | Body | Group | string;
+export type Node =
+    | Optional
+    | Mandatory
+    | Verbatim
+    | Body
+    | Group
+    | Until
+    | string;
 type Optional = OptionalArg | OptionalStar | OptionalToken | Embellishment;
 interface AstNode {
     type: string;
@@ -40,4 +47,8 @@ interface Group extends AstNode {
 }
 interface Body extends AstNode {
     type: "body";
+}
+interface Until extends AstNode {
+    type: "until";
+    stopTokens: string[];
 }

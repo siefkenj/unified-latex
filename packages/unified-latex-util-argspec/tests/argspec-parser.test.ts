@@ -31,6 +31,9 @@ describe("unified-latex-util-argspec", () => {
         "d++ D--{def}",
         "O{nested{defaults}}",
         "m ta o o",
+        "u{xx;}",
+        "u;",
+        "u{ }",
     ];
 
     for (const spec of SPEC_STRINGS) {

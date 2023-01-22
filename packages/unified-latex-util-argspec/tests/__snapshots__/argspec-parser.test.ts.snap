@@ -232,6 +232,41 @@ exports[`unified-latex-util-argspec parses xparse argument specification string 
 ]
 `;
 
+exports[`unified-latex-util-argspec parses xparse argument specification string "u;" 1`] = `
+[
+  {
+    "stopTokens": [
+      ";",
+    ],
+    "type": "until",
+  },
+]
+`;
+
+exports[`unified-latex-util-argspec parses xparse argument specification string "u{ }" 1`] = `
+[
+  {
+    "stopTokens": [
+      " ",
+    ],
+    "type": "until",
+  },
+]
+`;
+
+exports[`unified-latex-util-argspec parses xparse argument specification string "u{xx;}" 1`] = `
+[
+  {
+    "stopTokens": [
+      "x",
+      "x",
+      ";",
+    ],
+    "type": "until",
+  },
+]
+`;
+
 exports[`unified-latex-util-argspec parses xparse argument specification string "v!" 1`] = `
 [
   {
