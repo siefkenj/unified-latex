@@ -32,6 +32,9 @@ export const pegjsLoader = (options = {}) => ({
             if (filename.match(/latex\.(pegjs|peggy)$/)) {
                 defaultOptions.allowedStartRules = ["document", "math"];
             }
+            if (filename.match(/tikz\.(pegjs|peggy)$/)) {
+                defaultOptions.allowedStartRules = ["path_spec", "foreach_body"];
+            }
 
             try {
                 const contents = peg.generate(source, defaultOptions);

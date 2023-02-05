@@ -85,6 +85,9 @@ export function getNodeInfo(
     nextNode?: Ast.Node;
     referenceMap?: ReferenceMap;
 } {
+    if (!node) {
+        return { renderInfo: {} };
+    }
     const renderInfo = node._renderInfo || {};
     const previousNode =
         options.referenceMap && options.referenceMap.getPreviousNode(node);

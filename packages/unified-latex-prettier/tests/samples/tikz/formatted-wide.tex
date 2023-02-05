@@ -1,0 +1,239 @@
+%%
+%% This file contains tikz code from the examples for Paths in the tikz manual: https://tikz.dev/tikz-paths
+%%
+\begin{tikzpicture}[
+    fill=yellow!80!black,
+    every path/.style={draw}
+]
+    \fill (0,0) rectangle +(1,1);
+    \shade (2,0) rectangle +(1,1);
+
+    \draw (0,0) -- (2,0) (0,1) -- (2,1);
+
+    \draw (0,0) -- (1,1) (1,1) -- (2,0);
+    \draw (3,0) -- (4,1) -- (5,0);
+    \useasboundingbox (0,1.5); % make bounding box higher
+
+    \draw (0,0) --
+        (1,1) --
+        (1,0) --
+        (0,0)
+        (2,0) --
+        (3,1) --
+        (3,0) -- (2,0);
+    \draw (5,0) --
+        (6,1) --
+        (6,0) --
+        cycle
+        (7,0) --
+        (8,1) --
+        (8,0) --
+        cycle;
+    \useasboundingbox (0,1.5); % make bounding box higher
+
+    \draw (0,0) node[draw] (a) {A} (1,1) node[draw] (b) {B};
+    \draw (a.north) |- (b.west);
+    \draw[color=red] (a.east) -| (2,1.5) -| (b.north);
+
+    \draw[line width=10pt]
+        (0,0) .. controls (1,1) ..
+        (4,0) .. controls (5,0) and (5,1) .. (4,1);
+    \draw[color=gray]
+        (0,0) --
+        (1,1) --
+        (4,0) --
+        (5,0) --
+        (5,1) -- (4,1);
+
+    \draw[line width=10pt]
+        (0,0) --
+        (2,0) .. controls (1,1) ..
+        cycle;
+
+    \draw (0,0) --
+        (1,1)
+        (1,1) .. controls (1,0) and (2,0) .. (2,0);
+    \draw[yshift=-1.5cm]
+        (0,0) --
+        (1,1) .. controls (1,0) and (2,0) .. (2,0);
+
+    \draw (0,0) rectangle (1,1);
+    \draw (.5,1) rectangle
+        (2,0.5)
+        (3,0) rectangle
+        (3.5,1.5) -- (2,0);
+
+    \draw[color=gray, very thin]
+        (10pt,15pt)
+        circle[radius=10pt];
+    \draw[rounded corners=10pt]
+        (0,0) --
+        (0pt,25pt) -- (40pt,25pt);
+
+    \draw (0,0)
+        [rounded corners=10pt]
+        --
+        (1,1) -- (2,1)
+        [sharp corners]
+        --
+        (2,0)
+        [rounded corners=5pt]
+        --
+        cycle;
+
+    \draw[help lines] (0,0) grid (3,2);
+    \draw (1,1) ellipse[x radius=1cm, y radius=.5cm];
+
+    \draw (0,0)
+        arc[start angle=180, end angle=90]
+        --
+        (2,.5)
+        arc[start angle=90, delta angle=-90];
+    \draw (4,0) -- +(30:1cm)
+        arc[start angle=30, delta angle=30]
+        --
+        cycle;
+    \draw (8,0)
+        arc[
+                start angle=0,
+                end angle=270,
+                x radius=1cm,
+                y radius=5mm
+            ]
+        --
+        cycle;
+
+    \draw (-1,0) -- +(3.5,0);
+    \draw (1,0) ++(210:2cm) -- +(30:4cm);
+    \draw (1,0) +(0:1cm) arc[start angle=0];
+    \draw (1,0) +(180:1cm) arc[start angle=180];
+    \path (1,0) ++(15:.75cm) node {$\alpha$};
+    \path (1,0) ++(15:-.75cm) node {$\beta$};
+
+    \draw (0,0) rectangle (1,1.5) (0,0) parabola (1,1.5);
+    \draw[xshift=1.5cm]
+        (0,0) rectangle
+        (1,1.5)
+        (0,0)
+        parabola[bend at end]
+        (1,1.5);
+    \draw[xshift=3cm]
+        (0,0) rectangle
+        (1,1.5)
+        (0,0)
+        parabola
+        bend
+        (.75,1.75)
+        (1,1.5);
+
+    \draw[yshift=-2cm] (1,1.5) -- (0,0) parabola cycle;
+
+    \draw (0,0) sin
+        (1,1) cos
+        (2,0) sin
+        (3,-1) cos
+        (4,0) sin (5,1);
+    \draw[color=red]
+        (0,1.5) cos
+        (1,0) sin
+        (2,-1.5) cos
+        (3,0) sin
+        (4,1.5) cos (5,0);
+
+    \filldraw[fill=red!20]
+        (0,1)
+        svg[scale=2] {h 10 v 10 h -10}
+        node[above left] {upper left}
+        --
+        cycle;
+
+    \draw svg {M 0 0 L 20 20 h 10 a 10 10 0 0 0 -20 0};
+
+    \draw[help lines] (0,0) grid (3,2);
+    \node (a) at (2,2) {a};
+
+    \draw (0,0) to (0,2);
+    \draw[red] (10pt,10pt) to (a);
+    \draw[blue] (3,0) -- (3,2) -- (a) to cycle;
+
+    \draw (0,0) to node[sloped, above] {x} (3,2);
+
+    \draw (0,0) to[out=90, in=180]
+        node[sloped, above] {x}
+        (3,2);
+
+    \node :fill opacity = {0s="1", 2s="0", begin on=click}
+        :rotate = {0s="0", 2s="90", begin on=click}
+        [fill=blue!20, draw=blue, ultra thick, circle]
+        {Click me!};
+
+    \mydim=1cm
+    \draw (0pt,\mydim)
+        \pgfextra{\mydim=2cm}
+        --
+        (0pt,\mydim);
+
+    \node :path = {
+                0s="{(0,-1) .. controls (0,0) and (0,0) .. (0,1) -- (1,1)}",
+                2s="{(0,-1) .. controls (-1,0) and (-1,0) .. (-1,1) -- (.5,-1)}",
+                begin on=click
+            }
+        [fill=blue!20, draw=blue, ultra thick, circle]
+        {Click me!};
+
+    \draw (0,0)
+        foreach \x in {1, ..., 3} {-- (\x,1) -- (\x,0)};
+
+    \foreach \i in {0cm,1cm,15mm}
+    \node at ($(1,0)!\i!(3,2)$) {\i};
+
+    \node \foreach \x [evaluate=\x] in {0, 1, 2, 3}
+                \foreach \y in {0, 1, 2, 3} {
+                            (\x,\y)
+                            circle
+                            (0.2cm);
+                            (\x,\y)
+                            circle
+                            (0.1cm);
+                        };
+
+    \draw foreach \position in {
+                    (0,0),
+                    (1,1),
+                    (2,0),
+                    (3,1),
+                    (1,1),
+                    (2,0),
+                    (3,1)
+                } {
+                    \position
+                    rectangle
+                    +(.25,.5)
+                    \position
+                    --
+                    +(.25,.5)
+                };
+
+    \draw
+        node[fill=blue] [red] (A) at (1,0) {a a a a a a a};
+
+    \draw
+        node[fill=blue!20, draw=blue, ultra thick, circle]
+            :path = {
+                    0s="{(0,-1) .. controls (0,0) and (0,0) .. (0,1) -- (1,1)}",
+                    2s="{(0,-1) .. controls (-1,0) and (-1,0) .. (-1,1) -- (.5,-1)}",
+                    begin on=click
+                }
+            {Click me!a a a a a a a a a a a a a a};
+    \draw
+        %comment1
+        %comment2
+        %comment2.5
+        %comment3
+        node[fill=blue] [red] (A) at (1,0) {a a a a a a a};
+
+    \draw%comment1
+    [color=red]%comment2
+    (a.east) %comment3
+    -| (2,1.5) -| (b.north);
+\end{tikzpicture}

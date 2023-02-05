@@ -32,6 +32,12 @@ export type EnvInfo = {
          * @type {((string|null)[])}
          */
         namedArguments?: (string | null)[];
+        /**
+         * Whether the body is tikz-environment like (e.g., a `tikzpicture` or `scope`, etc.)
+         *
+         * @type {boolean}
+         */
+        tikzEnvironment?: boolean;
     };
     /**
      * Function to process the body of an environment. The return value of `processContent`
@@ -93,6 +99,12 @@ export type MacroInfo = {
          * @type {((string|null)[])}
          */
         namedArguments?: (string | null)[];
+        /**
+         * Whether the macro represents a tikz path command (e.g. `\draw (0,0) -- (1,1);`).
+         *
+         * @type {boolean}
+         */
+        tikzPathCommand?: boolean;
     };
     /**
      * The macro signature as an xparse argument specification string.
