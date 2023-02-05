@@ -18,10 +18,6 @@ import { parsePgfkeys } from "@unified-latex/unified-latex-util-pgfkeys";
 /**
  * Format a sequence of Pgfkeys key-value pairs. `nodes` will be parsed
  * by a grammar defining Pgfkeys
- *
- * @param {Ast.Node[]} nodes
- * @param {{ openMark: string; closeMark: string; leadingComment: Ast.Comment | null }} options - A `leadingComment` is a comment that appears as the first item in the environment (e.g. `\pgfkeys{%comment\na,b,c}`); If `allowParenGroups` is set to true, commas inside parenthesis won't be parsed as separators. Default behavior is `allowParenGroups === false`.
- * @returns {Doc}
  */
 export function printArgumentPgfkeys(
     nodes: Ast.Node[],

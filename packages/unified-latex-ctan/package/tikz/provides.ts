@@ -36,7 +36,7 @@ export const macros: MacroInfoRecord = {
     tikz: {
         signature: "o o m",
         argumentParser: tikzCommandArgumentParser,
-        renderInfo:{namedArguments:["animation", "options", "command"]}
+        renderInfo: { namedArguments: ["animation", "options", "command"] },
     },
 };
 
@@ -379,6 +379,9 @@ export const conditionalMacros: MacroInfoRecord = {
     scoped: {
         signature: "o o m",
         argumentParser: tikzCommandArgumentParser,
-        renderInfo:{namedArguments:["animation", "options", "command"], breakAround:true}
+        renderInfo: {
+            namedArguments: ["animation", "options", "command"],
+            breakAround: true,
+        },
     },
 };
