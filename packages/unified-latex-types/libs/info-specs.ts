@@ -1,5 +1,10 @@
 import * as Ast from "./ast-types";
 
+export type ArgumentParser = (
+    nodes: Ast.Node[],
+    startPos: number
+) => { args: Ast.Argument[]; nodesRemoved: number };
+
 export type EnvInfo = {
     renderInfo?: {
         /**
@@ -119,6 +124,22 @@ export type MacroInfo = {
      * escape token.
      */
     escapeToken?: string;
+    /**
+     * Custom argument parser. If present, function overrides the default argument
+     * parsing of `signature`. An array of nodes is passed as well as the position
+     * of the first node **after** the macro. This function is expected to _mutate_
+     * the input array, removing any nodes that are part of the macro's argument.
+     *
+     * This function will only be called on a macro if it has no existing `args`.
+     *
+     * Note: for stability when printing/accessing a node's arguments, this function
+     * should always return an argument array of the same length, regardless of
+     * whether optional arguments are present. For example, if this function parses
+     * a node with signature `o m`, it should ways return a length-two array of arguments.
+     * A "blank" argument (one that does not show up during printing) can be created
+     * with `args([], { openMark: "", closeMark: "" })`, using the `unified-latex-builder` package.
+     */
+    argumentParser?: ArgumentParser;
 };
 
 export type EnvInfoRecord = Record<string, EnvInfo>;

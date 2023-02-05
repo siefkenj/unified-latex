@@ -55,10 +55,12 @@ export function attachMacroArgsInArray(
         // Add `._renderInfo` if we have any
         updateRenderInfo(macro, macroInfo.renderInfo);
 
+        const signatureOrParser = macroInfo.argumentParser || macroInfo.signature
+
         // If the macro has no signature, it shouldn't consume any arguments. Just move along.
-        // Node: It is important that this happens *after* `updateRenderInfo` is called, since
+        // Note: It is important that this happens *after* `updateRenderInfo` is called, since
         // we still want to update the render info even if there are no args.
-        if (macroInfo.signature == null) {
+        if (signatureOrParser == null) {
             currIndex--;
             continue;
         }
@@ -74,7 +76,7 @@ export function attachMacroArgsInArray(
         // `currIndex` is the position of the macro. We want to start
         // looking for the arguments right after the macro
         currIndex++;
-        const { args } = gobbleArguments(nodes, macroInfo.signature, currIndex);
+        const { args } = gobbleArguments(nodes, signatureOrParser, currIndex);
         macro.args = args;
         // After we've gobbled the arguments, set
         // ourselves one space before the macro so we can continue.

@@ -1,6 +1,8 @@
 import util from "util";
+import * as Ast from "@unified-latex/unified-latex-types";
 import { attachMacroArgs } from "../libs/attach-arguments";
 import { strToNodes } from "../../test-common";
+import { arg, s, SP } from "@unified-latex/unified-latex-builder";
 
 /* eslint-env jest */
 
@@ -411,6 +413,35 @@ describe("unified-latex-util-arguments", () => {
                     },
                 ],
             },
+        ]);
+    });
+
+    it("Custom argument parser", () => {
+        /**
+         * Unconditionally take the first node as an argument.
+         */
+        function simpleParser(
+            nodes: Ast.Node[],
+            macroPos: number
+        ): { args: Ast.Argument[]; nodesRemoved: number } {
+            const args: Ast.Argument[] = [arg(nodes[macroPos])];
+            nodes.splice(macroPos, 1);
+            return { args, nodesRemoved: 1 };
+        }
+        let nodes = strToNodes("\\xxx a{b}");
+        attachMacroArgs(nodes, {
+            xxx: {
+                argumentParser: simpleParser,
+            },
+        });
+        expect(nodes).toEqual([
+            {
+                type: "macro",
+                content: "xxx",
+                args: [arg(SP)],
+            },
+            s("a"),
+            { type: "group", content: [s("b")] },
         ]);
     });
 });

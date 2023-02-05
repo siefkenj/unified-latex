@@ -91,4 +91,20 @@ describe("unified-latex-ctan:tikz", () => {
             });
         }
     });
+    describe("Can parse and print \\tikz{} with group or semicolon delimited argument", () => {
+        const EXAMPLES: [string, string][] = [
+            ["\\tikz {foo} bar", "\\tikz{foo} bar"],
+            ["\\tikz foo baz; bar", "\\tikz{foo baz;} bar"],
+            ["\\tikz [xxx] {foo} bar", "\\tikz[xxx]{foo} bar"],
+            ["\\tikz [xxx] foo baz; bar", "\\tikz[xxx]{foo baz;} bar"],
+            ["\\tikz :fill = {aaa} :rotate = {bbb} [xxx] foo baz; bar", "\\tikz :fill = {aaa} :rotate = {bbb} [xxx]{foo baz;} bar"],
+        ];
+
+        for (const [inStr, outStr] of EXAMPLES) {
+            it(`parses "${inStr}"`, () => {
+                const parsed = strToNodes(inStr);
+                expect(printRaw(parsed)).toEqual(outStr);
+            });
+        }
+    });
 });

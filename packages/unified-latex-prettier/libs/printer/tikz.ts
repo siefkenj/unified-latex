@@ -289,7 +289,6 @@ class TikzArgumentPrinter {
             // argument, then we force the command to start printing on the same line.
             const firstSep = cycle === 0 && !startArg.optionalArg ? " " : line;
             const comingUp = this.peek();
-            //console.log("Coming up", comingUp, tikzPrintRaw(this.nodes));
             switch (comingUp) {
                 case "short_path": {
                     const [n0, n1, n2] = this.nodes.splice(0, 3);

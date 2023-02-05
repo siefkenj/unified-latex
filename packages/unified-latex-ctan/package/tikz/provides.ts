@@ -4,6 +4,7 @@ import {
 } from "@unified-latex/unified-latex-types";
 import * as Ast from "@unified-latex/unified-latex-types";
 import { attachMacroArgsInArray } from "@unified-latex/unified-latex-util-arguments";
+import { tikzCommandArgumentParser } from "./libs/tikz-command-argument-parser";
 
 export const macros: MacroInfoRecord = {
     pgfkeys: {
@@ -33,7 +34,9 @@ export const macros: MacroInfoRecord = {
         renderInfo: { breakAround: true, pgfkeysArgs: true },
     },
     tikz: {
-        signature: "o m",
+        signature: "o o m",
+        argumentParser: tikzCommandArgumentParser,
+        renderInfo:{namedArguments:["animation", "options", "command"]}
     },
 };
 
@@ -374,7 +377,8 @@ export const conditionalMacros: MacroInfoRecord = {
         renderInfo: { breakAround: true, tikzPathCommand: true },
     },
     scoped: {
-        signature: "u;",
-        renderInfo: { breakAround: true, tikzPathCommand: true },
+        signature: "o o m",
+        argumentParser: tikzCommandArgumentParser,
+        renderInfo:{namedArguments:["animation", "options", "command"], breakAround:true}
     },
 };
