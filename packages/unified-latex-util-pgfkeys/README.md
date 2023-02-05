@@ -31,6 +31,7 @@ import the `.js` file. To explicitly access the commonjs export, import the `.cj
 
 ```typescript
 function createMatchers(): {
+  isChar: (node: Ast.Node, char: string) => boolean;
   isComma: (node: Ast.Node) => boolean;
   isEquals: (node: Ast.Node) => boolean;
   isWhitespace: (node: Ast.Node) => boolean;
@@ -40,22 +41,29 @@ function createMatchers(): {
 };
 ```
 
-## `parsePgfkeys(ast)`
+## `parsePgfkeys(ast, options)`
 
 Parse the arguments of a Pgfkeys macro. The `ast`
 is expected to be a comma separated list of `Item`s.
 Each item can have 0 or more item parts, which are separated
 by "=". If `itemPart` is undefined,
 
+If `options.allowParenGroups === true`, then commas that occur inside groups of parenthesis
+will not be parsed as separators. This is useful for parsing tikz `\foreach` loops.
+
 ```typescript
-function parsePgfkeys(ast: Ast.Node[]): Item[];
+function parsePgfkeys(
+  ast: Ast.Node[],
+  options: { allowParenGroups: boolean }
+): Item[];
 ```
 
 **Parameters**
 
-| Param | Type         |
-| :---- | :----------- |
-| ast   | `Ast.Node[]` |
+| Param   | Type                              |
+| :------ | :-------------------------------- |
+| ast     | `Ast.Node[]`                      |
+| options | <span color='gray'>Omitted</span> |
 
 ## `pgfkeysArgToObject(arg)`
 
