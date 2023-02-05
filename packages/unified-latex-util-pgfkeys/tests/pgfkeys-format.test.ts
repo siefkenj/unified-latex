@@ -1,6 +1,8 @@
 import Prettier from "prettier/standalone";
 import { prettierPluginLatex } from "../../unified-latex-prettier";
-import "../../test-common";
+import { strToNodes } from "../../test-common";
+import { parsePgfkeys } from "../libs/pgfkeys-parser";
+import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 
 /* eslint-env jest */
 
@@ -127,6 +129,41 @@ describe("unified-latex-util-pgfkeys", () => {
 
         for (const { inStr, outStr } of STRINGS) {
             expect(inStr).toFormatAs(outStr, formatter);
+        }
+    });
+    it("Pgfkeys can allow for parenthesis groups that contain commas", () => {
+        const STRINGS = [
+            {
+                inStr: "(1,2),(3,4)",
+                outStr: "(1,2), (3,4)",
+            },
+        ];
+
+        for (const { inStr, outStr } of STRINGS) {
+            const ast = strToNodes(inStr);
+            const parsedNoParen = parsePgfkeys(ast);
+            const parsedYesParen = parsePgfkeys(ast, {
+                allowParenGroups: true,
+            });
+            // Bare-bones printing of the parsed arguments
+            const noParen = parsedNoParen.map((x) => {
+                if (!x.itemParts) {
+                    return "";
+                }
+                return x.itemParts
+                    .map((y) => y.map((z) => printRaw(z)).join(""))
+                    .join("");
+            });
+            const yesParen = parsedYesParen.map((x) => {
+                if (!x.itemParts) {
+                    return "";
+                }
+                return x.itemParts
+                    .map((y) => y.map((z) => printRaw(z)).join(""))
+                    .join("");
+            });
+            expect(noParen).toEqual(["(1", "2)", "(3", "4)"]);
+            expect(yesParen).toEqual(["(1,2)", "(3,4)"]);
         }
     });
 });

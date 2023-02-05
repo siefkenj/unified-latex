@@ -5,6 +5,7 @@ import {
 import * as Ast from "@unified-latex/unified-latex-types";
 import { arg } from "@unified-latex/unified-latex-builder";
 import { gobbleSingleArgument } from "./gobble-single-argument";
+import { ArgumentParser } from "@unified-latex/unified-latex-types";
 
 /**
  * Gobbles an argument of whose type is specified
@@ -13,12 +14,16 @@ import { gobbleSingleArgument } from "./gobble-single-argument";
  */
 export function gobbleArguments(
     nodes: Ast.Node[],
-    argSpec: string | ArgSpec.Node[],
+    argSpec: string | ArgSpec.Node[] | ArgumentParser,
     startPos = 0
 ): {
     args: Ast.Argument[];
     nodesRemoved: number;
 } {
+    if (typeof argSpec === "function") {
+        return argSpec(nodes, startPos);
+    }
+
     if (typeof argSpec === "string") {
         argSpec = parseArgspec(argSpec);
     }

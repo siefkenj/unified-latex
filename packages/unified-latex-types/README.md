@@ -24,6 +24,15 @@ import the `.js` file. To explicitly access the commonjs export, import the `.cj
 
 # Types
 
+## `ArgumentParser`
+
+```typescript
+export type ArgumentParser = (
+    nodes: Ast.Node[],
+    startPos: number
+) => { args: Ast.Argument[]; nodesRemoved: number };
+```
+
 ## `Ast`
 
 ```typescript
@@ -65,6 +74,12 @@ export type EnvInfo = {
          * @type {((string|null)[])}
          */
         namedArguments?: (string | null)[];
+        /**
+         * Whether the body is tikz-environment like (e.g., a `tikzpicture` or `scope`, etc.)
+         *
+         * @type {boolean}
+         */
+        tikzEnvironment?: boolean;
     };
     /**
      * Function to process the body of an environment. The return value of `processContent`
@@ -142,6 +157,12 @@ export type MacroInfo = {
          * @type {((string|null)[])}
          */
         namedArguments?: (string | null)[];
+        /**
+         * Whether the macro represents a tikz path command (e.g. `\draw (0,0) -- (1,1);`).
+         *
+         * @type {boolean}
+         */
+        tikzPathCommand?: boolean;
     };
     /**
      * The macro signature as an xparse argument specification string.
@@ -156,6 +177,22 @@ export type MacroInfo = {
      * escape token.
      */
     escapeToken?: string;
+    /**
+     * Custom argument parser. If present, function overrides the default argument
+     * parsing of `signature`. An array of nodes is passed as well as the position
+     * of the first node **after** the macro. This function is expected to _mutate_
+     * the input array, removing any nodes that are part of the macro's argument.
+     *
+     * This function will only be called on a macro if it has no existing `args`.
+     *
+     * Note: for stability when printing/accessing a node's arguments, this function
+     * should always return an argument array of the same length, regardless of
+     * whether optional arguments are present. For example, if this function parses
+     * a node with signature `o m`, it should ways return a length-two array of arguments.
+     * A "blank" argument (one that does not show up during printing) can be created
+     * with `args([], { openMark: "", closeMark: "" })`, using the `unified-latex-builder` package.
+     */
+    argumentParser?: ArgumentParser;
 };
 ```
 

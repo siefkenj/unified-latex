@@ -11,6 +11,7 @@ import _XColorPegParser from "../grammars/xcolor-expressions.pegjs";
 import _TabularPegParser from "../grammars/tabular-spec.pegjs";
 import _SystemePegParser from "../grammars/systeme-environment.pegjs";
 import _GluePegParser from "../grammars/tex-glue.pegjs";
+import _TikzPegParser from "../grammars/tikz.pegjs";
 
 type PegParser = {
     parse: (input: string | unknown[], options?: unknown) => any;
@@ -32,6 +33,7 @@ const XColorPegParser = _XColorPegParser as PegParser;
 const TabularPegParser = _TabularPegParser as PegParser;
 const SystemePegParser = _SystemePegParser as PegParser;
 const GluePegParser = _GluePegParser as PegParser;
+const TikzPegParser = _TikzPegParser as PegParser;
 
 export {
     LatexPegParser,
@@ -44,4 +46,5 @@ export {
     TabularPegParser,
     SystemePegParser,
     GluePegParser,
+    TikzPegParser,
 };

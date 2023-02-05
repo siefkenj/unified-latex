@@ -92,3 +92,25 @@ function getNamedArgsContent(
 | :--------------------- | :----------------------------- |
 | node                   | `Ast.Macro \| Ast.Environment` |
 | namedArgumentsFallback | `readonly string[]`            |
+
+## `gobbleSingleArgument(nodes, argSpec, startPos)`
+
+Gobbles an argument of whose type is specified
+by `argSpec` starting at the position `startPos`. If an argument couldn't be found,
+`argument` will be `null`.
+
+```typescript
+function gobbleSingleArgument(
+  nodes: Ast.Node[],
+  argSpec: ArgSpec.Node,
+  startPos: Number
+): { argument: Ast.Argument | null; nodesRemoved: number };
+```
+
+**Parameters**
+
+| Param    | Type           |
+| :------- | :------------- |
+| nodes    | `Ast.Node[]`   |
+| argSpec  | `ArgSpec.Node` |
+| startPos | `Number`       |

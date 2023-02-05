@@ -1,6 +1,7 @@
 import { ArgSpecAst as ArgSpec } from "@unified-latex/unified-latex-util-argspec";
 import * as Ast from "@unified-latex/unified-latex-types";
 import { match } from "@unified-latex/unified-latex-util-match";
+import { scan } from "@unified-latex/unified-latex-util-scan";
 import { arg } from "@unified-latex/unified-latex-builder";
 
 /**
@@ -148,6 +149,45 @@ export function gobbleSingleArgument(
                 break;
             }
             break;
+        case "until": {
+            if (argSpec.stopTokens.length > 1) {
+                console.warn(
+                    `"until" matches with multi-token stop conditions are not yet implemented`
+                );
+                break;
+            }
+            const rawToken = argSpec.stopTokens[0];
+            const stopToken: Ast.String | Ast.Whitespace =
+                rawToken === " "
+                    ? { type: "whitespace" }
+                    : { type: "string", content: argSpec.stopTokens[0] };
+            let matchPos = scan(nodes, stopToken, {
+                startIndex: startPos,
+                allowSubstringMatches: true,
+            });
+            if (
+                matchPos != null &&
+                partialStringMatch(nodes[matchPos], stopToken)
+            ) {
+                console.warn(
+                    `"until" arguments that stop at non-punctuation symbols is not yet implemented`
+                );
+                break;
+            }
+            // If the corresponding token is not found, eat nothing;
+            if (matchPos == null) {
+                break;
+            }
+            argument = arg(nodes.slice(startPos, matchPos), {
+                openMark: "",
+                closeMark: rawToken,
+            });
+            currPos = matchPos;
+            if (currPos < nodes.length) {
+                currPos++;
+            }
+            break;
+        }
         default:
             console.warn(
                 `Don't know how to find an argument of argspec type "${argSpec.type}"`
@@ -159,4 +199,16 @@ export function gobbleSingleArgument(
     const nodesRemoved = argument ? currPos - startPos : 0;
     nodes.splice(startPos, nodesRemoved);
     return { argument, nodesRemoved };
+}
+
+/**
+ * Returns whether the presumed match "node" contains "token" as a strict
+ * substring.
+ */
+function partialStringMatch(node: Ast.Node, token: Ast.Node): boolean {
+    return (
+        match.anyString(node) &&
+        match.anyString(token) &&
+        node.content.length > token.content.length
+    );
 }

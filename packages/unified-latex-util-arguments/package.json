@@ -11,6 +11,7 @@
         "@unified-latex/unified-latex-util-match": "^1.2.2",
         "@unified-latex/unified-latex-util-render-info": "^1.2.2",
         "@unified-latex/unified-latex-util-visit": "^1.2.2",
+        "@unified-latex/unified-latex-util-scan": "^1.2.2",
         "unified": "^10.1.2"
     },
     "files": [

@@ -11,6 +11,7 @@
         { "path": "../unified-latex-util-argspec" },
         { "path": "../unified-latex-util-match" },
         { "path": "../unified-latex-util-render-info" },
+        { "path": "../unified-latex-util-scan" },
         { "path": "../unified-latex-util-visit" }
     ]
 }

@@ -33,7 +33,8 @@ export function printRaw(node: ArgSpec.Ast, root = false): string {
         : "";
     let spec = decorators;
 
-    switch (node.type) {
+    const type = node.type;
+    switch (type) {
         case "body":
             return decorators + "b";
         case "optionalStar":
@@ -71,12 +72,15 @@ export function printRaw(node: ArgSpec.Ast, root = false): string {
             return spec + "v" + node.openBrace;
         case "group":
             return spec + "{" + printRaw(node.content) + "}";
-
+        case "until": {
+            const stopTokens = printRaw(node.stopTokens);
+            return stopTokens.length > 1 || stopTokens[0] === " "
+                ? `u{${stopTokens}}`
+                : `u${stopTokens}`;
+        }
         default:
-            console.warn(
-                `Unknown node type "${(node as any).type}" for node`,
-                node
-            );
+            const neverType: never = type;
+            console.warn(`Unknown node type "${neverType}" for node`, node);
             return "";
     }
 }

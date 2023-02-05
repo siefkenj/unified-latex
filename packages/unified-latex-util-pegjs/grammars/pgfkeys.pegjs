@@ -21,11 +21,9 @@
     // If not, try to add them
     if (!options.isWhitespace) {
         try {
-            Object.assign(
-                options,
-                createMatchers(["\\", "hline", "cr"], ["&"])
-            );
             Object.assign(options, {
+                isChar: (node, char) =>
+                    node.type === "string" && node.content === char,
                 isComma(node) {
                     return node.type === "string" && node.content === ",";
                 },
@@ -35,6 +33,15 @@
                 isParbreak(node) {
                     return node.type === "parbreak";
                 },
+                isWhitespace(node) {
+                    return node.type === "whitespace";
+                },
+                isSameLineComment: (node) =>
+                    node.type === "comment" && node.sameline,
+                isOwnLineComment: (node) =>
+                    node.type === "comment" && !node.sameline,
+                isComment: (node) => node.type === "comment",
+                allowParenGroups: true,
             });
         } catch (e) {
             console.warn("Error when initializing parser", e);
@@ -45,8 +52,6 @@
 body
     = (comment_only_line / item_with_end / item_without_end)+
     / whitespace* EOL { return []; }
-
-item = x:token+ item_sep? { return x; }
 
 item_with_end
     // If there is a row ending we can have zero items
@@ -103,7 +108,8 @@ comment_only_line
 
 token = $(!non_token .)
 
-non_whitespace_non_parbreak_token = $(!(whitespace / parbreak) token)
+non_whitespace_non_parbreak_token
+    = $(!(whitespace / parbreak) (paren_block / token))
 
 non_token
     = item_sep
@@ -118,6 +124,12 @@ whitespace_or_parbreaks
                 parbreak: list.filter((x) => options.isParbreak(x)).length,
             };
         }
+
+// If options.allowParenGroup == false, then nothing will ever match
+// a `paren_block`.
+paren_block
+    = ! { return !options.allowParenGroups; }
+        $(open_paren (!close_paren .)* close_paren)
 
 // These rules use Javascript to do their matching
 // so that they can work on AST nodes instead of strings
@@ -134,5 +146,9 @@ parbreak = tok:. & { return options.isParbreak(tok); } { return tok; }
 item_sep = tok:. & { return options.isComma(tok); } { return tok; }
 
 equals = tok:. & { return options.isEquals(tok); } { return tok; }
+
+open_paren = tok:. & { return options.isChar(tok, "("); } { return tok; }
+
+close_paren = tok:. & { return options.isChar(tok, ")"); } { return tok; }
 
 EOL = !.
