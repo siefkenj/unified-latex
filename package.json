@@ -54,6 +54,7 @@
         "@types/cssesc": "^3.0.0",
         "@types/text-table": "^0.2.2",
         "camelcase": "^7.0.1",
+        "chalk": "^5.2.0",
         "chokidar": "^3.5.3",
         "color": "^4.2.3",
         "cssesc": "^3.0.0",
