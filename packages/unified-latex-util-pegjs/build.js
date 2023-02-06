@@ -1,9 +1,6 @@
 import esbuild from "esbuild";
 import fs from "node:fs/promises";
-import {pegjsLoader} from "../../scripts/esbuild-pegjs-loader.mjs";
-
-// Automatically exclude all node_modules from the bundled version
-import { nodeExternalsPlugin } from "esbuild-node-externals";
+import { pegjsLoader } from "../../scripts/esbuild-pegjs-loader.mjs";
 
 (async () => {
     const packageJson = JSON.parse(
@@ -21,7 +18,7 @@ import { nodeExternalsPlugin } from "esbuild-node-externals";
         sourcemap: true,
         format: "esm",
         target: "node14",
-        plugins: [nodeExternalsPlugin(), pegjsLoader()],
+        plugins: [pegjsLoader()],
         external: [...explicitDeps],
     };
 

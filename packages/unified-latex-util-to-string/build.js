@@ -1,9 +1,6 @@
 import esbuild from "esbuild";
 import fs from "node:fs/promises";
 
-// Automatically exclude all node_modules from the bundled version
-import { nodeExternalsPlugin } from "esbuild-node-externals";
-
 (async () => {
     const packageJson = JSON.parse(
         await fs.readFile(new URL("./package.json", import.meta.url))
@@ -23,7 +20,6 @@ import { nodeExternalsPlugin } from "esbuild-node-externals";
         sourcemap: true,
         format: "esm",
         target: "node14",
-        // plugins: [nodeExternalsPlugin()],
         external: [...explicitDeps],
     };
 
