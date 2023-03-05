@@ -1,6 +1,6 @@
 {
     "name": "@unified-latex/support-tables",
-    "version": "1.3.0",
+    "version": "1.3.1",
     "description": "Lists of special data needed for the internals of unified-latex",
     "type": "module",
     "files": [
