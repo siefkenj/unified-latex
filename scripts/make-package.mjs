@@ -33,6 +33,7 @@ import fs from "node:fs/promises";
         ".": {
             import: "./index.js",
             require: "./index.cjs",
+            types: "./index.d.ts",
         },
         "./*js": "./*js",
         "./*": {
