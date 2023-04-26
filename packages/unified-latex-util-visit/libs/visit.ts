@@ -16,12 +16,12 @@ export type VisitorContext = {
     hasMathModeAncestor?: boolean;
 };
 
-type GetGuard<T> = T extends (x: any) => x is infer R ? R : never;
+type GetGuard<T> = T extends (x: any, ...y: any[]) => x is infer R ? R : never;
 /**
  * Gets the type that a type-guard function is guarding. If
  * the guard type cannot be determined, the input type is returned.
  */
-type GuardTypeOf<T extends (x: any) => boolean> = GetGuard<T> extends never
+type GuardTypeOf<T extends (x: any, ...y: any[]) => boolean> = GetGuard<T> extends never
     ? T extends (x: infer A) => any
         ? A
         : never
@@ -37,7 +37,7 @@ type GuardFromOptions<
 > = Opts extends {
     test: infer R;
 }
-    ? R extends (x: any) => boolean
+    ? R extends (x: any, ...y: any[]) => boolean
         ? // A guard like `typeof Array.isArray` will return `any[]` as the type.
           // This type cannot be narrowed, so instead we use it to pick from
           // the set of all possible types.
