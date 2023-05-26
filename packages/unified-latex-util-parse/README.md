@@ -160,6 +160,21 @@ function parseMinimal(str: String): Ast.Root;
 | :---- | :------- |
 | str   | `String` |
 
+## `getParser(PluginOptions)`
+
+Returns the default `unified-latex` parser if the argument is `undefined`, or
+create a new one with the provided `unifiedLatexFromString` options.
+
+```typescript
+function getParser(options?: PluginOptions): FrozenProcessor<Ast.Root, Ast.Root, Ast.Root, void>;
+```
+
+**Parameters**
+
+| Param  | Type            |
+| :----- | :-------------- |
+| option | `PluginOptions` |
+
 # Types
 
 ## `PluginOptions`
