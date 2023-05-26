@@ -30,6 +30,7 @@ import fs from "node:fs/promises";
     esbuild
         .build({
             ...commonConfig,
+            external: commonConfig.external.filter(dep => !/unified|bail|is-plain-obj|trough|vfile.*|unist.*|hast.*|property-information|html-void-elements|.*-separated-tokens|.*entities.*|ccount|rehype*|string-width|strip-ansi|ansi-regex|supports-color|rehype|web-namespaces|zwitch/.exec(dep)),
             outfile: "./dist/index.cjs",
             format: "cjs",
         })

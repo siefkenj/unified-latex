@@ -31,6 +31,7 @@ import glob from "glob";
     esbuild
         .build({
             ...commonConfig,
+            external: commonConfig.external.filter(dep => !/unified|bail|is-plain-obj|trough|vfile.*|unist.*|hast.*|property-information|html-void-elements|.*-separated-tokens|.*entities.*|ccount|rehype*|string-width|strip-ansi|ansi-regex|supports-color|rehype|web-namespaces|zwitch/.exec(dep)),
             format: "cjs",
             outExtension: { ".js": ".cjs" },
         })
