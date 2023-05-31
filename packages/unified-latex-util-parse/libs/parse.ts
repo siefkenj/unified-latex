@@ -19,6 +19,10 @@ export function parse(str: string): Ast.Root {
  * @returns The default `unified-latex` parser if `options` is `undefined`, or a
  * newly created `unified-latex` parser with the provided `options`.
  */
-export function getParser(options?: PluginOptions): FrozenProcessor<Ast.Root, Ast.Root, Ast.Root, void> {
-    return options ? unified().use(unifiedLatexFromString, options).freeze() : parser
+export function getParser(
+    options?: PluginOptions
+): FrozenProcessor<Ast.Root, Ast.Root, Ast.Root, void> {
+    return options
+        ? unified().use(unifiedLatexFromString, options).freeze()
+        : parser;
 }
