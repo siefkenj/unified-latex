@@ -28,16 +28,6 @@ import fs from "node:fs/promises";
     // Build the ESM
     esbuild.build(commonConfig).catch(() => process.exit(1));
 
-    // Build a CommonJS version as well
-    esbuild
-        .build({
-            ...commonConfig,
-            external: commonConfig.external.filter(dep => !new RegExp(packageJson.internalDependencies).exec(dep)),
-            outfile: "./dist/index.cjs",
-            format: "cjs",
-        })
-        .catch(() => process.exit(1));
-
     // Build a standalone version as well
     esbuild
         .build({

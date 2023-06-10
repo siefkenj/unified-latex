@@ -27,6 +27,7 @@ import fs from "node:fs/promises";
     esbuild
         .build({
             ...commonConfig,
+            external: commonConfig.external.filter(dep => !new RegExp(packageJson.internalDependencies).exec(dep)),
             outfile: "./dist/index.cjs",
             format: "cjs",
         })
