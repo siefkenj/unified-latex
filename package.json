@@ -73,5 +73,6 @@
         "vfile-reporter-position": "^0.1.7",
         "vfile-reporter-pretty": "^6.1.0"
     },
+    "internalDependencies": "/unified|bail|is-plain-obj|trough|vfile.*|unist.*|hast.*|property-information|html-void-elements|.*-separated-tokens|.*entities.*|ccount|rehype*|string-width|strip-ansi|ansi-regex|supports-color|rehype|web-namespaces|zwitch/",
     "name": "unified-latex"
 }

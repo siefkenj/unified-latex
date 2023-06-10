@@ -1,7 +1,6 @@
 import esbuild from "esbuild";
 import fs from "node:fs/promises";
 import { pegjsLoader } from "../../scripts/esbuild-pegjs-loader.mjs";
-import { COMPILE_PKG_REGEXP } from "../unified-latex/build.js";
 
 (async () => {
     const packageJson = JSON.parse(
@@ -30,7 +29,7 @@ import { COMPILE_PKG_REGEXP } from "../unified-latex/build.js";
     esbuild
         .build({
             ...commonConfig,
-            external: commonConfig.external.filter(dep => !COMPILE_PKG_REGEXP.exec(dep)),
+            external: commonConfig.external.filter(dep => !new RegExp(packageJson.internalDependencies).exec(dep)),
             outfile: "./dist/index.cjs",
             format: "cjs",
         })

@@ -1,8 +1,6 @@
 import esbuild from "esbuild";
 import fs from "node:fs/promises";
 
-export const COMPILE_PKG_REGEXP = /unified|bail|is-plain-obj|trough|vfile.*|unist.*|hast.*|property-information|html-void-elements|.*-separated-tokens|.*entities.*|ccount|rehype*|string-width|strip-ansi|ansi-regex|supports-color|rehype|web-namespaces|zwitch/;
-
 (async () => {
     const packageJson = JSON.parse(
         await fs.readFile(new URL("./package.json", import.meta.url))
@@ -29,7 +27,7 @@ export const COMPILE_PKG_REGEXP = /unified|bail|is-plain-obj|trough|vfile.*|unis
     esbuild
         .build({
             ...commonConfig,
-            external: commonConfig.external.filter(dep => !COMPILE_PKG_REGEXP.exec(dep)),
+            external: commonConfig.external.filter(dep => !new RegExp(packageJson.internalDependencies).exec(dep)),
             outfile: "./dist/index.cjs",
             format: "cjs",
         })
