@@ -1,5 +1,6 @@
 import esbuild from "esbuild";
 import fs from "node:fs/promises";
+import { isExternal } from "../../scripts/esbuild-module-check.mjs";
 
 (async () => {
     const packageJson = JSON.parse(
@@ -31,7 +32,7 @@ import fs from "node:fs/promises";
     esbuild
         .build({
             ...commonConfig,
-            external: commonConfig.external.filter(dep => !new RegExp(packageJson.internalDependencies).exec(dep)),
+            external: commonConfig.external.filter(isExternal),
             outfile: "./dist/index.cjs",
             format: "cjs",
         })
