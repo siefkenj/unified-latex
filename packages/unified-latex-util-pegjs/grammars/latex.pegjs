@@ -118,6 +118,8 @@ special_macro "special macro" // for the special macros like \[ \] and \begin{} 
                 content: x.join(""),
             });
         }
+    // lstinline
+    / lstinline
     // verbatim environment
     / verbatim_environment
     // display math with \[...\]
@@ -137,6 +139,42 @@ special_macro "special macro" // for the special macros like \[ \] and \begin{} 
     // math with $...$
     / math_environment
     / environment
+
+lstinline "lstinline"
+    = escape
+    	content:"lstinline"
+        o:("[" o:(!(end:. & { return end === "]"; }) o:. { return o; })* "]" { return o.join(""); })?
+        begin_group x:(!end_group x:. { return x; })* end_group {
+            return createNode("macro", { content, args: [{
+                "type": "argument",
+                "content": o || "",
+                "openMark": o ? "[" : "",
+                "closeMark": o ? "]" : ""
+            }, {
+                "type": "argument",
+                "content": x.join(""),
+                "openMark": e,
+                "closeMark": ""
+            }] });
+        }
+    / escape
+    	content:"lstinline"
+        o:("[" o:(!(end:. & { return end === "]"; }) o:. { return o; })* "]" { return o.join(""); })?
+        e:.
+        x:(!(end:. & { return end == e; }) x:. { return x; })*
+        (end:. & { return end == e; }) {
+            return createNode("macro", { content, args: [{
+                "type": "argument",
+                "content": o || "",
+                "openMark": o ? "[" : "",
+                "closeMark": o ? "]" : ""
+            }, {
+                "type": "argument",
+                "content": x.join(""),
+                "openMark": e,
+                "closeMark": e
+            }] });
+        }
 
 verbatim_environment "verbatim environment"
     = begin_env
