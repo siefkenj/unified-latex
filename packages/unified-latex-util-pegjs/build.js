@@ -1,6 +1,7 @@
 import esbuild from "esbuild";
 import fs from "node:fs/promises";
 import { pegjsLoader } from "../../scripts/esbuild-pegjs-loader.mjs";
+import { COMPILE_PKG_REGEXP } from "../unified-latex/build.js";
 
 (async () => {
     const packageJson = JSON.parse(
@@ -29,7 +30,7 @@ import { pegjsLoader } from "../../scripts/esbuild-pegjs-loader.mjs";
     esbuild
         .build({
             ...commonConfig,
-            external: commonConfig.external.filter(dep => !/unified|bail|is-plain-obj|trough|vfile.*|unist.*|hast.*|property-information|html-void-elements|.*-separated-tokens|.*entities.*|ccount|rehype*|string-width|strip-ansi|ansi-regex|supports-color|rehype|web-namespaces|zwitch/.exec(dep)),
+            external: commonConfig.external.filter(dep => !COMPILE_PKG_REGEXP.exec(dep)),
             outfile: "./dist/index.cjs",
             format: "cjs",
         })
