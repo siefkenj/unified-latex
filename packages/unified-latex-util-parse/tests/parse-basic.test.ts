@@ -141,7 +141,7 @@ describe("unified-latex-util-parse", () => {
         expect(printRaw(parsed)).toEqual("\\x #1 y");
     });
 
-    it("Does not parse verbatim in \\lstinline", () => {
+    it("Does not parse verbatim in listings and minted packages", () => {
         expect(trimRenderInfo(parse("\\lstinline{some_code$}"))).toEqual({
             type: "root",
             content: [m("lstinline", args([null, "some_code$"], { braces: "[]{}" }))],
@@ -157,6 +157,27 @@ describe("unified-latex-util-parse", () => {
         expect(trimRenderInfo(parse("\\lstinline[some language]#some_code$#"))).toEqual({
             type: "root",
             content: [m("lstinline", [...args("some language", { braces: "[]" }), ...args("some_code$", { defaultOpenMark: "#", defaultCloseMark: "#" })])],
+        });
+
+        expect(trimRenderInfo(parse("\\mint{some language}{some_code$}"))).toEqual({
+            type: "root",
+            content: [m("mint", args([null, "some language", "some_code$"], { braces: "[]{}{}" }))],
+        });
+        expect(trimRenderInfo(parse("\\mint[options]{some language}{some_code$}"))).toEqual({
+            type: "root",
+            content: [m("mint", args(["options", "some language", "some_code$"], { braces: "[]{}{}" }))],
+        });
+        expect(trimRenderInfo(parse("\\mint{some language}#some_code$#"))).toEqual({
+            type: "root",
+            content: [m("mint", [...args([null, "some language"], { braces: "[]{}" }), ...args("some_code$", { defaultOpenMark: "#", defaultCloseMark: "#" })])],
+        });
+        expect(trimRenderInfo(parse("\\mint[options]{some language}#some_code$#"))).toEqual({
+            type: "root",
+            content: [m("mint", [...args(["options", "some language"], { braces: "[]{}" }), ...args("some_code$", { defaultOpenMark: "#", defaultCloseMark: "#" })])],
+        });
+        expect(trimRenderInfo(parse("\\mintinline[options]{some language}#some_code$#"))).toEqual({
+            type: "root",
+            content: [m("mintinline", [...args(["options", "some language"], { braces: "[]{}" }), ...args("some_code$", { defaultOpenMark: "#", defaultCloseMark: "#" })])],
         });
     });
 });

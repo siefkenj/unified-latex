@@ -118,8 +118,10 @@ special_macro "special macro" // for the special macros like \[ \] and \begin{} 
                 content: x.join(""),
             });
         }
-    // lstinline
-    / lstinline
+    // verbatim macro in listings package
+    / verbatim_listings
+    // verbatim macro in minted package
+    / verbatim_minted
     // verbatim environment
     / verbatim_environment
     // display math with \[...\]
@@ -140,40 +142,40 @@ special_macro "special macro" // for the special macros like \[ \] and \begin{} 
     / math_environment
     / environment
 
-lstinline "lstinline"
+verbatim_option "verbatim_option"
+    = "[" x:(!(end:. & { return end === "]"; }) c:. { return c; })* "]" { return [{ "type": "string", "content": x.join("") }]; }
+
+verbatim_group "verbatim_group"
+    = begin_group x:(!end_group c:. { return c; })* end_group { return { type: "argument", content: [{ "type": "string", "content": x.join("") }], openMark: "{", closeMark: "}" }; }
+
+verbatim_group_delim "verbatim_group_delim"
+    = e:. x:(!(end:. & { return end == e }) c:. { return c; })* (end:. & { return end == e }) { return { type: "argument", content: [{ "type": "string", "content": x.join("") }], openMark: e, closeMark: e }; }
+
+verbatim_listings "verbatim_listings"
     = escape
     	content:"lstinline"
-        o:("[" o:(!(end:. & { return end === "]"; }) o:. { return o; })* "]" { return o.join(""); })?
-        begin_group x:(!end_group x:. { return x; })* end_group {
+        o:verbatim_option?
+        x:(verbatim_group / verbatim_group_delim) {
             return createNode("macro", { content, args: [{
                 "type": "argument",
-                "content": o ? [{ "type": "string", "content": o }] : [],
+                "content": o || [],
                 "openMark": o ? "[" : "",
                 "closeMark": o ? "]" : ""
-            }, {
-                "type": "argument",
-                "content": [{ "type": "string", "content": x.join("") }],
-                "openMark": "{",
-                "closeMark": "}"
-            }] });
+            }, x] });
         }
-    / escape
-    	content:"lstinline"
-        o:("[" o:(!(end:. & { return end === "]"; }) o:. { return o; })* "]" { return o.join(""); })?
-        e:.
-        x:(!(end:. & { return end == e; }) x:. { return x; })*
-        (end:. & { return end == e; }) {
+
+verbatim_minted "verbatim_minted"
+	= escape
+    	content:("mintinline" / "mint")
+        o:verbatim_option?
+        l:verbatim_group
+        x:(verbatim_group / verbatim_group_delim) {
             return createNode("macro", { content, args: [{
                 "type": "argument",
-                "content": o ? [{ "type": "string", "content": o }] : [],
+                "content": o || [],
                 "openMark": o ? "[" : "",
                 "closeMark": o ? "]" : ""
-            }, {
-                "type": "argument",
-                "content": [{ "type": "string", "content": x.join("") }],
-                "openMark": e,
-                "closeMark": e
-            }] });
+            }, l, x] });
         }
 
 verbatim_environment "verbatim environment"
