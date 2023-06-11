@@ -147,14 +147,14 @@ lstinline "lstinline"
         begin_group x:(!end_group x:. { return x; })* end_group {
             return createNode("macro", { content, args: [{
                 "type": "argument",
-                "content": o || "",
+                "content": o ? [{ "type": "string", "content": o }] : [],
                 "openMark": o ? "[" : "",
                 "closeMark": o ? "]" : ""
             }, {
                 "type": "argument",
-                "content": x.join(""),
-                "openMark": e,
-                "closeMark": ""
+                "content": [{ "type": "string", "content": x.join("") }],
+                "openMark": "{",
+                "closeMark": "}"
             }] });
         }
     / escape
@@ -165,12 +165,12 @@ lstinline "lstinline"
         (end:. & { return end == e; }) {
             return createNode("macro", { content, args: [{
                 "type": "argument",
-                "content": o || "",
+                "content": o ? [{ "type": "string", "content": o }] : [],
                 "openMark": o ? "[" : "",
                 "closeMark": o ? "]" : ""
             }, {
                 "type": "argument",
-                "content": x.join(""),
+                "content": [{ "type": "string", "content": x.join("") }],
                 "openMark": e,
                 "closeMark": e
             }] });
