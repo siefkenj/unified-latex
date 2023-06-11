@@ -1,6 +1,7 @@
 import esbuild from "esbuild";
 import fs from "node:fs/promises";
 import { pegjsLoader } from "../../scripts/esbuild-pegjs-loader.mjs";
+import { isCjsPackage } from "../../scripts/esbuild-module-check.mjs";
 
 (async () => {
     const packageJson = JSON.parse(
@@ -29,6 +30,7 @@ import { pegjsLoader } from "../../scripts/esbuild-pegjs-loader.mjs";
     esbuild
         .build({
             ...commonConfig,
+            external: commonConfig.external.filter(isCjsPackage),
             outfile: "./dist/index.cjs",
             format: "cjs",
         })
