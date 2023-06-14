@@ -143,7 +143,7 @@ special_macro "special macro" // for the special macros like \[ \] and \begin{} 
     / environment
 
 square_bracket_argument
-    = "[" o:(!(end:. & { return end === "]"; }) x:token { return x; })* "]" {
+    = "[" o:(!(end:token & { return end.type === "string" && end.content === "]"; }) x:token { return x; })* "]" {
         return [
             createNode("string", { content: "[" }),
             ...o,
@@ -151,7 +151,7 @@ square_bracket_argument
         ]; }
 
 verbatim_group
-    = begin_group v:(!end_group x:. { return x; })* end_group { return createNode("group", { content: v.join("") }); }
+    = begin_group v:(!end_group x:. { return x; })* end_group { return createNode("group", { content: createNode("string", { content: v.join("") }) }); }
 
 verbatim_delimited_by_char
     = d:[^ \t\n\r] v:(!(end:. & { return end == d }) x:. { return x; })* (end:. & { return end == d }) {

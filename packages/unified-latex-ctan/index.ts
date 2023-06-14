@@ -3,6 +3,7 @@ import * as exam from "./package/exam";
 import * as geometry from "./package/geometry";
 import * as hyperref from "./package/hyperref";
 import * as latex2e from "./package/latex2e";
+import * as listings from "./package/listings"
 import * as makeidx from "./package/makeidx";
 import * as mathtools from "./package/mathtools";
 import * as nicematrix from "./package/nicematrix";
@@ -23,6 +24,7 @@ export const macroInfo = {
     geometry: geometry.macros,
     hyperref: hyperref.macros,
     latex2e: latex2e.macros,
+    listings: listings.macros,
     makeidx: makeidx.macros,
     mathtools: mathtools.macros,
     nicematrix: nicematrix.macros,
@@ -44,6 +46,7 @@ export const environmentInfo = {
     geometry: geometry.environments,
     hyperref: hyperref.environments,
     latex2e: latex2e.environments,
+    listings: listings.environments,
     makeidx: makeidx.environments,
     mathtools: mathtools.environments,
     nicematrix: nicematrix.environments,
