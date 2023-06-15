@@ -1,37 +1,42 @@
-import {
-    getDelimGroup,
-    getGroup,
-    getOptionalArg,
-} from "@unified-latex/unified-latex-ctan/utils/argument-globber";
-import { ArgumentParser } from "@unified-latex/unified-latex-types";
+import { arg } from "@unified-latex/unified-latex-builder";
+import { Argument, ArgumentParser } from "@unified-latex/unified-latex-types";
+import { parse as parseArgspec } from "@unified-latex/unified-latex-util-argspec";
+import { gobbleSingleArgument } from "@unified-latex/unified-latex-util-arguments";
+import { match } from "@unified-latex/unified-latex-util-match";
 
 /**
  * This argument parser parses arguments in the form of
  * - [⟨key=value list⟩]⟨character⟩⟨source code⟩⟨same character⟩
  * - [⟨key=value list⟩]{⟨source code⟩}
  */
-export const odArgumentParser: ArgumentParser = (nodes, startPos) => {
-    const optionalArg = getOptionalArg(nodes, startPos);
-    let codeArg = getGroup(nodes, startPos);
-    if (codeArg.nodesRemoved === 0) {
-        codeArg = getDelimGroup(nodes, startPos);
+export const argumentParser: ArgumentParser = (nodes, startPos) => {
+    const { argument: optionalArg, nodesRemoved: optionalArgNodesRemoved } =
+        gobbleSingleArgument(nodes, parseArgspec("o")[0], startPos);
+
+    let codeArg: Argument | null = null;
+    let codeArgNodesRemoved: number = 0;
+    const nextNode = nodes[startPos];
+    if (match.group(nextNode)) {
+        const mandatoryArg = gobbleSingleArgument(
+            nodes,
+            parseArgspec("m")[0],
+            startPos
+        );
+        codeArg = mandatoryArg.argument;
+        codeArgNodesRemoved = mandatoryArg.nodesRemoved;
+    } else if (match.string(nextNode) && nextNode.content.length === 1) {
+        const delim = nextNode.content;
+        const delimArg = gobbleSingleArgument(
+            nodes,
+            parseArgspec(`r${delim}${delim}`)[0],
+            startPos
+        );
+        codeArg = delimArg.argument;
+        codeArgNodesRemoved = delimArg.nodesRemoved;
     }
 
     return {
-        args: [optionalArg.arg, codeArg.arg],
-        nodesRemoved: optionalArg.nodesRemoved + codeArg.nodesRemoved,
-    };
-};
-
-/**
- * This argument parser parses arguments in the form of
- * - [⟨key=value list⟩]{⟨file name⟩}
- */
-export const ovArgumentParser: ArgumentParser = (nodes, startPos) => {
-    const optionalArg = getOptionalArg(nodes, startPos);
-    const fileArg = getGroup(nodes, startPos);
-    return {
-        args: [optionalArg.arg, fileArg.arg],
-        nodesRemoved: optionalArg.nodesRemoved + fileArg.nodesRemoved,
+        args: [optionalArg || arg(null), codeArg || arg(null)],
+        nodesRemoved: optionalArgNodesRemoved + codeArgNodesRemoved,
     };
 };

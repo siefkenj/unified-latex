@@ -2,15 +2,12 @@ import {
     MacroInfoRecord,
     EnvInfoRecord,
 } from "@unified-latex/unified-latex-types";
-import {
-    odArgumentParser,
-    ovArgumentParser,
-} from "./libs/command-argument-parser";
+import { argumentParser } from "./libs/command-argument-parser";
 
 export const macros: MacroInfoRecord = {
     lstset: { signature: "m" },
-    lstinline: { argumentParser: odArgumentParser },
-    lstinputlisting: { argumentParser: ovArgumentParser },
+    lstinline: { argumentParser: argumentParser },
+    lstinputlisting: { signature: "o m" },
     lstdefinestyle: { signature: "m m" },
     lstnewenvironment: { signature: "m o o m m" },
     lstMakeShortInline: { signature: "o m" },
