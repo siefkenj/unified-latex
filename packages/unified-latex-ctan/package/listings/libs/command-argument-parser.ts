@@ -1,50 +1,55 @@
-import { arg, s } from "@unified-latex/unified-latex-builder";
+import { s } from "@unified-latex/unified-latex-builder";
+import { getDelimGroup, getGroup, getOptionalArg } from "@unified-latex/unified-latex-ctan/utils/argument-globber";
 import { ArgumentParser } from "@unified-latex/unified-latex-types";
-import { parse as parseArgspec } from "@unified-latex/unified-latex-util-argspec";
-import { gobbleSingleArgument } from "@unified-latex/unified-latex-util-arguments";
-import { match } from "@unified-latex/unified-latex-util-match";
 
-export const commandArgumentParser: ArgumentParser = (nodes, startPos) => {
+
+/**
+ * This argument parser parses arguments in the form of
+ * - [⟨key=value list⟩]⟨character⟩⟨source code⟩⟨same character⟩
+ * - [⟨key=value list⟩]{⟨source code⟩}
+ */
+export const odArgumentParser: ArgumentParser = (nodes, startPos) => {
     let pos = startPos;
     let nodesRemoved = 0;
 
-    const {
-        argument: _optionalArgument,
-        nodesRemoved: optionalArgumentNodesRemoved,
-    } = gobbleSingleArgument(nodes, parseArgspec("o")[0], pos);
-    nodesRemoved += optionalArgumentNodesRemoved;
-    const optionalArg = _optionalArgument || arg([], { openMark: "", closeMark: "" });
+    const optionalArg = getOptionalArg(nodes, pos);
+    nodesRemoved += optionalArg.nodesRemoved;
 
-    const nextArgNode = nodes[pos];
-    if (match.group(nextArgNode)) {
-        // \lstinline{some_code$}
-
-        const codeArg = arg(nextArgNode.content);
-        nodesRemoved += 1;
-        nodes.splice(pos, 1);
-
+    const codeArg = getGroup(nodes, pos) || getDelimGroup(nodes, pos);
+    if (codeArg) {
         return {
-            args: [ optionalArg, codeArg ],
-            nodesRemoved,
-        };
-    } else if (match.string(nextArgNode) && nextArgNode.content.length === 1) {
-        // \\lstinline#some_code$#
-        const brace = nextArgNode.content
-        const closePos = nodes.findIndex( (node, i) => i > pos && match.string(node, brace) );
-        if (closePos > pos) {
-            const codeArg = arg(nodes.slice(pos + 1, closePos), { openMark: brace, closeMark: brace });
-            nodesRemoved += closePos - pos + 1;
-            nodes.splice(pos, closePos - pos + 1);
-
-            return {
-                args: [ optionalArg, codeArg ],
-                nodesRemoved,
-            };
+            args: [optionalArg.arg, codeArg.arg],
+            nodesRemoved: optionalArg.nodesRemoved + codeArg.nodesRemoved
         }
+    } else {
+        // \\lstinline[language]#some_code$
+        // This case, the optional arguments should not be globbed. Return them.
+        nodes.splice(pos, 0, s("["), ...optionalArg.arg.content, s("]"))
+        return { args: [], nodesRemoved: 0 };
     }
+};
 
-    // \\lstinline[language]#some_code$
-    nodes.splice(pos, 0, s("["), ...optionalArg.content, s("]"))
-    console.debug(nodes)
-    return { args: [], nodesRemoved: 0 };
+/**
+ * This argument parser parses arguments in the form of
+ * - [⟨key=value list⟩]{⟨file name⟩}
+ */
+export const ovArgumentParser: ArgumentParser = (nodes, startPos) => {
+    let pos = startPos;
+    let nodesRemoved = 0;
+
+    const optionalArg = getOptionalArg(nodes, pos);
+    nodesRemoved += optionalArg.nodesRemoved;
+
+    const fileArg = getGroup(nodes, pos)
+    if (fileArg) {
+        return {
+            args: [optionalArg.arg, fileArg.arg],
+            nodesRemoved: optionalArg.nodesRemoved + fileArg.nodesRemoved
+        }
+    } else {
+        // \\lstinputlisting[language]
+        // This case, the optional arguments should not be globbed. Return them.
+        nodes.splice(pos, 0, s("["), ...optionalArg.arg.content, s("]"))
+        return { args: [], nodesRemoved: 0 };
+    }
 };
