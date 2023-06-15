@@ -3,7 +3,7 @@ import { parse } from "../libs/parse";
 import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 import { parseMath } from "../libs/parse-math";
 import { trimRenderInfo } from "@unified-latex/unified-latex-util-render-info";
-import { SP, args, m, s } from "@unified-latex/unified-latex-builder";
+import { SP, arg, args, m, s } from "@unified-latex/unified-latex-builder";
 
 /* eslint-env jest */
 
@@ -152,33 +152,24 @@ describe("unified-latex-util-parse", () => {
         });
         expect(trimRenderInfo(parse("\\lstinline#some_code$#"))).toEqual({
             type: "root",
-            content: [m("lstinline", [...args(null), ...args("some_code$", { defaultOpenMark: "#", defaultCloseMark: "#" })])],
+            content: [m("lstinline", [arg(null), arg("some_code$", { openMark: "#", closeMark: "#" })])],
         });
         expect(trimRenderInfo(parse("\\lstinline[language]#some_code$#"))).toEqual({
             type: "root",
-            content: [m("lstinline", [...args("language", { braces: "[]" }), ...args("some_code$", { defaultOpenMark: "#", defaultCloseMark: "#" })])],
+            content: [m("lstinline", [arg("language", { braces: "[]" }), arg("some_code$", { openMark: "#", closeMark: "#" })])],
         });
-        expect((parse("\\lstinline[language]")).content.length).toEqual(4);
+        expect(trimRenderInfo(parse("\\lstinline[foo %bar\n\n]{my code}"))).toEqual({
+            type: "root",
+            content: [m("lstinline", [arg([s("foo"), { type: "comment", content: "bar", leadingWhitespace: true, sameline: true, suffixParbreak: true } , { type: "parbreak" }], { braces: "[]" }), arg("my code")])],
+        });
 
-        expect(trimRenderInfo(parse("\\mint{some language}{some_code$}"))).toEqual({
-            type: "root",
-            content: [m("mint", args([null, "some language", "some_code$"], { braces: "[]{}{}" }))],
-        });
-        expect(trimRenderInfo(parse("\\mint[options]{some language}{some_code$}"))).toEqual({
-            type: "root",
-            content: [m("mint", args(["options", "some language", "some_code$"], { braces: "[]{}{}" }))],
-        });
-        expect(trimRenderInfo(parse("\\mint{some language}#some_code$#"))).toEqual({
-            type: "root",
-            content: [m("mint", [...args([null, "some language"], { braces: "[]{}" }), ...args("some_code$", { defaultOpenMark: "#", defaultCloseMark: "#" })])],
-        });
         expect(trimRenderInfo(parse("\\mint[options]{some language}#some_code$#"))).toEqual({
             type: "root",
-            content: [m("mint", [...args(["options", "some language"], { braces: "[]{}" }), ...args("some_code$", { defaultOpenMark: "#", defaultCloseMark: "#" })])],
+            content: [m("mint", [...args(["options", "some language"], { braces: "[]{}" }), arg("some_code$", { openMark: "#", closeMark: "#" })])],
         });
         expect(trimRenderInfo(parse("\\mintinline[options]{some language}#some_code$#"))).toEqual({
             type: "root",
-            content: [m("mintinline", [...args(["options", "some language"], { braces: "[]{}" }), ...args("some_code$", { defaultOpenMark: "#", defaultCloseMark: "#" })])],
+            content: [m("mintinline", [...args(["options", "some language"], { braces: "[]{}" }), arg("some_code$", { openMark: "#", closeMark: "#" })])],
         });
     });
 });

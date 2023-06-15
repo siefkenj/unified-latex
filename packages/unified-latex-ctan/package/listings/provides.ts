@@ -2,7 +2,10 @@ import {
     MacroInfoRecord,
     EnvInfoRecord,
 } from "@unified-latex/unified-latex-types";
-import { odArgumentParser, ovArgumentParser } from "./libs/command-argument-parser";
+import {
+    odArgumentParser,
+    ovArgumentParser,
+} from "./libs/command-argument-parser";
 
 export const macros: MacroInfoRecord = {
     lstset: { signature: "m" },
@@ -15,8 +18,7 @@ export const macros: MacroInfoRecord = {
     lstdefineformat: { signature: "m m" },
     lstdefinelanguage: { signature: "o m o m o" },
     lstalias: { signature: "o m o m" },
-    lstloadlanguages: { signature: "m" }
+    lstloadlanguages: { signature: "m" },
 };
 
-export const environments: EnvInfoRecord = {
-};
+export const environments: EnvInfoRecord = {};
