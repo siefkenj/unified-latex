@@ -6,6 +6,7 @@ import * as latex2e from "./package/latex2e";
 import * as listings from "./package/listings"
 import * as makeidx from "./package/makeidx";
 import * as mathtools from "./package/mathtools";
+import * as minted from "./package/minted";
 import * as nicematrix from "./package/nicematrix";
 import * as systeme from "./package/systeme";
 import * as tikz from "./package/tikz";
@@ -27,6 +28,7 @@ export const macroInfo = {
     listings: listings.macros,
     makeidx: makeidx.macros,
     mathtools: mathtools.macros,
+    minted: minted.macros,
     nicematrix: nicematrix.macros,
     systeme: systeme.macros,
     tikz: tikz.macros,
@@ -49,6 +51,7 @@ export const environmentInfo = {
     listings: listings.environments,
     makeidx: makeidx.environments,
     mathtools: mathtools.environments,
+    minted: minted.environments,
     nicematrix: nicematrix.environments,
     systeme: systeme.environments,
     tikz: tikz.environments,

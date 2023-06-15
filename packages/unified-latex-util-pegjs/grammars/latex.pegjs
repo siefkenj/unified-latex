@@ -161,7 +161,7 @@ verbatim_delimited_by_char
             createNode("string", { content: d })
         ]; }
 
-verbatim_listings "verbatim_listings"
+verbatim_listings "verbatim listings"
     = escape
     	macro:"lstinline"
         option:square_bracket_argument?
@@ -169,13 +169,37 @@ verbatim_listings "verbatim_listings"
             return [createNode("macro", { content: macro }), ...(option || []), ...[].concat(verbatim)]
         }
 
-verbatim_minted "verbatim_minted"
+verbatim_minted "verbatim minted"
 	= escape
     	macro:("mintinline" / "mint")
         option:square_bracket_argument?
         language:verbatim_group
         verbatim:(verbatim_group / verbatim_delimited_by_char) {
             return [createNode("macro", { content: macro }), ...(option || []), language, ...[].concat(verbatim)]
+        }
+
+verbatim_minted_environment "verbatim minted environment"
+    = begin_env
+        begin_group
+        env:"minted"
+        end_group
+        lang:verbatim_group
+        body:(
+            !(
+                    end_env
+                        end_env:group
+                        & { return compare_env({ content: [env] }, end_env); }
+                )
+                x:. { return x; }
+        )*
+        end_env
+        begin_group
+        verbatim_env_name
+        end_group {
+            return createNode("verbatim", {
+                env: `${env}{${lang.content.content}}`,
+                content: body.join(""),
+            });
         }
 
 verbatim_environment "verbatim environment"
