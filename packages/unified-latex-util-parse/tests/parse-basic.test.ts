@@ -162,6 +162,10 @@ describe("unified-latex-util-parse", () => {
             type: "root",
             content: [m("lstinline", [arg([s("foo"), { type: "comment", content: "bar", leadingWhitespace: true, sameline: true, suffixParbreak: true } , { type: "parbreak" }], { braces: "[]" }), arg("my code")])],
         });
+        expect(trimRenderInfo(parse("\\lstinline{code % also code\n\\still code\\\\}"))).toEqual({
+            type: "root",
+            content: [m("lstinline", [arg(null), arg("code % also code\n\\still code\\\\")])],
+        });
 
         expect(trimRenderInfo(parse("\\mint[options]{some language}#some_code$#"))).toEqual({
             type: "root",
