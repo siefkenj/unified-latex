@@ -2,7 +2,7 @@ import {
     MacroInfoRecord,
     EnvInfoRecord,
 } from "@unified-latex/unified-latex-types";
-import { argumentParser } from "./libs/command-argument-parser";
+import { argumentParser } from "./libs/argument-parser";
 
 export const macros: MacroInfoRecord = {
     mint: { argumentParser: argumentParser },

@@ -141,39 +141,105 @@ describe("unified-latex-util-parse", () => {
         expect(printRaw(parsed)).toEqual("\\x #1 y");
     });
 
-    it("Does not parse verbatim in listings and minted packages", () => {
+    it("Parses verbatim arguments directly as strings", () => {
         expect(trimRenderInfo(parse("\\lstinline{some_code$}"))).toEqual({
             type: "root",
-            content: [m("lstinline", args([null, "some_code$"], { braces: "[]{}" }))],
+            content: [
+                m("lstinline", args([null, "some_code$"], { braces: "[]{}" })),
+            ],
         });
-        expect(trimRenderInfo(parse("\\lstinline[language]{some_code$}"))).toEqual({
+        expect(
+            trimRenderInfo(parse("\\lstinline[language]{some_code$}"))
+        ).toEqual({
             type: "root",
-            content: [m("lstinline", args(["language", "some_code$"], { braces: "[]{}" }))],
+            content: [
+                m(
+                    "lstinline",
+                    args(["language", "some_code$"], { braces: "[]{}" })
+                ),
+            ],
         });
         expect(trimRenderInfo(parse("\\lstinline#some_code$#"))).toEqual({
             type: "root",
-            content: [m("lstinline", [arg(null), arg("some_code$", { openMark: "#", closeMark: "#" })])],
+            content: [
+                m("lstinline", [
+                    arg(null),
+                    arg("some_code$", { openMark: "#", closeMark: "#" }),
+                ]),
+            ],
         });
-        expect(trimRenderInfo(parse("\\lstinline[language]#some_code$#"))).toEqual({
+        expect(
+            trimRenderInfo(parse("\\lstinline[language]!some_code$!"))
+        ).toEqual({
             type: "root",
-            content: [m("lstinline", [arg("language", { braces: "[]" }), arg("some_code$", { openMark: "#", closeMark: "#" })])],
+            content: [
+                m("lstinline", [
+                    arg("language", { braces: "[]" }),
+                    arg("some_code$", { openMark: "!", closeMark: "!" }),
+                ]),
+            ],
         });
-        expect(trimRenderInfo(parse("\\lstinline[foo %bar\n\n]{my code}"))).toEqual({
+        expect(
+            trimRenderInfo(parse("\\lstinline[foo %bar\n\n]{my code}"))
+        ).toEqual({
             type: "root",
-            content: [m("lstinline", [arg([s("foo"), { type: "comment", content: "bar", leadingWhitespace: true, sameline: true, suffixParbreak: true } , { type: "parbreak" }], { braces: "[]" }), arg("my code")])],
+            content: [
+                m("lstinline", [
+                    arg(
+                        [
+                            s("foo"),
+                            {
+                                type: "comment",
+                                content: "bar",
+                                leadingWhitespace: true,
+                                sameline: true,
+                                suffixParbreak: true,
+                            },
+                            { type: "parbreak" },
+                        ],
+                        { braces: "[]" }
+                    ),
+                    arg("my code"),
+                ]),
+            ],
         });
-        expect(trimRenderInfo(parse("\\lstinline{code % also code\n\\still code\\\\}"))).toEqual({
+        expect(
+            trimRenderInfo(
+                parse("\\lstinline{code % also code\n\\still code\\\\}")
+            )
+        ).toEqual({
             type: "root",
-            content: [m("lstinline", [arg(null), arg("code % also code\n\\still code\\\\")])],
+            content: [
+                m("lstinline", [
+                    arg(null),
+                    arg("code % also code\n\\still code\\\\"),
+                ]),
+            ],
         });
 
-        expect(trimRenderInfo(parse("\\mint[options]{some language}#some_code$#"))).toEqual({
+        expect(
+            trimRenderInfo(parse("\\mint[options]{some language}#some_code$#"))
+        ).toEqual({
             type: "root",
-            content: [m("mint", [...args(["options", "some language"], { braces: "[]{}" }), arg("some_code$", { openMark: "#", closeMark: "#" })])],
+            content: [
+                m("mint", [
+                    ...args(["options", "some language"], { braces: "[]{}" }),
+                    arg("some_code$", { openMark: "#", closeMark: "#" }),
+                ]),
+            ],
         });
-        expect(trimRenderInfo(parse("\\mintinline[options]{some language}#some_code$#"))).toEqual({
+        expect(
+            trimRenderInfo(
+                parse("\\mintinline[options]{some language}#some_code$#")
+            )
+        ).toEqual({
             type: "root",
-            content: [m("mintinline", [...args(["options", "some language"], { braces: "[]{}" }), arg("some_code$", { openMark: "#", closeMark: "#" })])],
+            content: [
+                m("mintinline", [
+                    ...args(["options", "some language"], { braces: "[]{}" }),
+                    arg("some_code$", { openMark: "#", closeMark: "#" }),
+                ]),
+            ],
         });
     });
 });

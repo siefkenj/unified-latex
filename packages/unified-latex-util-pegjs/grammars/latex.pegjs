@@ -173,7 +173,7 @@ verbatim_minted "verbatim minted"
 	= escape
     	macro:("mintinline" / "mint")
         option:square_bracket_argument?
-        language:verbatim_group
+        language:group
         verbatim:(verbatim_group / verbatim_delimited_by_char) {
             return [createNode("macro", { content: macro }), ...(option || []), language, ...[].concat(verbatim)]
         }
@@ -183,7 +183,7 @@ verbatim_minted_environment "verbatim minted environment"
         begin_group
         env:"minted"
         end_group
-        lang:verbatim_group
+        lang:group
         body:(
             !(
                     end_env
