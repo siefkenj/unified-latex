@@ -16,10 +16,10 @@ const argSpecRDelim: { [delim: string]: Node } = {};
  */
 export const argumentParser: ArgumentParser = (nodes, startPos) => {
     const { argument: optionalArg, nodesRemoved: optionalArgNodesRemoved } =
-        gobbleSingleArgument(nodes, argSpecM, startPos);
+        gobbleSingleArgument(nodes, argSpecO, startPos);
 
     const { argument: languageArg, nodesRemoved: languageArgNodesRemoved } =
-        gobbleSingleArgument(nodes, argSpecO, startPos);
+        gobbleSingleArgument(nodes, argSpecM, startPos);
 
     let codeArg: Argument | null = null;
     let codeArgNodesRemoved: number = 0;
