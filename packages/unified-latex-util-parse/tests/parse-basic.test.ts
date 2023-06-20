@@ -218,25 +218,25 @@ describe("unified-latex-util-parse", () => {
         });
 
         expect(
-            trimRenderInfo(parse("\\mint[options]{some language}#some_code$#"))
+            trimRenderInfo(parse("\\mint[options]{language}#some_code$#"))
         ).toEqual({
             type: "root",
             content: [
                 m("mint", [
-                    ...args(["options", "some language"], { braces: "[]{}" }),
+                    ...args(["options", "language"], { braces: "[]{}" }),
                     arg("some_code$", { openMark: "#", closeMark: "#" }),
                 ]),
             ],
         });
         expect(
             trimRenderInfo(
-                parse("\\mintinline[options]{some language}#some_code$#")
+                parse("\\mintinline[options]{language}#some_code$#")
             )
         ).toEqual({
             type: "root",
             content: [
                 m("mintinline", [
-                    ...args(["options", "some language"], { braces: "[]{}" }),
+                    ...args(["options", "language"], { braces: "[]{}" }),
                     arg("some_code$", { openMark: "#", closeMark: "#" }),
                 ]),
             ],
