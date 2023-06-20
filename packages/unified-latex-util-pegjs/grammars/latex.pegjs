@@ -25,7 +25,10 @@
     }
 }
 
-document "document" = content:token* { return createNode("root", { content }); }
+document "document"
+    = content:token* {
+            return createNode("root", { content: content.flatMap((x) => x) });
+        }
 
 // This rule is used as the entry rule to parse when you know that the string only contains math
 math "math" = math_token*
@@ -36,7 +39,7 @@ token "token"
     / full_comment
     / group
     / math_shift eq:(!math_shift t:math_token { return t; })+ math_shift {
-            return createNode("inlinemath", { content: eq });
+            return createNode("inlinemath", { content: eq.flatMap((x) => x) });
         }
     / alignment_tab
     / parbreak
@@ -118,25 +121,124 @@ special_macro "special macro" // for the special macros like \[ \] and \begin{} 
                 content: x.join(""),
             });
         }
+    // verbatim macro in listings package
+    / verbatim_listings
+    // verbatim macro in minted package
+    / verbatim_minted
     // verbatim environment
     / verbatim_environment
     // display math with \[...\]
     / begin_display_math
         x:(!end_display_math x:math_token { return x; })*
-        end_display_math { return createNode("displaymath", { content: x }); }
+        end_display_math {
+            return createNode("displaymath", { content: x.flatMap((x) => x) });
+        }
     // inline math with \(...\)
     / begin_inline_math
         x:(!end_inline_math x:math_token { return x; })*
-        end_inline_math { return createNode("inlinemath", { content: x }); }
+        end_inline_math {
+            return createNode("inlinemath", { content: x.flatMap((x) => x) });
+        }
     // display math with $$...$$
     / math_shift
         math_shift
         x:(!(math_shift math_shift) x:math_token { return x; })*
         math_shift
-        math_shift { return createNode("displaymath", { content: x }); }
+        math_shift {
+            return createNode("displaymath", { content: x.flatMap((x) => x) });
+        }
     // math with $...$
     / math_environment
     / environment
+
+square_bracket_argument
+    = "["
+        o:(
+            !(
+                    end:token
+                        & {
+                                return (
+                                    end.type === "string" && end.content === "]"
+                                );
+                            }
+                )
+                x:token { return x; }
+        )*
+        "]" {
+            return [
+                createNode("string", { content: "[" }),
+                ...o,
+                createNode("string", { content: "]" }),
+            ];
+        }
+
+verbatim_group
+    = begin_group v:(!end_group x:. { return x; })* end_group {
+            return createNode("group", {
+                content: createNode("string", { content: v.join("") }),
+            });
+        }
+
+verbatim_delimited_by_char
+    = d:[^ \t\n\r]
+        v:(!(end:. & { return end == d; }) x:. { return x; })*
+        (end:. & { return end == d; }) {
+            return [
+                createNode("string", { content: d }),
+                createNode("string", { content: v.join("") }),
+                createNode("string", { content: d }),
+            ];
+        }
+
+verbatim_listings "verbatim listings"
+    = escape
+        macro:"lstinline"
+        option:square_bracket_argument?
+        verbatim:(verbatim_group / verbatim_delimited_by_char) {
+            return [
+                createNode("macro", { content: macro }),
+                ...(option || []),
+                ...[].concat(verbatim),
+            ];
+        }
+
+verbatim_minted "verbatim minted"
+    = escape
+        macro:("mintinline" / "mint")
+        option:square_bracket_argument?
+        language:group
+        verbatim:(verbatim_group / verbatim_delimited_by_char) {
+            return [
+                createNode("macro", { content: macro }),
+                ...(option || []),
+                language,
+                ...[].concat(verbatim),
+            ];
+        }
+
+verbatim_minted_environment "verbatim minted environment"
+    = begin_env
+        begin_group
+        env:"minted"
+        end_group
+        lang:group
+        body:(
+            !(
+                    end_env
+                        end_env:group
+                        & { return compare_env({ content: [env] }, end_env); }
+                )
+                x:. { return x; }
+        )*
+        end_env
+        begin_group
+        verbatim_env_name
+        end_group {
+            return createNode("verbatim", {
+                env: `${env}{${lang.content.content}}`,
+                content: body.join(""),
+            });
+        }
 
 verbatim_environment "verbatim environment"
     = begin_env
@@ -179,7 +281,7 @@ macro "macro"
 
 group "group"
     = begin_group x:(!end_group c:token { return c; })* end_group {
-            return createNode("group", { content: x });
+            return createNode("group", { content: x.flatMap((x) => x) });
         }
 
 // Match a group but return its contents as a raw string.
@@ -200,6 +302,7 @@ environment "environment"
         )*
         end_env
         group_contents_as_string {
+            body = body.flatMap((x) => x);
             return createNode("environment", {
                 env,
                 content: env_comment ? [env_comment, ...body] : body,
@@ -224,6 +327,7 @@ math_environment "math environment"
         begin_group
         math_env_name
         end_group {
+            body = body.flatMap((x) => x);
             return createNode("mathenv", {
                 env: env,
                 content: env_comment ? [env_comment, ...body] : body,
@@ -233,7 +337,7 @@ math_environment "math environment"
 // group that assumes you're in math mode.  If you use "\text{}" this isn't a good idea....
 math_group "math group"
     = begin_group x:(!end_group c:math_token { return c; })* end_group {
-            return createNode("group", { content: x });
+            return createNode("group", { content: x.flatMap((x) => x) });
         }
 
 begin_display_math = escape "["

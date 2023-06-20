@@ -2,6 +2,8 @@ import util from "util";
 import { parse } from "../libs/parse";
 import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 import { parseMath } from "../libs/parse-math";
+import { trimRenderInfo } from "@unified-latex/unified-latex-util-render-info";
+import { SP, arg, args, m, s } from "@unified-latex/unified-latex-builder";
 
 /* eslint-env jest */
 
@@ -137,5 +139,107 @@ describe("unified-latex-util-parse", () => {
         let parsed;
         parsed = parseMath("\\x   #1    y");
         expect(printRaw(parsed)).toEqual("\\x #1 y");
+    });
+
+    it("Parses verbatim arguments directly as strings", () => {
+        expect(trimRenderInfo(parse("\\lstinline{some_code$}"))).toEqual({
+            type: "root",
+            content: [
+                m("lstinline", args([null, "some_code$"], { braces: "[]{}" })),
+            ],
+        });
+        expect(
+            trimRenderInfo(parse("\\lstinline[language]{some_code$}"))
+        ).toEqual({
+            type: "root",
+            content: [
+                m(
+                    "lstinline",
+                    args(["language", "some_code$"], { braces: "[]{}" })
+                ),
+            ],
+        });
+        expect(trimRenderInfo(parse("\\lstinline#some_code$#"))).toEqual({
+            type: "root",
+            content: [
+                m("lstinline", [
+                    arg(null),
+                    arg("some_code$", { openMark: "#", closeMark: "#" }),
+                ]),
+            ],
+        });
+        expect(
+            trimRenderInfo(parse("\\lstinline[language]!some_code$!"))
+        ).toEqual({
+            type: "root",
+            content: [
+                m("lstinline", [
+                    arg("language", { braces: "[]" }),
+                    arg("some_code$", { openMark: "!", closeMark: "!" }),
+                ]),
+            ],
+        });
+        expect(
+            trimRenderInfo(parse("\\lstinline[foo %bar\n\n]{my code}"))
+        ).toEqual({
+            type: "root",
+            content: [
+                m("lstinline", [
+                    arg(
+                        [
+                            s("foo"),
+                            {
+                                type: "comment",
+                                content: "bar",
+                                leadingWhitespace: true,
+                                sameline: true,
+                                suffixParbreak: true,
+                            },
+                            { type: "parbreak" },
+                        ],
+                        { braces: "[]" }
+                    ),
+                    arg("my code"),
+                ]),
+            ],
+        });
+        expect(
+            trimRenderInfo(
+                parse("\\lstinline{code % also code\n\\still code\\\\}")
+            )
+        ).toEqual({
+            type: "root",
+            content: [
+                m("lstinline", [
+                    arg(null),
+                    arg("code % also code\n\\still code\\\\"),
+                ]),
+            ],
+        });
+
+        expect(
+            trimRenderInfo(parse("\\mint[options]{language}#some_code$#"))
+        ).toEqual({
+            type: "root",
+            content: [
+                m("mint", [
+                    ...args(["options", "language"], { braces: "[]{}" }),
+                    arg("some_code$", { openMark: "#", closeMark: "#" }),
+                ]),
+            ],
+        });
+        expect(
+            trimRenderInfo(
+                parse("\\mintinline[options]{language}#some_code$#")
+            )
+        ).toEqual({
+            type: "root",
+            content: [
+                m("mintinline", [
+                    ...args(["options", "language"], { braces: "[]{}" }),
+                    arg("some_code$", { openMark: "#", closeMark: "#" }),
+                ]),
+            ],
+        });
     });
 });
