@@ -1,12 +1,12 @@
 {
     "name": "@unified-latex/unified-latex-util-match",
-    "version": "1.3.1",
+    "version": "1.4.0",
     "description": "Match nodes in a unified-latex AST",
     "main": "dist/index.js",
     "type": "module",
     "dependencies": {
         "@unified-latex/unified-latex-types": "^1.3.1",
-        "@unified-latex/unified-latex-util-print-raw": "^1.3.1"
+        "@unified-latex/unified-latex-util-print-raw": "^1.4.0"
     },
     "files": [
         "dist/**/*.ts",
