@@ -96,6 +96,30 @@ function unifiedLatexFromStringMinimal(options: PluginOptions): void;
 
 # Functions
 
+## `getParser(options)`
+
+Returns the default `unified-latex` parser, or create a new one with the
+provided `unifiedLatexFromString` options
+
+```typescript
+function getParser(options: {
+  mode?: "math" | "regular";
+  macros?: Ast.MacroInfoRecord;
+  environments?: Ast.EnvInfoRecord;
+  flags?: {
+    atLetter?: boolean;
+    expl3?: boolean;
+    autodetectExpl3AndAtLetter?: boolean;
+  };
+}): FrozenProcessor<Ast.Root, Ast.Root, Ast.Root, void>;
+```
+
+**Parameters**
+
+| Param   | Type                              | Description                                        |
+| :------ | :-------------------------------- | -------------------------------------------------- |
+| options | <span color='gray'>Omitted</span> | Plugin options of `unifiedLatexFromString` plugin. |
+
 ## `parse(str)`
 
 Parse the string into an AST.
@@ -159,21 +183,6 @@ function parseMinimal(str: String): Ast.Root;
 | Param | Type     |
 | :---- | :------- |
 | str   | `String` |
-
-## `getParser(PluginOptions)`
-
-Returns the default `unified-latex` parser if the argument is `undefined`, or
-create a new one with the provided `unifiedLatexFromString` options.
-
-```typescript
-function getParser(options?: PluginOptions): FrozenProcessor<Ast.Root, Ast.Root, Ast.Root, void>;
-```
-
-**Parameters**
-
-| Param  | Type            |
-| :----- | :-------------- |
-| option | `PluginOptions` |
 
 # Types
 
