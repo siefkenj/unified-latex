@@ -711,4 +711,13 @@ c
             expect(inStr).toFormatAs(outStr, formatter);
         }
     });
+
+    it("Double backslash macro doesn't absorb optional argument if there's a space in front (issue #40)", () => {
+        const STRINGS = [{ inStr: "\\\\ [2pt]", outStr: "\\\\ [2pt]" }];
+
+        for (const { inStr, outStr } of STRINGS) {
+            expect(inStr).toFormatAs(outStr, formatter);
+        }
+    });
+
 });
