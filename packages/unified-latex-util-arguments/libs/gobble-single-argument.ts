@@ -235,8 +235,8 @@ function cloneStringNode(node: Ast.String, content: string): Ast.String {
 /**
  * Find the position of the open brace and the closing brace.
  * Returns undefined if the brace isn't found.
- * This may mutate `nodes`, in rare occasions when braces are not a kind of
- * characters that are always parsed as a separate token
+ * This may mutate `nodes`, if braces are not a kind of characters that are
+ * always parsed as a separate token
  */
 function findBracePositions(nodes: Ast.Node[], startPos: number,
     openMark: string, closeMark?: string): [number, number] | undefined {

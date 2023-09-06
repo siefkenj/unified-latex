@@ -724,7 +724,7 @@ describe("unified-latex-util-arguments", () => {
 
     });
     it("can gobble embellishments whose token is in a group one level deep", () => {
-        let ast :Ast.Node[] = [
+        let ast: Ast.Node[] = [
             { type: "string", content: "^a_b" }
         ]
         expect(gobbleSingleArgument(ast, parseArgspec("e{{^}{_}}")[0])).toMatchObject(
