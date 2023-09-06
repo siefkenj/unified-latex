@@ -1,8 +1,9 @@
 import { ArgSpecAst as ArgSpec } from "@unified-latex/unified-latex-util-argspec";
 import * as Ast from "@unified-latex/unified-latex-types";
-import { match } from "@unified-latex/unified-latex-util-match";
+import { match, string } from "@unified-latex/unified-latex-util-match";
 import { scan } from "@unified-latex/unified-latex-util-scan";
 import { arg } from "@unified-latex/unified-latex-builder";
+import { stringifyGroup } from "./gobble-arguments";
 
 /**
  * Gobbles an argument of whose type is specified
@@ -14,7 +15,7 @@ export function gobbleSingleArgument(
     argSpec: ArgSpec.Node,
     startPos = 0
 ): {
-    argument: Ast.Argument | null;
+    argument: Ast.Argument | Ast.Argument[] | null;
     nodesRemoved: number;
 } {
     if (typeof argSpec === "string" || !argSpec.type) {
@@ -25,7 +26,7 @@ export function gobbleSingleArgument(
         );
     }
 
-    let argument: Ast.Argument | null = null;
+    let argument: Ast.Argument | Ast.Argument[] | null = null;
 
     let currPos = startPos;
 
@@ -34,15 +35,15 @@ export function gobbleSingleArgument(
     // this function does nothing.
     const gobbleWhitespace = (argSpec as ArgSpec.LeadingWhitespace)
         .noLeadingWhitespace
-        ? () => {}
+        ? () => { }
         : () => {
-              while (currPos < nodes.length) {
-                  if (!match.whitespace(nodes[currPos])) {
-                      break;
-                  }
-                  currPos++;
-              }
-          };
+            while (currPos < nodes.length) {
+                if (!match.whitespace(nodes[currPos])) {
+                    break;
+                }
+                currPos++;
+            }
+        };
 
     const openMark: string = (argSpec as any).openBrace || "";
     const closeMark: string = (argSpec as any).closeBrace || "";
@@ -55,32 +56,6 @@ export function gobbleSingleArgument(
         (argSpec.type === "mandatory" || argSpec.type === "optional") &&
         openMark === "{" &&
         closeMark === "}";
-
-    // Find the position of the open brace and the closing brace.
-    // The position(s) are null if the brace isn't found.
-    function findBracePositions(): [number | null, number | null] {
-        let openMarkPos: number | null = null;
-        if (openMark) {
-            openMarkPos = nodes.findIndex(
-                (node, i) => i >= currPos && match.string(node, openMark)
-            );
-            if (openMarkPos < currPos) {
-                openMarkPos = null;
-            }
-        }
-        let closeMarkPos: number | null = null;
-        if (openMarkPos != null) {
-            closeMarkPos = nodes.findIndex(
-                (node, i) =>
-                    i >= (openMarkPos as number) + 1 &&
-                    match.string(node, closeMark)
-            );
-            if (closeMarkPos < openMarkPos + 1) {
-                closeMarkPos = null;
-            }
-        }
-        return [openMarkPos, closeMarkPos];
-    }
 
     // Do the actual matching
     gobbleWhitespace();
@@ -109,6 +84,16 @@ export function gobbleSingleArgument(
                 });
                 currPos++;
                 break;
+            } else {
+                const bracePos = findBracePositions(nodes, currPos, openMark, closeMark);
+                if (bracePos) {
+                    argument = arg(nodes.slice(bracePos[0] + 1, bracePos[1]), {
+                        openMark,
+                        closeMark,
+                    });
+                    currPos = bracePos[1] + 1;
+                    break;
+                }
             }
         // NOTE: Fallthrough is on purpose.
         // Matching a mandatory argument and an optional argument is the same for our purposes
@@ -123,17 +108,15 @@ export function gobbleSingleArgument(
                 currPos++;
                 break;
             }
-            if (match.string(currNode, openMark)) {
-                // If we're here, we have custom braces to match
-                const [openMarkPos, closeMarkPos] = findBracePositions();
-                if (openMarkPos != null && closeMarkPos != null) {
-                    argument = arg(nodes.slice(openMarkPos + 1, closeMarkPos), {
-                        openMark,
-                        closeMark,
-                    });
-                    currPos = closeMarkPos + 1;
-                    break;
-                }
+            // If we're here, we have custom braces to match
+            const bracePos = findBracePositions(nodes, currPos, openMark, closeMark);
+            if (bracePos) {
+                argument = arg(nodes.slice(bracePos[0] + 1, bracePos[1]), {
+                    openMark,
+                    closeMark,
+                });
+                currPos = bracePos[1] + 1;
+                break;
             }
             break;
         case "optionalStar":
@@ -188,6 +171,31 @@ export function gobbleSingleArgument(
             }
             break;
         }
+        case "embellishment": {
+            argument = [];
+            // Split tokens into single characters
+            const tokens = argSpec.embellishmentTokens.flatMap(token => {
+                if (typeof token === 'string') return token.split('');
+                console.warn(
+                    `Embellishment token should be a single character, but got ${stringifyGroup(token)}`
+                );
+                return [];
+            });
+            for (let token of tokens) {
+                const bracePos = findBracePositions(nodes, currPos, token);
+                if (bracePos) {
+                    let argNode = nodes[bracePos[0] + 1];
+                    argument.push(arg(match.group(argNode) ? argNode.content : argNode, {
+                        openMark: token,
+                        closeMark: ""
+                    }));
+                    currPos = bracePos[1] + 1;
+                } else {
+                    argument.push(arg([], { openMark: "", closeMark: "" }));
+                }
+            }
+            break;
+        }
         default:
             console.warn(
                 `Don't know how to find an argument of argspec type "${argSpec.type}"`
@@ -211,4 +219,64 @@ function partialStringMatch(node: Ast.Node, token: Ast.Node): boolean {
         match.anyString(token) &&
         node.content.length > token.content.length
     );
+}
+
+function cloneStringNode(node: Ast.String, content: string): Ast.String {
+    return Object.assign({}, node, { content });
+}
+
+// Find the position of the open brace and the closing brace.
+// Returns undefined if the brace isn't found.
+// This may mutate `nodes`.
+function findBracePositions(nodes: Ast.Node[], startPos: number,
+    openMark: string, closeMark?: string): [number, number] | undefined {
+    const currNode = nodes[startPos];
+    if (!openMark || !match.anyString(currNode)) return;
+    const nodeContent = currNode.content;
+    // The first node we encounter must contain the opening brace.
+    if (!nodeContent.startsWith(openMark)) return;
+    const openMarkPos = startPos;
+    if (currNode.content.length > openMark.length) {
+        const nodeContent = currNode.content;
+        currNode.content = openMark;
+        nodes.splice(openMarkPos + 1, 0,
+            cloneStringNode(currNode, nodeContent.slice(openMark.length))
+        );
+    }
+    if (!closeMark) {
+        // In such a case, the token immediately preceding the opening brace
+        // will be treated as an argument. If the next token is a string node,
+        // only its first character is picked up.
+        let closeMarkPos = openMarkPos + 1;
+        const argNode = nodes[closeMarkPos];
+        if (!argNode) return;
+        if (match.anyString(argNode) && argNode.content.length > 1) {
+            const argContent = argNode.content;
+            argNode.content = argContent[0];
+            nodes.splice(closeMarkPos + 1, 0, cloneStringNode(argNode, argContent.slice(1)));
+        }
+        return [openMarkPos, closeMarkPos];
+    }
+    for (let i = openMarkPos + 1; i < nodes.length; i++) {
+        const node = nodes[i];
+        if (!match.anyString(node)) continue;
+        const nodeContent = node.content;
+        let closeMarkIndex = nodeContent.indexOf(closeMark);
+        if (closeMarkIndex === -1) continue;
+        // Found a closeMark, store its index to `closeMarkPos`
+        let closeMarkPos = i;
+        if (nodeContent.length > closeMark.length) {
+            node.content = closeMark;
+            let prev = nodeContent.slice(0, closeMarkIndex);
+            let next = nodeContent.slice(closeMarkIndex + closeMark.length);
+            if (prev) {
+                nodes.splice(closeMarkPos, 0, cloneStringNode(node, prev));
+                closeMarkPos++;
+            }
+            if (next) {
+                nodes.splice(closeMarkPos + 1, 0, cloneStringNode(node, next));
+            }
+        }
+        return [openMarkPos, closeMarkPos];
+    }
 }

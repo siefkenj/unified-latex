@@ -16,14 +16,14 @@ const argSpecRDelim: { [delim: string]: Node } = {};
  */
 export const argumentParser: ArgumentParser = (nodes, startPos) => {
     const { argument: optionalArg, nodesRemoved: optionalArgNodesRemoved } =
-        gobbleSingleArgument(nodes, argSpecO, startPos);
+        gobbleSingleArgument(nodes, argSpecO, startPos) as { argument: Argument, nodesRemoved: number };
 
     let codeArg: Argument | null = null;
     let codeArgNodesRemoved: number = 0;
     const nextNode = nodes[startPos];
     if (match.group(nextNode)) {
         const mandatoryArg = gobbleSingleArgument(nodes, argSpecM, startPos);
-        codeArg = mandatoryArg.argument;
+        codeArg = mandatoryArg.argument as Argument;
         codeArgNodesRemoved = mandatoryArg.nodesRemoved;
     } else if (match.string(nextNode) && nextNode.content.length === 1) {
         const delim = nextNode.content;
@@ -34,7 +34,7 @@ export const argumentParser: ArgumentParser = (nodes, startPos) => {
             argSpecRDelim[delim],
             startPos
         );
-        codeArg = delimArg.argument;
+        codeArg = delimArg.argument as Argument;
         codeArgNodesRemoved = delimArg.nodesRemoved;
     }
 

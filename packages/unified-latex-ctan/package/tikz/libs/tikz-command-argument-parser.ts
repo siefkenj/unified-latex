@@ -4,7 +4,7 @@ import {
     ArgSpecAst as ArgSpec,
     parse as parseArgspec,
 } from "@unified-latex/unified-latex-util-argspec";
-import { ArgumentParser } from "@unified-latex/unified-latex-types";
+import { Argument, ArgumentParser } from "@unified-latex/unified-latex-types";
 import { gobbleSingleArgument } from "@unified-latex/unified-latex-util-arguments";
 import { match } from "@unified-latex/unified-latex-util-match";
 import { scan } from "@unified-latex/unified-latex-util-scan";
@@ -44,7 +44,7 @@ export const tikzCommandArgumentParser: ArgumentParser = (nodes, startPos) => {
     const {
         argument: _optionalArgument,
         nodesRemoved: optionalArgumentNodesRemoved,
-    } = gobbleSingleArgument(nodes, OPTIONAL_ARGUMENT_ARG_SPEC, pos);
+    } = gobbleSingleArgument(nodes, OPTIONAL_ARGUMENT_ARG_SPEC, pos) as { argument: Argument, nodesRemoved: number };
     nodesRemoved += optionalArgumentNodesRemoved;
     const optionalArg = _optionalArgument || blankArg();
 

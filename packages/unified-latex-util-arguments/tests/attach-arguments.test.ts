@@ -416,6 +416,41 @@ describe("unified-latex-util-arguments", () => {
         ]);
     });
 
+    it("Can attach arguments with complex signature", () => {
+        let nodes = strToNodes(`\\xxx_a{bc}<d>`);
+        attachMacroArgs(nodes, {
+            xxx: {
+                signature: 'e{_} m r<>'
+            }
+        });
+        expect(nodes).toEqual([
+            {
+                type:"macro",
+                content: "xxx",
+                args: [
+                    {
+                        type:"argument",
+                        content: [{type:"string", content:"a"}],
+                        openMark:"_",
+                        closeMark:""
+                    },
+                    {
+                        type:"argument",
+                        content:[{type:"string",content:"bc"}],
+                        openMark:"{",
+                        closeMark:"}"
+                    },
+                    {
+                        type:"argument",
+                        content:[{type:"string",content:"d"}],
+                        openMark:"<",
+                        closeMark:">"
+                    }
+                ]
+            }
+        ])
+    })
+
     it("Custom argument parser", () => {
         /**
          * Unconditionally take the first node as an argument.

@@ -197,5 +197,48 @@ describe("unified-latex-util-arguments", () => {
                 ],
             },
         ]);
+
+        // embellishments
+        nodes = strToNodes("\\xxx^a \\xxx_b");
+        attachMacroArgsInArray(nodes, { xxx: { signature: "e{^_}" } });
+        expect(nodes).toEqual([
+            {
+                type: "macro",
+                content: "xxx",
+                args: [
+                    {
+                        type: "argument",
+                        content: [{ type: "string", content: "a" }],
+                        openMark: "^",
+                        closeMark: "",
+                    },
+                    {
+                        type: "argument",
+                        content: [],
+                        openMark: "",
+                        closeMark: "",
+                    }
+                ],
+            },
+            { type: "whitespace" },
+            {
+                type: "macro",
+                content: "xxx",
+                args: [
+                    {
+                        type: "argument",
+                        content: [],
+                        openMark: "",
+                        closeMark: "",
+                    },
+                    {
+                        type: "argument",
+                        content: [{ type: "string", content: "b" }],
+                        openMark: "_",
+                        closeMark: "",
+                    },
+                ],
+            },
+        ])
     });
 });
