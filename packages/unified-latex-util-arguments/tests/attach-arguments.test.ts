@@ -425,26 +425,26 @@ describe("unified-latex-util-arguments", () => {
         });
         expect(nodes).toEqual([
             {
-                type:"macro",
+                type: "macro",
                 content: "xxx",
                 args: [
                     {
-                        type:"argument",
-                        content: [{type:"string", content:"a"}],
-                        openMark:"_",
-                        closeMark:""
+                        type: "argument",
+                        content: [{ type: "string", content: "a" }],
+                        openMark: "_",
+                        closeMark: ""
                     },
                     {
-                        type:"argument",
-                        content:[{type:"string",content:"bc"}],
-                        openMark:"{",
-                        closeMark:"}"
+                        type: "argument",
+                        content: [{ type: "string", content: "bc" }],
+                        openMark: "{",
+                        closeMark: "}"
                     },
                     {
-                        type:"argument",
-                        content:[{type:"string",content:"d"}],
-                        openMark:"<",
-                        closeMark:">"
+                        type: "argument",
+                        content: [{ type: "string", content: "d" }],
+                        openMark: "<",
+                        closeMark: ">"
                     }
                 ]
             }
