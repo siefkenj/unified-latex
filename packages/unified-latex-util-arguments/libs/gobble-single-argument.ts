@@ -1,6 +1,6 @@
 import { arg } from "@unified-latex/unified-latex-builder";
 import * as Ast from "@unified-latex/unified-latex-types";
-import { ArgSpecAst as ArgSpec } from "@unified-latex/unified-latex-util-argspec";
+import { ArgSpecAst as ArgSpec, printRaw } from "@unified-latex/unified-latex-util-argspec";
 import { match } from "@unified-latex/unified-latex-util-match";
 import { scan } from "@unified-latex/unified-latex-util-scan";
 
@@ -176,11 +176,11 @@ export function gobbleSingleArgument(
             const tokens = argSpec.embellishmentTokens.flatMap(token => {
                 if (typeof token === 'string') return token.split('');
                 console.warn(
-                    `Embellishment token should be a single character, but got ${stringifyGroup(token)}`
+                    `Embellishment token should be a single character, but got ${printRaw(token)}`
                 );
                 return [];
             });
-            for (let token of tokens) {
+            for (const token of tokens) {
                 const bracePos = findBracePositions(nodes, currPos, token);
                 if (bracePos) {
                     let argNode = nodes[bracePos[0] + 1];
@@ -224,9 +224,11 @@ function cloneStringNode(node: Ast.String, content: string): Ast.String {
     return Object.assign({}, node, { content });
 }
 
-// Find the position of the open brace and the closing brace.
-// Returns undefined if the brace isn't found.
-// This may mutate `nodes`.
+/**
+ * Find the position of the open brace and the closing brace.
+ * Returns undefined if the brace isn't found.
+ * This may mutate `nodes`.
+ */
 function findBracePositions(nodes: Ast.Node[], startPos: number,
     openMark: string, closeMark?: string): [number, number] | undefined {
     const currNode = nodes[startPos];
@@ -278,10 +280,4 @@ function findBracePositions(nodes: Ast.Node[], startPos: number,
         }
         return [openMarkPos, closeMarkPos];
     }
-}
-function stringifyGroup(group: ArgSpec.Group): string {
-    return '{' + group.content.map(content => {
-        if (typeof content === 'string') return content;
-        return stringifyGroup(content);
-    }).join('') + '}';
 }
