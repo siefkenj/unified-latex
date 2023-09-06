@@ -584,7 +584,7 @@ describe("unified-latex-util-arguments", () => {
         });
         expect(nodes).toEqual([{ content: "yx", type: "string" }]);
     });
-    it("gobbleSingleArgument gobbles non-brace delimited arguments", () => {
+    it("gobbleSingleArgument gobbles non-punctuation delimited arguments", () => {
         let ast: Ast.Node[] = [
             { type: "whitespace" },
             { type: "string", content: "_a__" }, // additional delimiter should be ignored
@@ -722,6 +722,33 @@ describe("unified-latex-util-arguments", () => {
             }
         );
 
-
+    });
+    it("can gobble embellishments whose token is in a group one level deep", () => {
+        let ast :Ast.Node[] = [
+            { type: "string", content: "^a_b" }
+        ]
+        expect(gobbleSingleArgument(ast, parseArgspec("e{{^}{_}}")[0])).toMatchObject(
+            {
+                argument: [
+                    {
+                        type: "argument",
+                        content: [
+                            { type: "string", content: "a" }
+                        ],
+                        openMark: "^",
+                        closeMark: ""
+                    },
+                    {
+                        type: "argument",
+                        content: [
+                            { type: "string", content: "b" }
+                        ],
+                        openMark: "_",
+                        closeMark: ""
+                    }
+                ],
+                nodesRemoved: 4,
+            }
+        );
     });
 });

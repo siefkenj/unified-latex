@@ -175,6 +175,14 @@ export function gobbleSingleArgument(
             // Split tokens into single characters
             const tokens = argSpec.embellishmentTokens.flatMap(token => {
                 if (typeof token === 'string') return token.split('');
+                // xparse (as of 2023-02-02) accepts single character enclosed in braces {}.
+                // It does not allow more nesting, e.g. e{{{_}}} produces an error.
+                if (token.content.length === 1) {
+                    const bracedToken = token.content[0];
+                    if (typeof bracedToken === 'string' && bracedToken.length === 1) {
+                        return bracedToken;
+                    }
+                }
                 console.warn(
                     `Embellishment token should be a single character, but got ${printRaw(token)}`
                 );
@@ -227,7 +235,8 @@ function cloneStringNode(node: Ast.String, content: string): Ast.String {
 /**
  * Find the position of the open brace and the closing brace.
  * Returns undefined if the brace isn't found.
- * This may mutate `nodes`.
+ * This may mutate `nodes`, in rare occasions when braces are not a kind of
+ * characters that are always parsed as a separate token
  */
 function findBracePositions(nodes: Ast.Node[], startPos: number,
     openMark: string, closeMark?: string): [number, number] | undefined {
