@@ -1,9 +1,8 @@
-import { ArgSpecAst as ArgSpec } from "@unified-latex/unified-latex-util-argspec";
-import * as Ast from "@unified-latex/unified-latex-types";
-import { match, string } from "@unified-latex/unified-latex-util-match";
-import { scan } from "@unified-latex/unified-latex-util-scan";
 import { arg } from "@unified-latex/unified-latex-builder";
-import { stringifyGroup } from "./gobble-arguments";
+import * as Ast from "@unified-latex/unified-latex-types";
+import { ArgSpecAst as ArgSpec } from "@unified-latex/unified-latex-util-argspec";
+import { match } from "@unified-latex/unified-latex-util-match";
+import { scan } from "@unified-latex/unified-latex-util-scan";
 
 /**
  * Gobbles an argument of whose type is specified
