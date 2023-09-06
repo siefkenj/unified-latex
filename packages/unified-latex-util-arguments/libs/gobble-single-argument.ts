@@ -280,3 +280,9 @@ function findBracePositions(nodes: Ast.Node[], startPos: number,
         return [openMarkPos, closeMarkPos];
     }
 }
+function stringifyGroup(group: ArgSpec.Group): string {
+    return '{' + group.content.map(content => {
+        if (typeof content === 'string') return content;
+        return stringifyGroup(content);
+    }).join('') + '}';
+}
