@@ -682,6 +682,24 @@ describe("unified-latex-util-arguments", () => {
                 nodesRemoved: 0,
             }
         );
+
+        // closing delimiter in the middle
+        ast = [
+            { type: "string", content: "_a^_^" }
+        ];
+        expect(gobbleSingleArgument(ast, parseArgspec("r__")[0])).toMatchObject(
+            {
+                argument: {
+                    type: "argument",
+                    content: [
+                        { type: "string", content: "a^" }
+                    ],
+                    openMark: "_",
+                    closeMark: "_"
+                },
+                nodesRemoved: 3,
+            }
+        );
     });
     it("can gobble embellishments", () => {
         let ast: Ast.Node[] = [
