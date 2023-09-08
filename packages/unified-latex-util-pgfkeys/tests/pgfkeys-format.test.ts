@@ -1,4 +1,5 @@
 import Prettier from "prettier/standalone";
+import { Plugin } from "prettier";
 import { prettierPluginLatex } from "../../unified-latex-prettier";
 import { strToNodes } from "../../test-common";
 import { parsePgfkeys } from "../libs/pgfkeys-parser";
@@ -11,7 +12,7 @@ const formatter = (x: string) =>
         printWidth: 30,
         useTabs: true,
         parser: "latex-parser",
-        plugins: [prettierPluginLatex],
+        plugins: [prettierPluginLatex as Plugin],
     });
 
 describe("unified-latex-util-pgfkeys", () => {

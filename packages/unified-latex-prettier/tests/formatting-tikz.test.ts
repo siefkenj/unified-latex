@@ -1,19 +1,19 @@
-import Prettier from "prettier/standalone";
+import * as Prettier from "prettier/standalone";
 import { prettierPluginLatex } from "../libs/prettier-plugin-latex";
 import "../../test-common";
 import * as fs from "node:fs/promises";
 import path from "node:path";
 
 /* eslint-env jest */
-const formatter = (x: string) =>
-    Prettier.format(x, {
+const formatter = async (x: string) =>
+    await Prettier.format(x, {
         printWidth: 30,
         useTabs: true,
         parser: "latex-parser",
         plugins: [prettierPluginLatex],
     });
-const formatterWide = (x: string) =>
-    Prettier.format(x, {
+const formatterWide = async (x: string) =>
+    await Prettier.format(x, {
         printWidth: 60,
         useTabs: false,
         tabWidth: 4,
@@ -76,8 +76,8 @@ describe("unified-latex-prettier", () => {
     ];
 
     for (const { inStr, outStr } of STRINGS) {
-        it(`Can print tikz string "${inStr}"`, () => {
-            expect(inStr).toFormatAs(outStr, formatter);
+        it(`Can print tikz string "${inStr}"`, async () => {
+            await expect(inStr).toFormatAs(outStr, formatter);
         });
     }
 
@@ -95,6 +95,6 @@ describe("unified-latex-prettier", () => {
                 encoding: "utf-8",
             }
         );
-        expect(inStr).toFormatAs(outStr, formatterWide);
+        await expect(inStr).toFormatAs(outStr, formatterWide);
     });
 });
