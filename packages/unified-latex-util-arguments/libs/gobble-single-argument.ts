@@ -119,18 +119,17 @@ export function gobbleSingleArgument(
             }
             break;
         case "optionalStar":
-        case "optionalToken":
-            if (
-                match.string(
-                    currNode,
-                    argSpec.type === "optionalStar" ? "*" : argSpec.token
-                )
-            ) {
-                argument = arg([currNode], { openMark: "", closeMark: "" });
-                currPos++;
-                break;
+        case "optionalToken": {
+            const bracePos = findBracePositions(nodes, currPos,
+                argSpec.type === "optionalStar" ? "*" : argSpec.token);
+            if (bracePos) {
+                argument = arg(currNode, { openMark: "", closeMark: "" });
+                // Instead of `closeMarkPos` returned from findBracePositions,
+                // one should use `openMarkPos + ` because there's no argument
+                currPos = bracePos[0] + 1;
             }
             break;
+        }
         case "until": {
             if (argSpec.stopTokens.length > 1) {
                 console.warn(

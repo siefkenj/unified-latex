@@ -424,6 +424,24 @@ describe("unified-latex-util-arguments", () => {
             argument: null,
             nodesRemoved: 0,
         });
+
+        // non-punctuation optional token
+        ast = [
+            { type: "whitespace" },
+            { type: "string", content: "_abc" }
+
+        ]
+        expect(
+            gobbleSingleArgument([...ast], parseArgspec("t_")[0])
+        ).toMatchObject({
+            argument: {
+                type: "argument",
+                content: [{ type: "string", content: "_" }],
+                openMark: "",
+                closeMark: ""
+            },
+            nodesRemoved: 2
+        })
     });
     it("gobbleSingleArgument gobbles optional group (i.e., optional argument in '{...}' braces)", () => {
         let ast: Ast.Node[];

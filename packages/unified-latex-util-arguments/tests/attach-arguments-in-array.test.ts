@@ -256,6 +256,30 @@ describe("unified-latex-util-arguments", () => {
                     },
                 ],
             },
-        ])
+        ]);
+
+        // non-punctuation optional token and delimiters combined
+        nodes = strToNodes("\\xxx^_789_");
+        attachMacroArgsInArray(nodes, { xxx: { signature: "t^ r__" } });
+        expect(nodes).toEqual([
+            {
+                type: "macro",
+                content: "xxx",
+                args: [
+                    {
+                        type: "argument",
+                        content: [{ type: "string", content: "^" }],
+                        openMark: "",
+                        closeMark: "",
+                    },
+                    {
+                        type: "argument",
+                        content: [{ type: "string", content: "789" }],
+                        openMark: "_",
+                        closeMark: "_",
+                    }
+                ],
+            }
+        ]);
     });
 });
