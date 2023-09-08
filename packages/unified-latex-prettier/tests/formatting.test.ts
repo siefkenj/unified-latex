@@ -1,18 +1,18 @@
-import Prettier from "prettier/standalone";
+import * as Prettier from "prettier/standalone";
 import { prettierPluginLatex } from "../libs/prettier-plugin-latex";
 import "../../test-common";
 
 /* eslint-env jest */
 
 describe("unified-latex-prettier", () => {
-    const formatter = (x: string) =>
-        Prettier.format(x, {
+    const formatter = async (x: string) =>
+        await Prettier.format(x, {
             printWidth: 30,
             useTabs: true,
             parser: "latex-parser",
             plugins: [prettierPluginLatex],
         });
-    it("prints latex code", () => {
+    it("prints latex code", async () => {
         const STRINGS = [
             { inStr: "$x^{21}$", outStr: "$x^{21}$" },
             {
@@ -46,11 +46,11 @@ c
         ];
 
         for (const { inStr, outStr } of STRINGS) {
-            expect(inStr).toFormatAs(outStr, formatter);
+            await expect(inStr).toFormatAs(outStr, formatter);
         }
     });
 
-    it("prints comments", () => {
+    it("prints comments", async () => {
         const STRINGS = [
             { inStr: "%", outStr: "%" },
             { inStr: "x%", outStr: "x%" },
@@ -104,11 +104,11 @@ c
         ];
 
         for (const { inStr, outStr } of STRINGS) {
-            expect(inStr).toFormatAs(outStr, formatter);
+            await expect(inStr).toFormatAs(outStr, formatter);
         }
     });
 
-    it("prints math environments", () => {
+    it("prints math environments", async () => {
         const STRINGS = [
             { inStr: "\\[x\\]", outStr: "\\[\n\tx\n\\]" },
             { inStr: "\\[\\]", outStr: "\\[\n\\]" },
@@ -130,11 +130,11 @@ c
         ];
 
         for (const { inStr, outStr } of STRINGS) {
-            expect(inStr).toFormatAs(outStr, formatter);
+            await expect(inStr).toFormatAs(outStr, formatter);
         }
     });
 
-    it("insert newlines around environments", () => {
+    it("insert newlines around environments", async () => {
         const STRINGS = [
             { inStr: "\\[\\] x", outStr: "\\[\n\\]\nx" },
             { inStr: "y \\[\\]", outStr: "y\n\\[\n\\]" },
@@ -169,11 +169,11 @@ c
         ];
 
         for (const { inStr, outStr } of STRINGS) {
-            expect(inStr).toFormatAs(outStr, formatter);
+            await expect(inStr).toFormatAs(outStr, formatter);
         }
     });
 
-    it("verb tests", () => {
+    it("verb tests", async () => {
         const STRINGS = [
             { inStr: "\\verb|%$\n|", outStr: "\\verb|%$\n|" },
             { inStr: "\\verb!{!", outStr: "\\verb!{!" },
@@ -184,11 +184,11 @@ c
         ];
 
         for (const { inStr, outStr } of STRINGS) {
-            expect(inStr).toFormatAs(outStr, formatter);
+            await expect(inStr).toFormatAs(outStr, formatter);
         }
     });
 
-    it("verbatim environments tests", () => {
+    it("verbatim environments tests", async () => {
         const STRINGS = [
             {
                 inStr: "\\begin{verbatim}\\end{verbatim}",
@@ -233,11 +233,11 @@ c
         ];
 
         for (const { inStr, outStr } of STRINGS) {
-            expect(inStr).toFormatAs(outStr, formatter);
+            await expect(inStr).toFormatAs(outStr, formatter);
         }
     });
 
-    it("comments at start of environments tests", () => {
+    it("comments at start of environments tests", async () => {
         const STRINGS = [
             {
                 inStr: "\\begin{a}\\end{a}",
@@ -299,11 +299,11 @@ c
         ];
 
         for (const { inStr, outStr } of STRINGS) {
-            expect(inStr).toFormatAs(outStr, formatter);
+            await expect(inStr).toFormatAs(outStr, formatter);
         }
     });
 
-    it("matrix environment tests", () => {
+    it("matrix environment tests", async () => {
         const STRINGS = [
             {
                 inStr: "\\begin{matrix}a\\end{matrix}",
@@ -364,11 +364,11 @@ c
         ];
 
         for (const { inStr, outStr } of STRINGS) {
-            expect(inStr).toFormatAs(outStr, formatter);
+            await expect(inStr).toFormatAs(outStr, formatter);
         }
     });
 
-    it("matrix environment with comments at start", () => {
+    it("matrix environment with comments at start", async () => {
         const STRINGS = [
             {
                 inStr: "\\begin{matrix}%xx\na\\end{matrix}",
@@ -389,11 +389,11 @@ c
         ];
 
         for (const { inStr, outStr } of STRINGS) {
-            expect(inStr).toFormatAs(outStr, formatter);
+            await expect(inStr).toFormatAs(outStr, formatter);
         }
     });
 
-    it("matrix environment alignment of cell items", () => {
+    it("matrix environment alignment of cell items", async () => {
         const STRINGS = [
             {
                 inStr: "\\begin{matrix}\na\\\\ b\\end{matrix}",
@@ -406,11 +406,11 @@ c
         ];
 
         for (const { inStr, outStr } of STRINGS) {
-            expect(inStr).toFormatAs(outStr, formatter);
+            await expect(inStr).toFormatAs(outStr, formatter);
         }
     });
 
-    it.skip("matrix environment with parbreak", () => {
+    it.skip("matrix environment with parbreak", async () => {
         const STRINGS = [
             {
                 inStr: "\\begin{matrix}a\n\nb\\end{matrix}",
@@ -419,11 +419,11 @@ c
         ];
 
         for (const { inStr, outStr } of STRINGS) {
-            expect(inStr).toFormatAs(outStr, formatter);
+            await expect(inStr).toFormatAs(outStr, formatter);
         }
     });
 
-    it("comments at the end of an arguments list get a closing newline", () => {
+    it("comments at the end of an arguments list get a closing newline", async () => {
         const STRINGS = [
             {
                 inStr: "\\mathbb{x%matrix\n}",
@@ -432,11 +432,11 @@ c
         ];
 
         for (const { inStr, outStr } of STRINGS) {
-            expect(inStr).toFormatAs(outStr, formatter);
+            await expect(inStr).toFormatAs(outStr, formatter);
         }
     });
 
-    it("Formats aligned environments", () => {
+    it("Formats aligned environments", async () => {
         const STRINGS = [
             {
                 inStr: "\\begin{align}ab& c\\\\d&eee\\end{align}",
@@ -457,16 +457,16 @@ c
         ];
 
         for (const { inStr, outStr } of STRINGS) {
-            const formatted = Prettier.format(inStr, {
+            const formatted = await Prettier.format(inStr, {
                 printWidth: 30,
                 useTabs: true,
                 parser: "latex-parser",
                 plugins: [prettierPluginLatex],
             });
-            expect(formatted).toEqual(outStr);
+            await expect(formatted).toEqual(outStr);
         }
     });
-    it("Allows indenting of `printRaw` content (e.g., content inside of a group)", () => {
+    it("Allows indenting of `printRaw` content (e.g., content inside of a group)", async () => {
         const STRINGS = [
             {
                 inStr: "\\begin{x}{%\n}\\end{x}",
@@ -475,7 +475,7 @@ c
         ];
 
         for (const { inStr, outStr } of STRINGS) {
-            const formatted = Prettier.format(inStr, {
+            const formatted = await Prettier.format(inStr, {
                 printWidth: 30,
                 useTabs: true,
                 parser: "latex-parser",
@@ -484,7 +484,7 @@ c
             expect(formatted).toEqual(outStr);
         }
     });
-    it("Linebreaks before and after \\section command", () => {
+    it("Linebreaks before and after \\section command", async () => {
         const STRINGS = [
             {
                 inStr: "\\section{x}",
@@ -545,17 +545,17 @@ c
         ];
 
         for (const { inStr, outStr } of STRINGS) {
-            const formatted = Prettier.format(inStr, {
+            const formatted = await Prettier.format(inStr, {
                 printWidth: 30,
                 useTabs: true,
                 parser: "latex-parser",
                 plugins: [prettierPluginLatex],
             });
-            expect(formatted).toEqual(outStr);
+            await expect(formatted).toEqual(outStr);
         }
     });
 
-    it("Formats matrix environments with optional arguments", () => {
+    it("Formats matrix environments with optional arguments", async () => {
         const STRINGS = [
             {
                 inStr: "\\begin{NiceArray}a&b&c\\end{NiceArray}",
@@ -580,16 +580,16 @@ c
         ];
 
         for (const { inStr, outStr } of STRINGS) {
-            const formatted = Prettier.format(inStr, {
+            const formatted = await Prettier.format(inStr, {
                 printWidth: 30,
                 useTabs: true,
                 parser: "latex-parser",
                 plugins: [prettierPluginLatex],
             });
-            expect(formatted).toEqual(outStr);
+            await expect(formatted).toEqual(outStr);
         }
     });
-    it("Macros and Environments with inMathMode=true specified have their contents processed as math", () => {
+    it("Macros and Environments with inMathMode=true specified have their contents processed as math", async () => {
         const STRINGS = [
             {
                 inStr: "\\begin{matrix}a^2\\end{matrix}",
@@ -602,25 +602,25 @@ c
         ];
 
         for (const { inStr, outStr } of STRINGS) {
-            const formatted = Prettier.format(inStr, {
+            const formatted = await Prettier.format(inStr, {
                 printWidth: 30,
                 useTabs: true,
                 parser: "latex-parser",
                 plugins: [prettierPluginLatex],
             });
-            expect(formatted).toEqual(outStr);
+            await expect(formatted).toEqual(outStr);
         }
     });
 
-    it("no excess newlines between comments separated by pars", () => {
+    it("no excess newlines between comments separated by pars", async () => {
         const STRINGS = [{ inStr: "%\n\n%", outStr: "%\n\n%" }];
 
         for (const { inStr, outStr } of STRINGS) {
-            expect(inStr).toFormatAs(outStr, formatter);
+            await expect(inStr).toFormatAs(outStr, formatter);
         }
     });
 
-    it("no excess newlines between breakAround arguments separated by pars", () => {
+    it("no excess newlines between breakAround arguments separated by pars", async () => {
         const STRINGS = [
             {
                 inStr: "\\section{x}\n\n\\section{y}",
@@ -633,11 +633,11 @@ c
         ];
 
         for (const { inStr, outStr } of STRINGS) {
-            expect(inStr).toFormatAs(outStr, formatter);
+            await expect(inStr).toFormatAs(outStr, formatter);
         }
     });
 
-    it("preamble macros aren't forced to be broken", () => {
+    it("preamble macros aren't forced to be broken", async () => {
         const STRINGS = [
             {
                 inStr: "\\documentclass{a}\\emph{x y}",
@@ -646,10 +646,10 @@ c
         ];
 
         for (const { inStr, outStr } of STRINGS) {
-            expect(inStr).toFormatAs(outStr, formatter);
+            await expect(inStr).toFormatAs(outStr, formatter);
         }
     });
-    it("macro arguments wrap paragraph-style by default", () => {
+    it("macro arguments wrap paragraph-style by default", async () => {
         const STRINGS = [
             {
                 inStr: "\\clap{foooooo, barooooo, bazooooo, bangoooo}",
@@ -658,10 +658,10 @@ c
         ];
 
         for (const { inStr, outStr } of STRINGS) {
-            expect(inStr).toFormatAs(outStr, formatter);
+            await expect(inStr).toFormatAs(outStr, formatter);
         }
     });
-    it("preamble math doesn't have extra hardlines", () => {
+    it("preamble math doesn't have extra hardlines", async () => {
         const STRINGS = [
             {
                 inStr: "\\documentclass{a}\\[a\\begin{x}y\\end{x}\\]",
@@ -670,11 +670,11 @@ c
         ];
 
         for (const { inStr, outStr } of STRINGS) {
-            expect(inStr).toFormatAs(outStr, formatter);
+            await expect(inStr).toFormatAs(outStr, formatter);
         }
     });
 
-    it("enumerate with comment only inserts one newline", () => {
+    it("enumerate with comment only inserts one newline", async () => {
         const STRINGS = [
             {
                 inStr: "\\begin{enumerate}a%\n\\item\\end{enumerate}",
@@ -708,15 +708,15 @@ c
         ];
 
         for (const { inStr, outStr } of STRINGS) {
-            expect(inStr).toFormatAs(outStr, formatter);
+            await expect(inStr).toFormatAs(outStr, formatter);
         }
     });
 
-    it("Double backslash macro doesn't absorb optional argument if there's a space in front (issue #40)", () => {
+    it("Double backslash macro doesn't absorb optional argument if there's a space in front (issue #40)", async () => {
         const STRINGS = [{ inStr: "\\\\ [2pt]", outStr: "\\\\ [2pt]" }];
 
         for (const { inStr, outStr } of STRINGS) {
-            expect(inStr).toFormatAs(outStr, formatter);
+            await expect(inStr).toFormatAs(outStr, formatter);
         }
     });
 
