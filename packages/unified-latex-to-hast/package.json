@@ -22,11 +22,11 @@
     "@unified-latex/unified-latex-util-visit": "^1.4.0",
     "cssesc": "^3.0.0",
     "hast": "^1.0.0",
-    "hast-util-to-html": "^8.0.3",
-    "hastscript": "^7.0.2",
+    "hast-util-to-html": "^8.0.4",
+    "hastscript": "^7.2.0",
     "prettier": "^2.8.8",
     "rehype-raw": "^6.1.1",
-    "rehype-stringify": "^9.0.3",
+    "rehype-stringify": "^9.0.4",
     "unified": "^10.1.2"
   },
   "files": [
@@ -71,19 +71,5 @@
     "url": "https://github.com/siefkenj/unified-latex/issues"
   },
   "homepage": "https://github.com/siefkenj/unified-latex#readme",
-  "jest": {
-    "transformIgnorePatterns": [
-      "node_modules/(?!unified|bail|is-plain-obj|trough|vfile.*|unist.*|hast.*|property-information|html-void-elements|.*-separated-tokens|.*entities.*|ccount|rehype*|string-width|strip-ansi|ansi-regex|supports-color|rehype|web-namespaces|zwitch)"
-    ],
-    "transform": {
-      "\\.m?jsx?$": "esbuild-jest",
-      "latex.pegjs$": "<rootDir>/../../tests/pegjs-preprocessor-latex.js",
-      "\\.pegjs$": "<rootDir>/../../tests/pegjs-preprocessor.js",
-      "^.+\\.tsx?$": "ts-jest"
-    },
-    "modulePathIgnorePatterns": [
-      "/dist/"
-    ]
-  },
   "private": true
 }

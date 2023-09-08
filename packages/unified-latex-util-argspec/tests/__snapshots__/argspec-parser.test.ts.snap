@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`unified-latex-util-argspec parses xparse argument specification string "!o r() m" 1`] = `
+exports[`unified-latex-util-argspec > parses xparse argument specification string "!o r() m" 1`] = `
 [
   {
     "closeBrace": "]",
@@ -21,9 +21,9 @@ exports[`unified-latex-util-argspec parses xparse argument specification string 
 ]
 `;
 
-exports[`unified-latex-util-argspec parses xparse argument specification string "" 1`] = `[]`;
+exports[`unified-latex-util-argspec > parses xparse argument specification string "" 1`] = `[]`;
 
-exports[`unified-latex-util-argspec parses xparse argument specification string "O{nested{defaults}}" 1`] = `
+exports[`unified-latex-util-argspec > parses xparse argument specification string "O{nested{defaults}}" 1`] = `
 [
   {
     "closeBrace": "]",
@@ -57,7 +57,7 @@ exports[`unified-latex-util-argspec parses xparse argument specification string 
 ]
 `;
 
-exports[`unified-latex-util-argspec parses xparse argument specification string "O{somedefault} m o" 1`] = `
+exports[`unified-latex-util-argspec > parses xparse argument specification string "O{somedefault} m o" 1`] = `
 [
   {
     "closeBrace": "]",
@@ -93,7 +93,7 @@ exports[`unified-latex-util-argspec parses xparse argument specification string 
 ]
 `;
 
-exports[`unified-latex-util-argspec parses xparse argument specification string "d++ D--{def}" 1`] = `
+exports[`unified-latex-util-argspec > parses xparse argument specification string "d++ D--{def}" 1`] = `
 [
   {
     "closeBrace": "+",
@@ -116,7 +116,7 @@ exports[`unified-latex-util-argspec parses xparse argument specification string 
 ]
 `;
 
-exports[`unified-latex-util-argspec parses xparse argument specification string "m e{^}" 1`] = `
+exports[`unified-latex-util-argspec > parses xparse argument specification string "m e{^}" 1`] = `
 [
   {
     "closeBrace": "}",
@@ -132,7 +132,7 @@ exports[`unified-latex-util-argspec parses xparse argument specification string 
 ]
 `;
 
-exports[`unified-latex-util-argspec parses xparse argument specification string "m e{_^}" 1`] = `
+exports[`unified-latex-util-argspec > parses xparse argument specification string "m e{_^}" 1`] = `
 [
   {
     "closeBrace": "}",
@@ -149,7 +149,7 @@ exports[`unified-latex-util-argspec parses xparse argument specification string 
 ]
 `;
 
-exports[`unified-latex-util-argspec parses xparse argument specification string "m ta o o" 1`] = `
+exports[`unified-latex-util-argspec > parses xparse argument specification string "m ta o o" 1`] = `
 [
   {
     "closeBrace": "}",
@@ -173,7 +173,7 @@ exports[`unified-latex-util-argspec parses xparse argument specification string 
 ]
 `;
 
-exports[`unified-latex-util-argspec parses xparse argument specification string "o m o !o m" 1`] = `
+exports[`unified-latex-util-argspec > parses xparse argument specification string "o m o !o m" 1`] = `
 [
   {
     "closeBrace": "]",
@@ -204,7 +204,7 @@ exports[`unified-latex-util-argspec parses xparse argument specification string 
 ]
 `;
 
-exports[`unified-latex-util-argspec parses xparse argument specification string "o m" 1`] = `
+exports[`unified-latex-util-argspec > parses xparse argument specification string "o m" 1`] = `
 [
   {
     "closeBrace": "]",
@@ -219,7 +219,7 @@ exports[`unified-latex-util-argspec parses xparse argument specification string 
 ]
 `;
 
-exports[`unified-latex-util-argspec parses xparse argument specification string "s m" 1`] = `
+exports[`unified-latex-util-argspec > parses xparse argument specification string "s m" 1`] = `
 [
   {
     "type": "optionalStar",
@@ -232,7 +232,7 @@ exports[`unified-latex-util-argspec parses xparse argument specification string 
 ]
 `;
 
-exports[`unified-latex-util-argspec parses xparse argument specification string "u;" 1`] = `
+exports[`unified-latex-util-argspec > parses xparse argument specification string "u;" 1`] = `
 [
   {
     "stopTokens": [
@@ -243,7 +243,7 @@ exports[`unified-latex-util-argspec parses xparse argument specification string 
 ]
 `;
 
-exports[`unified-latex-util-argspec parses xparse argument specification string "u{ }" 1`] = `
+exports[`unified-latex-util-argspec > parses xparse argument specification string "u{ }" 1`] = `
 [
   {
     "stopTokens": [
@@ -254,7 +254,7 @@ exports[`unified-latex-util-argspec parses xparse argument specification string 
 ]
 `;
 
-exports[`unified-latex-util-argspec parses xparse argument specification string "u{xx;}" 1`] = `
+exports[`unified-latex-util-argspec > parses xparse argument specification string "u{xx;}" 1`] = `
 [
   {
     "stopTokens": [
@@ -267,7 +267,7 @@ exports[`unified-latex-util-argspec parses xparse argument specification string 
 ]
 `;
 
-exports[`unified-latex-util-argspec parses xparse argument specification string "v!" 1`] = `
+exports[`unified-latex-util-argspec > parses xparse argument specification string "v!" 1`] = `
 [
   {
     "closeBrace": "!",
