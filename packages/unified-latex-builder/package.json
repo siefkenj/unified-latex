@@ -49,19 +49,5 @@
         "url": "https://github.com/siefkenj/unified-latex/issues"
     },
     "homepage": "https://github.com/siefkenj/unified-latex#readme",
-    "jest": {
-        "transformIgnorePatterns": [
-            "node_modules/(?!unified|bail|is-plain-obj|trough|vfile.*|unist.*|hast.*|property-information|html-void-elements|.*-separated-tokens|.*entities.*|ccount|rehype*|string-width|strip-ansi|ansi-regex|supports-color)"
-        ],
-        "transform": {
-            "\\.m?jsx?$": "ts-jest",
-            "latex.pegjs$": "<rootDir>/../../tests/pegjs-preprocessor-latex.js",
-            "\\.pegjs$": "<rootDir>/../../tests/pegjs-preprocessor.js",
-            "^.+\\.tsx?$": "ts-jest"
-        },
-        "modulePathIgnorePatterns": [
-            "/dist/"
-        ]
-    },
     "private": true
 }
