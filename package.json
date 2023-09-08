@@ -13,6 +13,7 @@
     },
     "devDependencies": {
         "@types/node": "^20.5.9",
+        "@types/prettier": "^2.7.3",
         "esbuild": "^0.19.2",
         "esbuild-runner": "^2.2.2",
         "lerna": "^7.2.0",
