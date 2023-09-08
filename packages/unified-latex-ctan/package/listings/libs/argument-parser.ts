@@ -2,7 +2,7 @@ import { arg } from "@unified-latex/unified-latex-builder";
 import { Argument, ArgumentParser } from "@unified-latex/unified-latex-types";
 import { parse as parseArgspec } from "@unified-latex/unified-latex-util-argspec";
 import { Node } from "@unified-latex/unified-latex-util-argspec/libs/argspec-types";
-import { gobbleSingleArgument } from "@unified-latex/unified-latex-util-arguments";
+import { assertSingleArgument, gobbleSingleArgument } from "@unified-latex/unified-latex-util-arguments";
 import { match } from "@unified-latex/unified-latex-util-match";
 
 const argSpecM = parseArgspec("m")[0];
@@ -16,14 +16,15 @@ const argSpecRDelim: { [delim: string]: Node } = {};
  */
 export const argumentParser: ArgumentParser = (nodes, startPos) => {
     const { argument: optionalArg, nodesRemoved: optionalArgNodesRemoved } =
-        gobbleSingleArgument(nodes, argSpecO, startPos) as { argument: Argument, nodesRemoved: number };
+        gobbleSingleArgument(nodes, argSpecO, startPos);
+    assertSingleArgument(optionalArg);
 
-    let codeArg: Argument | null = null;
+    let codeArg: Argument | Argument[] | null = null;
     let codeArgNodesRemoved: number = 0;
     const nextNode = nodes[startPos];
     if (match.group(nextNode)) {
         const mandatoryArg = gobbleSingleArgument(nodes, argSpecM, startPos);
-        codeArg = mandatoryArg.argument as Argument;
+        codeArg = mandatoryArg.argument;
         codeArgNodesRemoved = mandatoryArg.nodesRemoved;
     } else if (match.string(nextNode) && nextNode.content.length === 1) {
         const delim = nextNode.content;
@@ -34,9 +35,10 @@ export const argumentParser: ArgumentParser = (nodes, startPos) => {
             argSpecRDelim[delim],
             startPos
         );
-        codeArg = delimArg.argument as Argument;
+        codeArg = delimArg.argument;
         codeArgNodesRemoved = delimArg.nodesRemoved;
     }
+    assertSingleArgument(codeArg);
 
     return {
         args: [optionalArg || arg(null), codeArg || arg(null)],

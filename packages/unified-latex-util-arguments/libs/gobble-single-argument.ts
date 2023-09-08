@@ -303,3 +303,13 @@ function normalizeEmbellishmentTokens(tokens: (ArgSpec.Group | string)[]): strin
         return [];
     });
 }
+
+/**
+ * Asserts that `arg` is not an array. Use on returned values of `gobbleSingleArgument`.
+ */
+export function assertSingleArgument(arg: Ast.Argument | Ast.Argument[] | null):
+    asserts arg is (Ast.Argument | null) {
+    if (Array.isArray(arg)) {
+        throw new Error(`Expected an argspec to gobble single argument, but got ${arg.length}`);
+    }
+}
