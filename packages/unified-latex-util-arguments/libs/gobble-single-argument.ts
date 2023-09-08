@@ -171,35 +171,31 @@ export function gobbleSingleArgument(
             break;
         }
         case "embellishment": {
-            argument = [];
             // Split tokens into single characters
-            const tokens = argSpec.embellishmentTokens.flatMap(token => {
-                if (typeof token === 'string') return token.split('');
-                // xparse (as of 2023-02-02) accepts single character enclosed in braces {}.
-                // It does not allow more nesting, e.g. e{{{_}}} produces an error.
-                if (token.content.length === 1) {
-                    const bracedToken = token.content[0];
-                    if (typeof bracedToken === 'string' && bracedToken.length === 1) {
-                        return bracedToken;
-                    }
-                }
-                console.warn(
-                    `Embellishment token should be a single character, but got ${printRaw(token)}`
-                );
-                return [];
-            });
-            for (const token of tokens) {
-                const bracePos = findBracePositions(nodes, currPos, token);
-                if (bracePos) {
+            const tokens = normalizeEmbellishmentTokens(argSpec.embellishmentTokens);
+            argument = [];
+            let hasMatch: boolean;
+            do { // Try finding match until there is no more
+                hasMatch = false;
+                for (let i = 0; i < tokens.length; i++) {
+                    if (argument[i]) continue;
+                    const token = tokens[i];
+                    const bracePos = findBracePositions(nodes, currPos, token);
+                    if (!bracePos) continue;
                     let argNode = nodes[bracePos[0] + 1];
-                    argument.push(arg(match.group(argNode) ? argNode.content : argNode, {
+                    argument[i] = arg(match.group(argNode) ? argNode.content : argNode, {
                         openMark: token,
                         closeMark: ""
-                    }));
+                    });
                     currPos = bracePos[1] + 1;
-                } else {
-                    argument.push(arg([], { openMark: "", closeMark: "" }));
+                    hasMatch = true;
+                    break;
                 }
+            } while (hasMatch);
+            // Fill out missing arguments
+            for (let i = 0; i < tokens.length; i++) {
+                if (argument[i]) continue;
+                argument[i] = arg([], { openMark: "", closeMark: "" });
             }
             break;
         }
@@ -289,4 +285,22 @@ function findBracePositions(nodes: Ast.Node[], startPos: number,
         }
         return [openMarkPos, closeMarkPos];
     }
+}
+
+function normalizeEmbellishmentTokens(tokens: (ArgSpec.Group | string)[]): string[] {
+    return tokens.flatMap(token => {
+        if (typeof token === 'string') return token.split('');
+        // xparse (as of 2023-02-02) accepts single character enclosed in braces {}.
+        // It does not allow more nesting, e.g. e{{{_}}} produces an error.
+        if (token.content.length === 1) {
+            const bracedToken = token.content[0];
+            if (typeof bracedToken === 'string' && bracedToken.length === 1) {
+                return bracedToken;
+            }
+        }
+        console.warn(
+            `Embellishment token should be a single character, but got ${printRaw(token)}`
+        );
+        return [];
+    });
 }

@@ -722,6 +722,43 @@ describe("unified-latex-util-arguments", () => {
             }
         );
 
+        // Order of embellishments shouldn't matter
+        ast = [
+            { type: "string", content: "_" },
+            { type: "group", content: [{ type: "string", content: "1234" }] },
+            { type: "string", content: "daac" }
+        ];
+        expect(gobbleSingleArgument(ast, parseArgspec("e{_ad}")[0])).toMatchObject(
+            {
+                argument: [
+                    {
+                        type: "argument",
+                        content: [
+                            { type: "string", content: "1234" }
+                        ],
+                        openMark: "_",
+                        closeMark: ""
+                    },
+                    {
+                        type: "argument",
+                        content: [
+                            { type: "string", content: "c" }
+                        ],
+                        openMark: "a",
+                        closeMark: ""
+                    },
+                    {
+                        type: "argument",
+                        content: [
+                            { type: "string", content: "a" }
+                        ],
+                        openMark: "d",
+                        closeMark: "",
+                    }
+                ],
+                nodesRemoved: 6,
+            }
+        );
     });
     it("can gobble embellishments whose token is in a group one level deep", () => {
         let ast: Ast.Node[] = [

@@ -199,7 +199,7 @@ describe("unified-latex-util-arguments", () => {
         ]);
 
         // embellishments
-        nodes = strToNodes("\\xxx^a \\xxx_b");
+        nodes = strToNodes("\\xxx^a\\xxx_b\\xxx_b^a");
         attachMacroArgsInArray(nodes, { xxx: { signature: "e{^_}" } });
         expect(nodes).toEqual([
             {
@@ -220,7 +220,6 @@ describe("unified-latex-util-arguments", () => {
                     }
                 ],
             },
-            { type: "whitespace" },
             {
                 type: "macro",
                 content: "xxx",
@@ -229,6 +228,24 @@ describe("unified-latex-util-arguments", () => {
                         type: "argument",
                         content: [],
                         openMark: "",
+                        closeMark: "",
+                    },
+                    {
+                        type: "argument",
+                        content: [{ type: "string", content: "b" }],
+                        openMark: "_",
+                        closeMark: "",
+                    },
+                ],
+            },
+            {
+                type: "macro",
+                content: "xxx",
+                args: [
+                    {
+                        type: "argument",
+                        content: [{ type: "string", content: "a" }],
+                        openMark: "^",
                         closeMark: "",
                     },
                     {
