@@ -138,32 +138,20 @@ export function gobbleSingleArgument(
                 break;
             }
             const rawToken = argSpec.stopTokens[0];
-            const stopToken: Ast.String | Ast.Whitespace =
+            const stopToken: string | Ast.Whitespace =
                 rawToken === " "
                     ? { type: "whitespace" }
-                    : { type: "string", content: argSpec.stopTokens[0] };
-            let matchPos = scan(nodes, stopToken, {
-                startIndex: startPos,
-                allowSubstringMatches: true,
-            });
-            if (
-                matchPos != null &&
-                partialStringMatch(nodes[matchPos], stopToken)
-            ) {
-                console.warn(
-                    `"until" arguments that stop at non-punctuation symbols is not yet implemented`
-                );
-                break;
-            }
+                    : rawToken;
+
+            let bracePos = findBracePositions(nodes, startPos, undefined, stopToken);
             // If the corresponding token is not found, eat nothing;
-            if (matchPos == null) {
-                break;
-            }
-            argument = arg(nodes.slice(startPos, matchPos), {
+            if (!bracePos) break;
+
+            argument = arg(nodes.slice(startPos, bracePos[1]), {
                 openMark: "",
                 closeMark: rawToken,
             });
-            currPos = matchPos;
+            currPos = bracePos[1];
             if (currPos < nodes.length) {
                 currPos++;
             }
@@ -234,25 +222,29 @@ function cloneStringNode(node: Ast.String, content: string): Ast.String {
  * always parsed as a separate token
  */
 function findBracePositions(nodes: Ast.Node[], startPos: number,
-    openMark: string, closeMark?: string): [number, number] | undefined {
+    openMark?: string, closeMark?: string | Ast.Node): [number, number] | undefined {
     const currNode = nodes[startPos];
-    if (!openMark || !match.anyString(currNode)) return;
-    const nodeContent = currNode.content;
-    // The first node we encounter must contain the opening brace.
-    if (!nodeContent.startsWith(openMark)) return;
-    const openMarkPos = startPos;
-    if (currNode.content.length > openMark.length) {
+    let openMarkPos = startPos;
+    let closeMarkPos: number | null = startPos;
+    if (openMark) {
+        if (!match.anyString(currNode)) return;
         const nodeContent = currNode.content;
-        currNode.content = openMark;
-        nodes.splice(openMarkPos + 1, 0,
-            cloneStringNode(currNode, nodeContent.slice(openMark.length))
-        );
+        // The first node we encounter must contain the opening brace.
+        if (!nodeContent.startsWith(openMark)) return;
+        openMarkPos = startPos;
+        if (currNode.content.length > openMark.length) {
+            const nodeContent = currNode.content;
+            currNode.content = openMark;
+            nodes.splice(openMarkPos + 1, 0,
+                cloneStringNode(currNode, nodeContent.slice(openMark.length))
+            );
+        }
+        closeMarkPos = openMarkPos + 1;
     }
     if (!closeMark) {
         // In such a case, the token immediately preceding the opening brace
         // will be treated as an argument. If the next token is a string node,
         // only its first character is picked up.
-        let closeMarkPos = openMarkPos + 1;
         const argNode = nodes[closeMarkPos];
         if (!argNode) return;
         if (match.anyString(argNode) && argNode.content.length > 1) {
@@ -262,28 +254,27 @@ function findBracePositions(nodes: Ast.Node[], startPos: number,
         }
         return [openMarkPos, closeMarkPos];
     }
-    for (let i = openMarkPos + 1; i < nodes.length; i++) {
-        const node = nodes[i];
-        if (!match.anyString(node)) continue;
-        const nodeContent = node.content;
-        let closeMarkIndex = nodeContent.indexOf(closeMark);
-        if (closeMarkIndex === -1) continue;
-        // Found a closeMark, store its index to `closeMarkPos`
-        let closeMarkPos = i;
-        if (nodeContent.length > closeMark.length) {
-            node.content = closeMark;
-            let prev = nodeContent.slice(0, closeMarkIndex);
-            let next = nodeContent.slice(closeMarkIndex + closeMark.length);
+    // scan for closing marks
+    closeMarkPos = scan(nodes, closeMark, { startIndex: closeMarkPos, allowSubstringMatches: true });
+    if (closeMarkPos === null) return;
+    const closingNode = nodes[closeMarkPos];
+    if (match.anyString(closingNode) && typeof closeMark === 'string') {
+        const closingNodeContent = closingNode.content;
+        let closeMarkIndex = closingNodeContent.indexOf(closeMark);
+        if (closingNodeContent.length > closeMark.length) {
+            closingNode.content = closeMark;
+            const prev = closingNodeContent.slice(0, closeMarkIndex);
+            const next = closingNodeContent.slice(closeMarkIndex + closeMark.length);
             if (prev) {
-                nodes.splice(closeMarkPos, 0, cloneStringNode(node, prev));
+                nodes.splice(closeMarkPos, 0, cloneStringNode(closingNode, prev));
                 closeMarkPos++;
             }
             if (next) {
-                nodes.splice(closeMarkPos + 1, 0, cloneStringNode(node, next));
+                nodes.splice(closeMarkPos + 1, 0, cloneStringNode(closingNode, next));
             }
         }
-        return [openMarkPos, closeMarkPos];
     }
+    return [openMarkPos, closeMarkPos];
 }
 
 function normalizeEmbellishmentTokens(tokens: (ArgSpec.Group | string)[]): string[] {

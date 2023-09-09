@@ -520,7 +520,7 @@ describe("unified-latex-util-arguments", () => {
         });
     });
 
-    it.skip("can gobble an 'until' argument", () => {
+    it("can gobble an 'until' argument", () => {
         let argspec = parseArgspec("u)")[0];
         value = "(val)x x";
         file = processLatexToAstViaUnified().processSync({ value });
@@ -560,7 +560,7 @@ describe("unified-latex-util-arguments", () => {
         });
         expect(nodes).toEqual([]);
     });
-    it.skip("can gobble an 'until' argument with a whitespace stop", () => {
+    it("can gobble an 'until' argument with a whitespace stop", () => {
         let argspec = parseArgspec("u{ }")[0];
         value = "(val)x x";
         file = processLatexToAstViaUnified().processSync({ value });
@@ -581,7 +581,7 @@ describe("unified-latex-util-arguments", () => {
         });
         expect(nodes).toEqual([{ content: "x", type: "string" }]);
     });
-    it.skip("can gobble an 'until' that requires splitting a string", () => {
+    it("can gobble an 'until' that requires splitting a string", () => {
         let argspec = parseArgspec("ux")[0];
         value = "(val)mxyx";
         file = processLatexToAstViaUnified().processSync({ value });
@@ -598,7 +598,7 @@ describe("unified-latex-util-arguments", () => {
                 openMark: "",
                 closeMark: "x",
             },
-            nodesRemoved: 3,
+            nodesRemoved: 5,
         });
         expect(nodes).toEqual([{ content: "yx", type: "string" }]);
     });
