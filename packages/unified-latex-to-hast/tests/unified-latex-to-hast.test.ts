@@ -268,9 +268,9 @@ describe("unified-latex-to-hast:unified-latex-to-hast", () => {
 
         ast = process(`\\begin{enumerate}\\item\\bfseries b\\end{enumerate}`);
         expect(normalizeHtml(ast)).toEqual(
-            normalizeHtml(`<ol class=\"enumerate\">
+            normalizeHtml(`<ol class="enumerate">
         <li>
-          <p><b class=\"textbf\">b</b></p>
+          <p><b class="textbf">b</b></p>
         </li>
       </ol>`)
         );

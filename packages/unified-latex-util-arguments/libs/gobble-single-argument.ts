@@ -1,3 +1,4 @@
+/* eslint-disable no-fallthrough */
 import { arg } from "@unified-latex/unified-latex-builder";
 import * as Ast from "@unified-latex/unified-latex-types";
 import {
@@ -164,7 +165,9 @@ export function gobbleSingleArgument(
                 stopToken
             );
             // If the corresponding token is not found, eat nothing;
-            if (!bracePos) break;
+            if (!bracePos) {
+                break;
+            }
 
             argument = arg(nodes.slice(startPos, bracePos[1]), {
                 openMark: "",
@@ -187,10 +190,14 @@ export function gobbleSingleArgument(
                 // Try finding match until there is no more
                 hasMatch = false;
                 for (let i = 0; i < tokens.length; i++) {
-                    if (argument[i]) continue;
+                    if (argument[i]) {
+                        continue;
+                    }
                     const token = tokens[i];
                     const bracePos = findBracePositions(nodes, currPos, token);
-                    if (!bracePos) continue;
+                    if (!bracePos) {
+                        continue;
+                    }
                     let argNode = nodes[bracePos[0] + 1];
                     argument[i] = arg(
                         match.group(argNode) ? argNode.content : argNode,
@@ -206,7 +213,9 @@ export function gobbleSingleArgument(
             } while (hasMatch);
             // Fill out missing arguments
             for (let i = 0; i < tokens.length; i++) {
-                if (argument[i]) continue;
+                if (argument[i]) {
+                    continue;
+                }
                 argument[i] = arg([], { openMark: "", closeMark: "" });
             }
             break;
@@ -256,10 +265,14 @@ function findBracePositions(
     let openMarkPos = startPos;
     let closeMarkPos: number | null = startPos;
     if (openMark) {
-        if (!match.anyString(currNode)) return;
+        if (!match.anyString(currNode)) {
+            return;
+        }
         const nodeContent = currNode.content;
         // The first node we encounter must contain the opening brace.
-        if (!nodeContent.startsWith(openMark)) return;
+        if (!nodeContent.startsWith(openMark)) {
+            return;
+        }
         openMarkPos = startPos;
         if (currNode.content.length > openMark.length) {
             const nodeContent = currNode.content;
@@ -277,7 +290,9 @@ function findBracePositions(
         // will be treated as an argument. If the next token is a string node,
         // only its first character is picked up.
         const argNode = nodes[closeMarkPos];
-        if (!argNode) return;
+        if (!argNode) {
+            return;
+        }
         if (match.anyString(argNode) && argNode.content.length > 1) {
             const argContent = argNode.content;
             argNode.content = argContent[0];
@@ -294,7 +309,9 @@ function findBracePositions(
         startIndex: closeMarkPos,
         allowSubstringMatches: true,
     });
-    if (closeMarkPos === null) return;
+    if (closeMarkPos === null) {
+        return;
+    }
     const closingNode = nodes[closeMarkPos];
     if (match.anyString(closingNode) && typeof closeMark === "string") {
         const closingNodeContent = closingNode.content;
@@ -329,7 +346,9 @@ function normalizeEmbellishmentTokens(
     tokens: (ArgSpec.Group | string)[]
 ): string[] {
     return tokens.flatMap((token) => {
-        if (typeof token === "string") return token.split("");
+        if (typeof token === "string") {
+            return token.split("");
+        }
         // xparse (as of 2023-02-02) accepts single character enclosed in braces {}.
         // It does not allow more nesting, e.g. e{{{_}}} produces an error.
         if (token.content.length === 1) {

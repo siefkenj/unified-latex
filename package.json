@@ -10,7 +10,8 @@
         "publish": "npm run publish -ws",
         "test": "vitest ./packages",
         "test:ci": "vitest ./packages --maxWorkers=1",
-        "prettier": "prettier '**/*.ts' --write"
+        "prettier": "prettier '**/*.ts' --write",
+        "eslint": "eslint '**/*.ts' --ignore-pattern dist"
     },
     "devDependencies": {
         "@types/node": "^20.5.9",

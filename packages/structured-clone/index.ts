@@ -1,8 +1,8 @@
-// @ts-nocheck
-
 // globalThis polyfill from https://mathiasbynens.be/notes/globalthis
 (function () {
-    if (typeof globalThis === "object") return;
+    if (typeof globalThis === "object") {
+        return;
+    }
     Object.defineProperty(Object.prototype, "__magic__", {
         get: function () {
             return this;
@@ -25,3 +25,5 @@ const clone =
 export function structuredClone<T>(obj: T): T {
     return clone(obj);
 }
+
+declare const __magic__: any;

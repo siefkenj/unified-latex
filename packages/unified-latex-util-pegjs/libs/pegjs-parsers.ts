@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 // This file needs to be here because typescript does not know how to use babel's transpiler
 // to directly load Pegjs grammars.
 // @ts-nocheck
