@@ -233,18 +233,6 @@ export function gobbleSingleArgument(
     return { argument, nodesRemoved };
 }
 
-/**
- * Returns whether the presumed match "node" contains "token" as a strict
- * substring.
- */
-function partialStringMatch(node: Ast.Node, token: Ast.Node): boolean {
-    return (
-        match.anyString(node) &&
-        match.anyString(token) &&
-        node.content.length > token.content.length
-    );
-}
-
 function cloneStringNode(node: Ast.String, content: string): Ast.String {
     return Object.assign({}, node, { content });
 }
