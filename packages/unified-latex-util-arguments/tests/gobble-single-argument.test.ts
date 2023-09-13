@@ -773,6 +773,41 @@ describe("unified-latex-util-arguments", () => {
             ],
             nodesRemoved: 6,
         });
+
+        // whitespaces between several embellishments shouldn't matter
+        ast = [
+            {
+                type: "string",
+                content: "^1"
+            },
+            {
+                "type": "whitespace"
+            },
+            {
+                type: "string",
+                content: "_2"
+            }
+        ];
+        expect(
+            gobbleSingleArgument(ast, parseArgspec("e{^_}")[0])
+        ).toMatchObject({
+            argument: [
+                {
+                    type: "argument",
+                    content: [{ type: "string", content: "1" }],
+                    openMark: "^",
+                    closeMark: "",
+                },
+                {
+                    type: "argument",
+                    content: [{ type: "string", content: "2" }],
+                    openMark: "_",
+                    closeMark: "",
+                }
+            ],
+            nodesRemoved: 5,
+        });
+
     });
     it("can gobble embellishments whose token is in a group one level deep", () => {
         let ast: Ast.Node[] = [{ type: "string", content: "^a_b" }];

@@ -189,6 +189,7 @@ export function gobbleSingleArgument(
             do {
                 // Try finding match until there is no more
                 hasMatch = false;
+                gobbleWhitespace();
                 for (let i = 0; i < tokens.length; i++) {
                     if (argument[i]) {
                         continue;
