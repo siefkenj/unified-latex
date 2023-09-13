@@ -38,7 +38,7 @@ export function gobbleArguments(
         );
         if (argument) {
             if (Array.isArray(argument)) {
-                args.push(...argument)
+                args.push(...argument);
             } else {
                 args.push(argument);
             }

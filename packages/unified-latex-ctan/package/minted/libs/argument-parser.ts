@@ -2,7 +2,10 @@ import { arg } from "@unified-latex/unified-latex-builder";
 import { Argument, ArgumentParser } from "@unified-latex/unified-latex-types";
 import { parse as parseArgspec } from "@unified-latex/unified-latex-util-argspec";
 import { Node } from "@unified-latex/unified-latex-util-argspec/libs/argspec-types";
-import { assertSingleArgument, gobbleSingleArgument } from "@unified-latex/unified-latex-util-arguments";
+import {
+    assertSingleArgument,
+    gobbleSingleArgument,
+} from "@unified-latex/unified-latex-util-arguments";
 import { match } from "@unified-latex/unified-latex-util-match";
 
 const argSpecM = parseArgspec("m")[0];

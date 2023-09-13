@@ -13,7 +13,6 @@ console.log = (...args) => {
 };
 
 describe("unified-latex-util-arguments", () => {
-
     it("can get args content", () => {
         // Recursively apply substitutions in groups
         let nodes = strToNodes("\\xxx b");

@@ -229,9 +229,7 @@ describe("unified-latex-util-parse", () => {
             ],
         });
         expect(
-            trimRenderInfo(
-                parse("\\mintinline[options]{language}#some_code$#")
-            )
+            trimRenderInfo(parse("\\mintinline[options]{language}#some_code$#"))
         ).toEqual({
             type: "root",
             content: [

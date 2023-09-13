@@ -36,7 +36,7 @@ interface OptionalToken extends LeadingWhitespace, AstNode {
 }
 export interface Embellishment extends DefaultArgument, AstNode {
     type: "embellishment";
-    embellishmentTokens: (Group|string)[];
+    embellishmentTokens: (Group | string)[];
 }
 interface Mandatory extends LeadingWhitespace, DefaultArgument, Arg {
     type: "mandatory";

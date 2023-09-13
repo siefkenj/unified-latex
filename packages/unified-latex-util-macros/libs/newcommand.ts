@@ -41,7 +41,7 @@ const NEWCOMMAND_ARGUMENTS_BEAMER = [
     "body",
 ] as const;
 type NewcommandNamedArgs = Record<
-    typeof NEWCOMMAND_ARGUMENTS_REG[number],
+    (typeof NEWCOMMAND_ARGUMENTS_REG)[number],
     Ast.Node[] | null
 >;
 

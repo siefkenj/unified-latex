@@ -7,7 +7,9 @@ import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
  * Direct and un-intelligent conversion of `Ast.Node` to a HAST element.
  * This function is not recursive! But, it will produce an output for every input.
  */
-export function toHastDirect(node: Ast.Node): Hast.Element | Hast.Text | Hast.Comment {
+export function toHastDirect(
+    node: Ast.Node
+): Hast.Element | Hast.Text | Hast.Comment {
     switch (node.type) {
         case "string":
             return {

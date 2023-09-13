@@ -211,7 +211,7 @@ describe("unified-latex-util-arguments", () => {
                         content: [{ type: "string", content: "a^" }],
                         openMark: "_",
                         closeMark: "_",
-                    }
+                    },
                 ],
             },
             { type: "string", content: "^" },
@@ -224,9 +224,9 @@ describe("unified-latex-util-arguments", () => {
                         content: [],
                         openMark: "_",
                         closeMark: "_",
-                    }
+                    },
                 ],
-            }
+            },
         ]);
 
         // embellishments
@@ -248,7 +248,7 @@ describe("unified-latex-util-arguments", () => {
                         content: [],
                         openMark: "",
                         closeMark: "",
-                    }
+                    },
                 ],
             },
             {
@@ -308,9 +308,9 @@ describe("unified-latex-util-arguments", () => {
                         content: [{ type: "string", content: "789" }],
                         openMark: "_",
                         closeMark: "_",
-                    }
+                    },
                 ],
-            }
+            },
         ]);
     });
 });

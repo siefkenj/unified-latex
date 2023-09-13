@@ -420,8 +420,8 @@ describe("unified-latex-util-arguments", () => {
         let nodes = strToNodes(`\\xxx_a{bc}<d>`);
         attachMacroArgs(nodes, {
             xxx: {
-                signature: 'e{_} m r<>'
-            }
+                signature: "e{_} m r<>",
+            },
         });
         expect(nodes).toEqual([
             {
@@ -432,24 +432,24 @@ describe("unified-latex-util-arguments", () => {
                         type: "argument",
                         content: [{ type: "string", content: "a" }],
                         openMark: "_",
-                        closeMark: ""
+                        closeMark: "",
                     },
                     {
                         type: "argument",
                         content: [{ type: "string", content: "bc" }],
                         openMark: "{",
-                        closeMark: "}"
+                        closeMark: "}",
                     },
                     {
                         type: "argument",
                         content: [{ type: "string", content: "d" }],
                         openMark: "<",
-                        closeMark: ">"
-                    }
-                ]
-            }
-        ])
-    })
+                        closeMark: ">",
+                    },
+                ],
+            },
+        ]);
+    });
 
     it("Custom argument parser", () => {
         /**

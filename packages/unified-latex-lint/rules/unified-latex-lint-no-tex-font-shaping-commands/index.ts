@@ -44,22 +44,25 @@ CTAN l2tabuen Section 2.`;
 export const unifiedLatexLintNoTexFontShapingCommands = lintRule<
     Ast.Root,
     PluginOptions
->({ origin: "unified-latex-lint:no-tex-font-shaping-commands" }, (tree, file, options) => {
-    visit(
-        tree,
-        (node, info) => {
-            const macroName = node.content;
-            file.message(
-                `Replace "${printRaw(node)}" with "${printRaw(
-                    m(REPLACEMENTS[macroName])
-                )}"`,
-                node
-            );
+>(
+    { origin: "unified-latex-lint:no-tex-font-shaping-commands" },
+    (tree, file, options) => {
+        visit(
+            tree,
+            (node, info) => {
+                const macroName = node.content;
+                file.message(
+                    `Replace "${printRaw(node)}" with "${printRaw(
+                        m(REPLACEMENTS[macroName])
+                    )}"`,
+                    node
+                );
 
-            if (options?.fix) {
-                replaceNodeDuringVisit(m(REPLACEMENTS[macroName]), info);
-            }
-        },
-        { test: isReplaceable }
-    );
-});
+                if (options?.fix) {
+                    replaceNodeDuringVisit(m(REPLACEMENTS[macroName]), info);
+                }
+            },
+            { test: isReplaceable }
+        );
+    }
+);

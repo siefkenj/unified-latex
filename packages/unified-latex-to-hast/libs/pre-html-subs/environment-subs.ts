@@ -16,7 +16,10 @@ import { wrapPars } from "../wrap-pars";
 
 const ITEM_ARG_NAMES_REG = ["label"] as const;
 const ITEM_ARG_NAMES_BEAMER = [null, "label", null] as const;
-type ItemArgs = Record<typeof ITEM_ARG_NAMES_REG[number], Ast.Node[] | null> & {
+type ItemArgs = Record<
+    (typeof ITEM_ARG_NAMES_REG)[number],
+    Ast.Node[] | null
+> & {
     body: Ast.Node[];
 };
 

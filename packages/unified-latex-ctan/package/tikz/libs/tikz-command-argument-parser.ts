@@ -44,7 +44,10 @@ export const tikzCommandArgumentParser: ArgumentParser = (nodes, startPos) => {
     const {
         argument: _optionalArgument,
         nodesRemoved: optionalArgumentNodesRemoved,
-    } = gobbleSingleArgument(nodes, OPTIONAL_ARGUMENT_ARG_SPEC, pos) as { argument: Argument, nodesRemoved: number };
+    } = gobbleSingleArgument(nodes, OPTIONAL_ARGUMENT_ARG_SPEC, pos) as {
+        argument: Argument;
+        nodesRemoved: number;
+    };
     nodesRemoved += optionalArgumentNodesRemoved;
     const optionalArg = _optionalArgument || blankArg();
 

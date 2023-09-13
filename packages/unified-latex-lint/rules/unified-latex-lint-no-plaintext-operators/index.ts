@@ -1,7 +1,7 @@
 import { pointStart, pointEnd } from "unist-util-position";
 import { lintRule } from "unified-lint-rule";
 import * as Ast from "@unified-latex/unified-latex-types";
-import { match} from "@unified-latex/unified-latex-util-match";
+import { match } from "@unified-latex/unified-latex-util-match";
 import { prefixMatch, Trie } from "@unified-latex/unified-latex-util-scan";
 import { visit } from "@unified-latex/unified-latex-util-visit";
 

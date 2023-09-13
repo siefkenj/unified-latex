@@ -14,9 +14,7 @@ import {
     softline,
     fill,
 } from "./common";
-import {
-    printRaw,
-} from "@unified-latex/unified-latex-util-print-raw";
+import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 import { match } from "@unified-latex/unified-latex-util-match";
 import { trim } from "@unified-latex/unified-latex-util-trim";
 import {

@@ -9,7 +9,8 @@
         "package": "npm run package -ws",
         "publish": "npm run publish -ws",
         "test": "vitest ./packages",
-        "test:ci": "vitest ./packages --maxWorkers=1"
+        "test:ci": "vitest ./packages --maxWorkers=1",
+        "prettier": "prettier '**/*.ts' --write"
     },
     "devDependencies": {
         "@types/node": "^20.5.9",

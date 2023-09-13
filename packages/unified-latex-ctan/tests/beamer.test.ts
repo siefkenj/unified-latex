@@ -32,15 +32,46 @@ describe("unified-latex-ctan:beamer", () => {
         const EXAMPLES: [string, Ast.Node[]][] = [
             [
                 "\\onslide+<foo>",
-                [m("onslide", args([arg("+", {openMark:"", closeMark:""}), null, "foo", null], { braces: "[][]<>{}" }))],
+                [
+                    m(
+                        "onslide",
+                        args(
+                            [
+                                arg("+", { openMark: "", closeMark: "" }),
+                                null,
+                                "foo",
+                                null,
+                            ],
+                            { braces: "[][]<>{}" }
+                        )
+                    ),
+                ],
             ],
             [
                 "\\onslide+<foo>{bar}",
-                [m("onslide", args([arg("+", {openMark:"", closeMark:""}), null, "foo", "bar"], { braces: "[][]<>{}" }))],
+                [
+                    m(
+                        "onslide",
+                        args(
+                            [
+                                arg("+", { openMark: "", closeMark: "" }),
+                                null,
+                                "foo",
+                                "bar",
+                            ],
+                            { braces: "[][]<>{}" }
+                        )
+                    ),
+                ],
             ],
             [
                 "\\onslide{bar}",
-                [m("onslide", args([null, null, null, "bar"], { braces: "[][]<>{}" }))],
+                [
+                    m(
+                        "onslide",
+                        args([null, null, null, "bar"], { braces: "[][]<>{}" })
+                    ),
+                ],
             ],
         ];
 

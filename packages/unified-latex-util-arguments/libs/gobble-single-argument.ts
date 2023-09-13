@@ -1,6 +1,9 @@
 import { arg } from "@unified-latex/unified-latex-builder";
 import * as Ast from "@unified-latex/unified-latex-types";
-import { ArgSpecAst as ArgSpec, printRaw } from "@unified-latex/unified-latex-util-argspec";
+import {
+    ArgSpecAst as ArgSpec,
+    printRaw,
+} from "@unified-latex/unified-latex-util-argspec";
 import { match } from "@unified-latex/unified-latex-util-match";
 import { scan } from "@unified-latex/unified-latex-util-scan";
 
@@ -34,15 +37,15 @@ export function gobbleSingleArgument(
     // this function does nothing.
     const gobbleWhitespace = (argSpec as ArgSpec.LeadingWhitespace)
         .noLeadingWhitespace
-        ? () => { }
+        ? () => {}
         : () => {
-            while (currPos < nodes.length) {
-                if (!match.whitespace(nodes[currPos])) {
-                    break;
-                }
-                currPos++;
-            }
-        };
+              while (currPos < nodes.length) {
+                  if (!match.whitespace(nodes[currPos])) {
+                      break;
+                  }
+                  currPos++;
+              }
+          };
 
     const openMark: string = (argSpec as any).openBrace || "";
     const closeMark: string = (argSpec as any).closeBrace || "";
@@ -84,7 +87,12 @@ export function gobbleSingleArgument(
                 currPos++;
                 break;
             } else {
-                const bracePos = findBracePositions(nodes, currPos, openMark, closeMark);
+                const bracePos = findBracePositions(
+                    nodes,
+                    currPos,
+                    openMark,
+                    closeMark
+                );
                 if (bracePos) {
                     argument = arg(nodes.slice(bracePos[0] + 1, bracePos[1]), {
                         openMark,
@@ -108,7 +116,12 @@ export function gobbleSingleArgument(
                 break;
             }
             // If we're here, we have custom braces to match
-            const bracePos = findBracePositions(nodes, currPos, openMark, closeMark);
+            const bracePos = findBracePositions(
+                nodes,
+                currPos,
+                openMark,
+                closeMark
+            );
             if (bracePos) {
                 argument = arg(nodes.slice(bracePos[0] + 1, bracePos[1]), {
                     openMark,
@@ -120,8 +133,11 @@ export function gobbleSingleArgument(
             break;
         case "optionalStar":
         case "optionalToken": {
-            const bracePos = findBracePositions(nodes, currPos,
-                argSpec.type === "optionalStar" ? "*" : argSpec.token);
+            const bracePos = findBracePositions(
+                nodes,
+                currPos,
+                argSpec.type === "optionalStar" ? "*" : argSpec.token
+            );
             if (bracePos) {
                 argument = arg(currNode, { openMark: "", closeMark: "" });
                 // Instead of `closeMarkPos` returned from findBracePositions,
@@ -139,11 +155,14 @@ export function gobbleSingleArgument(
             }
             const rawToken = argSpec.stopTokens[0];
             const stopToken: string | Ast.Whitespace =
-                rawToken === " "
-                    ? { type: "whitespace" }
-                    : rawToken;
+                rawToken === " " ? { type: "whitespace" } : rawToken;
 
-            let bracePos = findBracePositions(nodes, startPos, undefined, stopToken);
+            let bracePos = findBracePositions(
+                nodes,
+                startPos,
+                undefined,
+                stopToken
+            );
             // If the corresponding token is not found, eat nothing;
             if (!bracePos) break;
 
@@ -159,10 +178,13 @@ export function gobbleSingleArgument(
         }
         case "embellishment": {
             // Split tokens into single characters
-            const tokens = normalizeEmbellishmentTokens(argSpec.embellishmentTokens);
+            const tokens = normalizeEmbellishmentTokens(
+                argSpec.embellishmentTokens
+            );
             argument = [];
             let hasMatch: boolean;
-            do { // Try finding match until there is no more
+            do {
+                // Try finding match until there is no more
                 hasMatch = false;
                 for (let i = 0; i < tokens.length; i++) {
                     if (argument[i]) continue;
@@ -170,10 +192,13 @@ export function gobbleSingleArgument(
                     const bracePos = findBracePositions(nodes, currPos, token);
                     if (!bracePos) continue;
                     let argNode = nodes[bracePos[0] + 1];
-                    argument[i] = arg(match.group(argNode) ? argNode.content : argNode, {
-                        openMark: token,
-                        closeMark: ""
-                    });
+                    argument[i] = arg(
+                        match.group(argNode) ? argNode.content : argNode,
+                        {
+                            openMark: token,
+                            closeMark: "",
+                        }
+                    );
                     currPos = bracePos[1] + 1;
                     hasMatch = true;
                     break;
@@ -221,8 +246,12 @@ function cloneStringNode(node: Ast.String, content: string): Ast.String {
  * This may mutate `nodes`, if braces are not a kind of characters that are
  * always parsed as a separate token
  */
-function findBracePositions(nodes: Ast.Node[], startPos: number,
-    openMark?: string, closeMark?: string | Ast.Node): [number, number] | undefined {
+function findBracePositions(
+    nodes: Ast.Node[],
+    startPos: number,
+    openMark?: string,
+    closeMark?: string | Ast.Node
+): [number, number] | undefined {
     const currNode = nodes[startPos];
     let openMarkPos = startPos;
     let closeMarkPos: number | null = startPos;
@@ -235,7 +264,9 @@ function findBracePositions(nodes: Ast.Node[], startPos: number,
         if (currNode.content.length > openMark.length) {
             const nodeContent = currNode.content;
             currNode.content = openMark;
-            nodes.splice(openMarkPos + 1, 0,
+            nodes.splice(
+                openMarkPos + 1,
+                0,
                 cloneStringNode(currNode, nodeContent.slice(openMark.length))
             );
         }
@@ -250,46 +281,67 @@ function findBracePositions(nodes: Ast.Node[], startPos: number,
         if (match.anyString(argNode) && argNode.content.length > 1) {
             const argContent = argNode.content;
             argNode.content = argContent[0];
-            nodes.splice(closeMarkPos + 1, 0, cloneStringNode(argNode, argContent.slice(1)));
+            nodes.splice(
+                closeMarkPos + 1,
+                0,
+                cloneStringNode(argNode, argContent.slice(1))
+            );
         }
         return [openMarkPos, closeMarkPos];
     }
     // scan for closing marks
-    closeMarkPos = scan(nodes, closeMark, { startIndex: closeMarkPos, allowSubstringMatches: true });
+    closeMarkPos = scan(nodes, closeMark, {
+        startIndex: closeMarkPos,
+        allowSubstringMatches: true,
+    });
     if (closeMarkPos === null) return;
     const closingNode = nodes[closeMarkPos];
-    if (match.anyString(closingNode) && typeof closeMark === 'string') {
+    if (match.anyString(closingNode) && typeof closeMark === "string") {
         const closingNodeContent = closingNode.content;
         let closeMarkIndex = closingNodeContent.indexOf(closeMark);
         if (closingNodeContent.length > closeMark.length) {
             closingNode.content = closeMark;
             const prev = closingNodeContent.slice(0, closeMarkIndex);
-            const next = closingNodeContent.slice(closeMarkIndex + closeMark.length);
+            const next = closingNodeContent.slice(
+                closeMarkIndex + closeMark.length
+            );
             if (prev) {
-                nodes.splice(closeMarkPos, 0, cloneStringNode(closingNode, prev));
+                nodes.splice(
+                    closeMarkPos,
+                    0,
+                    cloneStringNode(closingNode, prev)
+                );
                 closeMarkPos++;
             }
             if (next) {
-                nodes.splice(closeMarkPos + 1, 0, cloneStringNode(closingNode, next));
+                nodes.splice(
+                    closeMarkPos + 1,
+                    0,
+                    cloneStringNode(closingNode, next)
+                );
             }
         }
     }
     return [openMarkPos, closeMarkPos];
 }
 
-function normalizeEmbellishmentTokens(tokens: (ArgSpec.Group | string)[]): string[] {
-    return tokens.flatMap(token => {
-        if (typeof token === 'string') return token.split('');
+function normalizeEmbellishmentTokens(
+    tokens: (ArgSpec.Group | string)[]
+): string[] {
+    return tokens.flatMap((token) => {
+        if (typeof token === "string") return token.split("");
         // xparse (as of 2023-02-02) accepts single character enclosed in braces {}.
         // It does not allow more nesting, e.g. e{{{_}}} produces an error.
         if (token.content.length === 1) {
             const bracedToken = token.content[0];
-            if (typeof bracedToken === 'string' && bracedToken.length === 1) {
+            if (typeof bracedToken === "string" && bracedToken.length === 1) {
                 return bracedToken;
             }
         }
         console.warn(
-            `Embellishment token should be a single character, but got ${printRaw(token)}`
+            `Embellishment token should be a single character, but got ${printRaw(
+                token
+            )}`
         );
         return [];
     });
@@ -298,9 +350,12 @@ function normalizeEmbellishmentTokens(tokens: (ArgSpec.Group | string)[]): strin
 /**
  * Asserts that `arg` is not an array. Use on returned values of `gobbleSingleArgument`.
  */
-export function assertSingleArgument(arg: Ast.Argument | Ast.Argument[] | null):
-    asserts arg is (Ast.Argument | null) {
+export function assertSingleArgument(
+    arg: Ast.Argument | Ast.Argument[] | null
+): asserts arg is Ast.Argument | null {
     if (Array.isArray(arg)) {
-        throw new Error(`Expected an argspec to gobble single argument, but got ${arg.length}`);
+        throw new Error(
+            `Expected an argspec to gobble single argument, but got ${arg.length}`
+        );
     }
 }
