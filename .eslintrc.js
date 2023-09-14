@@ -23,7 +23,6 @@ module.exports = {
         "no-case-declarations": "off",
         "prefer-const": "off",
         "no-empty": "off",
-        "no-var": "off",
         "curly": "error"
     }
 };
