@@ -778,15 +778,15 @@ describe("unified-latex-util-arguments", () => {
         ast = [
             {
                 type: "string",
-                content: "^1"
+                content: "^1",
             },
             {
-                "type": "whitespace"
+                type: "whitespace",
             },
             {
                 type: "string",
-                content: "_2"
-            }
+                content: "_2",
+            },
         ];
         expect(
             gobbleSingleArgument(ast, parseArgspec("e{^_}")[0])
@@ -803,11 +803,10 @@ describe("unified-latex-util-arguments", () => {
                     content: [{ type: "string", content: "2" }],
                     openMark: "_",
                     closeMark: "",
-                }
+                },
             ],
             nodesRemoved: 5,
         });
-
     });
     it("can gobble embellishments whose token is in a group one level deep", () => {
         let ast: Ast.Node[] = [{ type: "string", content: "^a_b" }];
