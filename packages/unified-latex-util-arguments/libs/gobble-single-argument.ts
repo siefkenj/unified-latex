@@ -10,16 +10,22 @@ import { scan } from "@unified-latex/unified-latex-util-scan";
 
 /**
  * Gobbles an argument of whose type is specified
- * by `argSpec` starting at the position `startPos`. If an argument couldn't be found,
- * `argument` will be `null`.
+ * by `argSpec` starting at the position `startPos`.
+ * If an argument couldn't be found, `argument` will be `null`.
+ * `matchNum` is undefined in most cases. It is optionally provided
+ * if the provided `argSpec` may match multiple arguments. In such cases,
+ * if there is a matched `argument`, `matchNum` represents a 1-based index of
+ * that argument, and if there's no `argument`, it represents the count of
+ * missing arguments.
  */
 export function gobbleSingleArgument(
     nodes: Ast.Node[],
     argSpec: ArgSpec.Node,
     startPos = 0
 ): {
-    argument: Ast.Argument | Ast.Argument[] | null;
+    argument: Ast.Argument | null;
     nodesRemoved: number;
+    matchNum?: number;
 } {
     if (typeof argSpec === "string" || !argSpec.type) {
         throw new Error(
@@ -29,9 +35,11 @@ export function gobbleSingleArgument(
         );
     }
 
-    let argument: Ast.Argument | Ast.Argument[] | null = null;
+    let argument: Ast.Argument | null = null;
 
     let currPos = startPos;
+
+    let matchNum: number | undefined = undefined;
 
     // Gobble whitespace from `currPos` onward, updating `currPos`.
     // If `argSpec` specifies leading whitespace is not allowed,
@@ -68,7 +76,14 @@ export function gobbleSingleArgument(
         match.comment(currNode) ||
         match.parbreak(currNode)
     ) {
-        return { argument, nodesRemoved: 0 };
+        const ret: { argument: null; nodesRemoved: number; matchNum?: number } =
+            { argument, nodesRemoved: 0 };
+        if (argSpec.type === "embellishment") {
+            ret.matchNum = normalizeEmbellishmentTokens(
+                argSpec.embellishmentTokens
+            ).length;
+        }
+        return ret;
     }
 
     switch (argSpec.type) {
@@ -184,40 +199,28 @@ export function gobbleSingleArgument(
             const tokens = normalizeEmbellishmentTokens(
                 argSpec.embellishmentTokens
             );
-            argument = [];
-            let hasMatch: boolean;
-            do {
-                // Try finding match until there is no more
-                hasMatch = false;
-                gobbleWhitespace();
-                for (let i = 0; i < tokens.length; i++) {
-                    if (argument[i]) {
-                        continue;
-                    }
-                    const token = tokens[i];
-                    const bracePos = findBracePositions(nodes, currPos, token);
-                    if (!bracePos) {
-                        continue;
-                    }
-                    let argNode = nodes[bracePos[0] + 1];
-                    argument[i] = arg(
-                        match.group(argNode) ? argNode.content : argNode,
-                        {
-                            openMark: token,
-                            closeMark: "",
-                        }
-                    );
-                    currPos = bracePos[1] + 1;
-                    hasMatch = true;
-                    break;
-                }
-            } while (hasMatch);
-            // Fill out missing arguments
+            argSpec.embellishmentTokens = tokens; // ArgSpec is mutated here
             for (let i = 0; i < tokens.length; i++) {
-                if (argument[i]) {
+                const token = tokens[i];
+                const bracePos = findBracePositions(nodes, currPos, token);
+                if (!bracePos) {
                     continue;
                 }
-                argument[i] = arg([], { openMark: "", closeMark: "" });
+                let argNode = nodes[bracePos[0] + 1];
+                argument = arg(
+                    match.group(argNode) ? argNode.content : argNode,
+                    {
+                        openMark: token,
+                        closeMark: "",
+                    }
+                );
+                currPos = bracePos[1] + 1;
+                matchNum = i + 1; // 1-based indices
+                tokens.splice(i, 1);
+                break;
+            }
+            if (!argument) {
+                matchNum = tokens.length;
             }
             break;
         }
@@ -231,7 +234,7 @@ export function gobbleSingleArgument(
     // if we did not consume an argument, we don't want to consume the whitespace.
     const nodesRemoved = argument ? currPos - startPos : 0;
     nodes.splice(startPos, nodesRemoved);
-    return { argument, nodesRemoved };
+    return { argument, nodesRemoved, matchNum };
 }
 
 function cloneStringNode(node: Ast.String, content: string): Ast.String {
@@ -353,17 +356,4 @@ function normalizeEmbellishmentTokens(
         );
         return [];
     });
-}
-
-/**
- * Asserts that `arg` is not an array. Use on returned values of `gobbleSingleArgument`.
- */
-export function assertSingleArgument(
-    arg: Ast.Argument | Ast.Argument[] | null
-): asserts arg is Ast.Argument | null {
-    if (Array.isArray(arg)) {
-        throw new Error(
-            `Expected an argspec to gobble single argument, but got ${arg.length}`
-        );
-    }
 }

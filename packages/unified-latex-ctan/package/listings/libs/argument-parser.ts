@@ -2,10 +2,7 @@ import { arg } from "@unified-latex/unified-latex-builder";
 import { Argument, ArgumentParser } from "@unified-latex/unified-latex-types";
 import { parse as parseArgspec } from "@unified-latex/unified-latex-util-argspec";
 import { Node } from "@unified-latex/unified-latex-util-argspec/libs/argspec-types";
-import {
-    assertSingleArgument,
-    gobbleSingleArgument,
-} from "@unified-latex/unified-latex-util-arguments";
+import { gobbleSingleArgument } from "@unified-latex/unified-latex-util-arguments";
 import { match } from "@unified-latex/unified-latex-util-match";
 
 const argSpecM = parseArgspec("m")[0];
@@ -20,7 +17,6 @@ const argSpecRDelim: { [delim: string]: Node } = {};
 export const argumentParser: ArgumentParser = (nodes, startPos) => {
     const { argument: optionalArg, nodesRemoved: optionalArgNodesRemoved } =
         gobbleSingleArgument(nodes, argSpecO, startPos);
-    assertSingleArgument(optionalArg);
 
     let codeArg: Argument | Argument[] | null = null;
     let codeArgNodesRemoved: number = 0;
@@ -41,7 +37,6 @@ export const argumentParser: ArgumentParser = (nodes, startPos) => {
         codeArg = delimArg.argument;
         codeArgNodesRemoved = delimArg.nodesRemoved;
     }
-    assertSingleArgument(codeArg);
 
     return {
         args: [optionalArg || arg(null), codeArg || arg(null)],

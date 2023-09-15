@@ -692,7 +692,16 @@ describe("unified-latex-util-arguments", () => {
         );
     });
     it("can gobble embellishments", () => {
-        let ast: Ast.Node[] = [
+        let ast: Ast.Node[] = [{ type: "string", content: "xxx" }];
+        expect(gobbleSingleArgument(ast, parseArgspec("e{}")[0])).toMatchObject(
+            {
+                argument: null,
+                nodesRemoved: 0,
+                matchNum: 0,
+            }
+        );
+
+        ast = [
             { type: "whitespace" },
             { type: "string", content: "_1234" },
             { type: "string", content: "!" },
@@ -700,15 +709,14 @@ describe("unified-latex-util-arguments", () => {
         expect(
             gobbleSingleArgument(ast, parseArgspec("e{_}")[0])
         ).toMatchObject({
-            argument: [
-                {
-                    type: "argument",
-                    content: [{ type: "string", content: "1" }],
-                    openMark: "_",
-                    closeMark: "",
-                },
-            ],
+            argument: {
+                type: "argument",
+                content: [{ type: "string", content: "1" }],
+                openMark: "_",
+                closeMark: "",
+            },
             nodesRemoved: 3,
+            matchNum: 1,
         });
 
         ast = [
@@ -717,95 +725,16 @@ describe("unified-latex-util-arguments", () => {
             { type: "string", content: "abcde" },
         ];
         expect(
-            gobbleSingleArgument(ast, parseArgspec("e{_ad}")[0])
+            gobbleSingleArgument(ast, parseArgspec("e{a_}")[0])
         ).toMatchObject({
-            argument: [
-                {
-                    type: "argument",
-                    content: [{ type: "string", content: "1234" }],
-                    openMark: "_",
-                    closeMark: "",
-                },
-                {
-                    type: "argument",
-                    content: [{ type: "string", content: "b" }],
-                    openMark: "a",
-                    closeMark: "",
-                },
-                {
-                    type: "argument",
-                    content: [],
-                    openMark: "",
-                    closeMark: "",
-                },
-            ],
-            nodesRemoved: 4,
-        });
-
-        // Order of embellishments shouldn't matter
-        ast = [
-            { type: "string", content: "_" },
-            { type: "group", content: [{ type: "string", content: "1234" }] },
-            { type: "string", content: "daac" },
-        ];
-        expect(
-            gobbleSingleArgument(ast, parseArgspec("e{_ad}")[0])
-        ).toMatchObject({
-            argument: [
-                {
-                    type: "argument",
-                    content: [{ type: "string", content: "1234" }],
-                    openMark: "_",
-                    closeMark: "",
-                },
-                {
-                    type: "argument",
-                    content: [{ type: "string", content: "c" }],
-                    openMark: "a",
-                    closeMark: "",
-                },
-                {
-                    type: "argument",
-                    content: [{ type: "string", content: "a" }],
-                    openMark: "d",
-                    closeMark: "",
-                },
-            ],
-            nodesRemoved: 6,
-        });
-
-        // whitespaces between several embellishments shouldn't matter
-        ast = [
-            {
-                type: "string",
-                content: "^1",
+            argument: {
+                type: "argument",
+                content: [{ type: "string", content: "1234" }],
+                openMark: "_",
+                closeMark: "",
             },
-            {
-                type: "whitespace",
-            },
-            {
-                type: "string",
-                content: "_2",
-            },
-        ];
-        expect(
-            gobbleSingleArgument(ast, parseArgspec("e{^_}")[0])
-        ).toMatchObject({
-            argument: [
-                {
-                    type: "argument",
-                    content: [{ type: "string", content: "1" }],
-                    openMark: "^",
-                    closeMark: "",
-                },
-                {
-                    type: "argument",
-                    content: [{ type: "string", content: "2" }],
-                    openMark: "_",
-                    closeMark: "",
-                },
-            ],
-            nodesRemoved: 5,
+            nodesRemoved: 2,
+            matchNum: 2,
         });
     });
     it("can gobble embellishments whose token is in a group one level deep", () => {
@@ -813,21 +742,14 @@ describe("unified-latex-util-arguments", () => {
         expect(
             gobbleSingleArgument(ast, parseArgspec("e{{^}{_}}")[0])
         ).toMatchObject({
-            argument: [
-                {
-                    type: "argument",
-                    content: [{ type: "string", content: "a" }],
-                    openMark: "^",
-                    closeMark: "",
-                },
-                {
-                    type: "argument",
-                    content: [{ type: "string", content: "b" }],
-                    openMark: "_",
-                    closeMark: "",
-                },
-            ],
-            nodesRemoved: 4,
+            argument: {
+                type: "argument",
+                content: [{ type: "string", content: "a" }],
+                openMark: "^",
+                closeMark: "",
+            },
+            nodesRemoved: 2,
+            matchNum: 1,
         });
     });
 });
