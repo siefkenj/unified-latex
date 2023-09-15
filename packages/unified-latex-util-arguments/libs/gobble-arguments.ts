@@ -69,20 +69,20 @@ export function gobbleArguments(
     return { args, nodesRemoved: totalNodesRemoved };
 }
 
-function nextHoleIndex<T>(arr: (T | undefined)[], startPos: number) {
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
+function nextHoleIndex<T>(
+    arr: (NonNullable<T> | undefined)[],
+    startPos: number
+) {
+    do {
         startPos++;
-        if (typeof arr[startPos] === "undefined") {
-            return startPos;
-        }
-    }
+    } while (typeof arr[startPos] !== "undefined");
+    return startPos;
 }
 /**
  * Get n-th left-most hole in `arr`. `n` is a 1-based integer,
  * so putting ([], 1) would return 0.
  */
-function nthHoleIndex<T>(arr: (T | undefined)[], n: number) {
+function nthHoleIndex<T>(arr: (NonNullable<T> | undefined)[], n: number) {
     let i = -1;
     while (n--) {
         i = nextHoleIndex(arr, i);
