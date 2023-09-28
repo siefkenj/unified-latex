@@ -11,6 +11,15 @@
         const computedOptions = DEFAULT_OPTIONS[type] || {};
         return { type, ...computedOptions, ...options };
     }
+    /**
+     * Recursively return the content of a group until there are no more groups
+     */
+    function groupContent(node) {
+        if (node.type === "group") {
+            return node.content.map(groupContent).flat();
+        }
+        return node;
+    }
 }
 
 args_spec_list
@@ -60,13 +69,15 @@ optional_standard
 
 optional_embellishment
     = "e" args:braced_group {
+            // Embellishments ignore groups around tokens. E.g. `e{x}` and `e{{x}}`
+            // are the same.
             return createNode("embellishment", {
-                embellishmentTokens: args.content,
+                embellishmentTokens: args.content.map(groupContent).flat(),
             });
         }
     / "E" args:braced_group g:braced_group {
             return createNode("embellishment", {
-                embellishmentTokens: args.content,
+                embellishmentTokens: args.content.map(groupContent).flat(),
                 defaultArg: g,
             });
         }
