@@ -1,3 +1,4 @@
+import { describe, it, expect } from "vitest";
 import { toHtml } from "hast-util-to-html";
 import util from "util";
 import { strToNodes } from "../../test-common";

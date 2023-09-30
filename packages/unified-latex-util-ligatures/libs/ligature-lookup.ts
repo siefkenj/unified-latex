@@ -35,6 +35,7 @@ const SUBSTITUTION_MAP: Map<string, Ast.String> = new Map([
     ["- - -", makeString("—")],
     ["- -", makeString("–")],
     ["` `", makeString("“")],
+    ["\"", makeString("”")],
     ["' '", makeString("”")],
     ["`", makeString("‘")],
     ["'", makeString("’")],

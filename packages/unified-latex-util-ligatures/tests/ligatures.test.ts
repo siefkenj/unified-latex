@@ -1,8 +1,10 @@
+import { describe, it, expect } from "vitest";
 import util from "util";
 import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 import { expandUnicodeLigatures } from "../libs/expand-unicode-ligatures";
 import { parseLigatures } from "../libs/parse";
 import { strToNodes } from "../../test-common";
+import { Node } from "@unified-latex/unified-latex-types";
 
 /* eslint-env jest */
 
@@ -28,6 +30,20 @@ describe("unified-latex-util-ligatures", () => {
         expect(printRaw(parseLigatures(ast))).toEqual("a$b");
         ast = strToNodes("<<a>>");
         expect(printRaw(parseLigatures(ast))).toEqual("«a»");
+    });
+
+    it("quotes and apostrophes get expanded to their 'smart' versions", () => {
+        let ast: Node[];
+        ast = strToNodes(`''`);
+        expect(printRaw(parseLigatures(ast))).toEqual(`”`);
+        ast = strToNodes(`"`);
+        expect(printRaw(parseLigatures(ast))).toEqual(`”`);
+        ast = strToNodes(`'`);
+        expect(printRaw(parseLigatures(ast))).toEqual(`’`);
+        ast = strToNodes("``");
+        expect(printRaw(parseLigatures(ast))).toEqual(`“`);
+        ast = strToNodes("`");
+        expect(printRaw(parseLigatures(ast))).toEqual(`‘`);
     });
 
     it("can replace macro ligatures", () => {

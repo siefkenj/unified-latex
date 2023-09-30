@@ -1,3 +1,4 @@
+import { describe, it, expect } from "vitest";
 import Prettier from "prettier";
 import rehypeStringify from "rehype-stringify";
 import util from "util";
