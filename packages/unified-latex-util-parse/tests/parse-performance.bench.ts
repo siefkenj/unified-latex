@@ -1,10 +1,5 @@
-import { describe, it, expect, bench } from "vitest";
-import { VFile } from "unified-lint-rule/lib";
+import { describe, bench } from "vitest";
 import util from "util";
-import { trimRenderInfo } from "@unified-latex/unified-latex-util-render-info";
-import * as Ast from "@unified-latex/unified-latex-types";
-import { trim } from "@unified-latex/unified-latex-util-trim";
-import { processLatexToAstViaUnified } from "@unified-latex/unified-latex";
 import { parseMinimal } from "../libs/parse-minimal";
 
 /* eslint-env jest */
