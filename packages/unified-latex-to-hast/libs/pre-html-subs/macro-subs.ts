@@ -28,13 +28,18 @@ function factory(
     };
 }
 
-function createHeading(tag: string) {
+function createHeading(tag: string, attrs = {}) {
     return (macro: Ast.Macro) => {
         const args = getArgsContent(macro);
         const starred = !!args[0];
         const attributes: Record<string, string> = starred
             ? { className: "starred" }
             : {};
+
+        if (attrs) {
+            Object.assign(attributes, attrs);
+        }
+
         return htmlLike({
             tag,
             content: args[args.length - 1] || [],
@@ -59,6 +64,8 @@ export const macroReplacements: Record<string, (node: Ast.Macro) => Ast.Node> =
         section: createHeading("h3"),
         subsection: createHeading("h4"),
         subsubsection: createHeading("h5"),
+        paragraph: createHeading("h6", { className: "section-paragraph" }),
+        subparagraph: createHeading("h6", { className: "section-subparagraph" }),
         appendix: createHeading("h2"),
         smallskip: () =>
             htmlLike({

@@ -276,4 +276,15 @@ describe("unified-latex-to-hast:unified-latex-to-hast", () => {
       </ol>`)
         );
     });
+    it("replaces paragraphs", () => {
+        let ast;
+
+        ast = process(`\\paragraph{Important.} Paragraph`);
+        expect(normalizeHtml(ast)).toEqual(
+            normalizeHtml(`
+                <h6 class="section-paragraph">Important.</h6>
+                Paragraph
+            `)
+        );
+    });
 });
