@@ -3,6 +3,8 @@ import { processLatexViaUnified } from "@unified-latex/unified-latex";
 import { VFile } from "unified-lint-rule/lib";
 import util from "util";
 import { unifiedLatexToHtmlLike } from "../libs/unified-latex-plugin-to-html-like";
+import { htmlLike } from "@unified-latex/unified-latex-util-html-like";
+import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 
 /* eslint-env jest */
 
@@ -39,5 +41,37 @@ describe("unified-latex-to-hast:unified-latex-to-html-like", () => {
         expect(file.value).toEqual(
             '\\html-tag:ol{\\html-attr:className{"enumerate"}\\html-tag:li{\\html-tag:p{foo}}\\html-tag:li{\\html-tag:p{bar}}}'
         );
+    });
+
+    it("can accept custom replacers", () => {
+        const process = (value: string) =>
+            processLatexViaUnified({ macros: { xxx: { signature: "m m" } } })
+                .use(unifiedLatexToHtmlLike, {
+                    macroReplacements: {
+                        xxx: (node) =>
+                            htmlLike({
+                                tag: "xxx",
+                                attributes: Object.fromEntries(
+                                    (node.args || []).map((x, i) => [
+                                        i,
+                                        printRaw(x.content),
+                                    ])
+                                ),
+                            }),
+                    },
+                    environmentReplacements: {
+                        yyy: (node) =>
+                            htmlLike({ tag: "yyy", content: node.content }),
+                    },
+                })
+                .processSync({ value });
+
+        file = process("\\xxx{a}{b}");
+        expect(file.value).toEqual(
+            `\\html-tag:xxx{\\html-attr:0{"a"}\\html-attr:1{"b"}}`
+        );
+
+        file = process("\\begin{yyy}a\\end{yyy}");
+        expect(file.value).toEqual(`\\html-tag:yyy{a}`);
     });
 });

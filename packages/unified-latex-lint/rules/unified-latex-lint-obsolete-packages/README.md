@@ -6,7 +6,7 @@
 
 # Constants
 
-| Name                               | Type                                                                                         |
-| :--------------------------------- | :------------------------------------------------------------------------------------------- |
-| `DESCRIPTION`                      | `String`                                                                                     |
-| `unifiedLatexLintObsoletePackages` | `Plugin<void[] \| [unknown] \| [boolean \| Label \| Severity, unknown], Ast.Root, Ast.Root>` |
+| Name                               | Type                                              |
+| :--------------------------------- | :------------------------------------------------ |
+| `DESCRIPTION`                      | `String`                                          |
+| `unifiedLatexLintObsoletePackages` | `Plugin<void[] \| [unknown], Ast.Root, Ast.Root>` |

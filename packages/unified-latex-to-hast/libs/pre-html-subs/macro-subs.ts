@@ -59,13 +59,16 @@ export const macroReplacements: Record<string, (node: Ast.Macro) => Ast.Node> =
         textbf: factory("b", { className: "textbf" }),
         underline: factory("span", { className: "underline" }),
         mbox: factory("span", { className: "mbox" }),
+        phantom: factory("span", { className: "phantom" }),
         part: createHeading("h1"),
         chapter: createHeading("h2"),
         section: createHeading("h3"),
         subsection: createHeading("h4"),
         subsubsection: createHeading("h5"),
         paragraph: createHeading("h6", { className: "section-paragraph" }),
-        subparagraph: createHeading("h6", { className: "section-subparagraph" }),
+        subparagraph: createHeading("h6", {
+            className: "section-subparagraph",
+        }),
         appendix: createHeading("h2"),
         smallskip: () =>
             htmlLike({
@@ -106,6 +109,18 @@ export const macroReplacements: Record<string, (node: Ast.Macro) => Ast.Node> =
                 content: args[2] || [],
             });
         },
+        hyperref: (node) => {
+            const args = getArgsContent(node);
+            const url = "#" + printRaw(args[0] || "");
+            return htmlLike({
+                tag: "a",
+                attributes: {
+                    className: "href",
+                    href: url,
+                },
+                content: args[1] || [],
+            });
+        },
         "\\": () =>
             htmlLike({
                 tag: "br",
@@ -114,10 +129,21 @@ export const macroReplacements: Record<string, (node: Ast.Macro) => Ast.Node> =
         vspace: (node) => {
             const args = getArgsContent(node);
             return htmlLike({
-                tag: "vspace",
+                tag: "div",
                 attributes: {
                     className: "vspace",
-                    amount: printRaw(args[1] || []),
+                    "data-amount": printRaw(args[1] || []),
+                },
+                content: [],
+            });
+        },
+        hspace: (node) => {
+            const args = getArgsContent(node);
+            return htmlLike({
+                tag: "span",
+                attributes: {
+                    className: "vspace",
+                    "data-amount": printRaw(args[1] || []),
                 },
                 content: [],
             });
@@ -168,4 +194,16 @@ export const macroReplacements: Record<string, (node: Ast.Macro) => Ast.Node> =
             });
         },
         noindent: () => ({ type: "string", content: "" }),
+        includegraphics: (node) => {
+            const args = getArgsContent(node);
+            const src = printRaw(args[args.length - 1] || []);
+            return htmlLike({
+                tag: "img",
+                attributes: {
+                    className: "includegraphics",
+                    src,
+                },
+                content: [],
+            });
+        },
     };

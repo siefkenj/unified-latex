@@ -1,9 +1,12 @@
 import rehypeStringify from "rehype-stringify";
 import * as Ast from "@unified-latex/unified-latex-types";
 import { processLatexViaUnified } from "@unified-latex/unified-latex";
-import { unifiedLatexToHast } from "./unified-latex-plugin-to-hast";
+import {
+    unifiedLatexToHast,
+    PluginOptions,
+} from "./unified-latex-plugin-to-hast";
 
-const processor = processLatexViaUnified()
+const _processor = processLatexViaUnified()
     .use(unifiedLatexToHast)
     .use(rehypeStringify);
 
@@ -20,12 +23,20 @@ const processor = processLatexViaUnified()
  *      .processSync("\\LaTeX to convert")
  * ```
  */
-export function convertToHtml(tree: Ast.Node | Ast.Node[]): string {
+export function convertToHtml(
+    tree: Ast.Node | Ast.Node[],
+    options?: PluginOptions
+): string {
+    let processor = _processor;
     if (!Array.isArray(tree) && tree.type !== "root") {
         tree = { type: "root", content: [tree] };
     }
     if (Array.isArray(tree)) {
         tree = { type: "root", content: tree };
+    }
+
+    if (options) {
+        processor = _processor.use(unifiedLatexToHast, options);
     }
 
     const hast = processor.runSync(tree);

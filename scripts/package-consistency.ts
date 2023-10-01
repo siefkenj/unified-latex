@@ -17,14 +17,20 @@ async function getImportsInDir(dirname): Promise<string[]> {
             continue;
         }
         const contents = await fs.readFile(f, "utf-8");
-        for (const m of contents.matchAll(/from "([^"]+)"/g)) {
-            const imp = m[1];
-            if (!imp.startsWith(".")) {
-                ret.push(imp);
+        for (const line of contents.split("\n")) {
+            // Lines that start with ` * ` are comments; we don't track them.
+            if (line.match(/^\s*\*\s/)) {
+                continue
+            }
+            for (const m of line.matchAll(/from "([^"]+)"/g)) {
+                const imp = m[1];
+                if (!imp.startsWith(".") && !imp.startsWith("node:")) {
+                    ret.push(imp);
+                }
             }
         }
     }
-    ret = ret.map((m) => m.match(/[^/]+\/[^/]+|[^/]+/)[0]);
+    ret = ret.map((m) => m.match(/[^/]+\/[^/]+|[^/]+/)?.[0] || "");
     return Array.from(new Set(ret));
 }
 

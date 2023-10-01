@@ -4,6 +4,8 @@ import rehypeStringify from "rehype-stringify";
 import util from "util";
 import { processLatexViaUnified } from "@unified-latex/unified-latex";
 import { unifiedLatexToHast } from "../libs/unified-latex-plugin-to-hast";
+import { htmlLike } from "@unified-latex/unified-latex-util-html-like";
+import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 
 function normalizeHtml(str: string) {
     try {
@@ -25,7 +27,7 @@ describe("unified-latex-to-hast:unified-latex-to-hast", () => {
     let html: string;
 
     const process = (value: string) =>
-        processLatexViaUnified()
+        processLatexViaUnified({ macros: { xxx: { signature: "m m" } } })
             .use(unifiedLatexToHast)
             .use(rehypeStringify)
             .processSync({ value }).value as string;
@@ -285,6 +287,62 @@ describe("unified-latex-to-hast:unified-latex-to-hast", () => {
                 <h6 class="section-paragraph">Important.</h6>
                 Paragraph
             `)
+        );
+    });
+    it("macro arguments get wrapped in spans", () => {
+        let ast;
+
+        ast = process(`\\xxx{a}{b}`);
+        expect(normalizeHtml(ast)).toEqual(
+            normalizeHtml(`<span class="macro macro-xxx"
+               ><span class="argument" data-open-mark="{" data-close-mark="}">a</span
+               ><span class="argument" data-open-mark="{" data-close-mark="}">b</span></span
+             >
+            `)
+        );
+    });
+    it("custom replacers work", () => {
+        const process = (value: string) =>
+            processLatexViaUnified({ macros: { xxx: { signature: "m m" } } })
+                .use(unifiedLatexToHast, {
+                    macroReplacements: {
+                        xxx: (node) =>
+                            htmlLike({
+                                tag: "xxx",
+                                attributes: Object.fromEntries(
+                                    (node.args || []).map((x, i) => [
+                                        `arg${i}`,
+                                        printRaw(x.content),
+                                    ])
+                                ),
+                            }),
+                        textbf: (node) =>
+                            htmlLike({
+                                tag: "my-bold",
+                                content: node.args?.[0]?.content || [],
+                            }),
+                    },
+                    environmentReplacements: {
+                        yyy: (node) =>
+                            htmlLike({ tag: "yyy", content: node.content }),
+                    },
+                })
+                .use(rehypeStringify)
+                .processSync({ value }).value as string;
+        let ast;
+
+        ast = process(`\\xxx{a}{b}`);
+        expect(normalizeHtml(ast)).toEqual(
+            normalizeHtml(`<xxx arg0="a" arg1="b"></xxx>`)
+        );
+
+        ast = process(`\\begin{yyy}a\\end{yyy}`);
+        expect(normalizeHtml(ast)).toEqual(normalizeHtml(`<yyy>a</yyy>`));
+
+        // Can override default-defined macros
+        ast = process(`\\textbf{a}`);
+        expect(normalizeHtml(ast)).toEqual(
+            normalizeHtml(`<my-bold>a</my-bold>`)
         );
     });
 });

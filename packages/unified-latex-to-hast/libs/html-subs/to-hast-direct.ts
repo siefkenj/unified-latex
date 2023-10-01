@@ -7,7 +7,9 @@ import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
  * Direct and un-intelligent conversion of `Ast.Node` to a HAST element.
  * This function is not recursive! But, it will produce an output for every input.
  */
-export function toHastDirect(node: Ast.Node): Hast.Element | Hast.Text | Hast.Comment {
+export function toHastDirect(
+    node: Ast.Node | Ast.Argument
+): Hast.Element | Hast.Text | Hast.Comment {
     switch (node.type) {
         case "string":
             return {
@@ -53,15 +55,27 @@ export function toHastDirect(node: Ast.Node): Hast.Element | Hast.Text | Hast.Co
             return h(
                 "span",
                 { className: ["macro", `macro-${node.content}`] },
-                printRaw(node.args || "")
+                (node.args || []).map(toHastDirect)
+            );
+        case "argument":
+            return h(
+                "span",
+                {
+                    className: ["argument"],
+                    "data-open-mark": node.openMark,
+                    "data-close-mark": node.closeMark,
+                },
+                printRaw(node.content)
             );
         case "root":
             return h("root");
-        default:
+        default: {
+            const _exhaustiveCheck: never = node;
             throw new Error(
                 `Unknown node type; cannot convert to HAST ${JSON.stringify(
                     node
                 )}`
             );
+        }
     }
 }

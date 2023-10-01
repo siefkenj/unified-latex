@@ -6,7 +6,7 @@
 
 # Constants
 
-| Name                                          | Type                                                                                                                                    |
-| :-------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------- |
-| `DESCRIPTION`                                 | `String`                                                                                                                                |
-| `unifiedLatexLintArgumentFontShapingCommands` | `Plugin<void[] \| [Label \| Severity \| { fix?: boolean; }] \| [boolean \| Label \| Severity, { fix?: boolean; }], Ast.Root, Ast.Root>` |
+| Name                                          | Type                                                                                                                |
+| :-------------------------------------------- | :------------------------------------------------------------------------------------------------------------------ |
+| `DESCRIPTION`                                 | `String`                                                                                                            |
+| `unifiedLatexLintArgumentFontShapingCommands` | `Plugin<void[] \| [{ fix?: boolean; } \| [boolean \| Label \| Severity, { fix?: boolean; }?]], Ast.Root, Ast.Root>` |

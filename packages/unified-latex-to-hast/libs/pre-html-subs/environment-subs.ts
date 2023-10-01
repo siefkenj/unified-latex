@@ -169,4 +169,11 @@ export const environmentReplacements: Record<
     itemize: enumerateFactory("ul", "itemize"),
     center: createCenteredElement,
     tabular: createTableFromTabular,
+    quote: (env) => {
+        return htmlLike({
+            tag: "blockquote",
+            content: env.content,
+            attributes: { className: "environment quote" },
+        });
+    }
 };
