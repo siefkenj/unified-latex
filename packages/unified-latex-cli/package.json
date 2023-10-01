@@ -1,6 +1,6 @@
 {
   "name": "@unified-latex/unified-latex-cli",
-  "version": "1.4.2",
+  "version": "1.5.0",
   "description": "Command line interface to common unified-latex options",
   "main": "dist/index.js",
   "type": "module",
@@ -8,8 +8,8 @@
     "unified-latex": "./unified-latex-cli.mjs"
   },
   "dependencies": {
-    "@unified-latex/unified-latex-lint": "^1.4.2",
-    "@unified-latex/unified-latex-to-hast": "^1.4.2",
+    "@unified-latex/unified-latex-lint": "^1.5.0",
+    "@unified-latex/unified-latex-to-hast": "^1.5.0",
     "@unified-latex/unified-latex-types": "^1.4.2",
     "@unified-latex/unified-latex-util-arguments": "^1.4.2",
     "@unified-latex/unified-latex-util-macros": "^1.4.2",

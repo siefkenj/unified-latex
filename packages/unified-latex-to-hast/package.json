@@ -1,14 +1,14 @@
 {
   "name": "@unified-latex/unified-latex-to-hast",
-  "version": "1.4.2",
+  "version": "1.5.0",
   "description": "Convert a unified-latex AST to a HAST AST (for HTML conversion)",
   "main": "dist/index.js",
   "type": "module",
   "dependencies": {
-    "@unified-latex/unified-latex": "^1.4.2",
+    "@unified-latex/unified-latex": "^1.5.0",
     "@unified-latex/unified-latex-builder": "^1.4.2",
     "@unified-latex/unified-latex-ctan": "^1.4.2",
-    "@unified-latex/unified-latex-lint": "^1.4.2",
+    "@unified-latex/unified-latex-lint": "^1.5.0",
     "@unified-latex/unified-latex-types": "^1.4.2",
     "@unified-latex/unified-latex-util-align": "^1.4.2",
     "@unified-latex/unified-latex-util-arguments": "^1.4.2",
@@ -28,9 +28,9 @@
     "unified": "^10.1.2"
   },
   "devDependencies": {
-    "prettier": "^2.8.8",
+    "hast-util-to-html": "^8.0.4",
     "hast-util-to-string": "^3.0.0",
-    "hast-util-to-html": "^8.0.4"
+    "prettier": "^2.8.8"
   },
   "files": [
     "dist/**/*.ts",
