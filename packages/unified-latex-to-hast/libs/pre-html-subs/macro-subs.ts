@@ -85,6 +85,11 @@ export const macroReplacements: Record<string, (node: Ast.Macro) => Ast.Node> =
                 tag: "br",
                 attributes: { className: "bigskip" },
             }),
+        "\n": () =>
+            htmlLike({
+                tag: "br",
+                attributes: { className: "literal-newline" },
+            }),
         url: (node) => {
             const args = getArgsContent(node);
             const url = printRaw(args[0] || "#");

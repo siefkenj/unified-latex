@@ -345,4 +345,12 @@ describe("unified-latex-to-hast:unified-latex-to-hast", () => {
             normalizeHtml(`<my-bold>a</my-bold>`)
         );
     });
+    it("literal newlines turn into <br>s", () => {
+        let ast;
+
+        ast = process(`x\\\ny`);
+        expect(normalizeHtml(ast)).toEqual(
+            normalizeHtml(`x<br class="literal-newline" />y`)
+        );
+    });
 });

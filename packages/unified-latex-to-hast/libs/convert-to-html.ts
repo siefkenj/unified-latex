@@ -18,6 +18,7 @@ const _processor = processLatexViaUnified()
  * For example,
  * ```
  * unified()
+ *      .use(unifiedLatexFromString)
  *      .use(unifiedLatexToHast)
  *      .use(rehypeStringify)
  *      .processSync("\\LaTeX to convert")
