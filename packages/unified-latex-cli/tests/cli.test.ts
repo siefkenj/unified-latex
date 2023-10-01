@@ -1,3 +1,4 @@
+import { describe, it, expect } from "vitest";
 import util from "util";
 import "../../test-common";
 import { exec as _exec } from "node:child_process";
@@ -80,6 +81,22 @@ describe("unified-latex-cli", () => {
         {
             let { stdout, stderr } = await exec(
                 `node ${exePath} ${examplesPath}/has-existing-definition.tex -e '\\newcommand{mathbb}[2]{\\mathbb{#1}{#2}}'`
+            );
+            expect(stdout).toMatchSnapshot();
+        }
+    });
+    it("can convert to html", async () => {
+        {
+            let { stdout, stderr } = await exec(
+                `node ${exePath} ${examplesPath}/simple.tex --html`
+            );
+            expect(stdout).toMatchSnapshot();
+        }
+    });
+    it("can convert to markdown", async () => {
+        {
+            let { stdout, stderr } = await exec(
+                `node ${exePath} ${examplesPath}/simple.tex --markdown`
             );
             expect(stdout).toMatchSnapshot();
         }

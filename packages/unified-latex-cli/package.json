@@ -52,6 +52,7 @@
     "clean": "rm -rf ./dist && rm -rf tsconfig.tsbuildinfo",
     "compile": "tsc -b tsconfig.json & node build.js & wait",
     "package": "node ../../scripts/make-package.mjs",
+    "test": "vitest",
     "publish": "cd dist && npm publish"
   },
   "repository": {
