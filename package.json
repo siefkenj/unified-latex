@@ -2,6 +2,7 @@
     "private": true,
     "workspaces": [
         "./packages/unified-latex-util-pegjs",
+        "./packages/unified-latex-util-*",
         "./packages/*"
     ],
     "scripts": {

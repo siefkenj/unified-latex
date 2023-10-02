@@ -5,7 +5,6 @@ import type * as Ast from "@unified-latex/unified-latex-types";
 import { unifiedLatexToHast } from "@unified-latex/unified-latex-to-hast";
 import { PluginOptions as HtmlLikePluginOptions } from "@unified-latex/unified-latex-to-hast";
 import rehypeRemark, { Options as RehypeRemarkOptions } from "rehype-remark";
-import { VFile } from "vfile";
 import { defaultHandlers } from "./remark-handlers-defaults";
 
 export type PluginOptions = HtmlLikePluginOptions & RehypeRemarkOptions;
@@ -22,11 +21,12 @@ export const unifiedLatexToMdast: Plugin<
     const handlers = Object.assign({}, defaultHandlers, options?.handlers);
     options = Object.assign({}, options, { handlers });
 
-    return (tree: Ast.Root, file: VFile) => {
+    return (tree: Ast.Root, file) => {
         const mdast = unified()
             .use(unifiedLatexToHast, options)
             .use(rehypeRemark, options)
-            .runSync(tree, file as any) as Mdast.Root;
-        return mdast;
+            // @ts-ignore
+            .runSync(tree, file);
+        return mdast as Mdast.Root;
     };
 };
