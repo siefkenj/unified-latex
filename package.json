@@ -5,6 +5,7 @@
         "./packages/support-tables",
         "./packages/unified-latex-util-pegjs",
         "./packages/unified-latex-util-*",
+        "./packages/unified-latex-to-*",
         "./packages/*"
     ],
     "scripts": {
