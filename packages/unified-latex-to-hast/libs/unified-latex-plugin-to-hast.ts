@@ -6,11 +6,14 @@ import * as Ast from "@unified-latex/unified-latex-types";
 import { TypeGuard } from "@unified-latex/unified-latex-types";
 import { expandUnicodeLigatures } from "@unified-latex/unified-latex-util-ligatures";
 import { match } from "@unified-latex/unified-latex-util-match";
-import { visit } from "@unified-latex/unified-latex-util-visit";
+import { EXIT, visit } from "@unified-latex/unified-latex-util-visit";
 import { toHastWithLoggerFactory } from "./html-subs/to-hast";
-import { unifiedLatexToHtmlLike } from "./unified-latex-plugin-to-html-like";
+import {
+    unifiedLatexToHtmlLike,
+    PluginOptions as HtmlLikePluginOptions,
+} from "./unified-latex-plugin-to-html-like";
 
-type PluginOptions = void;
+export type PluginOptions = HtmlLikePluginOptions;
 
 /**
  * Unified plugin to convert a `unified-latex` AST into a `hast` AST.
@@ -18,7 +21,7 @@ type PluginOptions = void;
 export const unifiedLatexToHast: Plugin<PluginOptions[], Ast.Root, Hast.Root> =
     function unifiedLatexAttachMacroArguments(options) {
         return (tree, file) => {
-            unified().use(unifiedLatexToHtmlLike).run(tree);
+            unified().use(unifiedLatexToHtmlLike, options).run(tree);
 
             // This should happen right before converting to HTML because macros like `\&` should
             // be expanded via html rules first (and not turned into their corresponding ligature directly)
@@ -31,6 +34,7 @@ export const unifiedLatexToHast: Plugin<PluginOptions[], Ast.Root, Hast.Root> =
                 tree,
                 (env) => {
                     content = env.content;
+                    return EXIT;
                 },
                 {
                     test: ((node) =>

@@ -9,18 +9,32 @@ import {
     replaceNode,
     unifiedLatexReplaceStreamingCommands,
 } from "@unified-latex/unified-latex-util-replace";
-import { visit } from "@unified-latex/unified-latex-util-visit";
-import { environmentReplacements } from "./pre-html-subs/environment-subs";
+import { EXIT, visit } from "@unified-latex/unified-latex-util-visit";
+import { environmentReplacements as _environmentReplacements } from "./pre-html-subs/environment-subs";
 import {
     attachNeededRenderInfo,
     katexSpecificEnvironmentReplacements,
     katexSpecificMacroReplacements,
 } from "./pre-html-subs/katex-subs";
-import { macroReplacements } from "./pre-html-subs/macro-subs";
+import { macroReplacements as _macroReplacements } from "./pre-html-subs/macro-subs";
 import { streamingMacroReplacements } from "./pre-html-subs/streaming-command-subs";
 import { unifiedLatexWrapPars } from "./unified-latex-wrap-pars";
 
-type PluginOptions = void;
+type EnvironmentReplacements = typeof _environmentReplacements;
+type MacroReplacements = typeof _macroReplacements;
+
+export type PluginOptions = {
+    /**
+     * Functions called to replace environments during processing. Key values should match environment names.
+     *  You probably want to use the function `htmlLike(...)` to return a node that gets converted to specific HTML.
+     */
+    environmentReplacements?: EnvironmentReplacements;
+    /**
+     * Functions called to replace macros during processing. Key values should match macro names.
+     * You probably want to use the function `htmlLike(...)` to return a node that gets converted to specific HTML.
+     */
+    macroReplacements?: MacroReplacements;
+};
 
 /**
  * Unified plugin to convert a `unified-latex` AST into an html-like AST. This replaces nodes
@@ -33,7 +47,17 @@ export const unifiedLatexToHtmlLike: Plugin<
     PluginOptions[],
     Ast.Root,
     Hast.Root
-> = function unifiedLatexToHtmlLike() {
+> = function unifiedLatexToHtmlLike(options) {
+    const macroReplacements = Object.assign(
+        {},
+        _macroReplacements,
+        options?.macroReplacements || {}
+    );
+    const environmentReplacements = Object.assign(
+        {},
+        _environmentReplacements,
+        options?.environmentReplacements || {}
+    );
     const isReplaceableMacro = match.createMacroMatcher(macroReplacements);
     const isReplaceableEnvironment = match.createEnvironmentMatcher(
         environmentReplacements
@@ -117,6 +141,7 @@ function shouldBeWrappedInPars(tree: Ast.Root): boolean {
         (env) => {
             if (match.anyEnvironment(env)) {
                 content = env.content;
+                return EXIT;
             }
         },
         { test: (node) => match.environment(node, "document") }

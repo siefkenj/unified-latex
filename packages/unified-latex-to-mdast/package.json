@@ -1,0 +1,67 @@
+{
+  "name": "@unified-latex/unified-latex-to-mdast",
+  "version": "1.5.0",
+  "description": "Convert a unified-latex AST to a MDAST AST (for Markdown conversion)",
+  "main": "dist/index.js",
+  "type": "module",
+  "dependencies": {
+    "@types/mdast": "^4.0.1",
+    "@unified-latex/unified-latex": "^1.5.0",
+    "@unified-latex/unified-latex-to-hast": "^1.5.0",
+    "@unified-latex/unified-latex-types": "^1.4.2",
+    "hast": "^1.0.0",
+    "hast-util-to-string": "^3.0.0",
+    "rehype-remark": "^10.0.0",
+    "remark-stringify": "^10.0.3",
+    "unified": "^10.1.2",
+    "vfile": "^6.0.1"
+  },
+  "devDependencies": {
+    "hast-util-to-html": "^8.0.4",
+    "rehype-parse": "^8.0.5"
+  },
+  "files": [
+    "dist/**/*.ts",
+    "dist/**/*.js",
+    "dist/**/*.map",
+    "dist/**/*.json"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./*js": "./dist/*js",
+    "./*": {
+      "import": "./dist/*.js",
+      "require": "./dist/*.cjs"
+    }
+  },
+  "scripts": {
+    "build": "npm run clean && mkdirp ./dist && npm run compile",
+    "test": "vitest",
+    "clean": "rm -rf ./dist && rm -rf tsconfig.tsbuildinfo",
+    "compile": "tsc -b tsconfig.json & node build.js & wait",
+    "package": "node ../../scripts/make-package.mjs",
+    "publish": "cd dist && npm publish"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/siefkenj/unified-latex.git"
+  },
+  "keywords": [
+    "pegjs",
+    "latex",
+    "parser",
+    "prettier",
+    "unified-latex",
+    "unified"
+  ],
+  "author": "Jason Siefken",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/siefkenj/unified-latex/issues"
+  },
+  "homepage": "https://github.com/siefkenj/unified-latex#readme",
+  "private": true
+}

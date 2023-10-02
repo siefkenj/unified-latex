@@ -24,6 +24,8 @@ export function wrapPars(
             "section",
             "subsection",
             "subsubsection",
+            "paragraph",
+            "subparagraph",
             "vspace",
             "smallskip",
             "medskip",

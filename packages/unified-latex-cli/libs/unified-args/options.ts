@@ -157,6 +157,7 @@ export function options(flags: string[], configuration: Options) {
             parseMacroExpansion
         ),
         html: config.html,
+        markdown: config.markdown,
     } as EngineOptions & {
         help: boolean;
         helpMessage: string;
@@ -170,6 +171,7 @@ export function options(flags: string[], configuration: Options) {
         expandDocumentMacro: string[];
         macro: { name: string; signature: string }[];
         html: boolean;
+        markdown: boolean;
     };
 }
 
