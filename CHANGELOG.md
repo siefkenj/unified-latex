@@ -3,6 +3,7 @@
 ### v1.5.0
 - HTML conversion: `vspace` and `hspace` now give the amount in a `data-amount` attribute.
 - HTML conversion: unknown macros now have their arguments wrapped in spans instead of appearing as formatted LaTeX code.
+- Add basic Markdown conversion support.
 
 ### v1.4.2
 - Avoid slowdown when paring incomplete environments (e.g. `\newcommand{\x}{\begin{x}}`). This is accomplished by enabling caching in PEGjs.

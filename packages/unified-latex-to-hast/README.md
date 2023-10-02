@@ -160,6 +160,7 @@ directly with the `unifiedLatexToHast` plugin.
 For example,
 
     unified()
+         .use(unifiedLatexFromString)
          .use(unifiedLatexToHast)
          .use(rehypeStringify)
          .processSync("\\LaTeX to convert")

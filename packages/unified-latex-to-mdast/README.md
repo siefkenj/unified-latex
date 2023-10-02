@@ -48,6 +48,36 @@ function unifiedLatexToMdast(
 ): (tree: Ast.Root, file: VFile) => Mdast.Root;
 ```
 
+# Functions
+
+## `convertToMarkdown(tree, options)`
+
+Convert the `unified-latex` AST `tree` into a Markdown string. If you need
+more precise control or further processing, consider using `unified`
+directly with the `unifiedLatexToMdast` plugin.
+
+For example,
+
+    unified()
+         .use(unifiedLatexFromString)
+         .use(unifiedLatexToMdast)
+         .use(remarkStringify)
+         .processSync("\\LaTeX to convert")
+
+```typescript
+function convertToMarkdown(
+  tree: Ast.Node | Ast.Node[],
+  options: PluginOptions
+): string;
+```
+
+**Parameters**
+
+| Param   | Type                     |
+| :------ | :----------------------- |
+| tree    | `Ast.Node \| Ast.Node[]` |
+| options | `PluginOptions`          |
+
 # Types
 
 ## `PluginOptions`

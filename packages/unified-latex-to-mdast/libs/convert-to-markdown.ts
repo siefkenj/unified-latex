@@ -37,7 +37,7 @@ export function convertToMarkdown(
     }
 
     if (options) {
-        processor = _processor.use(unifiedLatexToMdast, options);
+        processor = _processor.use(unifiedLatexToMdast, options) as any;
     }
 
     const mdast = processor.runSync(tree);

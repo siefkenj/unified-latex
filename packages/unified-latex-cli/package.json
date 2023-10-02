@@ -10,6 +10,7 @@
   "dependencies": {
     "@unified-latex/unified-latex-lint": "^1.5.0",
     "@unified-latex/unified-latex-to-hast": "^1.5.0",
+    "@unified-latex/unified-latex-to-mdast": "^1.5.0",
     "@unified-latex/unified-latex-types": "^1.4.2",
     "@unified-latex/unified-latex-util-arguments": "^1.4.2",
     "@unified-latex/unified-latex-util-macros": "^1.4.2",
@@ -26,6 +27,7 @@
     "minimist": "^1.2.7",
     "prettier": "^2.8.8",
     "rehype-stringify": "^9.0.4",
+    "remark-stringify": "^10.0.3",
     "text-table": "^0.2.0",
     "unified": "^10.1.2",
     "unified-engine": "^10.1.0"
