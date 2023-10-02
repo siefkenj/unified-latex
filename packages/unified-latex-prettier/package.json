@@ -14,8 +14,7 @@
     "@unified-latex/unified-latex-util-print-raw": "^1.4.2",
     "@unified-latex/unified-latex-util-trim": "^1.4.2",
     "@unified-latex/unified-latex-util-visit": "^1.4.2",
-    "prettier": "^3.0.3",
-    "unified": "^10.1.2"
+    "prettier": "^3.0.3"
   },
   "files": [
     "dist/**/*.ts",
