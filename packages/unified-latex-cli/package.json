@@ -75,5 +75,8 @@
     "url": "https://github.com/siefkenj/unified-latex/issues"
   },
   "homepage": "https://github.com/siefkenj/unified-latex#readme",
-  "private": true
+  "private": true,
+  "devDependencies": {
+    "source-map-support": "^0.5.21"
+  }
 }
