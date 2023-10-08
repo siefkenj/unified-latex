@@ -6,7 +6,7 @@
 
 # Constants
 
-| Name                              | Type                                                                                                                                    |
-| :-------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------- |
-| `DESCRIPTION`                     | `String`                                                                                                                                |
-| `unifiedLatexLintPreferSetlength` | `Plugin<void[] \| [Label \| Severity \| { fix?: boolean; }] \| [boolean \| Label \| Severity, { fix?: boolean; }], Ast.Root, Ast.Root>` |
+| Name                              | Type                                                                                                                |
+| :-------------------------------- | :------------------------------------------------------------------------------------------------------------------ |
+| `DESCRIPTION`                     | `String`                                                                                                            |
+| `unifiedLatexLintPreferSetlength` | `Plugin<void[] \| [{ fix?: boolean; } \| [boolean \| Label \| Severity, { fix?: boolean; }?]], Ast.Root, Ast.Root>` |

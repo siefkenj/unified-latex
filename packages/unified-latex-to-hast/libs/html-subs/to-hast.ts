@@ -25,7 +25,9 @@ export function toHastWithLoggerFactory(
     /**
      * Convert Ast.Node to Hast nodes.
      */
-    return function toHast(node: Ast.Node): HastNode | HastNode[] {
+    return function toHast(
+        node: Ast.Node | Ast.Argument
+    ): HastNode | HastNode[] {
         // Because `isHtmlLikeTag` is a type guard, if we use it directly on
         // `node` here, then in the switch statement `node.type === "macro"` will be `never`.
         // We rename the variable to avoid this issue.
@@ -98,16 +100,28 @@ export function toHastWithLoggerFactory(
                 return h(
                     "span",
                     { className: ["macro", `macro-${node.content}`] },
-                    printRaw(node.args || "")
+                    (node.args || []).map(toHast).flat()
+                );
+            case "argument":
+                return h(
+                    "span",
+                    {
+                        className: ["argument"],
+                        "data-open-mark": node.openMark,
+                        "data-close-mark": node.closeMark,
+                    },
+                    printRaw(node.content)
                 );
             case "root":
                 return node.content.flatMap(toHast);
-            default:
+            default: {
+                const _exhaustiveCheck: never = node;
                 throw new Error(
                     `Unknown node type; cannot convert to HAST ${JSON.stringify(
                         node
                     )}`
                 );
+            }
         }
     };
 }

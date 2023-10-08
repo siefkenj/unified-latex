@@ -6,7 +6,7 @@
 
 # Constants
 
-| Name                               | Type                                                                                                     |
-| :--------------------------------- | :------------------------------------------------------------------------------------------------------- |
-| `DESCRIPTION`                      | `String`                                                                                                 |
-| `unifiedLatexLintNoTexDisplayMath` | `Plugin<void[] \| [Label \| Severity] \| [boolean \| Label \| Severity, undefined], Ast.Root, Ast.Root>` |
+| Name                               | Type                                                                                 |
+| :--------------------------------- | :----------------------------------------------------------------------------------- |
+| `DESCRIPTION`                      | `String`                                                                             |
+| `unifiedLatexLintNoTexDisplayMath` | `Plugin<void[] \| [[boolean \| Label \| Severity, undefined?]], Ast.Root, Ast.Root>` |

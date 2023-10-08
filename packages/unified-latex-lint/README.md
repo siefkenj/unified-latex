@@ -24,6 +24,6 @@ import the `.js` file. To explicitly access the commonjs export, import the `.cj
 
 # Constants
 
-| Name    | Type                                                                                                                                                                                                                                      | Description                           |
-| :------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------ |
-| `lints` | `{ unifiedLatexLintArgumentColorCommands: Plugin<void[] \| [{ fix?: boolean; } \| Label \| Severity] \| [boolean \| Label \| Severity, { fix?: boolean; }], Root, Root>; ... 7 more ...; unifiedLatexLintPreferSetlength: Plugin<...>; }` | Object exporting all available lints. |
+| Name    | Type                                                                                                                                                                                                                  | Description                           |
+| :------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------ |
+| `lints` | `{ unifiedLatexLintArgumentColorCommands: Plugin<void[] \| [{ fix?: boolean; } \| [boolean \| Label \| Severity, { fix?: boolean; }?]], Root, Root>; ... 7 more ...; unifiedLatexLintPreferSetlength: Plugin<...>; }` | Object exporting all available lints. |

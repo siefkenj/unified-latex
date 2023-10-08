@@ -1,3 +1,4 @@
+import { describe, it, expect } from "vitest";
 import { VFile } from "unified-lint-rule/lib";
 import util from "util";
 import * as argspecParser from "..";
@@ -43,4 +44,19 @@ describe("unified-latex-util-argspec", () => {
             expect(argspecParser.printRaw(ast, true)).toEqual(spec);
         });
     }
+
+    it("Embellishments always return a string", () => {
+        let ast = argspecParser.parse("e{{{x}}y{z}}");
+        expect(ast).toEqual([
+            { type: "embellishment", embellishmentTokens: ["x", "y", "z"] },
+        ]);
+        ast = argspecParser.parse("E{{{x}}y{z}}{}");
+        expect(ast).toEqual([
+            {
+                type: "embellishment",
+                embellishmentTokens: ["x", "y", "z"],
+                defaultArg: { type: "group", content: [] },
+            },
+        ]);
+    });
 });

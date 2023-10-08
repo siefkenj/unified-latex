@@ -6,7 +6,7 @@
 
 # Constants
 
-| Name                                   | Type                                                                                                                                                                          |
-| :------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `DESCRIPTION`                          | `String`                                                                                                                                                                      |
-| `unifiedLatexLintConsistentInlineMath` | `Plugin<void[] \| [Label \| Severity \| { preferredStyle: "tex" \| "latex"; }] \| [boolean \| Label \| Severity, { preferredStyle: "tex" \| "latex"; }], Ast.Root, Ast.Root>` |
+| Name                                   | Type                                                                                                                                                      |
+| :------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DESCRIPTION`                          | `String`                                                                                                                                                  |
+| `unifiedLatexLintConsistentInlineMath` | `Plugin<void[] \| [{ preferredStyle: "tex" \| "latex"; } \| [boolean \| Label \| Severity, { preferredStyle: "tex" \| "latex"; }?]], Ast.Root, Ast.Root>` |

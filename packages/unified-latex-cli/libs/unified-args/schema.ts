@@ -185,6 +185,13 @@ export const schema: Option[] = [
         default: false,
     },
     {
+        long: "markdown",
+        description:
+            "Convert the output to Markdown. Markdown output uses Github-flavored Markdown to support math",
+        type: "boolean",
+        default: false,
+    },
+    {
         long: "stdout",
         description: "[Don't] write the processed file's contents to stdout",
         type: "boolean",

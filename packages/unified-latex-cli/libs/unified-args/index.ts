@@ -11,6 +11,7 @@ import {
     Context as EngineContext,
 } from "unified-engine";
 import { unifiedLatexToHast } from "@unified-latex/unified-latex-to-hast";
+import { unifiedLatexToMdast } from "@unified-latex/unified-latex-to-mdast";
 import { options, Options } from "./options";
 import { availableLints } from "../lints";
 import { statsJsonPlugin, statsPlugin } from "../stats";
@@ -19,6 +20,7 @@ import { attachMacroArgsPlugin } from "../macros/attach-macro-args-plugin";
 import { prettyPrintHtmlPlugin } from "../html/format";
 import { expandDocumentMacrosPlugin } from "../macros/expand-document-macros-plugin";
 import { PluginOptions } from "@unified-latex/unified-latex-util-parse";
+import remarkStringify from "remark-stringify";
 
 // Fake TTY stream.
 const ttyStream = Object.assign(new stream.Readable(), { isTTY: true });
@@ -159,6 +161,11 @@ export function unifiedArgs(cliConfig: Options) {
     if (config.html) {
         config.plugins.push([unifiedLatexToHast]);
         config.plugins.push([prettyPrintHtmlPlugin]);
+    }
+
+    if (config.markdown) {
+        config.plugins.push([unifiedLatexToMdast]);
+        config.plugins.push([remarkStringify as any]);
     }
 
     /**

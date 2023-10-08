@@ -13,6 +13,51 @@ tree.
 
 If you want to convert LaTeX to HTML.
 
+## Controlling the HTML output
+
+This plugin comes with presets for several common LaTeX macros/environments, but you probably want to
+control how various macros evaluate yourself. For example, you may have used `\includegraphics` with `pdf`s
+in your LaTeX source by want to output HTML that manipulates the path and includes `png`s instead.
+You can accomplish this by passing `macroReplacements` (for environments, there is the similarly-named
+`environmentReplacements`) to the plugin.
+
+For example,
+
+```typescript
+import { unified } from "unified";
+import rehypeStringify from "rehype-stringify";
+import { htmlLike } from "@unified-latex/unified-latex-util-html-like";
+import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
+import { unifiedLatexToHast } from "@unified-latex/unified-latex-to-hast";
+import { unifiedLatexFromString } from "@unified-latex/unified-latex-util-parse";
+
+const convert = (value) =>
+    unified()
+        .use(unifiedLatexFromString)
+        .use(unifiedLatexToHast, {
+            macroReplacements: {
+                includegraphics: (node) => {
+                    const args = getArgsContent(node);
+                    const path = printRaw(
+                        args[args.length - 1] || []
+                    ).replace(/\.pdf$/, ".png");
+                    return htmlLike({
+                        tag: "img",
+                        attributes: { src: path },
+                    });
+                },
+            },
+        })
+        .use(rehypeStringify)
+        .processSync(value).value;
+
+console.log(convert(`\\includegraphics{foo.pdf}`));
+```
+
+`macroReplacements` and `environmentReplacements` functions can return any unified-latex `Node`, but
+using the `htmlLike` utility function will return nodes that get converted to specific HTML. See `htmlLike`'s
+documentation for more details.
+
 ## Install
 
 ```bash
@@ -30,16 +75,39 @@ Unified plugin to convert a `unified-latex` AST into a `hast` AST.
 
 ### Usage
 
-`unified().use(unifiedLatexToHast)`
+`unified().use(unifiedLatexToHast[, options])`
+
+#### options
+
+```typescript
+HtmlLikePluginOptions
+```
 
 ### Type
 
-`Plugin<void[], Ast.Root, Hast.Root>`
+`Plugin<HtmlLikePluginOptions[], Ast.Root, Hast.Root>`
 
 ```typescript
 function unifiedLatexToHast(
-  options: void
+  options: HtmlLikePluginOptions
 ): (tree: Ast.Root, file: VFile) => Hast.Root;
+```
+
+where
+
+```typescript
+type HtmlLikePluginOptions = {
+  /**
+   * Functions called to replace environments during processing. Key values should match environment names.
+   *  You probably want to use the function `htmlLike(...)` to return a node that gets converted to specific HTML.
+   */
+  environmentReplacements?: EnvironmentReplacements;
+  /**
+   * Functions called to replace macros during processing. Key values should match macro names.
+   * You probably want to use the function `htmlLike(...)` to return a node that gets converted to specific HTML.
+   */
+  macroReplacements?: MacroReplacements;
+};
 ```
 
 ## `unifiedLatexWrapPars`
@@ -83,7 +151,7 @@ function attachNeededRenderInfo(ast: Ast.Ast): void;
 | :---- | :-------- |
 | ast   | `Ast.Ast` |
 
-## `convertToHtml(tree)`
+## `convertToHtml(tree, options)`
 
 Convert the `unified-latex` AST `tree` into an HTML string. If you need
 more precise control or further processing, consider using `unified`
@@ -92,19 +160,41 @@ directly with the `unifiedLatexToHast` plugin.
 For example,
 
     unified()
+         .use(unifiedLatexFromString)
          .use(unifiedLatexToHast)
          .use(rehypeStringify)
          .processSync("\\LaTeX to convert")
 
 ```typescript
-function convertToHtml(tree: Ast.Node | Ast.Node[]): string;
+function convertToHtml(
+  tree: Ast.Node | Ast.Node[],
+  options: PluginOptions
+): string;
 ```
 
 **Parameters**
 
-| Param | Type                     |
-| :---- | :----------------------- |
-| tree  | `Ast.Node \| Ast.Node[]` |
+| Param   | Type                     |
+| :------ | :----------------------- |
+| tree    | `Ast.Node \| Ast.Node[]` |
+| options | `PluginOptions`          |
+
+where
+
+```typescript
+type PluginOptions = {
+  /**
+   * Functions called to replace environments during processing. Key values should match environment names.
+   *  You probably want to use the function `htmlLike(...)` to return a node that gets converted to specific HTML.
+   */
+  environmentReplacements?: EnvironmentReplacements;
+  /**
+   * Functions called to replace macros during processing. Key values should match macro names.
+   * You probably want to use the function `htmlLike(...)` to return a node that gets converted to specific HTML.
+   */
+  macroReplacements?: MacroReplacements;
+};
+```
 
 ## `wrapPars(nodes, options)`
 
@@ -140,3 +230,11 @@ function wrapPars(
 | `KATEX_SUPPORT`                        | `{ macros: any; environments: any; }`                               |
 | `katexSpecificEnvironmentReplacements` | `Record<string, (node: Ast.Environment) => Ast.Node \| Ast.Node[]>` |
 | `katexSpecificMacroReplacements`       | `Record<string, (node: Ast.Macro) => Ast.Node \| Ast.Node[]>`       |
+
+# Types
+
+## `PluginOptions`
+
+```typescript
+export type PluginOptions = HtmlLikePluginOptions;
+```

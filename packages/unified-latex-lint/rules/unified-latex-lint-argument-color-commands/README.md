@@ -6,7 +6,7 @@
 
 # Constants
 
-| Name                                    | Type                                                                                                                                    |
-| :-------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------- |
-| `DESCRIPTION`                           | `String`                                                                                                                                |
-| `unifiedLatexLintArgumentColorCommands` | `Plugin<void[] \| [{ fix?: boolean; } \| Label \| Severity] \| [boolean \| Label \| Severity, { fix?: boolean; }], Ast.Root, Ast.Root>` |
+| Name                                    | Type                                                                                                                |
+| :-------------------------------------- | :------------------------------------------------------------------------------------------------------------------ |
+| `DESCRIPTION`                           | `String`                                                                                                            |
+| `unifiedLatexLintArgumentColorCommands` | `Plugin<void[] \| [{ fix?: boolean; } \| [boolean \| Label \| Severity, { fix?: boolean; }?]], Ast.Root, Ast.Root>` |
