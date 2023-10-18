@@ -30,6 +30,7 @@ import { htmlLike } from "@unified-latex/unified-latex-util-html-like";
 import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 import { unifiedLatexToHast } from "@unified-latex/unified-latex-to-hast";
 import { unifiedLatexFromString } from "@unified-latex/unified-latex-util-parse";
+import { getArgsContent } from "@unified-latex/unified-latex-util-arguments";
 
 const convert = (value) =>
     unified()
