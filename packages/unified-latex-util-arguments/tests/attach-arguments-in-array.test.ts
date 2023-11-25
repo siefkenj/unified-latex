@@ -197,5 +197,143 @@ describe("unified-latex-util-arguments", () => {
                 ],
             },
         ]);
+
+        // multiple delimiters
+        nodes = strToNodes("\\xxx_a^_^\\xxx__");
+        attachMacroArgsInArray(nodes, { xxx: { signature: "r__" } });
+        expect(nodes).toEqual([
+            {
+                type: "macro",
+                content: "xxx",
+                args: [
+                    {
+                        type: "argument",
+                        content: [{ type: "string", content: "a^" }],
+                        openMark: "_",
+                        closeMark: "_",
+                    },
+                ],
+            },
+            { type: "string", content: "^" },
+            {
+                type: "macro",
+                content: "xxx",
+                args: [
+                    {
+                        type: "argument",
+                        content: [],
+                        openMark: "_",
+                        closeMark: "_",
+                    },
+                ],
+            },
+        ]);
+
+        // embellishments
+        nodes = strToNodes("\\xxx^a\\xxx_b\\xxx_b^a");
+        attachMacroArgsInArray(nodes, { xxx: { signature: "e{^_}" } });
+        expect(nodes).toEqual([
+            {
+                type: "macro",
+                content: "xxx",
+                args: [
+                    {
+                        type: "argument",
+                        content: [{ type: "string", content: "a" }],
+                        openMark: "^",
+                        closeMark: "",
+                    },
+                    {
+                        type: "argument",
+                        content: [],
+                        openMark: "",
+                        closeMark: "",
+                    },
+                ],
+            },
+            {
+                type: "macro",
+                content: "xxx",
+                args: [
+                    {
+                        type: "argument",
+                        content: [],
+                        openMark: "",
+                        closeMark: "",
+                    },
+                    {
+                        type: "argument",
+                        content: [{ type: "string", content: "b" }],
+                        openMark: "_",
+                        closeMark: "",
+                    },
+                ],
+            },
+            {
+                type: "macro",
+                content: "xxx",
+                args: [
+                    {
+                        type: "argument",
+                        content: [{ type: "string", content: "a" }],
+                        openMark: "^",
+                        closeMark: "",
+                    },
+                    {
+                        type: "argument",
+                        content: [{ type: "string", content: "b" }],
+                        openMark: "_",
+                        closeMark: "",
+                    },
+                ],
+            },
+        ]);
+
+        nodes = strToNodes("\\xxx^{a_b}");
+        attachMacroArgsInArray(nodes, { xxx: { signature: "e{^_}" } });
+        expect(nodes).toEqual([
+            {
+                type: "macro",
+                content: "xxx",
+                args: [
+                    {
+                        type: "argument",
+                        content: [{ type: "string", content: "a_b" }],
+                        openMark: "^",
+                        closeMark: "",
+                    },
+                    {
+                        type: "argument",
+                        content: [],
+                        openMark: "",
+                        closeMark: "",
+                    },
+                ],
+            },
+        ]);
+
+        // non-punctuation optional token and delimiters combined
+        nodes = strToNodes("\\xxx^_789_");
+        attachMacroArgsInArray(nodes, { xxx: { signature: "t^ r__" } });
+        expect(nodes).toEqual([
+            {
+                type: "macro",
+                content: "xxx",
+                args: [
+                    {
+                        type: "argument",
+                        content: [{ type: "string", content: "^" }],
+                        openMark: "",
+                        closeMark: "",
+                    },
+                    {
+                        type: "argument",
+                        content: [{ type: "string", content: "789" }],
+                        openMark: "_",
+                        closeMark: "_",
+                    },
+                ],
+            },
+        ]);
     });
 });

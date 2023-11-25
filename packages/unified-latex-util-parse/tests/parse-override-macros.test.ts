@@ -28,10 +28,9 @@ describe("unified-latex-util-parse", () => {
         });
 
         // Default parsing
-        parser = unified().use(
-            unifiedLatexFromString,
-            { macros: { mathbb: { signature: "m m" } } },
-        );
+        parser = unified().use(unifiedLatexFromString, {
+            macros: { mathbb: { signature: "m m" } },
+        });
         expect(trimRenderInfo(parser.parse(`\\mathbb X Y`))).toEqual({
             type: "root",
             content: [m("mathbb", args(["X", "Y"]))],

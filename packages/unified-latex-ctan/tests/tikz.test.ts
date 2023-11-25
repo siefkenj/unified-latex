@@ -97,7 +97,10 @@ describe("unified-latex-ctan:tikz", () => {
             ["\\tikz foo baz; bar", "\\tikz{foo baz;} bar"],
             ["\\tikz [xxx] {foo} bar", "\\tikz[xxx]{foo} bar"],
             ["\\tikz [xxx] foo baz; bar", "\\tikz[xxx]{foo baz;} bar"],
-            ["\\tikz :fill = {aaa} :rotate = {bbb} [xxx] foo baz; bar", "\\tikz :fill = {aaa} :rotate = {bbb} [xxx]{foo baz;} bar"],
+            [
+                "\\tikz :fill = {aaa} :rotate = {bbb} [xxx] foo baz; bar",
+                "\\tikz :fill = {aaa} :rotate = {bbb} [xxx]{foo baz;} bar",
+            ],
         ];
 
         for (const [inStr, outStr] of EXAMPLES) {

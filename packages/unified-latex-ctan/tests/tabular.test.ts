@@ -1,6 +1,9 @@
 import util from "util";
 import { parse } from "../../unified-latex-util-parse";
-import { parseTabularSpec, printRaw as tabularPrintRaw } from "../package/tabularx";
+import {
+    parseTabularSpec,
+    printRaw as tabularPrintRaw,
+} from "../package/tabularx";
 
 /* eslint-env jest */
 

@@ -42,10 +42,8 @@ function isLineType(elm: Doc): boolean {
         return isLineType(elm[0]);
     }
     // Perhaps we can sneak by with Prettier v2 compatibility?
-    // @ts-ignore
-    if (elm.type === "concat") {
-        // @ts-ignore
-        return isLineType(elm.parts);
+    if ((elm.type as any) === "concat") {
+        return isLineType((elm as any).parts);
     }
     return elm.type === "line";
 }

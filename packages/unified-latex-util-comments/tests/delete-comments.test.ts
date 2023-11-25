@@ -12,7 +12,6 @@ console.log = (...args) => {
 };
 
 describe("unified-latex-util-comments", () => {
-
     it("can delete comments", () => {
         let nodes = strToNodes("a%\nb%xx\nc");
         deleteComments(nodes);

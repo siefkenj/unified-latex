@@ -29,7 +29,7 @@ export function printRaw(node: ArgSpec.Ast, root = false): string {
 
     const decorators = getDecorators(node);
     const defaultArg = (node as ArgSpec.DefaultArgument).defaultArg
-        ? printRaw((node as ArgSpec.DefaultArgument).defaultArg)
+        ? printRaw((node as ArgSpec.DefaultArgument).defaultArg!)
         : "";
     let spec = decorators;
 

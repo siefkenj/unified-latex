@@ -18,7 +18,7 @@ export const argumentParser: ArgumentParser = (nodes, startPos) => {
     const { argument: optionalArg, nodesRemoved: optionalArgNodesRemoved } =
         gobbleSingleArgument(nodes, argSpecO, startPos);
 
-    let codeArg: Argument | null = null;
+    let codeArg: Argument | Argument[] | null = null;
     let codeArgNodesRemoved: number = 0;
     const nextNode = nodes[startPos];
     if (match.group(nextNode)) {
