@@ -29,7 +29,6 @@
         "declarationMap": true,
         "moduleResolution": "node",
         "resolveJsonModule": true,
-        "types": ["vitest/globals"],
         "paths": {
             "@unified-latex/*": ["./packages/*"]
         }

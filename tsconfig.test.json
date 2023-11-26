@@ -1,0 +1,14 @@
+{
+    "extends": "./tsconfig.build.json",
+    "include": [
+        "**/*.ts"
+    ],
+    "exclude": ["**/*.d.ts", "node_modules", "scripts", "*.config.ts"],
+    "compilerOptions": {
+        "rootDir": "./packages",
+        "paths": {
+            "@unified-latex/*": ["./packages/dist/*"]
+        },
+        "types": ["vitest/globals"]
+    }
+}

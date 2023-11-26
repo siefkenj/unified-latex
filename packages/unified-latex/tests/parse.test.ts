@@ -1,8 +1,8 @@
 import { trimRenderInfo } from "@unified-latex/unified-latex-util-render-info";
 import { VFile } from "unified-lint-rule/lib";
 import util from "util";
-import { processLatexToAstViaUnified } from "..";
 import "../../test-common";
+import { processLatexToAstViaUnified } from "../libs/unified-latex";
 
 /* eslint-env jest */
 
