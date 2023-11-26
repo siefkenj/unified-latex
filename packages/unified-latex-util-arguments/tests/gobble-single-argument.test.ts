@@ -1,8 +1,9 @@
+import { describe, expect, it } from "vitest";
 import { VFile } from "unified-lint-rule/lib";
 import util from "util";
 import { trimRenderInfo } from "../../unified-latex-util-render-info";
 import * as Ast from "@unified-latex/unified-latex-types";
-import { parse as parseArgspec } from "../../unified-latex-util-argspec";
+import { parse as parseArgspec } from "@unified-latex/unified-latex-util-argspec";
 import { gobbleSingleArgument } from "../libs/gobble-single-argument";
 import { processLatexToAstViaUnified } from "@unified-latex/unified-latex";
 
@@ -697,7 +698,6 @@ describe("unified-latex-util-arguments", () => {
             {
                 argument: null,
                 nodesRemoved: 0,
-                matchNum: 0,
             }
         );
 
@@ -716,7 +716,6 @@ describe("unified-latex-util-arguments", () => {
                 closeMark: "",
             },
             nodesRemoved: 3,
-            matchNum: 1,
         });
 
         ast = [
@@ -734,7 +733,6 @@ describe("unified-latex-util-arguments", () => {
                 closeMark: "",
             },
             nodesRemoved: 2,
-            matchNum: 2,
         });
     });
     it("can gobble embellishments whose token is in a group one level deep", () => {
@@ -749,7 +747,6 @@ describe("unified-latex-util-arguments", () => {
                 closeMark: "",
             },
             nodesRemoved: 2,
-            matchNum: 1,
         });
     });
 });

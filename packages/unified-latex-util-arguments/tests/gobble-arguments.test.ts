@@ -1,8 +1,9 @@
+import { describe, expect, it } from "vitest";
 import { VFile } from "unified-lint-rule/lib";
 import util from "util";
 import { trimRenderInfo } from "../../unified-latex-util-render-info";
 import * as Ast from "@unified-latex/unified-latex-types";
-import { parse as parseArgspec } from "../../unified-latex-util-argspec";
+import { parse as parseArgspec } from "@unified-latex/unified-latex-util-argspec";
 import { gobbleArguments } from "../libs/gobble-arguments";
 import { processLatexToAstViaUnified } from "@unified-latex/unified-latex";
 import { arg, s, SP } from "@unified-latex/unified-latex-builder";
@@ -75,7 +76,7 @@ describe("unified-latex-util-arguments", () => {
         ]);
     });
 
-    it("can gobble arguments that represents mutiple embellishments", () => {
+    it("can gobble arguments that represents multiple embellishments", () => {
         let argspec = parseArgspec("e{_ad}");
         value = "_{1234}abcde";
         file = processLatexToAstViaUnified().processSync({ value });
@@ -135,7 +136,7 @@ describe("unified-latex-util-arguments", () => {
         });
         expect(nodes).toEqual([]);
 
-        // Whitespaces between embellishment arguments should be ignored.
+        // Whitespace between embellishment arguments should be ignored.
         argspec = parseArgspec("e{^_}");
         value = "^1 _2";
         file = processLatexToAstViaUnified().processSync({ value });
