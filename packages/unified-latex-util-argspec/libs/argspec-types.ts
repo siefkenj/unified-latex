@@ -1,12 +1,5 @@
 export type Ast = Node[] | Node;
-export type Node =
-    | Optional
-    | Mandatory
-    | Verbatim
-    | Body
-    | Group
-    | Until
-    | string;
+export type Node = Optional | Mandatory | Verbatim | Body | Group | Until;
 type Optional = OptionalArg | OptionalStar | OptionalToken | Embellishment;
 interface AstNode {
     type: string;
@@ -36,7 +29,7 @@ interface OptionalToken extends LeadingWhitespace, AstNode {
 }
 export interface Embellishment extends DefaultArgument, AstNode {
     type: "embellishment";
-    embellishmentTokens: (Group | string)[];
+    embellishmentTokens: string[];
 }
 interface Mandatory extends LeadingWhitespace, DefaultArgument, Arg {
     type: "mandatory";

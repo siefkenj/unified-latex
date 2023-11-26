@@ -1,3 +1,4 @@
+import { describe, expect, it } from "vitest";
 import util from "util";
 import { strToNodes } from "../../test-common";
 import { attachMacroArgsInArray } from "../libs/attach-arguments";
@@ -228,9 +229,10 @@ describe("unified-latex-util-arguments", () => {
                 ],
             },
         ]);
-
+    });
+    it("can attach embellishment arguments in array", () => {
         // embellishments
-        nodes = strToNodes("\\xxx^a\\xxx_b\\xxx_b^a");
+        let nodes = strToNodes("\\xxx^a\\xxx_b\\xxx_b^a");
         attachMacroArgsInArray(nodes, { xxx: { signature: "e{^_}" } });
         expect(nodes).toEqual([
             {

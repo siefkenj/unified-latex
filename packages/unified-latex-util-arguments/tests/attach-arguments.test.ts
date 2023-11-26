@@ -1,3 +1,4 @@
+import { describe, expect, it } from "vitest";
 import util from "util";
 import * as Ast from "@unified-latex/unified-latex-types";
 import { attachMacroArgs } from "../libs/attach-arguments";

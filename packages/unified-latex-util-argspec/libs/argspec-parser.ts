@@ -17,7 +17,10 @@ function getDecorators(node: ArgSpec.Node): string {
  * Print an `xparse` argument specification AST
  * to a string.
  */
-export function printRaw(node: ArgSpec.Ast, root = false): string {
+export function printRaw(
+    node: ArgSpec.Node | string | (ArgSpec.Node | string)[],
+    root = false
+): string {
     if (typeof node === "string") {
         return node;
     }

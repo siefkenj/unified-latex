@@ -29,63 +29,65 @@ export function gobbleArguments(
         argSpec = parseArgspec(argSpec);
     }
 
-    // argSpec may be mutated below.
-    argSpec = structuredClone(argSpec);
-
     const args: Ast.Argument[] = [];
-    let totalNodesRemoved = 0;
+    let nodesRemoved = 0;
 
     for (const spec of argSpec) {
-        const innerArgs: Ast.Argument[] = [];
-        let argument: Ast.Argument | null;
-        let nodesRemoved: number, matchNum: number | undefined;
-        do {
-            ({ argument, nodesRemoved, matchNum } = gobbleSingleArgument(
+        if (spec.type === "embellishment") {
+            // We need special behavior for embellishment argspecs.
+            // Because an embellishment argspec specifies more than one argument,
+            // we need to keep gobbling arguments until we've got them all.
+            const remainingTokens = new Set(spec.embellishmentTokens);
+            const argForToken = Object.fromEntries(
+                spec.embellishmentTokens.map((t) => [t, emptyArg()])
+            );
+
+            let { argument, nodesRemoved: removed } = gobbleSingleArgument(
+                nodes,
+                embellishmentSpec(remainingTokens),
+                startPos
+            );
+            while (argument) {
+                const token = argument.openMark;
+                remainingTokens.delete(token);
+                argForToken[token] = argument;
+                nodesRemoved += removed;
+                const newSpec = embellishmentSpec(remainingTokens);
+                ({ argument, nodesRemoved: removed } = gobbleSingleArgument(
+                    nodes,
+                    newSpec,
+                    startPos
+                ));
+            }
+
+            args.push(...spec.embellishmentTokens.map((t) => argForToken[t]));
+        } else {
+            const { argument, nodesRemoved: removed } = gobbleSingleArgument(
                 nodes,
                 spec,
                 startPos
-            ));
-            if (argument) {
-                innerArgs[nthHoleIndex(innerArgs, matchNum || 1)] = argument;
-                totalNodesRemoved += nodesRemoved;
-            }
-            // Usual ArgSpec ends this loop by returning `matchNum === undefined`.
-            // Embellishment argspecs always return matchNum. They end this loop
-            // by returning falsy `argument` value.
-        } while (argument && matchNum !== undefined);
-
-        // Fill out missing arguments.
-        if (matchNum === undefined) {
-            matchNum = argument ? 0 : 1;
+            );
+            args.push(argument || emptyArg());
+            nodesRemoved += removed;
         }
-        let i = -1;
-        while (matchNum--) {
-            i = nextHoleIndex(innerArgs, i);
-            innerArgs[i] = arg([], { openMark: "", closeMark: "" });
-        }
-        args.push(...innerArgs);
     }
 
-    return { args, nodesRemoved: totalNodesRemoved };
+    return { args, nodesRemoved };
 }
 
-function nextHoleIndex<T>(
-    arr: (NonNullable<T> | undefined)[],
-    startPos: number
-) {
-    do {
-        startPos++;
-    } while (typeof arr[startPos] !== "undefined");
-    return startPos;
-}
 /**
- * Get n-th left-most hole in `arr`. `n` is a 1-based integer,
- * so putting ([], 1) would return 0.
+ * Create an embellishment argspec from a set of tokens.
  */
-function nthHoleIndex<T>(arr: (NonNullable<T> | undefined)[], n: number) {
-    let i = -1;
-    while (n--) {
-        i = nextHoleIndex(arr, i);
-    }
-    return i;
+function embellishmentSpec(tokens: Set<string>): ArgSpec.Embellishment {
+    return {
+        type: "embellishment",
+        embellishmentTokens: [...tokens],
+    };
+}
+
+/**
+ * Create an empty argument.
+ */
+function emptyArg(): Ast.Argument {
+    return arg([], { openMark: "", closeMark: "" });
 }
