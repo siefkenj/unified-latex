@@ -1,5 +1,9 @@
 # unified-latex Changelog
 
+### v1.6.0
+- Embellishment tokens are now supported in macro `signature`s. E.g., a `xxx: {signature: "e{^_}"}` will allow `\xxx_{foo}^{bar}` and `\xxx^{foo}_{bar}` to parse correctly.
+- Stop tokens can now be regular string characters. For example `xxx: {signature: "ua"}` will allow `\xxx YYYaBBB` to consume `YYY` leaving `BBB` unconsumed.
+
 ### v1.5.0
 - HTML conversion: `vspace` and `hspace` now give the amount in a `data-amount` attribute.
 - HTML conversion: unknown macros now have their arguments wrapped in spans instead of appearing as formatted LaTeX code.
