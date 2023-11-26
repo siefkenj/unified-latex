@@ -53,7 +53,7 @@
     "build": "npm run clean && mkdirp ./dist && npm run compile",
     "test": "vitest",
     "clean": "rm -rf ./dist && rm -rf tsconfig.tsbuildinfo",
-    "compile": "tsc -b tsconfig.json & node build.js & wait",
+    "compile": "tsc -b tsconfig.json & node build.js & for job in `jobs -p`; do wait ${job}; done",
     "package": "node ../../scripts/make-package.mjs",
     "publish": "cd dist && npm publish"
   },

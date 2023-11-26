@@ -25,7 +25,7 @@ const clone =
 export function structuredClone<T>(obj: T): T {
     return clone(obj);
 }
-
+(
 declare global {
     const __magic__: any;
     interface Object {
