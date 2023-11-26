@@ -29,9 +29,9 @@ function _printRaw(node: Printable | Printable[]): PrintToken[] {
         case "argument":
             return [node.openMark, ..._printRaw(node.content), node.closeMark];
         case "comment":
-            var suffix = node.suffixParbreak ? "" : linebreak;
+            let suffix = node.suffixParbreak ? "" : linebreak;
             // A comment is responsible for printing its own leading whitespace
-            var leadingWhitespace = "";
+            let leadingWhitespace = "";
             if (node.sameline && node.leadingWhitespace) {
                 leadingWhitespace = " ";
             }
@@ -47,9 +47,9 @@ function _printRaw(node: Printable | Printable[]): PrintToken[] {
         case "environment":
         case "mathenv":
         case "verbatim":
-            var env = _printRaw(node.env);
-            var envStart: PrintToken[] = [ESCAPE + "begin{", ...env, "}"];
-            var envEnd: PrintToken[] = [ESCAPE + "end{", ...env, "}"];
+            let env = _printRaw(node.env);
+            let envStart: PrintToken[] = [ESCAPE + "begin{", ...env, "}"];
+            let envEnd: PrintToken[] = [ESCAPE + "end{", ...env, "}"];
             argsString =
                 (node as any).args == null ? [] : _printRaw((node as any).args);
             return [

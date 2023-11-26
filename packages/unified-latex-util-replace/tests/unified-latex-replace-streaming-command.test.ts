@@ -33,7 +33,7 @@ describe("unified-latex-util-replace:unified-latex-replace-streaming-command", (
 
         file = process("x \\foo y\n\nz");
         expect(file.value).toEqual("x \\FOO{y}\n\n\\FOO{z}");
-        
+
         file = process("x \\foo y \\bar yy\n\nz");
         expect(file.value).toEqual("x \\FOO{y \\BAR{yy}}\n\n\\FOO{\\BAR{z}}");
     });

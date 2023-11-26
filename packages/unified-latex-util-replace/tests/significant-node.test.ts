@@ -22,16 +22,16 @@ describe("unified-latex-replace", () => {
 
         nodes = strToNodes("a b c%foo");
         expect(lastSignificantNodeIndex(nodes)).toEqual(4);
-        
+
         nodes = strToNodes("a b c %foo");
         expect(lastSignificantNodeIndex(nodes)).toEqual(4);
-        
+
         nodes = strToNodes("a b c %foo\n%bar");
         expect(lastSignificantNodeIndex(nodes)).toEqual(4);
-        
+
         nodes = strToNodes("a b c%foo\n\n%bar");
         expect(lastSignificantNodeIndex(nodes)).toEqual(6);
-        
+
         nodes = strToNodes("a b c%foo\n\n%bar");
         expect(lastSignificantNodeIndex(nodes, true)).toEqual(4);
     });
@@ -47,7 +47,7 @@ describe("unified-latex-replace", () => {
 
         nodes = strToNodes("%foo\n\na b c");
         expect(firstSignificantNodeIndex(nodes)).toEqual(1);
-        
+
         nodes = strToNodes("%foo\n\na b c");
         expect(firstSignificantNodeIndex(nodes, true)).toEqual(2);
     });

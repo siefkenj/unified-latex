@@ -13,7 +13,13 @@
         "package": "npm run package -ws",
         "publish": "npm run publish -ws",
         "test": "vitest ./packages",
-        "test:ci": "vitest ./packages --maxWorkers=1"
+        "test:ci": "vitest ./packages --maxWorkers=1",
+        "prettier": "prettier '**/*.ts' --write",
+        "eslint": "eslint '**/*.ts' --ignore-pattern dist"
+    },
+    "prettier": {
+        "tabWidth": 4,
+        "trailingComma": "es5"
     },
     "devDependencies": {
         "@types/node": "^20.5.9",

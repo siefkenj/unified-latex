@@ -21,11 +21,12 @@ type GetGuard<T> = T extends (x: any, ...y: any[]) => x is infer R ? R : never;
  * Gets the type that a type-guard function is guarding. If
  * the guard type cannot be determined, the input type is returned.
  */
-type GuardTypeOf<T extends (x: any, ...y: any[]) => boolean> = GetGuard<T> extends never
-    ? T extends (x: infer A) => any
-        ? A
-        : never
-    : GetGuard<T>;
+type GuardTypeOf<T extends (x: any, ...y: any[]) => boolean> =
+    GetGuard<T> extends never
+        ? T extends (x: infer A) => any
+            ? A
+            : never
+        : GetGuard<T>;
 
 /**
  * Extracts the guard type from the `test` function provided in a

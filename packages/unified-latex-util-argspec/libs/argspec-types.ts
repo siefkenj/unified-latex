@@ -19,7 +19,7 @@ export interface LeadingWhitespace {
     noLeadingWhitespace: boolean | undefined;
 }
 export interface DefaultArgument {
-    defaultArg: Group;
+    defaultArg?: Group;
 }
 interface Verbatim extends Arg {
     type: "verbatim";
@@ -34,14 +34,14 @@ interface OptionalToken extends LeadingWhitespace, AstNode {
     type: "optionalToken";
     token: string;
 }
-interface Embellishment extends DefaultArgument, AstNode {
+export interface Embellishment extends DefaultArgument, AstNode {
     type: "embellishment";
-    embellishmentTokens: string[];
+    embellishmentTokens: (Group | string)[];
 }
 interface Mandatory extends LeadingWhitespace, DefaultArgument, Arg {
     type: "mandatory";
 }
-interface Group extends AstNode {
+export interface Group extends AstNode {
     type: "group";
     content: (Group | string)[];
 }

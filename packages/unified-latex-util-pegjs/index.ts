@@ -9,7 +9,7 @@ export * from "./libs/pegjs-parsers.js";
  * Pegjs grammars to help parse strings into a `unified-latex` Abstract Syntax Tree (AST). Note,
  * because of the dynamic nature of LaTeX, to get a full AST with arguments attached to macros, etc.,
  * the tree is parsed multiple times.
- * 
+ *
  * Also included are functions to decorate a `Ast.Node[]` array so that Pegjs can process it as if it were
  * a string. This allows for complex second-pass parsing.
  *

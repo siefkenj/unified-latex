@@ -75,6 +75,115 @@ describe("unified-latex-util-arguments", () => {
         ]);
     });
 
+    it("can gobble arguments that represents mutiple embellishments", () => {
+        let argspec = parseArgspec("e{_ad}");
+        value = "_{1234}abcde";
+        file = processLatexToAstViaUnified().processSync({ value });
+        let nodes = trimRenderInfo((file.result as any).content) as Ast.Node[];
+        expect(gobbleArguments(nodes, argspec)).toEqual({
+            args: [
+                {
+                    type: "argument",
+                    content: [{ type: "string", content: "1234" }],
+                    openMark: "_",
+                    closeMark: "",
+                },
+                {
+                    type: "argument",
+                    content: [{ type: "string", content: "b" }],
+                    openMark: "a",
+                    closeMark: "",
+                },
+                {
+                    type: "argument",
+                    content: [],
+                    openMark: "",
+                    closeMark: "",
+                },
+            ],
+            nodesRemoved: 4,
+        });
+        expect(nodes).toEqual([{ type: "string", content: "cde" }]);
+
+        // Order of embellishments shouldn't matter
+        argspec = parseArgspec("e{_ad}");
+        value = "_{1234}daac";
+        file = processLatexToAstViaUnified().processSync({ value });
+        nodes = trimRenderInfo((file.result as any).content) as Ast.Node[];
+        expect(gobbleArguments(nodes, argspec)).toEqual({
+            args: [
+                {
+                    type: "argument",
+                    content: [{ type: "string", content: "1234" }],
+                    openMark: "_",
+                    closeMark: "",
+                },
+                {
+                    type: "argument",
+                    content: [{ type: "string", content: "c" }],
+                    openMark: "a",
+                    closeMark: "",
+                },
+                {
+                    type: "argument",
+                    content: [{ type: "string", content: "a" }],
+                    openMark: "d",
+                    closeMark: "",
+                },
+            ],
+            nodesRemoved: 6,
+        });
+        expect(nodes).toEqual([]);
+
+        // Whitespaces between embellishment arguments should be ignored.
+        argspec = parseArgspec("e{^_}");
+        value = "^1 _2";
+        file = processLatexToAstViaUnified().processSync({ value });
+        nodes = trimRenderInfo((file.result as any).content) as Ast.Node[];
+        expect(gobbleArguments(nodes, argspec)).toEqual({
+            args: [
+                {
+                    type: "argument",
+                    content: [{ type: "string", content: "1" }],
+                    openMark: "^",
+                    closeMark: "",
+                },
+                {
+                    type: "argument",
+                    content: [{ type: "string", content: "2" }],
+                    openMark: "_",
+                    closeMark: "",
+                },
+            ],
+            nodesRemoved: 5,
+        });
+        expect(nodes).toEqual([]);
+
+        // Embellishment tokens enclosed in braces
+        argspec = parseArgspec("e{{^}{_}}");
+        value = "^a_b";
+        file = processLatexToAstViaUnified().processSync({ value });
+        nodes = trimRenderInfo((file.result as any).content) as Ast.Node[];
+        expect(gobbleArguments(nodes, argspec)).toEqual({
+            args: [
+                {
+                    type: "argument",
+                    content: [{ type: "string", content: "a" }],
+                    openMark: "^",
+                    closeMark: "",
+                },
+                {
+                    type: "argument",
+                    content: [{ type: "string", content: "b" }],
+                    openMark: "_",
+                    closeMark: "",
+                },
+            ],
+            nodesRemoved: 4,
+        });
+        expect(nodes).toEqual([]);
+    });
+
     it("can gobble arguments with custom argument parser", () => {
         /**
          * Unconditionally take the first node as an argument.

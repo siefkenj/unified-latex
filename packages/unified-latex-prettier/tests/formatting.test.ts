@@ -719,5 +719,4 @@ c
             await expect(inStr).toFormatAs(outStr, formatter);
         }
     });
-
 });

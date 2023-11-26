@@ -62,7 +62,7 @@ directly to the correct folder during development.
 
 ### Testing
 
-Tests in a specific workspace can be run via `npx jest` in that workspace. These for the whole project can be run via `npm run tests` in the
+Tests in a specific workspace can be run via `npx jest` in that workspace. These for the whole project can be run via `npm run test` in the
 root directory.
 
 ### Readme Generation and Consistency

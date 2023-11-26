@@ -55,7 +55,8 @@ export function attachMacroArgsInArray(
         // Add `._renderInfo` if we have any
         updateRenderInfo(macro, macroInfo.renderInfo);
 
-        const signatureOrParser = macroInfo.argumentParser || macroInfo.signature
+        const signatureOrParser =
+            macroInfo.argumentParser || macroInfo.signature;
 
         // If the macro has no signature, it shouldn't consume any arguments. Just move along.
         // Note: It is important that this happens *after* `updateRenderInfo` is called, since
