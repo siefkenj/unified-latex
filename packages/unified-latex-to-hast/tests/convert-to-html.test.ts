@@ -90,9 +90,9 @@ describe("unified-latex-to-hast:convert-to-html", () => {
                     },
                 })
                 .use(rehypeStringify)
-                .processSync(value).value;
+                .processSync(value).value as string;
 
-        let ast;
+        let ast: string;
 
         ast = convert(`\\includegraphics{myfile.pdf}`);
         expect(normalizeHtml(ast)).toEqual(

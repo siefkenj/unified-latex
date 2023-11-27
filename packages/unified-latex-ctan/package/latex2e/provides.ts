@@ -7,7 +7,7 @@ import { cleanEnumerateBody } from "../../utils/enumerate";
 
 export const macros: MacroInfoRecord = {
     // Special
-    "\\": { signature: "!s !o" },
+    "\\": { signature: "!s !o", renderInfo: { breakAfter: true } },
     _: { signature: "m", escapeToken: "" },
     "^": { signature: "m", escapeToken: "" },
     // \newcommand arg signature from https://www.texdev.net/2020/08/19/the-good-the-bad-and-the-ugly-creating-document-commands
