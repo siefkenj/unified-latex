@@ -713,7 +713,15 @@ c
     });
 
     it("Double backslash macro doesn't absorb optional argument if there's a space in front (issue #40)", async () => {
-        const STRINGS = [{ inStr: "\\\\ [2pt]", outStr: "\\\\ [2pt]" }];
+        const STRINGS = [{ inStr: "\\\\ [2pt]", outStr: "\\\\\n[2pt]" }];
+
+        for (const { inStr, outStr } of STRINGS) {
+            await expect(inStr).toFormatAs(outStr, formatter);
+        }
+    });
+
+    it("Double backslash forces a newline in text mode (issue #12)", async () => {
+        const STRINGS = [{ inStr: "a\\\\b", outStr: "a\\\\\nb" }];
 
         for (const { inStr, outStr } of STRINGS) {
             await expect(inStr).toFormatAs(outStr, formatter);

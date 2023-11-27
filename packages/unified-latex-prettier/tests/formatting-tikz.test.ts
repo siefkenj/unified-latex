@@ -3,6 +3,14 @@ import { prettierPluginLatex } from "../libs/prettier-plugin-latex";
 import "../../test-common";
 import * as fs from "node:fs/promises";
 import path from "node:path";
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
+
+const PACKAGE_ROOT = path.join(
+    require.resolve("@unified-latex/unified-latex-prettier"),
+    "..",
+    ".."
+);
 
 /* eslint-env jest */
 const formatter = async (x: string) =>
@@ -84,13 +92,13 @@ describe("unified-latex-prettier", () => {
     it("prints tikz samples", async () => {
         // ts-ignore
         const inStr = await fs.readFile(
-            "./packages/unified-latex-prettier/tests/samples/tikz/unformatted.tex",
+            path.join(PACKAGE_ROOT, "./tests/samples/tikz/unformatted.tex"),
             {
                 encoding: "utf-8",
             }
         );
         const outStr = await fs.readFile(
-            "./packages/unified-latex-prettier/tests/samples/tikz/formatted-wide.tex",
+            path.join(PACKAGE_ROOT, "./tests/samples/tikz/formatted-wide.tex"),
             {
                 encoding: "utf-8",
             }

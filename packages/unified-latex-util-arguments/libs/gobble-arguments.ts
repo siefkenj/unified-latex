@@ -1,4 +1,3 @@
-import { structuredClone } from "@unified-latex/structured-clone";
 import { arg } from "@unified-latex/unified-latex-builder";
 import * as Ast from "@unified-latex/unified-latex-types";
 import { ArgumentParser } from "@unified-latex/unified-latex-types";

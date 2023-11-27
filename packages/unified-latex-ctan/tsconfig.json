@@ -6,6 +6,7 @@
     },
     "include": ["./**/*.ts", "./package/**/*.ts"],
     "references": [
+        { "path": "../structured-clone" },
         { "path": "../unified-latex-types" },
         { "path": "../unified-latex-builder" },
         { "path": "../unified-latex-util-argspec" },

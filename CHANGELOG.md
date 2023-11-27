@@ -3,6 +3,8 @@
 ### v1.6.0
 - Embellishment tokens are now supported in macro `signature`s. E.g., a `xxx: {signature: "e{^_}"}` will allow `\xxx_{foo}^{bar}` and `\xxx^{foo}_{bar}` to parse correctly.
 - Stop tokens can now be regular string characters. For example `xxx: {signature: "ua"}` will allow `\xxx YYYaBBB` to consume `YYY` leaving `BBB` unconsumed.
+- Break after `\\` macro when pretty printing (Issue #59)
+- [DEVELOPMENT] Added `tsconfig.json` files to each `test/` folder for more granular control of the typescript settings.
 
 ### v1.5.0
 - HTML conversion: `vspace` and `hspace` now give the amount in a `data-amount` attribute.

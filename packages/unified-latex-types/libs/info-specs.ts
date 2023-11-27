@@ -74,12 +74,25 @@ export type MacroInfo = {
          */
         pgfkeysArgs?: boolean;
         /**
+         * Whether there should be line breaks after the macro
+         * (e.g., like the `\\` command.)
+         *
+         * @type {boolean}
+         */
+        breakAfter?: boolean;
+        /**
          * Whether there should be line breaks before and after the macro
-         * (e.g., like the \section{...} command.)
+         * (e.g., like the `\section{...}` command.)
          *
          * @type {boolean}
          */
         breakAround?: boolean;
+        /**
+         * Whether there should be line breaks before the macro.
+         *
+         * @type {boolean}
+         */
+        breakBefore?: boolean;
         /**
          * Whether the contents of the macro should be assumed to be in math mode.
          *

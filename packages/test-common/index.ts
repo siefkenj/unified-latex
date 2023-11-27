@@ -30,13 +30,7 @@ expect.extend({
                     inStr
                 )}\n\nthe output did ${
                     pass ? "" : "not"
-                } format correctly\n\n${this.utils.printDiffOrStringify(
-                    outStr,
-                    formatted,
-                    "Expected",
-                    "Received",
-                    false
-                )}`,
+                } format correctly\n\n${this.utils.diff(outStr, formatted)}`,
         };
     },
 });
