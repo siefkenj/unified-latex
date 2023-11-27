@@ -43,6 +43,7 @@
     "dependencies": {
         "@types/color": "^3.0.4",
         "@types/cssesc": "^3.0.0",
+        "@types/glob": "^8.1.0",
         "@types/text-table": "^0.2.2",
         "camelcase": "^8.0.0",
         "chalk": "^5.3.0",
@@ -62,7 +63,9 @@
         "unist-util-position": "^4.0.4",
         "vfile-reporter-json": "^3.2.0",
         "vfile-reporter-position": "^0.1.7",
-        "vfile-reporter-pretty": "^6.1.0"
+        "vfile-reporter-pretty": "^6.1.0",
+        "vite-node": "^0.34.6",
+        "wireit": "^0.14.1"
     },
     "name": "unified-latex"
 }

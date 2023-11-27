@@ -11,7 +11,7 @@ import { isCjsPackage } from "../../scripts/esbuild-module-check.mjs";
     const explicitDeps = Object.keys(packageJson.dependencies || {});
 
     const commonConfig = {
-        entryPoints: ["./index.ts"],
+        entryPoints: ["./src/index.ts"],
         outfile: "./dist/index.js",
         bundle: true,
         minify: false,

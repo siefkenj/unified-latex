@@ -30,7 +30,9 @@
   "scripts": {
     "build": "npm run clean && mkdirp ./dist && npm run compile",
     "clean": "rm -rf ./dist && rm -rf tsconfig.tsbuildinfo",
-    "compile": "tsc -b tsconfig.json & node build.js & for job in `jobs -p`; do wait ${job}; done",
+    "compile": "wireit",
+    "compile:js": "node build.js",
+    "compile:types": "tsc -b tsconfig.json",
     "package": "node ../../scripts/make-package.mjs",
     "publish": "cd dist && npm publish"
   },
@@ -52,5 +54,17 @@
     "url": "https://github.com/siefkenj/unified-latex/issues"
   },
   "homepage": "https://github.com/siefkenj/unified-latex#readme",
-  "private": true
+  "private": true,
+  "wireit": {
+    "compile": {
+      "dependencies": [
+        "compile:types",
+        "compile:js"
+      ],
+      "files": [
+        "src/**/*.ts",
+        "tsconfig.json"
+      ]
+    }
+  }
 }

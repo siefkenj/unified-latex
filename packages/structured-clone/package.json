@@ -24,8 +24,16 @@
   "scripts": {
     "build": "npm run clean && mkdirp ./dist && npm run compile",
     "clean": "rm -rf ./dist && rm -rf tsconfig.tsbuildinfo",
-    "compile": "tsc -b tsconfig.json & node build.js & for job in `jobs -p`; do wait ${job}; done",
+    "compile": "wireit",
+    "compile:types": "tsc -b tsconfig.json",
+    "compile:js": "node build.js",
     "test": "vitest"
+  },
+  "wireit": {
+    "compile": {
+      "dependencies": ["compile:types", "compile:js"],
+      "files": ["src/**/*.ts", "index.ts", "tsconfig.json"]
+    }
   },
   "repository": {
     "type": "git",
