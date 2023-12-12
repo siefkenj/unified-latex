@@ -7,7 +7,7 @@
     "compilerOptions": {
         "rootDir": "./packages",
         "paths": {
-            "@unified-latex/*": ["./packages/dist/*"]
+            "@unified-latex/*": ["./packages/*/dist"]
         },
         "types": ["vitest/globals"]
     }
