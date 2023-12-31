@@ -34,7 +34,7 @@ type GuardTypeOf<T extends (x: any, ...y: any[]) => boolean> =
  */
 type GuardFromOptions<
     Opts extends VisitOptions,
-    PossibleTypes = Ast.Ast
+    PossibleTypes = Ast.Ast,
 > = Opts extends {
     test: infer R;
 }

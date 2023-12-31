@@ -41,22 +41,19 @@ export function gobbleArguments(
                 spec.embellishmentTokens.map((t) => [t, emptyArg()])
             );
 
-            let { argument, nodesRemoved: removed } = gobbleSingleArgument(
-                nodes,
-                embellishmentSpec(remainingTokens),
-                startPos
-            );
-            while (argument) {
+            for (;;) {
+                let { argument, nodesRemoved: removed } = gobbleSingleArgument(
+                    nodes,
+                    embellishmentSpec(remainingTokens),
+                    startPos
+                );
+                if (!argument) {
+                    break;
+                }
                 const token = argument.openMark;
                 remainingTokens.delete(token);
                 argForToken[token] = argument;
                 nodesRemoved += removed;
-                const newSpec = embellishmentSpec(remainingTokens);
-                ({ argument, nodesRemoved: removed } = gobbleSingleArgument(
-                    nodes,
-                    newSpec,
-                    startPos
-                ));
             }
 
             args.push(...spec.embellishmentTokens.map((t) => argForToken[t]));

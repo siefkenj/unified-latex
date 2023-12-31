@@ -33,6 +33,22 @@ Check it out!
 "
 `;
 
+exports[`unified-latex-cli > can convert to markdown 2`] = `
+"<h3 class=\\"starred\\">Really Cool Math</h3>
+<p>Below you’ll find some really cool math.</p>
+<p>Check it out!</p>
+<ol class=\\"enumerate\\">
+	<li style=\\"list-style-type: &#x27;(a) &#x27;\\"><p>Hi there</p></li>
+	<li>
+		<p><span class=\\"inline-math\\">e^{2}</span> is math mode!</p>
+		<div class=\\"display-math\\">
+			\\\\begin{bmatrix}12&#x26;3^{e}\\\\\\\\ \\\\pi&#x26;0\\\\end{bmatrix}
+		</div>
+	</li>
+</ol>
+"
+`;
+
 exports[`unified-latex-cli > can expand macro 1`] = `
 "% Expand via> tests/needs-expanding.tex --stats -e \\"\\\\\\\\newcommand{foo}[1]{FOO(#1)}\\" -e '{name: \\"bar\\", body: \\"baz\\"}'
 hi FOO(fooArg) and baz!

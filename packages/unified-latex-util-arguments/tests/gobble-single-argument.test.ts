@@ -749,4 +749,47 @@ describe("unified-latex-util-arguments", () => {
             nodesRemoved: 2,
         });
     });
+    it("can gobble optional argument with default argument", () => {
+        const expectNoMatch = (ast: Ast.Node[]) => {
+            expect(
+                gobbleSingleArgument(ast, parseArgspec("O{default}")[0])
+            ).toMatchObject({
+                argument: {
+                    type: "argument",
+                    content: [{ type: "string", content: "default" }],
+                    openMark: "[",
+                    closeMark: "]",
+                },
+                nodesRemoved: 0,
+            });
+
+            expect(
+                gobbleSingleArgument(ast, parseArgspec("D(){\\LaTeX}")[0])
+            ).toMatchObject({
+                argument: {
+                    type: "argument",
+                    content: [{ type: "macro", content: "LaTeX" }],
+                    openMark: "(",
+                    closeMark: ")",
+                },
+                nodesRemoved: 0,
+            });
+
+            expect(
+                gobbleSingleArgument(ast, parseArgspec("R^_{default}")[0])
+            ).toMatchObject({
+                argument: {
+                    type: "argument",
+                    content: [{ type: "string", content: "default" }],
+                    openMark: "^",
+                    closeMark: "_",
+                },
+                nodesRemoved: 0,
+            });
+        };
+
+        expectNoMatch([{ type: "string", content: "this_should_not_match" }]);
+        expectNoMatch([{ type: "whitespace" }, { type: "parbreak" }]);
+        expectNoMatch([]);
+    });
 });
