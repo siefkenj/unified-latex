@@ -4,6 +4,7 @@ import "../../test-common";
 import { exec as _exec } from "node:child_process";
 import * as fsLegacy from "node:fs";
 import * as path from "node:path";
+import spawn from "cross-spawn";
 
 const exec = util.promisify(_exec);
 
@@ -37,16 +38,37 @@ describe(
         });
         it("can expand macro", async () => {
             {
-                let { stdout, stderr } = await exec(
-                    `node ${exePath} ${examplesPath}/needs-expanding.tex -e '\\newcommand{foo}[1]{FOO(#1)}' -e '{name: "bar", body: "baz"}'`
-                );
+                let stdout = await executeCommand(`node`, [
+                    exePath,
+                    `${examplesPath}/needs-expanding.tex`,
+                    `-e`,
+                    "\\newcommand{foo}[1]{FOO(#1)}",
+                    `-e`,
+                    '{name: "bar", body: "baz"}',
+                ]);
                 expect(stdout).toMatchSnapshot();
             }
             {
                 // Make sure we don't lose spaces in math mode
-                let { stdout, stderr } = await exec(
-                    `node ${exePath} ${examplesPath}/needs-expanding.tex -e '\\newcommand{foo}[1]{$\\x #1$}' -e '{name: "bar", body: "baz"}'`
-                );
+                let stdout = await executeCommand(`node`, [
+                    exePath,
+                    `${examplesPath}/needs-expanding.tex`,
+                    `-e`,
+                    "\\newcommand{foo}[1]{$\\x #1$}",
+                    `-e`,
+                    '{name: "bar", body: "baz"}',
+                ]);
+                expect(stdout).toMatchSnapshot();
+            }
+            {
+                let stdout = await executeCommand(`node`, [
+                    exePath,
+                    `${examplesPath}/needs-expanding.tex`,
+                    `-e`,
+                    "\\newcommand{foo}[1]{FOO(#1)}",
+                    `-e`,
+                    '{name: "bar", signature: "O{baz}", body: "#1"}',
+                ]);
                 expect(stdout).toMatchSnapshot();
             }
         });
@@ -69,21 +91,28 @@ describe(
         });
         it("can override default macros", async () => {
             {
-                let { stdout, stderr } = await exec(
-                    `node ${exePath} ${examplesPath}/has-existing-definition.tex`
-                );
+                let stdout = await executeCommand(`node`, [
+                    exePath,
+                    `${examplesPath}/has-existing-definition.tex`,
+                ]);
                 expect(stdout).toMatchSnapshot();
             }
             {
-                let { stdout, stderr } = await exec(
-                    `node ${exePath} ${examplesPath}/has-existing-definition.tex -e '\\newcommand{mathbb}{\\mathbb}'`
-                );
+                let stdout = await executeCommand(`node`, [
+                    exePath,
+                    `${examplesPath}/has-existing-definition.tex`,
+                    `-e`,
+                    "\\newcommand{mathbb}{\\mathbb}",
+                ]);
                 expect(stdout).toMatchSnapshot();
             }
             {
-                let { stdout, stderr } = await exec(
-                    `node ${exePath} ${examplesPath}/has-existing-definition.tex -e '\\newcommand{mathbb}[2]{\\mathbb{#1}{#2}}'`
-                );
+                let stdout = await executeCommand(`node`, [
+                    exePath,
+                    `${examplesPath}/has-existing-definition.tex`,
+                    `-e`,
+                    "\\newcommand{mathbb}[2]{\\mathbb{#1}{#2}}",
+                ]);
                 expect(stdout).toMatchSnapshot();
             }
         });
@@ -108,3 +137,34 @@ describe(
         timeout: 60 * 1000,
     }
 );
+
+/**
+ * Run commands with arguments using "cross-spawn", which correctly escapes arguments
+ * so that end results are the same across different shells.
+ */
+async function executeCommand(executablePath: string, args: string[]) {
+    return new Promise((resolve, reject) => {
+        const childProcess = spawn(executablePath, args, { stdio: "pipe" });
+
+        let stdoutData = "";
+
+        // Listen for stdout data
+        childProcess.stdout!.on("data", (data) => {
+            stdoutData += data.toString();
+        });
+
+        // Listen for errors
+        childProcess.on("error", (err) => {
+            reject(err);
+        });
+
+        // Listen for process completion
+        childProcess.on("close", (code) => {
+            if (code === 0) {
+                resolve(stdoutData);
+            } else {
+                reject(new Error(`Child process exited with code ${code}`));
+            }
+        });
+    });
+}

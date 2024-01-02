@@ -61,6 +61,12 @@ hi $\\\\x fooArg$ and baz!
 "
 `;
 
+exports[`unified-latex-cli > can expand macro 3`] = `
+"% Expand via> tests/needs-expanding.tex --stats -e \\"\\\\\\\\newcommand{foo}[1]{FOO(#1)}\\" -e '{name: \\"bar\\", body: \\"baz\\"}'
+hi FOO(fooArg) and baz!
+"
+`;
+
 exports[`unified-latex-cli > can expand macros defined in document 1`] = `
 "\\\\newcommand{\\\\foo}[1]{$BAR #1$}
 \\\\DeclareDocumentCommand{\\\\baz}{m}{\\\\foo{xxx} .#1.}
