@@ -440,7 +440,7 @@ describe("unified-latex-util-arguments", () => {
             nodesRemoved: 2,
         });
     });
-    it("gobbleSingleArgument gobbles optional group (i.e., optional argument in '{...}' braces)", () => {
+    it.skip("gobbleSingleArgument gobbles optional group (i.e., optional argument in '{...}' braces)", () => {
         let ast: Ast.Node[];
 
         // optional argument

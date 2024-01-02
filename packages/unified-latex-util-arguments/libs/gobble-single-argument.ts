@@ -131,14 +131,6 @@ export function gobbleSingleArgument(
                         closeMark,
                     });
                     currPos = bracePos[1] + 1;
-                } else if (argSpec.defaultArg) {
-                    const stringContent = printRaw(argSpec.defaultArg.content);
-                    const root = parse(stringContent);
-                    // TODO: inherit options passed to the parser which called the current function
-                    argument = arg(root.content, {
-                        openMark,
-                        closeMark,
-                    });
                 }
                 break;
             case "optionalStar":
@@ -220,8 +212,7 @@ export function gobbleSingleArgument(
     if (argument == null) {
         nodesRemoved = 0;
         if ("defaultArg" in argSpec && argSpec.defaultArg) {
-            const stringContent = printRaw(argSpec.defaultArg.content);
-            const root = parse(stringContent);
+            const root = parse(argSpec.defaultArg);
             // TODO: inherit options passed to the parser which called the current function
             argument = arg(root.content, {
                 openMark,

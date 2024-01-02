@@ -36,10 +36,27 @@ export function gobbleArguments(
             // We need special behavior for embellishment argspecs.
             // Because an embellishment argspec specifies more than one argument,
             // we need to keep gobbling arguments until we've got them all.
-            const remainingTokens = new Set(spec.embellishmentTokens);
-            const argForToken = Object.fromEntries(
-                spec.embellishmentTokens.map((t) => [t, emptyArg()])
-            );
+            const { embellishmentTokens, embellishmentDefaultArg } = spec;
+
+            const remainingTokens = new Set<string>();
+            const tokenToArgs = new Map<string, Ast.Argument>();
+
+            for (let i = 0, l = embellishmentTokens.length; i < l; i++) {
+                const token = embellishmentTokens[i];
+                // We assume that there aren't any duplicates in embellishmentTokens.
+                // Otherwise this may yield unexpected results.
+                remainingTokens.add(token);
+                const suppliedDefaultArg = embellishmentDefaultArg?.[i];
+                tokenToArgs.set(
+                    token,
+                    suppliedDefaultArg
+                        ? arg(suppliedDefaultArg, {
+                              openMark: token,
+                              closeMark: "",
+                          })
+                        : emptyArg()
+                );
+            }
 
             for (;;) {
                 let { argument, nodesRemoved: removed } = gobbleSingleArgument(
@@ -52,11 +69,13 @@ export function gobbleArguments(
                 }
                 const token = argument.openMark;
                 remainingTokens.delete(token);
-                argForToken[token] = argument;
+                tokenToArgs.set(token, argument);
                 nodesRemoved += removed;
             }
 
-            args.push(...spec.embellishmentTokens.map((t) => argForToken[t]));
+            args.push(
+                ...spec.embellishmentTokens.map((t) => tokenToArgs.get(t)!)
+            );
         } else {
             const { argument, nodesRemoved: removed } = gobbleSingleArgument(
                 nodes,

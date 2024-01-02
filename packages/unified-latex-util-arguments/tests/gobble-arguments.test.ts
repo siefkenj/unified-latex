@@ -185,6 +185,54 @@ describe("unified-latex-util-arguments", () => {
         expect(nodes).toEqual([]);
     });
 
+    it("can gobble arguments that represents multiple embellishments with default arguments", () => {
+        let argspec = parseArgspec("E{^_}{{UP}{DOWN}}");
+
+        value = "^{SuperscriptOnly}";
+        file = processLatexToAstViaUnified().processSync({ value });
+        let nodes = trimRenderInfo((file.result as any).content) as Ast.Node[];
+        expect(gobbleArguments(nodes, argspec)).toEqual({
+            args: [
+                {
+                    type: "argument",
+                    content: [{ type: "string", content: "SuperscriptOnly" }],
+                    openMark: "^",
+                    closeMark: "",
+                },
+                {
+                    type: "argument",
+                    content: [{ type: "string", content: "DOWN" }],
+                    openMark: "_",
+                    closeMark: "",
+                },
+            ],
+            nodesRemoved: 2,
+        });
+        expect(nodes).toEqual([]);
+
+        value = "_{SubscriptOnly}";
+        file = processLatexToAstViaUnified().processSync({ value });
+        nodes = trimRenderInfo((file.result as any).content) as Ast.Node[];
+        expect(gobbleArguments(nodes, argspec)).toEqual({
+            args: [
+                {
+                    type: "argument",
+                    content: [{ type: "string", content: "UP" }],
+                    openMark: "^",
+                    closeMark: "",
+                },
+                {
+                    type: "argument",
+                    content: [{ type: "string", content: "SubscriptOnly" }],
+                    openMark: "_",
+                    closeMark: "",
+                },
+            ],
+            nodesRemoved: 2,
+        });
+        expect(nodes).toEqual([]);
+    });
+
     it("can gobble arguments with custom argument parser", () => {
         /**
          * Unconditionally take the first node as an argument.

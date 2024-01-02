@@ -1,5 +1,5 @@
 export type Ast = Node[] | Node;
-export type Node = Optional | Mandatory | Verbatim | Body | Group | Until;
+export type Node = Optional | Mandatory | Verbatim | Body | Until;
 type Optional = OptionalArg | OptionalStar | OptionalToken | Embellishment;
 interface AstNode {
     type: string;
@@ -12,7 +12,7 @@ export interface LeadingWhitespace {
     noLeadingWhitespace: boolean | undefined;
 }
 export interface DefaultArgument {
-    defaultArg?: Group;
+    defaultArg?: string;
 }
 interface Verbatim extends Arg {
     type: "verbatim";
@@ -30,13 +30,10 @@ interface OptionalToken extends LeadingWhitespace, AstNode {
 export interface Embellishment extends DefaultArgument, AstNode {
     type: "embellishment";
     embellishmentTokens: string[];
+    embellishmentDefaultArg?: string[];
 }
 interface Mandatory extends LeadingWhitespace, DefaultArgument, Arg {
     type: "mandatory";
-}
-export interface Group extends AstNode {
-    type: "group";
-    content: (Group | string)[];
 }
 interface Body extends AstNode {
     type: "body";

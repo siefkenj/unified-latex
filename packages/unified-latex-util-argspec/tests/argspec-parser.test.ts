@@ -25,7 +25,7 @@ describe("unified-latex-util-argspec", () => {
         "o m o !o m",
         "!o r() m",
         "O{somedefault} m o",
-        "m e{^}",
+        "m e^",
         "m e{_^}",
         "s m",
         "v!",
@@ -35,6 +35,11 @@ describe("unified-latex-util-argspec", () => {
         "u{xx;}",
         "u;",
         "u{ }",
+        "Ox",
+        "r\\abc\\d",
+        "R\\a1{default}",
+        "D(ab",
+        "E{\\token ^}{{D1}2}",
     ];
 
     for (const spec of SPEC_STRINGS) {
@@ -46,16 +51,16 @@ describe("unified-latex-util-argspec", () => {
     }
 
     it("Embellishments always return a string", () => {
-        let ast = argspecParser.parse("e{{{x}}y{z}}");
+        let ast = argspecParser.parse("e{{x}y{z}}");
         expect(ast).toEqual([
             { type: "embellishment", embellishmentTokens: ["x", "y", "z"] },
         ]);
-        ast = argspecParser.parse("E{{{x}}y{z}}{}");
+        ast = argspecParser.parse("E{{x}y{z}}{{One}{Two}{Three}}");
         expect(ast).toEqual([
             {
                 type: "embellishment",
                 embellishmentTokens: ["x", "y", "z"],
-                defaultArg: { type: "group", content: [] },
+                embellishmentDefaultArg: ["One", "Two", "Three"],
             },
         ]);
     });
