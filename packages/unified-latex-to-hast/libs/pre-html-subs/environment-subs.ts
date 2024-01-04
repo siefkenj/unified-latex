@@ -178,5 +178,5 @@ export const environmentReplacements: Record<
             content: env.content,
             attributes: { className: "environment quote" },
         });
-    }
+    },
 };
