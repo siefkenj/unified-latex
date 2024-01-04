@@ -20,7 +20,7 @@ async function getImportsInDir(dirname): Promise<string[]> {
         for (const line of contents.split("\n")) {
             // Lines that start with ` * ` are comments; we don't track them.
             if (line.match(/^\s*\*\s/)) {
-                continue
+                continue;
             }
             for (const m of line.matchAll(/from "([^"]+)"/g)) {
                 const imp = m[1];

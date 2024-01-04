@@ -77,6 +77,8 @@
   "homepage": "https://github.com/siefkenj/unified-latex#readme",
   "private": true,
   "devDependencies": {
+    "@types/cross-spawn": "^6.0.6",
+    "cross-spawn": "^7.0.3",
     "source-map-support": "^0.5.21"
   }
 }

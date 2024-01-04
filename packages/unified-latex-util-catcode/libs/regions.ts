@@ -77,7 +77,7 @@ export function refineRegions(regions: Region[]): {
  */
 export function splitByRegions<
     T,
-    RegionRecord extends Record<string, Region[]>
+    RegionRecord extends Record<string, Region[]>,
 >(array: T[], regionsRecord: RegionRecord) {
     const ret: [keyof RegionRecord | null, T[]][] = [];
 

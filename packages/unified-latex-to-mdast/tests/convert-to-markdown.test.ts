@@ -44,24 +44,20 @@ describe("unified-latex-to-mdast:convert-to-markdown", () => {
             `### My Section\n\nHi there\n\nAnd here $x^{2}$ math\n`
         );
     });
-    
+
     it("display math converts to $$...$$", () => {
         let ast = unified()
             .use(unifiedLatexFromString)
             .parse("my\\[math\\]yay!");
         markdown = convertToMarkdown(ast);
-        expect(markdown).toEqual(
-            `my\n\n\`\`\`math\nmath\n\`\`\`\n\nyay!\n`
-        );
+        expect(markdown).toEqual(`my\n\n\`\`\`math\nmath\n\`\`\`\n\nyay!\n`);
     });
-    
+
     it("math isn't mangled when it is rendered", () => {
         let ast = unified()
             .use(unifiedLatexFromString)
             .parse("$\\sum_x^{y} x+Y$");
         markdown = convertToMarkdown(ast);
-        expect(markdown).toEqual(
-            `$\\sum_{x}^{y}x+Y$\n`
-        );
+        expect(markdown).toEqual(`$\\sum_{x}^{y}x+Y$\n`);
     });
 });
