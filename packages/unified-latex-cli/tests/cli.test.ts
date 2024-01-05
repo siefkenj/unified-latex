@@ -148,17 +148,14 @@ async function executeCommand(executablePath: string, args: string[]) {
 
         let stdoutData = "";
 
-        // Listen for stdout data
         childProcess.stdout!.on("data", (data) => {
             stdoutData += data.toString();
         });
 
-        // Listen for errors
         childProcess.on("error", (err) => {
             reject(err);
         });
 
-        // Listen for process completion
         childProcess.on("close", (code) => {
             if (code === 0) {
                 resolve(stdoutData);
