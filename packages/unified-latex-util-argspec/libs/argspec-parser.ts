@@ -7,7 +7,7 @@ import * as ArgSpec from "./argspec-types";
  */
 function getDecorators(node: ArgSpec.Node): string {
     let ret = "";
-    if ((node as ArgSpec.LeadingWhitespace).noLeadingWhitespace) {
+    if (node.noLeadingWhitespace) {
         ret += "!";
     }
     return ret;

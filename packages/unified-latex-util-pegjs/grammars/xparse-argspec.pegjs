@@ -15,7 +15,7 @@
      * Recursively return the content of an array until there are no more arrays
      */
     function arrayContent(node) {
-        if (typeof node === 'string') return node;
+        if (typeof node === 'string') { return node; }
         return '{' + node.map(arrayContent).join('') + '}'
     }
 }
@@ -90,7 +90,7 @@ required
 
 // An "until" argument gobbles tokens until the specified stop token(s)
 until
-    = "u" stopTokens:token_or_collection_allowing_whitespace {
+    = "u" stopTokens:(x:until_token { return [x] } / '{' @(until_token+) '}') {
             return createNode("until", { stopTokens });
         }
 
@@ -107,50 +107,40 @@ brace_spec
     / "{}" { return { openBrace: "{", closeBrace: "}"}}
 
 braced_group
-    = "{" content:(control_word_or_symbol / non_brace / braced_group)* "}" {
+    = "{" content:(macro_name / non_brace / braced_group)* "}" {
             return content;
         }
 
 non_brace
-    = ![{} ] x:. { return x; }
-
-non_brace_allowing_whitespace
-    = ![{}] x:. { return x; }
+    = ![{} ] @.
 
 // https://tex.stackexchange.com/questions/422966/which-characters-are-technically-legal-in-macro-names-with-t1
-control_word_or_symbol
+macro_name
     = $("\\"[a-zA-Z]+)
     / $("\\"![a-zA-Z] .)
+
+token
+    = macro_name / non_brace
+
+// Until token allows whitespace
+until_token
+	= macro_name / ![{}] @.
 
 // No need to separate individual characters here
 group
     = x:braced_group { return x.map(arrayContent).join(''); }
 
 token_or_group
-    = control_word_or_symbol / non_brace / group
+    = token / group
 
-token_or_group_allowing_whitespace
-    = control_word_or_symbol / non_brace_allowing_whitespace / group
-
-token_or_group_ignoring_whitespace
-    = whitespace x:token_or_group whitespace { return x; }
-
-// Collections are "groups with one level deep", and are used in `e,E,u`.
+// Collections are "groups with one level deep", and are used in `e,E`.
 // Whitespaces are ignored in e{***}, e.g. e{^ _} is the same as e{^_}.
 collection
-    = "{" content:token_or_group_ignoring_whitespace* "}" { return content; }
-
-// Whitespaces matter in u{ }.
-collection_allowing_whitespace
-    = "{" content:token_or_group_allowing_whitespace* "}" { return content; }
+    = "{" content:(whitespace @token_or_group whitespace)* "}" { return content; }
 
 token_or_collection
-    = x:(control_word_or_symbol / non_brace) { return [x]; }
+    = x:token { return [x]; }
     / collection
-
-token_or_collection_allowing_whitespace
-    = x:(control_word_or_symbol / non_brace) { return [x]; }
-    / collection_allowing_whitespace
 
 whitespace = whitespace_token* { return ""; }
 
