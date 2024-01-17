@@ -6,6 +6,7 @@ import { processLatexViaUnified } from "@unified-latex/unified-latex";
 import { unifiedLatexToHast } from "../libs/unified-latex-plugin-to-hast";
 import { htmlLike } from "@unified-latex/unified-latex-util-html-like";
 import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
+import { match } from "@unified-latex/unified-latex-util-match";
 
 function normalizeHtml(str: string) {
     try {
@@ -351,6 +352,40 @@ describe("unified-latex-to-hast:unified-latex-to-hast", () => {
         ast = process(`x\\\ny`);
         expect(normalizeHtml(ast)).toEqual(
             normalizeHtml(`x<br class="literal-newline" />y`)
+        );
+    });
+    it("can use VisitInfo to render nodes differently depending on the parent", () => {
+        const process = (value: string) =>
+            processLatexViaUnified()
+                .use(unifiedLatexToHast, {
+                    environmentReplacements: {
+                        yyy: (node, info) => {
+                            if (
+                                info.parents.some((x) =>
+                                    match.environment(x, "yyy")
+                                )
+                            ) {
+                                return htmlLike({
+                                    tag: "yyy-child",
+                                    content: node.content,
+                                });
+                            }
+                            return htmlLike({
+                                tag: "yyy",
+                                content: node.content,
+                            });
+                        },
+                    },
+                })
+                .use(rehypeStringify)
+                .processSync({ value }).value as string;
+        let ast;
+
+        ast = process(
+            `\\begin{yyy}a\\end{yyy}\\begin{yyy}\\begin{yyy}b\\end{yyy}c\\end{yyy}`
+        );
+        expect(normalizeHtml(ast)).toEqual(
+            normalizeHtml(`<yyy>a</yyy><yyy><yyy-child>b</yyy-child>c</yyy>`)
         );
     });
 });
