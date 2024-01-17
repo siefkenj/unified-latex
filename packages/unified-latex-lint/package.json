@@ -1,76 +1,76 @@
 {
-  "name": "@unified-latex/unified-latex-lint",
-  "version": "1.5.0",
-  "description": "Lints for LaTex code via the unified-latex framework",
-  "main": "dist/index.js",
-  "type": "module",
-  "dependencies": {
-    "@unified-latex/unified-latex-builder": "^1.4.2",
-    "@unified-latex/unified-latex-ctan": "^1.4.2",
-    "@unified-latex/unified-latex-types": "^1.4.2",
-    "@unified-latex/unified-latex-util-glue": "^1.4.2",
-    "@unified-latex/unified-latex-util-match": "^1.4.2",
-    "@unified-latex/unified-latex-util-packages": "^1.4.2",
-    "@unified-latex/unified-latex-util-print-raw": "^1.4.2",
-    "@unified-latex/unified-latex-util-replace": "^1.4.2",
-    "@unified-latex/unified-latex-util-scan": "^1.4.2",
-    "@unified-latex/unified-latex-util-trim": "^1.4.2",
-    "@unified-latex/unified-latex-util-visit": "^1.4.2",
-    "unified-lint-rule": "^2.1.2",
-    "unist-util-position": "^4.0.4"
-  },
-  "files": [
-    "dist/**/*.ts",
-    "dist/**/*.js",
-    "dist/**/*.map",
-    "dist/**/*.json"
-  ],
-  "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
+    "name": "@unified-latex/unified-latex-lint",
+    "version": "1.6.0",
+    "description": "Lints for LaTex code via the unified-latex framework",
+    "main": "dist/index.js",
+    "type": "module",
+    "dependencies": {
+        "@unified-latex/unified-latex-builder": "^1.6.0",
+        "@unified-latex/unified-latex-ctan": "^1.6.0",
+        "@unified-latex/unified-latex-types": "^1.6.0",
+        "@unified-latex/unified-latex-util-glue": "^1.6.0",
+        "@unified-latex/unified-latex-util-match": "^1.6.0",
+        "@unified-latex/unified-latex-util-packages": "^1.6.0",
+        "@unified-latex/unified-latex-util-print-raw": "^1.6.0",
+        "@unified-latex/unified-latex-util-replace": "^1.6.0",
+        "@unified-latex/unified-latex-util-scan": "^1.6.0",
+        "@unified-latex/unified-latex-util-trim": "^1.6.0",
+        "@unified-latex/unified-latex-util-visit": "^1.6.0",
+        "unified-lint-rule": "^2.1.2",
+        "unist-util-position": "^4.0.4"
     },
-    "./*js": "./dist/*js",
-    "./*/index": {
-      "import": "./dist/*/index.js",
-      "require": "./dist/*/index.cjs"
+    "files": [
+        "dist/**/*.ts",
+        "dist/**/*.js",
+        "dist/**/*.map",
+        "dist/**/*.json"
+    ],
+    "exports": {
+        ".": {
+            "import": "./dist/index.js",
+            "require": "./dist/index.cjs"
+        },
+        "./*js": "./dist/*js",
+        "./*/index": {
+            "import": "./dist/*/index.js",
+            "require": "./dist/*/index.cjs"
+        },
+        "./*": {
+            "import": "./dist/*/index.js",
+            "require": "./dist/*/index.cjs"
+        }
     },
-    "./*": {
-      "import": "./dist/*/index.js",
-      "require": "./dist/*/index.cjs"
-    }
-  },
-  "typesVersions": {
-    "*": {
-      "rules/*": [
-        "dist/rules/*"
-      ]
-    }
-  },
-  "scripts": {
-    "build": "npm run clean && mkdirp ./dist && npm run compile",
-    "clean": "rm -rf ./dist && rm -rf tsconfig.tsbuildinfo",
-    "compile": "tsc -b tsconfig.json & node build.js & for job in `jobs -p`; do wait ${job}; done",
-    "package": "node ../../scripts/make-package.mjs",
-    "publish": "cd dist && npm publish"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/siefkenj/unified-latex.git"
-  },
-  "keywords": [
-    "pegjs",
-    "latex",
-    "parser",
-    "prettier",
-    "unified-latex",
-    "unified"
-  ],
-  "author": "Jason Siefken",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/siefkenj/unified-latex/issues"
-  },
-  "homepage": "https://github.com/siefkenj/unified-latex#readme",
-  "private": true
+    "typesVersions": {
+        "*": {
+            "rules/*": [
+                "dist/rules/*"
+            ]
+        }
+    },
+    "scripts": {
+        "build": "npm run clean && mkdirp ./dist && npm run compile",
+        "clean": "rm -rf ./dist && rm -rf tsconfig.tsbuildinfo",
+        "compile": "tsc -b tsconfig.json & node build.js & for job in `jobs -p`; do wait ${job}; done",
+        "package": "node ../../scripts/make-package.mjs",
+        "publish": "cd dist && npm publish"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/siefkenj/unified-latex.git"
+    },
+    "keywords": [
+        "pegjs",
+        "latex",
+        "parser",
+        "prettier",
+        "unified-latex",
+        "unified"
+    ],
+    "author": "Jason Siefken",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/siefkenj/unified-latex/issues"
+    },
+    "homepage": "https://github.com/siefkenj/unified-latex#readme",
+    "private": true
 }

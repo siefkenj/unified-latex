@@ -1,54 +1,54 @@
 {
-  "name": "@unified-latex/unified-latex-util-argspec",
-  "version": "1.4.2",
-  "description": "Tools parsing a LaTeX argument specification in the xparse format",
-  "main": "dist/index.js",
-  "type": "module",
-  "dependencies": {
-    "@unified-latex/unified-latex-util-pegjs": "^1.4.2"
-  },
-  "files": [
-    "dist/**/*.ts",
-    "dist/**/*.js",
-    "dist/**/*.map",
-    "dist/**/*.json"
-  ],
-  "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
+    "name": "@unified-latex/unified-latex-util-argspec",
+    "version": "1.6.0",
+    "description": "Tools parsing a LaTeX argument specification in the xparse format",
+    "main": "dist/index.js",
+    "type": "module",
+    "dependencies": {
+        "@unified-latex/unified-latex-util-pegjs": "^1.6.0"
     },
-    "./*js": "./dist/*js",
-    "./*": {
-      "import": "./dist/*.js",
-      "require": "./dist/*.cjs"
-    }
-  },
-  "scripts": {
-    "build": "npm run clean && mkdirp ./dist && npm run compile",
-    "clean": "rm -rf ./dist && rm -rf tsconfig.tsbuildinfo",
-    "compile": "tsc -b tsconfig.json & node build.js & for job in `jobs -p`; do wait ${job}; done",
-    "test": "vitest",
-    "package": "node ../../scripts/make-package.mjs",
-    "publish": "cd dist && npm publish"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/siefkenj/unified-latex.git"
-  },
-  "keywords": [
-    "pegjs",
-    "latex",
-    "parser",
-    "prettier",
-    "unified-latex",
-    "unified"
-  ],
-  "author": "Jason Siefken",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/siefkenj/unified-latex/issues"
-  },
-  "homepage": "https://github.com/siefkenj/unified-latex#readme",
-  "private": true
+    "files": [
+        "dist/**/*.ts",
+        "dist/**/*.js",
+        "dist/**/*.map",
+        "dist/**/*.json"
+    ],
+    "exports": {
+        ".": {
+            "import": "./dist/index.js",
+            "require": "./dist/index.cjs"
+        },
+        "./*js": "./dist/*js",
+        "./*": {
+            "import": "./dist/*.js",
+            "require": "./dist/*.cjs"
+        }
+    },
+    "scripts": {
+        "build": "npm run clean && mkdirp ./dist && npm run compile",
+        "clean": "rm -rf ./dist && rm -rf tsconfig.tsbuildinfo",
+        "compile": "tsc -b tsconfig.json & node build.js & for job in `jobs -p`; do wait ${job}; done",
+        "test": "vitest",
+        "package": "node ../../scripts/make-package.mjs",
+        "publish": "cd dist && npm publish"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/siefkenj/unified-latex.git"
+    },
+    "keywords": [
+        "pegjs",
+        "latex",
+        "parser",
+        "prettier",
+        "unified-latex",
+        "unified"
+    ],
+    "author": "Jason Siefken",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/siefkenj/unified-latex/issues"
+    },
+    "homepage": "https://github.com/siefkenj/unified-latex#readme",
+    "private": true
 }
