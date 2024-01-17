@@ -13,13 +13,22 @@ import {
     PluginOptions as HtmlLikePluginOptions,
 } from "./unified-latex-plugin-to-html-like";
 
-export type PluginOptions = HtmlLikePluginOptions;
+export type PluginOptions = HtmlLikePluginOptions & {
+    /**
+     * By default, `unifiedLatexToHast` will force the output to be valid HTML.
+     * This is accomplished by running `rehypeRaw` on the output which will ensure
+     * there are no nested `<p>` tags, and that block elements don't end up as children of `<span>`s,
+     * etc. Set to `true` to skip this check.
+     */
+    skipHtmlValidation?: boolean;
+};
 
 /**
  * Unified plugin to convert a `unified-latex` AST into a `hast` AST.
  */
 export const unifiedLatexToHast: Plugin<PluginOptions[], Ast.Root, Hast.Root> =
     function unifiedLatexAttachMacroArguments(options) {
+        const { skipHtmlValidation = false } = options || {};
         return (tree, file) => {
             unified().use(unifiedLatexToHtmlLike, options).run(tree);
 
@@ -53,10 +62,12 @@ export const unifiedLatexToHast: Plugin<PluginOptions[], Ast.Root, Hast.Root> =
             // Wrap everything in a Hast.Root node
             let ret = h();
             ret.children = converted;
-            // We never want to produce invalid HTML, so we reparse the HTML we have generated.
-            // Ideally, any invalid HTML generation should be caught and fixed where it is, but
-            // we don't want to upset library users with invalid HTML
-            ret = unified().use(rehypeRaw).runSync(ret);
+            if (!skipHtmlValidation) {
+                // We never want to produce invalid HTML, so we reparse the HTML we have generated.
+                // Ideally, any invalid HTML generation should be caught and fixed where it is, but
+                // we don't want to upset library users with invalid HTML
+                ret = unified().use(rehypeRaw).runSync(ret);
+            }
             return ret;
         };
     };
