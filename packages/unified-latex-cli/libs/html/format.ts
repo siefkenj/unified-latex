@@ -1,4 +1,4 @@
-import { Root } from "hastscript/lib/core";
+import type { Root } from "hast";
 import rehypeStringify from "rehype-stringify";
 import Prettier from "prettier";
 import { Plugin, unified } from "unified";

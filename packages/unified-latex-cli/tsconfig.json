@@ -4,16 +4,5 @@
         "outDir": "./dist/",
         "rootDir": ".",
     },
-    "include": ["./**/*.ts"],
-    "references": [
-        { "path": "../unified-latex-types" },
-        { "path": "../unified-latex-util-parse" },
-        { "path": "../unified-latex-lint" },
-        { "path": "../unified-latex-to-hast" },
-        { "path": "../unified-latex-util-arguments" },
-        { "path": "../unified-latex-util-macros" },
-        { "path": "../unified-latex-util-packages" },
-        { "path": "../unified-latex-util-print-raw" },
-        { "path": "../unified-latex-util-to-string" }
-    ]
+    "include": ["./**/*.ts"]
 }

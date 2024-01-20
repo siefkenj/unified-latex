@@ -31,6 +31,7 @@ import { isCjsPackage } from "../../scripts/esbuild-module-check.mjs";
             external: commonConfig.external.filter(isCjsPackage),
             format: "cjs",
             outExtension: { ".js": ".cjs" },
+            conditions: ["_bundle"],
         })
         .catch(() => process.exit(1));
 })();

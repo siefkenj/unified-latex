@@ -27,10 +27,8 @@
         "sourceMap": true,
         "declaration": true,
         "declarationMap": true,
-        "moduleResolution": "node",
+        "moduleResolution": "Bundler",
         "resolveJsonModule": true,
-        "paths": {
-            "@unified-latex/*": ["./packages/*"]
-        }
+        "customConditions": ["_bundle"],
     }
 }

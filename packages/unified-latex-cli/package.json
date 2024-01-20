@@ -8,6 +8,7 @@
     "unified-latex": "./unified-latex-cli.mjs"
   },
   "dependencies": {
+    "@types/hast": "^2.3.9",
     "@unified-latex/unified-latex-lint": "^1.5.0",
     "@unified-latex/unified-latex-to-hast": "^1.5.0",
     "@unified-latex/unified-latex-to-mdast": "^1.5.0",
@@ -40,19 +41,23 @@
   ],
   "exports": {
     ".": {
+      "_bundle": "./index.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
     "./*js": "./dist/*js",
     "./*": {
+      "_bundle": "./*.ts",
       "import": "./dist/*.js",
       "require": "./dist/*.cjs"
     }
   },
   "scripts": {
     "build": "npm run clean && mkdirp ./dist && npm run compile",
-    "clean": "rm -rf ./dist && rm -rf tsconfig.tsbuildinfo",
-    "compile": "tsc -b tsconfig.json & node build.js & for job in `jobs -p`; do wait ${job}; done",
+    "clean": "rimraf ./dist",
+    "compile:tsc": "tsc",
+    "compile:esm_and_cjs": "node build.js",
+    "compile": "run-p compile:tsc compile:esm_and_cjs",
     "package": "node ../../scripts/make-package.mjs",
     "test": "vitest",
     "publish": "cd dist && npm publish"

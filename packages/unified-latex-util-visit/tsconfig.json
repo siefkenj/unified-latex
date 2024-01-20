@@ -4,9 +4,5 @@
         "outDir": "./dist/",
         "rootDir": "."
     },
-    "include": ["./**/*.ts"],
-    "references": [
-        { "path": "../unified-latex-types" },
-        { "path": "../unified-latex-util-match" }
-    ]
+    "include": ["./**/*.ts"]
 }
