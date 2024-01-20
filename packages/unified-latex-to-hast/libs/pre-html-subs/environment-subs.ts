@@ -167,7 +167,10 @@ function createTableFromTabular(env: Ast.Environment) {
  */
 export const environmentReplacements: Record<
     string,
-    (node: Ast.Environment, info: VisitInfo) => Ast.Macro | Ast.String | Ast.Environment
+    (
+        node: Ast.Environment,
+        info: VisitInfo
+    ) => Ast.Macro | Ast.String | Ast.Environment
 > = {
     enumerate: enumerateFactory("ol"),
     itemize: enumerateFactory("ul", "itemize"),

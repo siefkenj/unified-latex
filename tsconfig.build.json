@@ -29,6 +29,6 @@
         "declarationMap": true,
         "moduleResolution": "Bundler",
         "resolveJsonModule": true,
-        "customConditions": ["_bundle"],
+        "customConditions": ["_bundle"]
     }
 }

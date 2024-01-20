@@ -1,52 +1,52 @@
 {
-  "name": "@unified-latex/unified-latex-types",
-  "version": "1.6.0",
-  "description": "type definitions for unified-latex",
-  "main": "dist/index.js",
-  "type": "module",
-  "files": [
-    "dist/**/*.ts",
-    "dist/**/*.js",
-    "dist/**/*.map",
-    "dist/**/*.json"
-  ],
-  "exports": {
-    ".": {
-      "_bundle": "./index.ts",
-      "default": "./dist/index.js"
+    "name": "@unified-latex/unified-latex-types",
+    "version": "1.6.0",
+    "description": "type definitions for unified-latex",
+    "main": "dist/index.js",
+    "type": "module",
+    "files": [
+        "dist/**/*.ts",
+        "dist/**/*.js",
+        "dist/**/*.map",
+        "dist/**/*.json"
+    ],
+    "exports": {
+        ".": {
+            "_bundle": "./index.ts",
+            "default": "./dist/index.js"
+        },
+        "./*js": "./dist/*js",
+        "./*": {
+            "_bundle": "./dist/*.ts",
+            "default": "./dist/*.js"
+        }
     },
-    "./*js": "./dist/*js",
-    "./*": {
-      "_bundle": "./dist/*.ts",
-      "default": "./dist/*.js"
-    }
-  },
-  "scripts": {
-    "build": "npm run clean && npm run compile",
-    "clean": "rimraf ./dist",
-    "compile:tsc": "tsc",
-    "compile:esm_and_cjs": "node build.js",
-    "compile": "run-p compile:tsc compile:esm_and_cjs",
-    "package": "node ../../scripts/make-package.mjs",
-    "publish": "cd dist && npm publish"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/siefkenj/unified-latex.git"
-  },
-  "keywords": [
-    "pegjs",
-    "latex",
-    "parser",
-    "prettier",
-    "unified-latex",
-    "unified"
-  ],
-  "author": "Jason Siefken",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/siefkenj/unified-latex/issues"
-  },
-  "homepage": "https://github.com/siefkenj/unified-latex#readme",
-  "private": true
+    "scripts": {
+        "build": "npm run clean && npm run compile",
+        "clean": "rimraf ./dist",
+        "compile:tsc": "tsc",
+        "compile:esm_and_cjs": "node build.js",
+        "compile": "run-p compile:tsc compile:esm_and_cjs",
+        "package": "node ../../scripts/make-package.mjs",
+        "publish": "cd dist && npm publish"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/siefkenj/unified-latex.git"
+    },
+    "keywords": [
+        "pegjs",
+        "latex",
+        "parser",
+        "prettier",
+        "unified-latex",
+        "unified"
+    ],
+    "author": "Jason Siefken",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/siefkenj/unified-latex/issues"
+    },
+    "homepage": "https://github.com/siefkenj/unified-latex#readme",
+    "private": true
 }

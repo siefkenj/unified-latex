@@ -10,12 +10,13 @@
     ],
     "scripts": {
         "build": "npm run build -ws",
+        "clean": "npm run clean -ws",
         "package": "npm run package -ws",
         "publish": "npm run publish -ws",
         "test": "vitest ./packages",
         "test:ci": "vitest ./packages --maxWorkers=1",
-        "prettier": "prettier '**/*.ts' --write",
-        "eslint": "eslint '**/*.ts' --ignore-pattern dist"
+        "prettier": "prettier \"**/*.ts\" \"**/*.json\" --write",
+        "eslint": "eslint \"**/*.ts\" --ignore-pattern dist"
     },
     "prettier": {
         "tabWidth": 4,
