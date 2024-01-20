@@ -96,8 +96,8 @@ function getNamedArgsContent(
 ## `gobbleSingleArgument(nodes, argSpec, startPos)`
 
 Gobbles an argument of whose type is specified
-by `argSpec` starting at the position `startPos`. If an argument couldn't be found,
-`argument` will be `null`.
+by `argSpec` starting at the position `startPos`.
+If an argument couldn't be found, `argument` will be `null`.
 
 ```typescript
 function gobbleSingleArgument(

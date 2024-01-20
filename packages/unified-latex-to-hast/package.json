@@ -1,79 +1,83 @@
 {
-  "name": "@unified-latex/unified-latex-to-hast",
-  "version": "1.5.0",
-  "description": "Convert a unified-latex AST to a HAST AST (for HTML conversion)",
-  "main": "dist/index.js",
-  "type": "module",
-  "dependencies": {
-    "@unified-latex/unified-latex": "^1.5.0",
-    "@unified-latex/unified-latex-builder": "^1.4.2",
-    "@unified-latex/unified-latex-ctan": "^1.4.2",
-    "@unified-latex/unified-latex-lint": "^1.5.0",
-    "@unified-latex/unified-latex-types": "^1.4.2",
-    "@unified-latex/unified-latex-util-align": "^1.4.2",
-    "@unified-latex/unified-latex-util-arguments": "^1.4.2",
-    "@unified-latex/unified-latex-util-comments": "^1.4.2",
-    "@unified-latex/unified-latex-util-html-like": "^1.4.2",
-    "@unified-latex/unified-latex-util-ligatures": "^1.4.2",
-    "@unified-latex/unified-latex-util-match": "^1.4.2",
-    "@unified-latex/unified-latex-util-print-raw": "^1.4.2",
-    "@unified-latex/unified-latex-util-replace": "^1.4.2",
-    "@unified-latex/unified-latex-util-trim": "^1.4.2",
-    "@unified-latex/unified-latex-util-visit": "^1.4.2",
-    "cssesc": "^3.0.0",
-    "hast": "^1.0.0",
-    "hastscript": "^7.2.0",
-    "rehype-raw": "^6.1.1",
-    "rehype-stringify": "^9.0.4",
-    "unified": "^10.1.2"
-  },
-  "devDependencies": {
-    "hast-util-to-html": "^8.0.4",
-    "hast-util-to-string": "^3.0.0",
-    "prettier": "^2.8.8"
-  },
-  "files": [
-    "dist/**/*.ts",
-    "dist/**/*.js",
-    "dist/**/*.map",
-    "dist/**/*.json"
-  ],
-  "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
+    "name": "@unified-latex/unified-latex-to-hast",
+    "version": "1.6.0",
+    "description": "Convert a unified-latex AST to a HAST AST (for HTML conversion)",
+    "main": "dist/index.js",
+    "type": "module",
+    "dependencies": {
+        "@unified-latex/unified-latex": "^1.6.0",
+        "@unified-latex/unified-latex-builder": "^1.6.0",
+        "@unified-latex/unified-latex-ctan": "^1.6.0",
+        "@unified-latex/unified-latex-lint": "^1.6.0",
+        "@unified-latex/unified-latex-types": "^1.6.0",
+        "@unified-latex/unified-latex-util-align": "^1.6.0",
+        "@unified-latex/unified-latex-util-arguments": "^1.6.0",
+        "@unified-latex/unified-latex-util-comments": "^1.6.0",
+        "@unified-latex/unified-latex-util-html-like": "^1.6.0",
+        "@unified-latex/unified-latex-util-ligatures": "^1.6.0",
+        "@unified-latex/unified-latex-util-match": "^1.6.0",
+        "@unified-latex/unified-latex-util-print-raw": "^1.6.0",
+        "@unified-latex/unified-latex-util-replace": "^1.6.0",
+        "@unified-latex/unified-latex-util-trim": "^1.6.0",
+        "@unified-latex/unified-latex-util-visit": "^1.6.0",
+        "cssesc": "^3.0.0",
+        "hast": "^1.0.0",
+        "hastscript": "^7.2.0",
+        "rehype-raw": "^6.1.1",
+        "rehype-stringify": "^9.0.4",
+        "unified": "^10.1.2"
     },
-    "./*js": "./dist/*js",
-    "./*": {
-      "import": "./dist/*.js",
-      "require": "./dist/*.cjs"
-    }
-  },
-  "scripts": {
-    "build": "npm run clean && mkdirp ./dist && npm run compile",
-    "test": "vitest",
-    "clean": "rm -rf ./dist && rm -rf tsconfig.tsbuildinfo",
-    "compile": "tsc -b tsconfig.json & node build.js & for job in `jobs -p`; do wait ${job}; done",
-    "package": "node ../../scripts/make-package.mjs",
-    "publish": "cd dist && npm publish"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/siefkenj/unified-latex.git"
-  },
-  "keywords": [
-    "pegjs",
-    "latex",
-    "parser",
-    "prettier",
-    "unified-latex",
-    "unified"
-  ],
-  "author": "Jason Siefken",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/siefkenj/unified-latex/issues"
-  },
-  "homepage": "https://github.com/siefkenj/unified-latex#readme",
-  "private": true
+    "devDependencies": {
+        "hast-util-to-html": "^8.0.4",
+        "hast-util-to-string": "^3.0.0",
+        "prettier": "^2.8.8"
+    },
+    "files": [
+        "dist/**/*.ts",
+        "dist/**/*.js",
+        "dist/**/*.map",
+        "dist/**/*.json"
+    ],
+    "exports": {
+        ".": {
+            "_bundle": "./index.ts",
+            "import": "./dist/index.js",
+            "require": "./dist/index.cjs"
+        },
+        "./*js": "./dist/*js",
+        "./*": {
+            "_bundle": "./*.ts",
+            "import": "./dist/*.js",
+            "require": "./dist/*.cjs"
+        }
+    },
+    "scripts": {
+        "build": "npm run clean && mkdirp ./dist && npm run compile",
+        "test": "vitest",
+        "clean": "rimraf ./dist",
+        "compile:tsc": "tsc",
+        "compile:esm_and_cjs": "node build.js",
+        "compile": "run-p compile:tsc compile:esm_and_cjs",
+        "package": "node ../../scripts/make-package.mjs",
+        "publish": "cd dist && npm publish"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/siefkenj/unified-latex.git"
+    },
+    "keywords": [
+        "pegjs",
+        "latex",
+        "parser",
+        "prettier",
+        "unified-latex",
+        "unified"
+    ],
+    "author": "Jason Siefken",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/siefkenj/unified-latex/issues"
+    },
+    "homepage": "https://github.com/siefkenj/unified-latex#readme",
+    "private": true
 }

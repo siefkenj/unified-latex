@@ -13,6 +13,7 @@ import {
 import { match } from "@unified-latex/unified-latex-util-match";
 import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 import { wrapPars } from "../wrap-pars";
+import { VisitInfo } from "@unified-latex/unified-latex-util-visit";
 
 const ITEM_ARG_NAMES_REG = ["label"] as const;
 const ITEM_ARG_NAMES_BEAMER = [null, "label", null] as const;
@@ -166,7 +167,10 @@ function createTableFromTabular(env: Ast.Environment) {
  */
 export const environmentReplacements: Record<
     string,
-    (node: Ast.Environment) => Ast.Macro | Ast.String | Ast.Environment
+    (
+        node: Ast.Environment,
+        info: VisitInfo
+    ) => Ast.Macro | Ast.String | Ast.Environment
 > = {
     enumerate: enumerateFactory("ol"),
     itemize: enumerateFactory("ul", "itemize"),

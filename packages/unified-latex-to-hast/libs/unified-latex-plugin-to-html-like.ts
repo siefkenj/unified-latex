@@ -99,7 +99,7 @@ export const unifiedLatexToHtmlLike: Plugin<
                 return;
             }
             if (isReplaceableEnvironment(node)) {
-                return environmentReplacements[printRaw(node.env)](node);
+                return environmentReplacements[printRaw(node.env)](node, info);
             }
         });
         replaceNode(tree, (node, info) => {
@@ -108,7 +108,7 @@ export const unifiedLatexToHtmlLike: Plugin<
                 return;
             }
             if (isReplaceableMacro(node)) {
-                const replacement = macroReplacements[node.content](node);
+                const replacement = macroReplacements[node.content](node, info);
                 return replacement;
             }
         });

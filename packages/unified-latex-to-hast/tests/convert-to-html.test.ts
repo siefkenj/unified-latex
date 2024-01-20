@@ -99,4 +99,67 @@ describe("unified-latex-to-hast:convert-to-html", () => {
             normalizeHtml(`<img src="myfile.png" />`)
         );
     });
+
+    it("can skip html validation", () => {
+        const xxx = () =>
+            htmlLike({
+                tag: "p",
+                content: [
+                    htmlLike({
+                        tag: "yy",
+                        content: [
+                            { type: "string", content: "bar" },
+                            htmlLike({
+                                tag: "p",
+                                content: [
+                                    {
+                                        type: "string",
+                                        content: "foo",
+                                    },
+                                ],
+                            }),
+                        ],
+                    }),
+                ],
+            });
+        let convert = (value: string) =>
+            unified()
+                .use(unifiedLatexFromString)
+                .use(unifiedLatexToHast, {
+                    macroReplacements: {
+                        // This is a cheap way to produce invalid HTML by directly returning it.
+                        // There's probably a more elegant way to test this.
+                        xxx,
+                    },
+                    skipHtmlValidation: false,
+                })
+                .use(rehypeStringify)
+                .processSync(value).value as string;
+
+        let ast: string;
+
+        ast = convert(`\\xxx`);
+        expect(normalizeHtml(ast)).toEqual(
+            normalizeHtml(`<p><yy>bar</yy></p><p>foo</p><p></p>`)
+        );
+
+        convert = (value: string) =>
+            unified()
+                .use(unifiedLatexFromString)
+                .use(unifiedLatexToHast, {
+                    macroReplacements: {
+                        // This is a cheap way to produce invalid HTML by directly returning it.
+                        // There's probably a more elegant way to test this.
+                        xxx,
+                    },
+                    skipHtmlValidation: true,
+                })
+                .use(rehypeStringify)
+                .processSync(value).value as string;
+
+        ast = convert(`\\xxx`);
+        expect(normalizeHtml(ast)).toEqual(
+            normalizeHtml(`<p><yy>bar<p>foo</p></yy></p>`)
+        );
+    });
 });
