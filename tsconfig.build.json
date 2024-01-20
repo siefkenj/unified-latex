@@ -30,6 +30,6 @@
         "moduleResolution": "Bundler",
         "resolveJsonModule": true,
         "customConditions": ["_bundle"],
-        "forceConsistentCasingInFileNames": true,
+        "forceConsistentCasingInFileNames": true
     }
 }

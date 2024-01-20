@@ -3,7 +3,10 @@ export type Node = Optional | Mandatory | Verbatim | Body | Until;
 type Optional = OptionalArg | OptionalStar | OptionalToken | Embellishment;
 
 // Make several optional properties available in all `AstNode`s
-interface AstNode extends Partial<Arg>, Partial<LeadingWhitespace>, DefaultArgument {
+interface AstNode
+    extends Partial<Arg>,
+        Partial<LeadingWhitespace>,
+        DefaultArgument {
     type: string;
 }
 

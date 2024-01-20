@@ -498,6 +498,7 @@ describe("unified-latex-util-arguments", () => {
             { type: "string", content: "]" },
             { type: "string", content: "y" },
         ];
+
         expect(
             gobbleSingleArgument([...ast], parseArgspec("!o")[0])
         ).toMatchObject({
@@ -599,6 +600,41 @@ describe("unified-latex-util-arguments", () => {
         });
         expect(nodes).toEqual([{ content: "yx", type: "string" }]);
     });
+    it("can gobble an 'until' argument with multiple stop tokens", () => {
+        let argspec = parseArgspec("u{a \\bcd}")[0];
+        value = "asdf asydfxya{x}sa \\bcd2df";
+        file = processLatexToAstViaUnified().processSync({ value });
+        let nodes = trimRenderInfo((file.result as any).content) as Ast.Node[];
+        expect(gobbleSingleArgument(nodes, argspec)).toEqual({
+            argument: {
+                type: "argument",
+                content: [
+                    // Due to a current implementation of gobbleSingleArgument,
+                    // we may introduce extra string split during the search.
+                    { type: "string", content: "a" },
+                    { type: "string", content: "sdf" },
+                    { type: "whitespace" },
+                    { type: "string", content: "a" },
+                    { type: "string", content: "sydfxy" },
+                    { type: "string", content: "a" },
+                    {
+                        type: "group",
+                        content: [{ type: "string", content: "x" }],
+                    },
+                    { type: "string", content: "s" },
+                ],
+                openMark: "",
+                closeMark: "a \\bcd",
+            },
+            nodesRemoved: 11,
+        });
+        expect(nodes).toEqual([
+            {
+                type: "string",
+                content: "2df",
+            },
+        ]);
+    });
     it("gobbleSingleArgument gobbles non-punctuation delimited arguments", () => {
         let ast: Ast.Node[] = [
             { type: "whitespace" },
@@ -691,6 +727,46 @@ describe("unified-latex-util-arguments", () => {
                 nodesRemoved: 3,
             }
         );
+    });
+    it("gobbleSingleArgument gobbles arguments delimited by tokens", () => {
+        let ast: Ast.Node[] = [
+            { type: "macro", content: "a" },
+            { type: "group", content: [{ type: "string", content: "123" }] },
+            { type: "string", content: "1" },
+        ];
+        expect(
+            gobbleSingleArgument(ast, parseArgspec("r\\a{ 1 }")[0])
+        ).toMatchObject({
+            argument: {
+                type: "argument",
+                content: [
+                    {
+                        type: "group",
+                        content: [{ type: "string", content: "123" }],
+                    },
+                ],
+                openMark: "\\a",
+                closeMark: "1",
+            },
+            nodesRemoved: 3,
+        });
+
+        ast = [
+            { type: "macro", content: "abc" },
+            { type: "string", content: "123" },
+            { type: "macro", content: "def" },
+        ];
+        expect(
+            gobbleSingleArgument(ast, parseArgspec("r\\abc\\def")[0])
+        ).toMatchObject({
+            argument: {
+                type: "argument",
+                content: [{ type: "string", content: "123" }],
+                openMark: "\\abc",
+                closeMark: "\\def",
+            },
+            nodesRemoved: 3,
+        });
     });
     it("can gobble embellishments", () => {
         let ast: Ast.Node[] = [{ type: "string", content: "xxx" }];

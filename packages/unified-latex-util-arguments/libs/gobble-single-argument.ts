@@ -38,18 +38,18 @@ export function gobbleSingleArgument(
     // If `argSpec` specifies leading whitespace is not allowed,
     // this function does nothing.
     const gobbleWhitespace = argSpec.noLeadingWhitespace
-        ? () => { }
+        ? () => {}
         : () => {
-            while (currPos < nodes.length) {
-                if (!match.whitespace(nodes[currPos])) {
-                    break;
-                }
-                currPos++;
-            }
-        };
+              while (currPos < nodes.length) {
+                  if (!match.whitespace(nodes[currPos])) {
+                      break;
+                  }
+                  currPos++;
+              }
+          };
 
-    const openMark = parseBrace(argSpec.openBrace);
-    const closeMark = parseBrace(argSpec.closeBrace);
+    const openMark = parseToken(argSpec.openBrace);
+    const closeMark = parseToken(argSpec.closeBrace);
 
     // Only mandatory arguments can be wrapped in {...}.
     // Since we already parse such things as groups, we need to
@@ -148,13 +148,10 @@ export function gobbleSingleArgument(
                 break;
             }
             case "until": {
-                const stopTokens: (string | Ast.Whitespace)[] = argSpec.stopTokens.map(rawToken => {
-                    if (rawToken === " ") {
-                        return { type: "whitespace" };
-                    }
-                    return rawToken;
-                });
-
+                const stopTokens = argSpec.stopTokens.map(parseToken);
+                // TODO: in order to match xparse's behavior, multiple spaces at the start
+                // or in a middle should be collapsed to a single whitespace token,
+                // and spaces at the end should be ignored.
                 let nextStartPos = startPos;
                 let bracePos: [number, number] | undefined;
                 while (nextStartPos < nodes.length) {
@@ -164,7 +161,9 @@ export function gobbleSingleArgument(
                         undefined,
                         stopTokens[0]
                     );
-                    if (!bracePos) { break; }
+                    if (!bracePos) {
+                        break;
+                    }
                     let nextBracePos: [number, number] | undefined = bracePos;
                     let i = 1;
                     for (; i < stopTokens.length && nextBracePos; i++) {
@@ -176,7 +175,9 @@ export function gobbleSingleArgument(
                             /* endPos */ nextBracePos[1] + 1
                         );
                     }
-                    if (i >= stopTokens.length && nextBracePos) { break; }
+                    if (i >= stopTokens.length && nextBracePos) {
+                        break;
+                    }
                     nextStartPos = bracePos[0] + 1;
                 }
 
@@ -189,7 +190,9 @@ export function gobbleSingleArgument(
                     openMark: "",
                     closeMark: printRaw(argSpec.stopTokens),
                 });
-                currPos = bracePos[1];
+                // Since `stopTokens` may comprise of more than one token,
+                // we need to advance `currPos` further
+                currPos = bracePos[1] + stopTokens.length - 1;
                 if (currPos < nodes.length) {
                     currPos++;
                 }
@@ -245,7 +248,7 @@ function cloneStringNode(node: Ast.String, content: string): Ast.String {
     return Object.assign({}, node, { content });
 }
 
-type Braces = string | Ast.Macro | Ast.Whitespace
+type Braces = string | Ast.Macro | Ast.Whitespace;
 /**
  * Find the position of the open brace and the closing brace.
  * Returns undefined if the brace isn't found.
@@ -263,7 +266,9 @@ function findBracePositions(
     let closeMarkPos: number | undefined = startPos;
     if (openMark) {
         openMarkPos = findDelimiter(nodes, openMark, openMarkPos, openMarkPos);
-        if (openMarkPos === undefined) { return; }
+        if (openMarkPos === undefined) {
+            return;
+        }
         closeMarkPos = openMarkPos + 1;
     }
     if (!closeMark) {
@@ -285,18 +290,27 @@ function findBracePositions(
         }
         return [openMarkPos, closeMarkPos];
     }
-    closeMarkPos = findDelimiter(nodes, closeMark, closeMarkPos, endPos)
-    if (closeMarkPos === undefined) { return; }
+    closeMarkPos = findDelimiter(nodes, closeMark, closeMarkPos, endPos);
+    if (closeMarkPos === undefined) {
+        return;
+    }
     return [openMarkPos, closeMarkPos];
 }
 
-function findDelimiter(nodes: Ast.Node[], token: Braces, startPos: number, endPos?: number): number | undefined {
+function findDelimiter(
+    nodes: Ast.Node[],
+    token: Braces,
+    startPos: number,
+    endPos?: number
+): number | undefined {
     let closeMarkPos = scan(nodes, token, {
         startIndex: startPos,
         allowSubstringMatches: true,
-        endIndex: endPos
+        endIndex: endPos,
     });
-    if (closeMarkPos === null) { return; }
+    if (closeMarkPos === null) {
+        return;
+    }
     const closingNode = nodes[closeMarkPos];
     if (match.anyString(closingNode) && typeof token === "string") {
         const closingNodeContent = closingNode.content;
@@ -308,7 +322,9 @@ function findDelimiter(nodes: Ast.Node[], token: Braces, startPos: number, endPo
                 // `closeMarkPos` need to be increased, so double-check that we are bounded by
                 // `endPos` before mutating `nodes`. `closeMarkPos` is already less than or equal to `endPos`,
                 // so we only need to check for an equality here.
-                if (closeMarkPos === endPos) { return; }
+                if (closeMarkPos === endPos) {
+                    return;
+                }
                 nodes.splice(
                     closeMarkPos,
                     0,
@@ -332,13 +348,17 @@ function findDelimiter(nodes: Ast.Node[], token: Braces, startPos: number, endPo
     return closeMarkPos;
 }
 
-function parseBrace(str: string | undefined): string | Ast.Macro {
-    if (!str) { return ""; }
+function parseToken(
+    str: string | undefined
+): string | Ast.Whitespace | Ast.Macro {
+    if (!str) {
+        return "";
+    }
+    if (!str.trim()) {
+        return { type: "whitespace" };
+    }
     if (str.startsWith("\\")) {
-        return {
-            type: "macro",
-            content: str.slice(1)
-        }
+        return { type: "macro", content: str.slice(1) };
     }
     return str;
 }

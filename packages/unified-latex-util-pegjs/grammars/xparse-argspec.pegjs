@@ -88,9 +88,9 @@ required
         }
     / "r" braceSpec:brace_spec { return createNode("mandatory", braceSpec); }
 
-// An "until" argument gobbles tokens until the specified stop token(s)
+// An "until" argument gobbles tokens until the specified stop token(s). Until token allows whitespace.
 until
-    = "u" stopTokens:(x:until_token { return [x] } / '{' @(until_token+) '}') {
+    = "u" stopTokens:(x:token { return [x] } / '{' @(token_or_whitespace+) '}') {
             return createNode("until", { stopTokens });
         }
 
@@ -107,7 +107,7 @@ brace_spec
     / "{}" { return { openBrace: "{", closeBrace: "}"}}
 
 braced_group
-    = "{" content:(macro_name / non_brace / braced_group)* "}" {
+    = "{" content:( token_or_whitespace / braced_group)* "}" {
             return content;
         }
 
@@ -122,13 +122,12 @@ macro_name
 token
     = macro_name / non_brace
 
-// Until token allows whitespace
-until_token
-	= macro_name / ![{}] @.
+token_or_whitespace
+	= token / whitespace_token
 
-// No need to separate individual characters here
+// No need to separate individual characters here, just need to trim enclosing whitespaces
 group
-    = x:braced_group { return x.map(arrayContent).join(''); }
+    = x:braced_group { return x.map(arrayContent).join('').trim(); }
 
 token_or_group
     = token / group
