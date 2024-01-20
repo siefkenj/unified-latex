@@ -23,6 +23,7 @@ import { isCjsPackage } from "../../scripts/esbuild-module-check.mjs";
         format: "esm",
         target: "node14",
         external: [...explicitDeps],
+        conditions: ["_bundle"],
     };
 
     // Build the ESM
@@ -35,7 +36,6 @@ import { isCjsPackage } from "../../scripts/esbuild-module-check.mjs";
             external: commonConfig.external.filter(isCjsPackage),
             format: "cjs",
             outExtension: { ".js": ".cjs" },
-            conditions: ["_bundle"],
         })
         .catch(() => process.exit(1));
 })();
