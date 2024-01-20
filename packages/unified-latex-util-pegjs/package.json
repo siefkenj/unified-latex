@@ -1,12 +1,12 @@
 {
   "name": "@unified-latex/unified-latex-util-pegjs",
-  "version": "1.4.2",
+  "version": "1.6.0",
   "description": "PEGjs grammars and tools for constructing unified-latex ASTs",
   "main": "dist/index.js",
   "type": "module",
   "dependencies": {
-    "@unified-latex/unified-latex-types": "^1.4.2",
-    "@unified-latex/unified-latex-util-match": "^1.4.2"
+    "@unified-latex/unified-latex-types": "^1.6.0",
+    "@unified-latex/unified-latex-util-match": "^1.6.0"
   },
   "files": [
     "dist/**/*.ts",

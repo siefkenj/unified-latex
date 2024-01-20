@@ -81,34 +81,17 @@ Unified plugin to convert a `unified-latex` AST into a `hast` AST.
 #### options
 
 ```typescript
-HtmlLikePluginOptions
+PluginOptions
 ```
 
 ### Type
 
-`Plugin<HtmlLikePluginOptions[], Ast.Root, Hast.Root>`
+`Plugin<PluginOptions[], Ast.Root, Hast.Root>`
 
 ```typescript
 function unifiedLatexToHast(
-  options: HtmlLikePluginOptions
+  options: PluginOptions
 ): (tree: Ast.Root, file: VFile) => Hast.Root;
-```
-
-where
-
-```typescript
-type HtmlLikePluginOptions = {
-  /**
-   * Functions called to replace environments during processing. Key values should match environment names.
-   *  You probably want to use the function `htmlLike(...)` to return a node that gets converted to specific HTML.
-   */
-  environmentReplacements?: EnvironmentReplacements;
-  /**
-   * Functions called to replace macros during processing. Key values should match macro names.
-   * You probably want to use the function `htmlLike(...)` to return a node that gets converted to specific HTML.
-   */
-  macroReplacements?: MacroReplacements;
-};
 ```
 
 ## `unifiedLatexWrapPars`
@@ -180,23 +163,6 @@ function convertToHtml(
 | tree    | `Ast.Node \| Ast.Node[]` |
 | options | `PluginOptions`          |
 
-where
-
-```typescript
-type PluginOptions = {
-  /**
-   * Functions called to replace environments during processing. Key values should match environment names.
-   *  You probably want to use the function `htmlLike(...)` to return a node that gets converted to specific HTML.
-   */
-  environmentReplacements?: EnvironmentReplacements;
-  /**
-   * Functions called to replace macros during processing. Key values should match macro names.
-   * You probably want to use the function `htmlLike(...)` to return a node that gets converted to specific HTML.
-   */
-  macroReplacements?: MacroReplacements;
-};
-```
-
 ## `wrapPars(nodes, options)`
 
 Wrap paragraphs in `<p>...</p>` tags.
@@ -237,5 +203,13 @@ function wrapPars(
 ## `PluginOptions`
 
 ```typescript
-export type PluginOptions = HtmlLikePluginOptions;
+export type PluginOptions = HtmlLikePluginOptions & {
+    /**
+     * By default, `unifiedLatexToHast` will force the output to be valid HTML.
+     * This is accomplished by running `rehypeRaw` on the output which will ensure
+     * there are no nested `<p>` tags, and that block elements don't end up as children of `<span>`s,
+     * etc. Set to `true` to skip this check.
+     */
+    skipHtmlValidation?: boolean;
+};
 ```

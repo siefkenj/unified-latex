@@ -45,12 +45,15 @@ Print an `xparse` argument specification AST
 to a string.
 
 ```typescript
-function printRaw(node: ArgSpec.Ast, root: Boolean): string;
+function printRaw(
+  node: string | ArgSpec.Node | (string | ArgSpec.Node)[],
+  root: Boolean
+): string;
 ```
 
 **Parameters**
 
-| Param | Type          |
-| :---- | :------------ |
-| node  | `ArgSpec.Ast` |
-| root  | `Boolean`     |
+| Param | Type                              |
+| :---- | :-------------------------------- |
+| node  | <span color='gray'>Omitted</span> |
+| root  | `Boolean`                         |
