@@ -64,59 +64,33 @@ export function gobbleSingleArgument(
     const currNode = nodes[currPos];
 
     if (
-        currNode != null &&
-        !match.comment(currNode) &&
-        !match.parbreak(currNode)
+        currNode == null ||
+        match.comment(currNode) ||
+        match.parbreak(currNode)
     ) {
-        switch (argSpec.type) {
-            case "mandatory":
-                if (acceptGroup) {
-                    // We have already gobbled whitespace, so at this point, `currNode`
-                    // is either an openMark or we don't have an optional argument.
-                    let content: Ast.Node[] = [currNode];
-                    if (match.group(currNode)) {
-                        // Unwrap a group if there is one.
-                        content = currNode.content;
-                    }
-                    argument = arg(content, {
-                        openMark,
-                        closeMark,
-                    });
-                    currPos++;
-                    break;
-                } else {
-                    const bracePos = findBracePositions(
-                        nodes,
-                        currPos,
-                        openMark,
-                        closeMark
-                    );
-                    if (bracePos) {
-                        argument = arg(
-                            nodes.slice(bracePos[0] + 1, bracePos[1]),
-                            {
-                                openMark: argSpec.openBrace,
-                                closeMark: argSpec.closeBrace,
-                            }
-                        );
-                        currPos = bracePos[1] + 1;
-                        break;
-                    }
+        return {
+            argument: null,
+            nodesRemoved: 0,
+        };
+    }
+
+    switch (argSpec.type) {
+        case "mandatory":
+            if (acceptGroup) {
+                // We have already gobbled whitespace, so at this point, `currNode`
+                // is either an openMark or we don't have an optional argument.
+                let content: Ast.Node[] = [currNode];
+                if (match.group(currNode)) {
+                    // Unwrap a group if there is one.
+                    content = currNode.content;
                 }
-            // NOTE: Fallthrough is on purpose.
-            // Matching a mandatory argument and an optional argument is the same for our purposes
-            // because we're not going to fail to parse because of a missing argument.
-            case "optional":
-                // It is possible that an optional argument accepts a group if its open/close braces are `{}`
-                if (acceptGroup && match.group(currNode)) {
-                    argument = arg(currNode.content, {
-                        openMark,
-                        closeMark,
-                    });
-                    currPos++;
-                    break;
-                }
-                // If we're here, we have custom braces to match
+                argument = arg(content, {
+                    openMark,
+                    closeMark,
+                });
+                currPos++;
+                break;
+            } else {
                 const bracePos = findBracePositions(
                     nodes,
                     currPos,
@@ -129,109 +103,132 @@ export function gobbleSingleArgument(
                         closeMark: argSpec.closeBrace,
                     });
                     currPos = bracePos[1] + 1;
+                    break;
                 }
-                break;
-            case "optionalStar":
-            case "optionalToken": {
-                const bracePos = findBracePositions(
-                    nodes,
-                    currPos,
-                    argSpec.type === "optionalStar" ? "*" : argSpec.token
-                );
-                if (bracePos) {
-                    argument = arg(currNode, { openMark: "", closeMark: "" });
-                    // Instead of `closeMarkPos` returned from findBracePositions,
-                    // one should use `openMarkPos + ` because there's no argument
-                    currPos = bracePos[0] + 1;
-                }
+            }
+        // NOTE: Fallthrough is on purpose.
+        // Matching a mandatory argument and an optional argument is the same for our purposes
+        // because we're not going to fail to parse because of a missing argument.
+        case "optional":
+            // It is possible that an optional argument accepts a group if its open/close braces are `{}`
+            if (acceptGroup && match.group(currNode)) {
+                argument = arg(currNode.content, {
+                    openMark,
+                    closeMark,
+                });
+                currPos++;
                 break;
             }
-            case "until": {
-                const stopTokens = argSpec.stopTokens.map(parseToken);
-                // TODO: in order to match xparse's behavior, multiple spaces at the start
-                // or in a middle should be collapsed to a single whitespace token,
-                // and spaces at the end should be ignored.
-                let nextStartPos = startPos;
-                let bracePos: [number, number] | undefined;
-                while (nextStartPos < nodes.length) {
-                    bracePos = findBracePositions(
-                        nodes,
-                        nextStartPos,
-                        undefined,
-                        stopTokens[0]
-                    );
-                    if (!bracePos) {
-                        break;
-                    }
-                    let nextBracePos: [number, number] | undefined = bracePos;
-                    let i = 1;
-                    for (; i < stopTokens.length && nextBracePos; i++) {
-                        nextBracePos = findBracePositions(
-                            nodes,
-                            nextBracePos[1] + 1,
-                            undefined,
-                            stopTokens[i],
-                            /* endPos */ nextBracePos[1] + 1
-                        );
-                    }
-                    if (i >= stopTokens.length && nextBracePos) {
-                        break;
-                    }
-                    nextStartPos = bracePos[0] + 1;
-                }
-
-                // If the corresponding token is not found, eat nothing;
+            // If we're here, we have custom braces to match
+            const bracePos = findBracePositions(
+                nodes,
+                currPos,
+                openMark,
+                closeMark
+            );
+            if (bracePos) {
+                argument = arg(nodes.slice(bracePos[0] + 1, bracePos[1]), {
+                    openMark: argSpec.openBrace,
+                    closeMark: argSpec.closeBrace,
+                });
+                currPos = bracePos[1] + 1;
+            }
+            break;
+        case "optionalStar":
+        case "optionalToken": {
+            const bracePos = findBracePositions(
+                nodes,
+                currPos,
+                argSpec.type === "optionalStar" ? "*" : argSpec.token
+            );
+            if (bracePos) {
+                argument = arg(currNode, { openMark: "", closeMark: "" });
+                // Instead of `closeMarkPos` returned from findBracePositions,
+                // one should use `openMarkPos + ` because there's no argument
+                currPos = bracePos[0] + 1;
+            }
+            break;
+        }
+        case "until": {
+            const stopTokens = argSpec.stopTokens.map(parseToken);
+            // TODO: in order to match xparse's behavior, multiple spaces at the start
+            // or in a middle should be collapsed to a single whitespace token,
+            // and spaces at the end should be ignored.
+            let nextStartPos = startPos;
+            let bracePos: [number, number] | undefined;
+            while (nextStartPos < nodes.length) {
+                bracePos = findBracePositions(
+                    nodes,
+                    nextStartPos,
+                    undefined,
+                    stopTokens[0]
+                );
                 if (!bracePos) {
                     break;
                 }
-
-                argument = arg(nodes.slice(startPos, bracePos[1]), {
-                    openMark: "",
-                    closeMark: printRaw(argSpec.stopTokens),
-                });
-                // Since `stopTokens` may comprise of more than one token,
-                // we need to advance `currPos` further
-                currPos = bracePos[1] + stopTokens.length - 1;
-                if (currPos < nodes.length) {
-                    currPos++;
-                }
-                break;
-            }
-            case "embellishment": {
-                for (const token of argSpec.embellishmentTokens) {
-                    const bracePos = findBracePositions(nodes, currPos, token);
-                    if (!bracePos) {
-                        continue;
-                    }
-                    let argNode = nodes[bracePos[0] + 1];
-                    argument = arg(
-                        match.group(argNode) ? argNode.content : argNode,
-                        {
-                            openMark: token,
-                            closeMark: "",
-                        }
+                let nextBracePos: [number, number] | undefined = bracePos;
+                let i = 1;
+                for (; i < stopTokens.length && nextBracePos; i++) {
+                    nextBracePos = findBracePositions(
+                        nodes,
+                        nextBracePos[1] + 1,
+                        undefined,
+                        stopTokens[i],
+                        /* endPos */ nextBracePos[1] + 1
                     );
-                    currPos = bracePos[1] + 1;
+                }
+                if (i >= stopTokens.length && nextBracePos) {
                     break;
                 }
+                nextStartPos = bracePos[0] + 1;
+            }
+
+            // If the corresponding token is not found, eat nothing;
+            if (!bracePos) {
                 break;
             }
-            default:
-                console.warn(
-                    `Don't know how to find an argument of argspec type "${argSpec.type}"`
-                );
+
+            argument = arg(nodes.slice(startPos, bracePos[1]), {
+                openMark: "",
+                closeMark: printRaw(argSpec.stopTokens),
+            });
+            // Since `stopTokens` may comprise of more than one token,
+            // we need to advance `currPos` further
+            currPos = bracePos[1] + stopTokens.length - 1;
+            if (currPos < nodes.length) {
+                currPos++;
+            }
+            break;
         }
+        case "embellishment": {
+            for (const token of argSpec.embellishmentTokens) {
+                const bracePos = findBracePositions(nodes, currPos, token);
+                if (!bracePos) {
+                    continue;
+                }
+                let argNode = nodes[bracePos[0] + 1];
+                argument = arg(
+                    match.group(argNode) ? argNode.content : argNode,
+                    {
+                        openMark: token,
+                        closeMark: "",
+                    }
+                );
+                currPos = bracePos[1] + 1;
+                break;
+            }
+            break;
+        }
+        default:
+            console.warn(
+                `Don't know how to find an argument of argspec type "${argSpec.type}"`
+            );
     }
 
-    // `currPos` has already stepped past any whitespace. However,
+    // `currPos` is has already stepped past any whitespace. However,
     // if we did not consume an argument, we don't want to consume the whitespace.
-    let nodesRemoved: number;
-    if (argument == null) {
-        nodesRemoved = 0;
-    } else {
-        nodesRemoved = currPos - startPos;
-        nodes.splice(startPos, nodesRemoved);
-    }
+    const nodesRemoved = argument ? currPos - startPos : 0;
+    nodes.splice(startPos, nodesRemoved);
     return { argument, nodesRemoved };
 }
 
