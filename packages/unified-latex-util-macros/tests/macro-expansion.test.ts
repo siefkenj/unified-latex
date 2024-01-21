@@ -124,6 +124,88 @@ describe("unified-latex-utils-macros", () => {
         expect(printRaw(expander(macro))).toEqual("A B C X E");
     });
 
+    it("Can substitute default arguments referencing other arguments", () => {
+        let substitutionBody = latexParser.parse("#1 #2 #3 #4 #5").content;
+        // This macro defines the args that will be substituted
+        let macro = parseXxxMacro(
+            "\\xxx{A}{B}",
+            "O{#2} m O{abc#4{#2}} O{def#5} m"
+        );
+
+        const expander = createMacroExpander(
+            substitutionBody,
+            "O{#2} m O{abc#4{#2}} O{def#5} m"
+        );
+        expect(printRaw(expander(macro))).toEqual("A A abcdefB{A} defB B");
+    });
+
+    it("Can substitute default arguments referencing other arguments in embellishments", () => {
+        let substitutionBody = latexParser.parse("#1 #2 #3 #4 #5").content;
+        // This macro defines the args that will be substituted
+        let macro = parseXxxMacro(
+            "\\xxx",
+            "E{\\a\\b\\c\\d\\e}{{#2#3}{#4}{X}{#3Y}{#1Z}}"
+        );
+
+        const expander = createMacroExpander(
+            substitutionBody,
+            "E{\\a\\b\\c\\d\\e}{{#2#3}{#4}{X}{#3Y}{#1Z}}"
+        );
+        expect(printRaw(expander(macro))).toEqual("XYX XY X XY XYXZ");
+    });
+
+    it("Can substitute default arguments with circuler references which is resolved by supplying arguments", () => {
+        let substitutionBody = latexParser.parse("#1 #2").content;
+        // This macro defines the args that will be substituted
+        // If both arguments are not specified, it can't be compiled by LaTeX due to circular
+        // references, but it gets resolved by providing a first argument.
+        let macro = parseXxxMacro("\\xxx[X]", "O{#2} O{abc#1}");
+
+        const expander = createMacroExpander(
+            substitutionBody,
+            "O{#2} O{abc#1}"
+        );
+        expect(printRaw(expander(macro))).toEqual("X abcX");
+    });
+
+    it("Can substitute default arguments that cross-references each other", () => {
+        let substitutionBody = latexParser.parse("#1/#2").content;
+        // This macro defines the args that will be substituted
+        let macro = parseXxxMacro("\\xxx", "O{#2} O{#1}");
+
+        const expander = createMacroExpander(substitutionBody, "O{#2} O{#1}");
+        expect(printRaw(expander(macro))).toEqual("/");
+    });
+
+    it("Can substitute default arguments referencing other default arguments that cross-references each other", () => {
+        let substitutionBody = latexParser.parse("#1/#2/#3/#4").content;
+        // This macro defines the args that will be substituted
+        let macro = parseXxxMacro("\\xxx", "O{a#2#4} O{#3} O{#2} O{b#2}");
+
+        const expander = createMacroExpander(
+            substitutionBody,
+            "O{a#2#4} O{#3} O{#2} O{b#2}"
+        );
+        expect(printRaw(expander(macro))).toEqual("ab///b");
+    });
+
+    it("Can substitute default arguments with complex dependency graph", () => {
+        let substitutionBody = latexParser.parse(
+            "#1/#2/#3/#4/#5/#6/#7/#8/#9"
+        ).content;
+        // This macro defines the args that will be substituted
+        let macro = parseXxxMacro(
+            "\\xxx\\a9\\b",
+            "D<>{#2} E{^_}{{#1}{#4}} O{#5} E{<>,}{{#3}{a#3b#1c#7}{#9d#4}} O{#6e} D\\a\\b{f#8}"
+        );
+
+        const expander = createMacroExpander(
+            substitutionBody,
+            "D<>{#2} E{^_}{{#1}{#4}} O{#5} E{<>,}{{#3}{a#3b#1c#7}{#9d#4}} O{#6e} D\\a\\b{f#8}"
+        );
+        expect(printRaw(expander(macro))).toEqual("/////abc9d/9d/abc9de/9");
+    });
+
     it("Can expand macro", () => {
         let body = latexParser.parse("$x^{#1}_{#2}$").content;
         let nodes = latexParser.parse(

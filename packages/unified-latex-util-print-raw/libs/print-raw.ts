@@ -82,6 +82,8 @@ function _printRaw(node: Printable | Printable[]): PrintToken[] {
             ];
         case "whitespace":
             return [" "];
+        case "hash_number":
+            return ["#", node.number.toString(10)];
 
         default:
             console.warn(

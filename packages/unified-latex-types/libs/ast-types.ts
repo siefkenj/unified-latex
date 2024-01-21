@@ -92,6 +92,12 @@ export interface Argument extends ContentNode {
     closeMark: string;
 }
 
+// Only available during macro expansion
+export interface HashNumber extends BaseNode {
+    type: "hash_number";
+    number: number;
+}
+
 export type Node =
     | Root
     | String
@@ -104,6 +110,7 @@ export type Node =
     | InlineMath
     | DisplayMath
     | Group
-    | Verb;
+    | Verb
+    | HashNumber;
 
 export type Ast = Node | Argument | Node[];

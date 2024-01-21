@@ -83,6 +83,8 @@ export function printLatexAst(
             return printVerbatimEnvironment(path, print, options);
         case "whitespace":
             return line;
+        case "hash_number":
+            return "#" + node.number.toString(10);
         default:
             console.warn("Printing unknown type", node);
             return printRaw(node);

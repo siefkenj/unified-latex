@@ -353,10 +353,3 @@ function parseToken(
     }
     return str;
 }
-
-/**
- * Create an empty argument.
- */
-export function emptyArg(): Ast.Argument {
-    return arg([], { openMark: "", closeMark: "" });
-}

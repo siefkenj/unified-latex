@@ -69,6 +69,11 @@ export function toHastDirect(
             );
         case "root":
             return h("root");
+        case "hash_number":
+            return {
+                type: "text",
+                value: `#${node.number}`,
+            };
         default: {
             const _exhaustiveCheck: never = node;
             throw new Error(

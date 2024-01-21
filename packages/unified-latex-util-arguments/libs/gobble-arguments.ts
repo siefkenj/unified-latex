@@ -1,10 +1,11 @@
+import { emptyArg } from "@unified-latex/unified-latex-builder";
 import * as Ast from "@unified-latex/unified-latex-types";
 import { ArgumentParser } from "@unified-latex/unified-latex-types";
 import {
     ArgSpecAst as ArgSpec,
     parse as parseArgspec,
 } from "@unified-latex/unified-latex-util-argspec";
-import { emptyArg, gobbleSingleArgument } from "./gobble-single-argument";
+import { gobbleSingleArgument } from "./gobble-single-argument";
 
 /**
  * Gobbles an argument of whose type is specified
