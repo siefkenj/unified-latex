@@ -7,7 +7,6 @@ import {
 } from "@unified-latex/unified-latex-util-argspec";
 import { match } from "@unified-latex/unified-latex-util-match";
 import { scan } from "@unified-latex/unified-latex-util-scan";
-import { parse } from "@unified-latex/unified-latex-util-parse";
 
 /**
  * Gobbles an argument of whose type is specified
@@ -229,14 +228,6 @@ export function gobbleSingleArgument(
     let nodesRemoved: number;
     if (argument == null) {
         nodesRemoved = 0;
-        if ("defaultArg" in argSpec && argSpec.defaultArg) {
-            const root = parse(argSpec.defaultArg);
-            // TODO: inherit options passed to the parser which called the current function
-            argument = arg(root.content, {
-                openMark: argSpec.openBrace,
-                closeMark: argSpec.closeBrace,
-            });
-        }
     } else {
         nodesRemoved = currPos - startPos;
         nodes.splice(startPos, nodesRemoved);
@@ -361,4 +352,11 @@ function parseToken(
         return { type: "macro", content: str.slice(1) };
     }
     return str;
+}
+
+/**
+ * Create an empty argument.
+ */
+export function emptyArg(): Ast.Argument {
+    return arg([], { openMark: "", closeMark: "" });
 }

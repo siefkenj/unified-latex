@@ -201,8 +201,8 @@ describe("unified-latex-util-arguments", () => {
                 },
                 {
                     type: "argument",
-                    content: [{ type: "string", content: "DOWN" }],
-                    openMark: "_",
+                    content: [],
+                    openMark: "",
                     closeMark: "",
                 },
             ],
@@ -217,8 +217,8 @@ describe("unified-latex-util-arguments", () => {
             args: [
                 {
                     type: "argument",
-                    content: [{ type: "string", content: "UP" }],
-                    openMark: "^",
+                    content: [],
+                    openMark: "",
                     closeMark: "",
                 },
                 {

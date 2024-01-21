@@ -4,6 +4,9 @@ import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 import { replaceNode } from "@unified-latex/unified-latex-util-replace";
 import { visit } from "@unified-latex/unified-latex-util-visit";
 import { getNamedArgsContent } from "@unified-latex/unified-latex-util-arguments";
+import { parse as parseArgspec } from "@unified-latex/unified-latex-util-argspec";
+import { s } from "@unified-latex/unified-latex-builder";
+import { parse } from "@unified-latex/unified-latex-util-parse";
 import {
     HashNumber,
     parseMacroSubstitutions,
@@ -187,7 +190,8 @@ export function newcommandMacroToSubstitutionAst(node: Ast.Macro): Ast.Node[] {
  * it expands the macro).
  */
 export function createMacroExpander(
-    substitution: Ast.Node[]
+    substitution: Ast.Node[],
+    signature?: string
 ): (macro: Ast.Macro) => Ast.Node[] {
     const cachedSubstitutionTree = structuredClone(substitution);
     let hasSubstitutions = false;
@@ -207,29 +211,56 @@ export function createMacroExpander(
             test: Array.isArray,
         }
     );
+    if (!hasSubstitutions) {
+        return () => structuredClone(cachedSubstitutionTree);
+    }
+
+    const argSpec = parseArgspec(signature);
+    const defaultArgs = argSpec
+        .map((node) => {
+            if (node.type === "embellishment") {
+                return (
+                    node.embellishmentDefaultArg ||
+                    (Array(node.embellishmentTokens.length).fill(
+                        undefined
+                    ) as undefined[])
+                );
+            }
+            return node.defaultArg;
+        })
+        .flat();
 
     return (macro: Ast.Macro) => {
-        if (!hasSubstitutions) {
-            return cachedSubstitutionTree;
-        }
-        const cachedSubstitutions = (macro.args || []).map(
-            (arg) => arg.content
-        );
-        function getSubstitutionForHashNumber(hashNumber: HashNumber) {
-            return (
-                cachedSubstitutions[hashNumber.number - 1] || {
-                    type: "string",
-                    content: `#${hashNumber.number}`,
-                }
-            );
-        }
         const retTree = structuredClone(cachedSubstitutionTree);
         replaceNode(retTree, (node) => {
             const hashNumOrNode = node as Ast.Node | HashNumber;
             if (hashNumOrNode.type !== "hash_number") {
                 return;
             }
-            return getSubstitutionForHashNumber(hashNumOrNode);
+
+            const arg = macro.args?.[hashNumOrNode.number - 1];
+
+            // Check if this argument is -NoValue-
+            if (
+                !arg ||
+                (arg.content.length === 0 &&
+                    arg.openMark === "" &&
+                    arg.closeMark === "")
+            ) {
+                // Check if there exists a default argument for this hash number
+                const defaultArg = defaultArgs[hashNumOrNode.number - 1];
+                if (!defaultArg) {
+                    return s(`#${hashNumOrNode.number}`);
+                }
+                // `defaultArg` is a string expression. The same `defaultArg` may be parsed
+                // differently depending on the context of `macro`, so we cannot cache
+                // the parse result of `defaultArg`. FIXME: we should probably pass some options
+                // that is provided to whatever function that called this to the below parse call.
+                const root = parse(defaultArg);
+                return root.content;
+            }
+
+            return arg.content;
         });
         return retTree;
     };

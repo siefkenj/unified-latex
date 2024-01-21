@@ -5,9 +5,12 @@
     "main": "dist/index.js",
     "type": "module",
     "dependencies": {
+        "@unified-latex/unified-latex-builder": "^1.6.0",
         "@unified-latex/unified-latex-types": "^1.6.0",
+        "@unified-latex/unified-latex-util-argspec": "^1.6.0",
         "@unified-latex/unified-latex-util-arguments": "^1.6.0",
         "@unified-latex/unified-latex-util-match": "^1.6.0",
+        "@unified-latex/unified-latex-util-parse": "^1.6.0",
         "@unified-latex/unified-latex-util-pegjs": "^1.6.0",
         "@unified-latex/unified-latex-util-print-raw": "^1.6.0",
         "@unified-latex/unified-latex-util-replace": "^1.6.0",

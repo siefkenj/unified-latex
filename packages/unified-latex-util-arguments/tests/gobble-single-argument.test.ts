@@ -830,36 +830,21 @@ describe("unified-latex-util-arguments", () => {
             expect(
                 gobbleSingleArgument(ast, parseArgspec("O{default}")[0])
             ).toMatchObject({
-                argument: {
-                    type: "argument",
-                    content: [{ type: "string", content: "default" }],
-                    openMark: "[",
-                    closeMark: "]",
-                },
+                argument: null,
                 nodesRemoved: 0,
             });
 
             expect(
                 gobbleSingleArgument(ast, parseArgspec("D(){\\LaTeX}")[0])
             ).toMatchObject({
-                argument: {
-                    type: "argument",
-                    content: [{ type: "macro", content: "LaTeX" }],
-                    openMark: "(",
-                    closeMark: ")",
-                },
+                argument: null,
                 nodesRemoved: 0,
             });
 
             expect(
                 gobbleSingleArgument(ast, parseArgspec("R^_{default}")[0])
             ).toMatchObject({
-                argument: {
-                    type: "argument",
-                    content: [{ type: "string", content: "default" }],
-                    openMark: "^",
-                    closeMark: "_",
-                },
+                argument: null,
                 nodesRemoved: 0,
             });
         };
