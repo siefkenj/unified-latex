@@ -12,13 +12,11 @@
     ],
     "exports": {
         ".": {
-            "_bundle": "./index.ts",
-            "default": "./dist/index.js"
+            "default": "./index.ts"
         },
         "./*js": "./dist/*js",
         "./*": {
-            "_bundle": "./dist/*.ts",
-            "default": "./dist/*.js"
+            "default": "./dist/*.ts"
         }
     },
     "scripts": {

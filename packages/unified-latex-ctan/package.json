@@ -29,19 +29,19 @@
     ],
     "exports": {
         ".": {
-            "_bundle": "./index.ts",
-            "import": "./dist/index.js",
+            "prebuilt": "./dist/index.js",
+            "import": "./index.ts",
             "require": "./dist/index.cjs"
         },
         "./*js": "./dist/*js",
         "./*/index": {
-            "_bundle": "./dist/*/index.ts",
-            "import": "./dist/*/index.js",
+            "prebuilt": "./dist/dist/*/index.js",
+            "import": "./dist/*/index.ts",
             "require": "./dist/*/index.cjs"
         },
         "./*": {
-            "_bundle": "./*/index.ts",
-            "import": "./dist/*/index.js",
+            "prebuilt": "./dist/*/index.js",
+            "import": "./*/index.ts",
             "require": "./dist/*/index.cjs"
         }
     },

@@ -19,27 +19,35 @@ console.log = (...args) => {
 const exePath = path.resolve(__dirname, "../dist/unified-latex-cli.mjs");
 const examplesPath = path.resolve(__dirname, "examples");
 
+async function execCLI(args: string[]) {
+    return await executeCommand(`node`, [
+        // package.json points to typescript sources and it is replaced with the build output
+        // before publishing by scripts/make-package.mjs. In testing, we need to point to the
+        // build output explicitly by passing the conditions flag.
+        `-C`,
+        `prebuilt`,
+        exePath,
+        ...args,
+    ]);
+}
+
 describe(
     "unified-latex-cli",
     () => {
-        let stdout: string, stderr: string;
         it("executable exists", async () => {
             expect(fsLegacy.existsSync(exePath)).toBeTruthy();
         });
         it("can execute without error", async () => {
-            let { stdout, stderr } = await exec(`node ${exePath} -h`);
+            const stdout = await execCLI(["-h"]);
             expect(stdout).toBeTruthy();
         });
         it("can format document", async () => {
-            let { stdout, stderr } = await exec(
-                `node ${exePath} ${examplesPath}/needs-fixing.tex`
-            );
+            const stdout = await execCLI([`${examplesPath}/needs-fixing.tex`]);
             expect(stdout).toMatchSnapshot();
         });
         it("can expand macro", async () => {
             {
-                let stdout = await executeCommand(`node`, [
-                    exePath,
+                const stdout = await execCLI([
                     `${examplesPath}/needs-expanding.tex`,
                     `-e`,
                     "\\newcommand{foo}[1]{FOO(#1)}",
@@ -50,8 +58,7 @@ describe(
             }
             {
                 // Make sure we don't lose spaces in math mode
-                let stdout = await executeCommand(`node`, [
-                    exePath,
+                const stdout = await execCLI([
                     `${examplesPath}/needs-expanding.tex`,
                     `-e`,
                     "\\newcommand{foo}[1]{$\\x #1$}",
@@ -62,9 +69,10 @@ describe(
             }
         });
         it("can expand macros defined in document", async () => {
-            let { stdout, stderr } = await exec(
-                `node ${exePath} ${examplesPath}/has-definition.tex --stats-json`
-            );
+            const stdout = await execCLI([
+                `${examplesPath}/has-definition.tex`,
+                `--stats-json`,
+            ]);
             const { newcommands } = JSON.parse(stdout) as {
                 newcommands: { name: string }[];
             };
@@ -72,23 +80,25 @@ describe(
             expect(newcommandNames).toEqual(["foo", "baz"]);
 
             {
-                let { stdout, stderr } = await exec(
-                    `node ${exePath} ${examplesPath}/has-definition.tex --expand-document-macro foo --expand-document-macro baz`
-                );
+                const stdout = await execCLI([
+                    `${examplesPath}/has-definition.tex`,
+                    `--expand-document-macro`,
+                    `foo`,
+                    `--expand-document-macro`,
+                    `baz`,
+                ]);
                 expect(stdout).toMatchSnapshot();
             }
         });
         it("can override default macros", async () => {
             {
-                let stdout = await executeCommand(`node`, [
-                    exePath,
+                const stdout = await execCLI([
                     `${examplesPath}/has-existing-definition.tex`,
                 ]);
                 expect(stdout).toMatchSnapshot();
             }
             {
-                let stdout = await executeCommand(`node`, [
-                    exePath,
+                const stdout = await execCLI([
                     `${examplesPath}/has-existing-definition.tex`,
                     `-e`,
                     "\\newcommand{mathbb}{\\mathbb}",
@@ -96,8 +106,7 @@ describe(
                 expect(stdout).toMatchSnapshot();
             }
             {
-                let stdout = await executeCommand(`node`, [
-                    exePath,
+                const stdout = await execCLI([
                     `${examplesPath}/has-existing-definition.tex`,
                     `-e`,
                     "\\newcommand{mathbb}[2]{\\mathbb{#1}{#2}}",
@@ -107,17 +116,19 @@ describe(
         });
         it("can convert to html", async () => {
             {
-                let { stdout, stderr } = await exec(
-                    `node ${exePath} ${examplesPath}/simple.tex --html`
-                );
+                const stdout = await execCLI([
+                    `${examplesPath}/simple.tex`,
+                    `--html`,
+                ]);
                 expect(stdout).toMatchSnapshot();
             }
         });
         it("can convert to markdown", async () => {
             {
-                let { stdout, stderr } = await exec(
-                    `node ${exePath} ${examplesPath}/simple.tex --markdown`
-                );
+                const stdout = await execCLI([
+                    `${examplesPath}/simple.tex`,
+                    `--markdown`,
+                ]);
                 expect(stdout).toMatchSnapshot();
             }
         });
@@ -131,7 +142,10 @@ describe(
  * Run commands with arguments using "cross-spawn", which correctly escapes arguments
  * so that end results are the same across different shells.
  */
-async function executeCommand(executablePath: string, args: string[]) {
+function executeCommand(
+    executablePath: string,
+    args: string[]
+): Promise<string> {
     return new Promise((resolve, reject) => {
         const childProcess = spawn(executablePath, args, { stdio: "pipe" });
 
