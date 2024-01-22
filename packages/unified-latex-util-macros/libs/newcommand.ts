@@ -90,7 +90,7 @@ export function newcommandMacroToSpec(node: Ast.Macro): string {
         // If it is present, we need to change the signature.
         if (namedArgs.default != null) {
             numArgsForSig--;
-            sigOptionalArg = ["o"];
+            sigOptionalArg = [`O{${printRaw(namedArgs.default)}}`];
         }
         return [
             ...sigOptionalArg,

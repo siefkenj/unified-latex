@@ -22,7 +22,6 @@ const examplesPath = path.resolve(__dirname, "examples");
 describe(
     "unified-latex-cli",
     () => {
-        let stdout: string, stderr: string;
         it("executable exists", async () => {
             expect(fsLegacy.existsSync(exePath)).toBeTruthy();
         });
@@ -65,7 +64,7 @@ describe(
                     exePath,
                     `${examplesPath}/needs-expanding.tex`,
                     `-e`,
-                    "\\newcommand{foo}[1]{FOO(#1)}",
+                    "\\newcommand{foo}[2][FOO]{#1(#2)}",
                     `-e`,
                     '{name: "bar", signature: "O{baz}", body: "#1"}',
                 ]);
