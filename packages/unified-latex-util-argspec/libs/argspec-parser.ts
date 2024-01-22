@@ -35,7 +35,7 @@ function printRawInner(node: ArgSpec.Node) {
     const decorators = getDecorators(node);
     let spec = decorators;
     function appendDefaultArg() {
-        if ("defaultArg" in node && node.defaultArg) {
+        if (node.defaultArg) {
             spec = appendTokenOrGroup(spec, node.defaultArg);
         }
     }
@@ -71,10 +71,10 @@ function printRawInner(node: ArgSpec.Node) {
             appendDefaultArg();
             return spec;
         case "embellishment":
-            spec += node.embellishmentDefaultArg ? "E" : "e";
-            appendCollection(node.embellishmentTokens);
-            if (node.embellishmentDefaultArg) {
-                appendCollection(node.embellishmentDefaultArg);
+            spec += node.defaultArgs ? "E" : "e";
+            appendCollection(node.tokens);
+            if (node.defaultArgs) {
+                appendCollection(node.defaultArgs);
             }
             return spec;
         case "verbatim":

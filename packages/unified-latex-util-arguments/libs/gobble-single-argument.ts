@@ -201,7 +201,7 @@ export function gobbleSingleArgument(
             break;
         }
         case "embellishment": {
-            for (const token of argSpec.embellishmentTokens) {
+            for (const token of argSpec.tokens) {
                 const bracePos = findBracePositions(nodes, currPos, token);
                 if (!bracePos) {
                     continue;

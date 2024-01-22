@@ -37,11 +37,11 @@ exports[`unified-latex-util-argspec > parses xparse argument specification strin
 exports[`unified-latex-util-argspec > parses xparse argument specification string "E{\\token ^}{{D1}2}" 1`] = `
 [
   {
-    "embellishmentDefaultArg": [
+    "defaultArgs": [
       "D1",
       "2",
     ],
-    "embellishmentTokens": [
+    "tokens": [
       "\\\\token",
       "^",
     ],
@@ -128,7 +128,7 @@ exports[`unified-latex-util-argspec > parses xparse argument specification strin
     "type": "mandatory",
   },
   {
-    "embellishmentTokens": [
+    "tokens": [
       "^",
     ],
     "type": "embellishment",
@@ -144,7 +144,7 @@ exports[`unified-latex-util-argspec > parses xparse argument specification strin
     "type": "mandatory",
   },
   {
-    "embellishmentTokens": [
+    "tokens": [
       "_",
       "^",
     ],

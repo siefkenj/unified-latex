@@ -48,8 +48,8 @@ interface OptionalToken extends LeadingWhitespace, AstNode {
 }
 export interface Embellishment extends AstNode {
     type: "embellishment";
-    embellishmentTokens: string[];
-    embellishmentDefaultArg?: string[]; // Embellishment default arguments are always a collection of arguments
+    tokens: string[];
+    defaultArgs?: string[]; // Embellishment default arguments are always a collection of arguments
 }
 interface Mandatory extends DefaultArgument, AstNode, Arg {
     type: "mandatory";

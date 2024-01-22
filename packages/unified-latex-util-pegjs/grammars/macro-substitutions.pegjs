@@ -32,7 +32,7 @@
         } catch (e) {
             console.warn("Error when initializing parser", e);
         }
-    }2
+    }
 }
 
 body

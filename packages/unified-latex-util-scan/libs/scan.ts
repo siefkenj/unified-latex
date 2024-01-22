@@ -32,18 +32,16 @@ export function scan(
     }
 ): number | null {
     const {
-        startIndex,
-        endIndex,
+        startIndex = 0,
+        endIndex = nodes.length - 1,
         onlySkipWhitespaceAndComments,
         allowSubstringMatches,
     } = options || {};
     if (typeof token === "string") {
         token = { type: "string", content: token } as Ast.String;
     }
-    const start = typeof startIndex === "number" ? startIndex : 0;
-    const end = typeof endIndex === "number" ? endIndex : nodes.length - 1;
 
-    for (let i = start; i <= end; i++) {
+    for (let i = startIndex; i <= endIndex; i++) {
         const node = nodes[i];
         if (node.type === token.type) {
             switch (node.type) {

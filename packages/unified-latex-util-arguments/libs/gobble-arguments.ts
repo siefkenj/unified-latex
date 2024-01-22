@@ -36,9 +36,9 @@ export function gobbleArguments(
             // We need special behavior for embellishment argspecs.
             // Because an embellishment argspec specifies more than one argument,
             // we need to keep gobbling arguments until we've got them all.
-            const { embellishmentTokens } = spec;
+            const { tokens } = spec;
 
-            const remainingTokens = new Set<string>(embellishmentTokens);
+            const remainingTokens = new Set<string>(tokens);
             const tokenToArgs = new Map<string, Ast.Argument>();
 
             for (;;) {
@@ -57,9 +57,7 @@ export function gobbleArguments(
             }
 
             args.push(
-                ...spec.embellishmentTokens.map(
-                    (t) => tokenToArgs.get(t) || emptyArg()
-                )
+                ...spec.tokens.map((t) => tokenToArgs.get(t) || emptyArg())
             );
         } else {
             const { argument, nodesRemoved: removed } = gobbleSingleArgument(
@@ -81,6 +79,6 @@ export function gobbleArguments(
 function embellishmentSpec(tokens: Set<string>): ArgSpec.Embellishment {
     return {
         type: "embellishment",
-        embellishmentTokens: [...tokens],
+        tokens: [...tokens],
     };
 }

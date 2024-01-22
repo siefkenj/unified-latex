@@ -68,13 +68,13 @@ optional_standard
 optional_embellishment
     = "e" args:token_or_collection {
             return createNode("embellishment", {
-                embellishmentTokens:args
+                tokens:args
             });
         }
     / "E" args:token_or_collection g:token_or_collection {
             return createNode("embellishment", {
-                embellishmentTokens: args,
-                embellishmentDefaultArg: g
+                tokens: args,
+                defaultArgs: g
             });
         }
 
