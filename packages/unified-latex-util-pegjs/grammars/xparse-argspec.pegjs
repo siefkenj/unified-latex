@@ -89,6 +89,8 @@ required
     / "r" braceSpec:brace_spec { return createNode("mandatory", braceSpec); }
 
 // An "until" argument gobbles tokens until the specified stop token(s). Until token allows whitespace.
+// TODO: in order to match xparse's behavior, multiple spaces at the start or in a middle
+// should be collapsed to a single whitespace token, and spaces at the end should be ignored.
 until
     = "u" stopTokens:(x:token { return [x] } / '{' @(token_or_whitespace+) '}') {
             return createNode("until", { stopTokens });

@@ -84,7 +84,7 @@ export function printLatexAst(
         case "whitespace":
             return line;
         case "hash_number":
-            return "#" + node.number.toString(10);
+            return `#${node.number}`;
         default:
             console.warn("Printing unknown type", node);
             return printRaw(node);

@@ -601,8 +601,8 @@ describe("unified-latex-util-arguments", () => {
         expect(nodes).toEqual([{ content: "yx", type: "string" }]);
     });
     it("can gobble an 'until' argument with multiple stop tokens", () => {
-        let argspec = parseArgspec("u{a \\bcd}")[0];
-        value = "asdf asydfxya{x}sa \\bcd2df";
+        let argspec = parseArgspec("u{| \\stop}")[0];
+        value = "|ThisBarIsNotAStop|{Token}This| \\stop Is.";
         file = processLatexToAstViaUnified().processSync({ value });
         let nodes = trimRenderInfo((file.result as any).content) as Ast.Node[];
         expect(gobbleSingleArgument(nodes, argspec)).toEqual({
@@ -611,28 +611,24 @@ describe("unified-latex-util-arguments", () => {
                 content: [
                     // Due to a current implementation of gobbleSingleArgument,
                     // we may introduce extra string split during the search.
-                    { type: "string", content: "a" },
-                    { type: "string", content: "sdf" },
-                    { type: "whitespace" },
-                    { type: "string", content: "a" },
-                    { type: "string", content: "sydfxy" },
-                    { type: "string", content: "a" },
+                    { type: "string", content: "|" },
+                    { type: "string", content: "ThisBarIsNotAStop" },
+                    { type: "string", content: "|" },
                     {
                         type: "group",
-                        content: [{ type: "string", content: "x" }],
+                        content: [{ type: "string", content: "Token" }],
                     },
-                    { type: "string", content: "s" },
+                    { type: "string", content: "This" },
                 ],
                 openMark: "",
-                closeMark: "a \\bcd",
+                closeMark: "| \\stop",
             },
-            nodesRemoved: 11,
+            nodesRemoved: 8,
         });
         expect(nodes).toEqual([
-            {
-                type: "string",
-                content: "2df",
-            },
+            { type: "whitespace" },
+            { type: "string", content: "Is" },
+            { type: "string", content: "." },
         ]);
     });
     it("gobbleSingleArgument gobbles non-punctuation delimited arguments", () => {
@@ -825,7 +821,7 @@ describe("unified-latex-util-arguments", () => {
             nodesRemoved: 2,
         });
     });
-    it("can gobble optional argument with default argument", () => {
+    it("can skip optional argument with default argument", () => {
         const expectNoMatch = (ast: Ast.Node[]) => {
             expect(
                 gobbleSingleArgument(ast, parseArgspec("O{default}")[0])

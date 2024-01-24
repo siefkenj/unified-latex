@@ -151,9 +151,6 @@ export function gobbleSingleArgument(
         }
         case "until": {
             const stopTokens = argSpec.stopTokens.map(parseToken);
-            // TODO: in order to match xparse's behavior, multiple spaces at the start
-            // or in a middle should be collapsed to a single whitespace token,
-            // and spaces at the end should be ignored.
             let nextStartPos = startPos;
             let bracePos: [number, number] | undefined;
             while (nextStartPos < nodes.length) {
@@ -236,7 +233,6 @@ function cloneStringNode(node: Ast.String, content: string): Ast.String {
     return Object.assign({}, node, { content });
 }
 
-type Braces = string | Ast.Macro | Ast.Whitespace;
 /**
  * Find the position of the open brace and the closing brace.
  * Returns undefined if the brace isn't found.
@@ -246,8 +242,8 @@ type Braces = string | Ast.Macro | Ast.Whitespace;
 function findBracePositions(
     nodes: Ast.Node[],
     startPos: number,
-    openMark?: Braces,
-    closeMark?: Braces,
+    openMark?: string | Ast.Macro | Ast.Whitespace,
+    closeMark?: string | Ast.Macro | Ast.Whitespace,
     endPos?: number
 ): [number, number] | undefined {
     let openMarkPos: number | undefined = startPos;
@@ -285,9 +281,15 @@ function findBracePositions(
     return [openMarkPos, closeMarkPos];
 }
 
+/**
+ * Find the position of the delimiter in `nodes`. A delimiter can either be a single character,
+ * or a single control word or a symbol (represented as Ast.Macro). Returns `undefined`
+ * if it cannot be found. If a search found a character delimiter in a middle of a string,
+ * this function may mutate `nodes` to split the string.
+ */
 function findDelimiter(
     nodes: Ast.Node[],
-    token: Braces,
+    token: string | Ast.Macro | Ast.Whitespace,
     startPos: number,
     endPos?: number
 ): number | undefined {
@@ -338,7 +340,7 @@ function findDelimiter(
 
 function parseToken(
     str: string | undefined
-): string | Ast.Whitespace | Ast.Macro {
+): string | Ast.Macro | Ast.Whitespace {
     if (!str) {
         return "";
     }

@@ -34,14 +34,6 @@ export function printRaw(
 function printRawInner(node: ArgSpec.Node) {
     const decorators = getDecorators(node);
     let spec = decorators;
-    function appendDefaultArg() {
-        if (node.defaultArg) {
-            spec = appendTokenOrGroup(spec, node.defaultArg);
-        }
-    }
-    function appendCollection(collection: string[]) {
-        spec += printTokenOrCollection(collection);
-    }
     const type = node.type;
     switch (type) {
         case "body":
@@ -58,7 +50,9 @@ function printRawInner(node: ArgSpec.Node) {
                 spec += node.defaultArg ? "D" : "d";
                 spec += node.openBrace + node.closeBrace;
             }
-            appendDefaultArg();
+            if (node.defaultArg) {
+                spec = appendTokenOrGroup(spec, node.defaultArg);
+            }
             return spec;
         case "mandatory":
             // {...} is the default enclosure for mandatory arguments
@@ -68,20 +62,22 @@ function printRawInner(node: ArgSpec.Node) {
                 spec += node.defaultArg ? "R" : "r";
                 spec += node.openBrace + node.closeBrace;
             }
-            appendDefaultArg();
+            if (node.defaultArg) {
+                spec = appendTokenOrGroup(spec, node.defaultArg);
+            }
             return spec;
         case "embellishment":
             spec += node.defaultArgs ? "E" : "e";
-            appendCollection(node.tokens);
+            spec += printTokenOrCollection(node.tokens);
             if (node.defaultArgs) {
-                appendCollection(node.defaultArgs);
+                spec += printTokenOrCollection(node.defaultArgs);
             }
             return spec;
         case "verbatim":
             return spec + "v" + node.openBrace;
         case "until": {
             spec += "u";
-            appendCollection(node.stopTokens);
+            spec += printTokenOrCollection(node.stopTokens);
             return spec;
         }
         default:
@@ -95,8 +91,22 @@ function printRawInner(node: ArgSpec.Node) {
  * This function will reconstruct a representative in an inverse image of token_or_group
  * for a given array of strings, and append it to a given string.
  * In order to avoid parsing ambiguity, we force enclose the representative with braces in some case.
- * For instance, if the given string ends with a control word such as "\asdf", and if the representative is a
- * whitespace where we are in a circumstance where no whitespaces are allowed.
+ *
+ * Examples)
+ * Appending a `token_or_group` representing an embellishment tokens, with existingString `e`.
+ * token of several chars "ab" --> {ab} will be appended, so the result will be `e{ab}`.
+ * token of single char "^" ---> ^ will be appended, so the result will be `e^`.
+ * token of single char " " ---> { } will be appended, so the result will be `e{ }`.
+ *
+ * Appending a `token_or_group` representing a bracespec of a delimited argument spec.
+ * Already constructed a string until the opening brace, existingString = "r\open".
+ * If the bracespec is a single alphabetric char "a", then we need to append it with braces, so the result will be "r\open{a}".
+ *
+ * Appending an embellishment token, with existingString = "e{a\token".
+ * If a next token is again a control world, say \anotherToken, we can append it as-is. "e{a\token\anotherToken".
+ * If a next token is a single char, say "b", we may either enclose it with braces or separate it with a space,
+ * because in this circumstance, space can be used to separate tokens (as conveyed by allowWhitespace = true).
+ * Then the result will be "e{a\token b".
  */
 function appendTokenOrGroup(
     existingString: string,

@@ -252,24 +252,24 @@ export function createMacroExpander(
                 // some options that is provided to whatever function that called this to
                 // the below parse call. Note that `parse` is done in several passes, and we
                 // may be able to cache result of a first few passes that aren't context-dependent.
-                const subst = parse(defaultArg).content;
-                const hasSubstitutions = attachHashNumbers(subst);
+                const sub = parse(defaultArg).content;
+                const hasSubstitutions = attachHashNumbers(sub);
 
                 if (!hasSubstitutions) {
-                    return subst;
+                    return sub;
                 }
 
                 stack.push(hashNum);
                 try {
-                    expandArgs(subst);
+                    expandArgs(sub);
 
                     if (lastSelfReference !== hashNum) {
-                        return subst;
+                        return sub;
                     }
                     // At this point, we have encountered #n while expanding #n.
                     // Check if we got exactly #n by expanding #n,
                     // in which case we should return the -NoValue-.
-                    if (`#${hashNum}` === printRaw(subst)) {
+                    if (`#${hashNum}` === printRaw(sub)) {
                         // We are good, clear the last self-reference variable
                         lastSelfReference = null;
                         return emptyArg();
