@@ -68,8 +68,7 @@ describe(
                 expect(stdout).toMatchSnapshot();
             }
             {
-                let stdout = await executeCommand(`node`, [
-                    exePath,
+                let stdout = await execCLI([
                     `${examplesPath}/needs-expanding.tex`,
                     `-e`,
                     "\\newcommand{foo}[2][FOO]{#1(#2)}",
