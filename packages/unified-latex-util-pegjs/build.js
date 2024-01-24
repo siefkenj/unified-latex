@@ -21,7 +21,6 @@ import { isCjsPackage } from "../../scripts/esbuild-module-check.mjs";
         target: "node14",
         plugins: [pegjsLoader()],
         external: [...explicitDeps],
-        conditions: ["_bundle"],
     };
 
     // Build the ESM

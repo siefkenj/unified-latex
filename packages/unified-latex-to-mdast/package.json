@@ -27,14 +27,14 @@
     ],
     "exports": {
         ".": {
-            "_bundle": "./index.ts",
-            "import": "./dist/index.js",
+            "prebuilt": "./dist/index.js",
+            "import": "./index.ts",
             "require": "./dist/index.cjs"
         },
         "./*js": "./dist/*js",
         "./*": {
-            "_bundle": "./*.ts",
-            "import": "./dist/*.js",
+            "prebuilt": "./dist/*.js",
+            "import": "./*.ts",
             "require": "./dist/*.cjs"
         }
     },
