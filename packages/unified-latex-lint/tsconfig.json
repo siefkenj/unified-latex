@@ -4,18 +4,5 @@
         "outDir": "./dist/",
         "rootDir": "."
     },
-    "include": ["./**/*.ts"],
-    "references": [
-        { "path": "../unified-latex-types" },
-        { "path": "../unified-latex-ctan" },
-        { "path": "../unified-latex-builder" },
-        { "path": "../unified-latex-util-glue" },
-        { "path": "../unified-latex-util-match" },
-        { "path": "../unified-latex-util-packages" },
-        { "path": "../unified-latex-util-print-raw" },
-        { "path": "../unified-latex-util-replace" },
-        { "path": "../unified-latex-util-scan" },
-        { "path": "../unified-latex-util-trim" },
-        { "path": "../unified-latex-util-visit" }
-    ]
+    "include": ["./**/*.ts"]
 }
