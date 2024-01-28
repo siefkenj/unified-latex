@@ -151,7 +151,6 @@ special_macro "special macro" // for the special macros like \[ \] and \begin{} 
     / math_environment
     / environment
     / url
-    / href
 
 square_bracket_argument
     = "["
@@ -175,19 +174,10 @@ square_bracket_argument
         }
 
 url
-    = escape m:"url" url:verbatim_group {
+    = escape m:("url"/"href") url:verbatim_group {
             return [
               createNode("macro", { content: m }),
               url,
-            ]
-        }
-
-href
-    = escape m:"href" url:verbatim_group label:group {
-            return [
-              createNode("macro", { content: m }),
-              url,
-              label,
             ]
         }
 
