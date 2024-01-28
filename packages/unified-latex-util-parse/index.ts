@@ -1,9 +1,12 @@
 export * from "./libs/compiler-ast";
 export * from "./libs/plugin-from-string";
 export * from "./libs/plugin-from-string-minimal";
+export * from "./libs/process-at-letter-and-expl-macros";
+export * from "./libs/process-macros-and-environments";
 export * from "./libs/parse-minimal";
 export * from "./libs/parse";
 export * from "./libs/parse-math";
+export * from "./libs/reparse-math";
 
 // NOTE: The docstring comment must be the last item in the index.ts file!
 /**
