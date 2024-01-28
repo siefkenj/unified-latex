@@ -15,14 +15,14 @@
     ],
     "exports": {
         ".": {
-            "prebuilt": "./dist/index.js",
-            "import": "./index.ts",
+            "_bundle": "./index.ts",
+            "import": "./dist/index.js",
             "require": "./dist/index.cjs"
         },
         "./*js": "./dist/*js",
         "./*": {
-            "prebuilt": "./dist/*.js",
-            "import": "./*.ts",
+            "_bundle": "./*.ts",
+            "import": "./dist/*.js",
             "require": "./dist/*.cjs"
         }
     },

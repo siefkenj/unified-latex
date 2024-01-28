@@ -19,6 +19,7 @@ import { isCjsPackage } from "../../scripts/esbuild-module-check.mjs";
         format: "esm",
         target: "node14",
         external: [...explicitDeps],
+        conditions: ["_bundle"],
     };
 
     // Build the ESM
