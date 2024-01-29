@@ -236,7 +236,7 @@ export function createMacroExpander(
                 // Check if there exists a default argument for this hash number
                 const defaultArg = defaultArgs[hashNum - 1];
                 if (!defaultArg) {
-                    return s(`#${hashNum}`);
+                    return emptyArg(); // Return -NoValue-
                 }
 
                 // Detect self-references

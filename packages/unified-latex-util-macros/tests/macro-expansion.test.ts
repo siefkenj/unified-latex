@@ -73,6 +73,15 @@ describe("unified-latex-utils-macros", () => {
         expect(printRaw(expander(macro))).toEqual("a $x^{A}_{B}$");
     });
 
+    it("Can substitute optional arguments", () => {
+        let substitutionBody = latexParser.parse("a b #1 c #2").content;
+        // This macro defines the args that will be substituted
+        let macro = parseXxxMacro("\\xxx{B}", "o m");
+
+        const expander = createMacroExpander(substitutionBody);
+        expect(printRaw(expander(macro))).toEqual("a b  c B");
+    })
+
     it("Can substitute default arguments", () => {
         let substitutionBody = latexParser.parse("a b #1 c #2").content;
         // This macro defines the args that will be substituted
