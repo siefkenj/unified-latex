@@ -29,7 +29,9 @@
         "compile:tsc": "tsc",
         "compile:esm_and_cjs": "node build.js",
         "compile": "run-p compile:tsc compile:esm_and_cjs",
-        "test": "vitest"
+        "test": "vitest",
+        "package": "node ../../scripts/make-package.mjs",
+        "publish": "cd dist && npm publish"
     },
     "repository": {
         "type": "git",
