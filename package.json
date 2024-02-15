@@ -9,6 +9,7 @@
         "./packages/*"
     ],
     "scripts": {
+        "docs": "typedoc",
         "build": "npm run build -ws",
         "clean": "npm run clean -ws",
         "package": "npm run package -ws",
@@ -40,6 +41,7 @@
         "remark-stringify": "^10.0.3",
         "rimraf": "^5.0.5",
         "ts-morph": "^19.0.0",
+        "typedoc": "^0.25.8",
         "typescript": "^5.2.2",
         "vitest": "^0.34.3"
     },
