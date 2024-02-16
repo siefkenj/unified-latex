@@ -1,6 +1,6 @@
 # unified-latex
 
-Monorepo for `@unified-latex` packages.
+Monorepo for `@unified-latex` packages. See the auto-generated [**Documentation**](https://siefkenj.github.io/unified-latex) for usage details.
 
 These packages provide a JS/TypeScript interface for creating, manipulating, and printing LaTeX Abstract Syntax Trees (ASTs).
 
