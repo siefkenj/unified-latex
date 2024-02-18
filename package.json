@@ -46,7 +46,8 @@
         "vite": "^5.1.3",
         "vite-plugin-dts": "^3.7.2",
         "vite-plugin-static-copy": "^1.0.1",
-        "vitest": "^0.34.3"
+        "vitest": "^0.34.3",
+        "wireit": "^0.14.4"
     },
     "dependencies": {
         "@types/color": "^3.0.4",

@@ -1,6 +1,6 @@
 {
-  "entryPoints": ["packages/*"],
-  "name": "Unified LaTeX",
-  "entryPointStrategy": "packages",
-  "includeVersion": false
+    "entryPoints": ["packages/*"],
+    "name": "Unified LaTeX",
+    "entryPointStrategy": "packages",
+    "includeVersion": false
 }

@@ -12,15 +12,12 @@ export default defineConfig(({ mode }) => {
         mode === "commonjs" ? ["cjs"] : ["es"];
     const externalList =
         mode === "commonjs" ? explicitDeps.filter(isCjsPackage) : explicitDeps;
-    
+
     const plugins =
         mode === "commonjs"
             ? []
             : [dts({ rollupTypes: true }), packageReadmeAndPackageJson()];
-    console.log(
-        `Building in mode: ${mode}.\n`,
-
-    );
+    console.log(`Building in mode: ${mode}.\n`);
 
     return {
         plugins,

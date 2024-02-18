@@ -30,12 +30,47 @@
     "scripts": {
         "build": "npm run clean && mkdirp ./dist && npm run compile",
         "clean": "rimraf ./dist",
-        "compile:tsc": "tsc",
-        "compile:esm_and_cjs": "node build.js",
-        "compile": "run-p compile:tsc compile:esm_and_cjs",
+        "compile:cjs": "wireit",
+        "compile:esm": "wireit",
+        "compile": "wireit",
         "test": "vitest",
         "package": "node ../../scripts/make-package.mjs",
         "publish": "cd dist && npm publish"
+    },
+    "wireit": {
+        "compile": {
+            "dependencies": [
+                "compile:cjs",
+                "compile:esm"
+            ]
+        },
+        "compile:cjs": {
+            "command": "vite build --mode commonjs",
+            "files": [
+                "index.ts",
+                "src/**/*.ts",
+                "src/**/*.json",
+                "tsconfig.json",
+                "vite.config.ts"
+            ],
+            "output": [
+                "dist/**/*.cjs"
+            ]
+        },
+        "compile:esm": {
+            "command": "vite build",
+            "files": [
+                "index.ts",
+                "src/**/*.ts",
+                "src/**/*.json",
+                "tsconfig.json",
+                "vite.config.ts"
+            ],
+            "output": [
+                "dist/**/*.js",
+                "dist/**/*.json"
+            ]
+        }
     },
     "repository": {
         "type": "git",

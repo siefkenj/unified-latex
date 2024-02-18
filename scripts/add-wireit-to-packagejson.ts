@@ -13,23 +13,54 @@ async function main() {
             const pkgJson = await fs.readFile(pkgJsonPath, "utf8");
             const pkg = JSON.parse(pkgJson);
 
-            if (pkg.wireit) {
+            if (!pkg.wireit) {
                 console.log("skipping", pkgJsonPath);
                 continue;
             }
 
-            pkg.wireit = {
-                compile: {
-                    dependencies: ["compile:types", "compile:js"],
-                    files: ["src/**/*.ts", "tsconfig.json"],
-                },
-            };
+            pkg.wireit["compile:cjs"].output = ["dist/**/*.cjs*"];
+            pkg.wireit["compile:esm"].output = [
+                "dist/**/*.js*",
+                "dist/**/*.json",
+                "dist/**/*.d.ts",
+                "dist/**/*.md",
+            ];
+
+            //pkg.wireit = {
+            //    compile: {
+            //        dependencies: ["compile:cjs", "compile:esm"],
+            //    },
+            //    "compile:cjs": {
+            //        command: "vite build --mode commonjs",
+            //        files: [
+            //            "index.ts",
+            //            "src/**/*.ts",
+            //            "src/**/*.json",
+            //            "tsconfig.json",
+            //            "vite.config.ts",
+            //        ],
+            //        output: ["dist/**/*.cjs"],
+            //    },
+            //    "compile:esm": {
+            //        command: "vite build",
+            //        files: [
+            //            "index.ts",
+            //            "src/**/*.ts",
+            //            "src/**/*.json",
+            //            "tsconfig.json",
+            //            "vite.config.ts",
+            //        ],
+            //        output: ["dist/**/*.js", "dist/**/*.json"],
+            //    },
+            //};
 
             Object.assign(pkg.scripts, {
                 compile: "wireit",
-                "compile:types": "tsc -b tsconfig.json",
-                "compile:js": "node build.js",
+                "compile:cjs": "wireit",
+                "compile:esm": "wireit",
             });
+            delete pkg.scripts["compile:tsc"];
+            delete pkg.scripts["compile:esm_and_cjs"];
 
             // sort the keys of pkg.scripts alphabetically
             pkg.scripts = Object.fromEntries(
@@ -37,8 +68,8 @@ async function main() {
             );
 
             console.log(pkgJsonPath);
-            //console.log("NEW JSON\n", JSON.stringify(pkg, null, 2));
-            await fs.writeFile(pkgJsonPath, JSON.stringify(pkg, null, 2));
+            console.log("NEW JSON\n", JSON.stringify(pkg, null, 4));
+            //await fs.writeFile(pkgJsonPath, JSON.stringify(pkg, null, 4));
         } catch (e) {
             console.log(e);
         }

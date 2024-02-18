@@ -55,13 +55,49 @@
     "scripts": {
         "build": "npm run clean && mkdirp ./dist && npm run compile",
         "clean": "rimraf ./dist",
-        "compile:esm": "npx vite build",
-        "compile:cjs": "npx vite build --mode commonjs",
+        "compile:esm": "wireit",
+        "compile:cjs": "wireit",
         "compile:executable": "echo '#!/usr/bin/env node' > dist/unified-latex-cli.mjs && cat dist/index.js >> dist/unified-latex-cli.mjs",
-        "compile": "run-p compile:esm compile:cjs && npm run compile:executable",
+        "compile": "wireit",
         "package": "node ../../scripts/make-package.mjs",
         "test": "vitest",
         "publish": "cd dist && npm publish"
+    },
+    "wireit": {
+        "compile": {
+            "dependencies": [
+                "compile:cjs",
+                "compile:esm",
+                "compile:executable"
+            ]
+        },
+        "compile:cjs": {
+            "command": "vite build --mode commonjs",
+            "files": [
+                "index.ts",
+                "src/**/*.ts",
+                "src/**/*.json",
+                "tsconfig.json",
+                "vite.config.ts"
+            ],
+            "output": [
+                "dist/**/*.cjs"
+            ]
+        },
+        "compile:esm": {
+            "command": "vite build",
+            "files": [
+                "index.ts",
+                "src/**/*.ts",
+                "src/**/*.json",
+                "tsconfig.json",
+                "vite.config.ts"
+            ],
+            "output": [
+                "dist/**/*.js",
+                "dist/**/*.json"
+            ]
+        }
     },
     "repository": {
         "type": "git",
