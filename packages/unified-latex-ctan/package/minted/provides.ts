@@ -17,4 +17,6 @@ export const macros: MacroInfoRecord = {
     newmintedfile: { signature: "o m m" },
 };
 
-export const environments: EnvInfoRecord = {};
+export const environments: EnvInfoRecord = {
+    minted: { signature: "o m" },
+};
