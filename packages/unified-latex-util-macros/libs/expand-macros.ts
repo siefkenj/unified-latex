@@ -1,7 +1,7 @@
 import * as Ast from "@unified-latex/unified-latex-types";
 import { match } from "@unified-latex/unified-latex-util-match";
 import { replaceNode } from "@unified-latex/unified-latex-util-replace";
-import { newcommandMatcher } from "./list-newcommands";
+import { MacroExpansionSpec, newcommandMatcher } from "./list-newcommands";
 import { createMacroExpander } from "./newcommand";
 
 /**
@@ -11,12 +11,12 @@ import { createMacroExpander } from "./newcommand";
  * to each macro specified. If the macro doesn't have it's arguments attached, its
  * contents will be wholesale replaced with its substitution AST.
  */
-export function expandMacros(
-    tree: Ast.Ast,
-    macros: { name: string; body: Ast.Node[] }[]
-) {
+export function expandMacros(tree: Ast.Ast, macros: MacroExpansionSpec[]) {
     const expanderCache = new Map(
-        macros.map((spec) => [spec.name, createMacroExpander(spec.body)])
+        macros.map((spec) => [
+            spec.name,
+            createMacroExpander(spec.body, spec.signature),
+        ])
     );
     replaceNode(tree, (node) => {
         if (!match.anyMacro(node)) {
@@ -58,10 +58,13 @@ export function expandMacros(
  */
 export function expandMacrosExcludingDefinitions(
     tree: Ast.Ast,
-    macros: { name: string; body: Ast.Node[] }[]
+    macros: MacroExpansionSpec[]
 ) {
     const expanderCache = new Map(
-        macros.map((spec) => [spec.name, createMacroExpander(spec.body)])
+        macros.map((spec) => [
+            spec.name,
+            createMacroExpander(spec.body, spec.signature),
+        ])
     );
     replaceNode(tree, (node, info) => {
         if (!match.anyMacro(node)) {

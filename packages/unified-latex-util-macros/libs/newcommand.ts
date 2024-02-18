@@ -1,13 +1,14 @@
 import { structuredClone } from "@unified-latex/structured-clone";
+import { emptyArg, s } from "@unified-latex/unified-latex-builder";
 import * as Ast from "@unified-latex/unified-latex-types";
+import { parse as parseArgspec } from "@unified-latex/unified-latex-util-argspec";
+import { getNamedArgsContent } from "@unified-latex/unified-latex-util-arguments";
+import * as match from "@unified-latex/unified-latex-util-match";
+import { parse } from "@unified-latex/unified-latex-util-parse";
 import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 import { replaceNode } from "@unified-latex/unified-latex-util-replace";
 import { visit } from "@unified-latex/unified-latex-util-visit";
-import { getNamedArgsContent } from "@unified-latex/unified-latex-util-arguments";
-import {
-    HashNumber,
-    parseMacroSubstitutions,
-} from "./parse-macro-substitutions";
+import { parseMacroSubstitutions } from "./parse-macro-substitutions";
 
 export const LATEX_NEWCOMMAND = new Set([
     "newcommand",
@@ -89,7 +90,7 @@ export function newcommandMacroToSpec(node: Ast.Macro): string {
         // If it is present, we need to change the signature.
         if (namedArgs.default != null) {
             numArgsForSig--;
-            sigOptionalArg = ["o"];
+            sigOptionalArg = [`O{${printRaw(namedArgs.default)}}`];
         }
         return [
             ...sigOptionalArg,
@@ -187,12 +188,119 @@ export function newcommandMacroToSubstitutionAst(node: Ast.Macro): Ast.Node[] {
  * it expands the macro).
  */
 export function createMacroExpander(
-    substitution: Ast.Node[]
+    substitution: Ast.Node[],
+    signature?: string
 ): (macro: Ast.Macro) => Ast.Node[] {
     const cachedSubstitutionTree = structuredClone(substitution);
+    const hasSubstitutions = attachHashNumbers(cachedSubstitutionTree);
+
+    if (!hasSubstitutions) {
+        return () => structuredClone(cachedSubstitutionTree);
+    }
+
+    const argSpec = parseArgspec(signature);
+    const defaultArgs = argSpec
+        .map((node) => {
+            if (node.type === "embellishment") {
+                return (
+                    node.defaultArgs ||
+                    (Array(node.tokens.length).fill(undefined) as undefined[])
+                );
+            }
+            return node.defaultArg;
+        })
+        .flat();
+
+    return (macro: Ast.Macro) => {
+        const retTree = structuredClone(cachedSubstitutionTree);
+
+        const stack: number[] = [];
+        let lastSelfReference: number | null = null;
+
+        // Recursively expand macro arguments. If a self-reference is found, sets a
+        // lastSelfReference variable, which is used to special-case `O{#2} O{#1}`.
+        function expandArgs(retTree: Ast.Node[]): void {
+            replaceNode(retTree, (node) => {
+                if (node.type !== "hash_number") {
+                    return;
+                }
+
+                const hashNum = node.number;
+                const arg = macro.args?.[hashNum - 1];
+
+                // If `arg` is provided, return it
+                if (arg && !match.blankArgument(arg)) {
+                    return arg.content;
+                }
+
+                // Check if there exists a default argument for this hash number
+                const defaultArg = defaultArgs[hashNum - 1];
+                if (!defaultArg) {
+                    return emptyArg(); // Return -NoValue-
+                }
+
+                // Detect self-references
+                if (stack.includes(hashNum)) {
+                    lastSelfReference = hashNum;
+                    return s(`#${hashNum}`);
+                }
+                // `defaultArg` is a string expression. The same `defaultArg` may be parsed
+                // differently depending on the context of `macro`, so we cannot cache
+                // the parse result of `defaultArg`. Currently we just call `parse` without
+                // taking account of parsing contexts, so actually the result can be cached,
+                // but this is not the correct thing to do. FIXME: we should probably pass
+                // some options that is provided to whatever function that called this to
+                // the below parse call. Note that `parse` is done in several passes, and we
+                // may be able to cache result of a first few passes that aren't context-dependent.
+                const sub = parse(defaultArg).content;
+                const hasSubstitutions = attachHashNumbers(sub);
+
+                if (!hasSubstitutions) {
+                    return sub;
+                }
+
+                stack.push(hashNum);
+                try {
+                    expandArgs(sub);
+
+                    if (lastSelfReference !== hashNum) {
+                        return sub;
+                    }
+                    // At this point, we have encountered #n while expanding #n.
+                    // Check if we got exactly #n by expanding #n,
+                    // in which case we should return the -NoValue-.
+                    if (`#${hashNum}` === printRaw(sub)) {
+                        // We are good, clear the last self-reference variable
+                        lastSelfReference = null;
+                        return emptyArg();
+                    }
+
+                    console.warn(
+                        `Detected unrecoverable self-reference while expanding macro: ${printRaw(
+                            macro
+                        )}`
+                    );
+                    // Return a placeholder string, so that we know that
+                    // this code path is not taken in unit tests.
+                    return s("-Circular-");
+                } finally {
+                    stack.pop();
+                }
+            });
+        }
+
+        expandArgs(retTree);
+        return retTree;
+    };
+}
+
+/**
+ * Parses macro substitutions, mutates tree, and signal if there are any hash numbers.
+ */
+export function attachHashNumbers(tree: Ast.Node[]) {
     let hasSubstitutions = false;
     visit(
-        cachedSubstitutionTree,
+        tree,
         (nodes) => {
             const parsed = parseMacroSubstitutions(nodes);
             // Keep track of whether there are any substitutions so we can bail early if not.
@@ -207,30 +315,5 @@ export function createMacroExpander(
             test: Array.isArray,
         }
     );
-
-    return (macro: Ast.Macro) => {
-        if (!hasSubstitutions) {
-            return cachedSubstitutionTree;
-        }
-        const cachedSubstitutions = (macro.args || []).map(
-            (arg) => arg.content
-        );
-        function getSubstitutionForHashNumber(hashNumber: HashNumber) {
-            return (
-                cachedSubstitutions[hashNumber.number - 1] || {
-                    type: "string",
-                    content: `#${hashNumber.number}`,
-                }
-            );
-        }
-        const retTree = structuredClone(cachedSubstitutionTree);
-        replaceNode(retTree, (node) => {
-            const hashNumOrNode = node as Ast.Node | HashNumber;
-            if (hashNumOrNode.type !== "hash_number") {
-                return;
-            }
-            return getSubstitutionForHashNumber(hashNumOrNode);
-        });
-        return retTree;
-    };
+    return hasSubstitutions;
 }

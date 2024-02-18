@@ -9,12 +9,15 @@ import {
     XPARSE_NEWCOMMAND,
 } from "./newcommand";
 
-type NewCommandSpec = {
+export interface MacroExpansionSpec {
     name: string;
-    signature: string;
+    signature?: string;
     body: Ast.Node[];
+}
+
+interface NewCommandSpec extends Required<MacroExpansionSpec> {
     definition: Ast.Macro;
-};
+}
 
 export const newcommandMatcher = match.createMacroMatcher([
     ...LATEX_NEWCOMMAND,

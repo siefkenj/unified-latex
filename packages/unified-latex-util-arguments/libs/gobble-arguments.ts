@@ -1,4 +1,4 @@
-import { arg } from "@unified-latex/unified-latex-builder";
+import { emptyArg } from "@unified-latex/unified-latex-builder";
 import * as Ast from "@unified-latex/unified-latex-types";
 import { ArgumentParser } from "@unified-latex/unified-latex-types";
 import {
@@ -36,30 +36,29 @@ export function gobbleArguments(
             // We need special behavior for embellishment argspecs.
             // Because an embellishment argspec specifies more than one argument,
             // we need to keep gobbling arguments until we've got them all.
-            const remainingTokens = new Set(spec.embellishmentTokens);
-            const argForToken = Object.fromEntries(
-                spec.embellishmentTokens.map((t) => [t, emptyArg()])
-            );
+            const { tokens } = spec;
 
-            let { argument, nodesRemoved: removed } = gobbleSingleArgument(
-                nodes,
-                embellishmentSpec(remainingTokens),
-                startPos
-            );
-            while (argument) {
+            const remainingTokens = new Set<string>(tokens);
+            const tokenToArgs = new Map<string, Ast.Argument>();
+
+            for (;;) {
+                let { argument, nodesRemoved: removed } = gobbleSingleArgument(
+                    nodes,
+                    embellishmentSpec(remainingTokens),
+                    startPos
+                );
+                if (!argument) {
+                    break;
+                }
                 const token = argument.openMark;
                 remainingTokens.delete(token);
-                argForToken[token] = argument;
+                tokenToArgs.set(token, argument);
                 nodesRemoved += removed;
-                const newSpec = embellishmentSpec(remainingTokens);
-                ({ argument, nodesRemoved: removed } = gobbleSingleArgument(
-                    nodes,
-                    newSpec,
-                    startPos
-                ));
             }
 
-            args.push(...spec.embellishmentTokens.map((t) => argForToken[t]));
+            args.push(
+                ...spec.tokens.map((t) => tokenToArgs.get(t) || emptyArg())
+            );
         } else {
             const { argument, nodesRemoved: removed } = gobbleSingleArgument(
                 nodes,
@@ -80,13 +79,6 @@ export function gobbleArguments(
 function embellishmentSpec(tokens: Set<string>): ArgSpec.Embellishment {
     return {
         type: "embellishment",
-        embellishmentTokens: [...tokens],
+        tokens: [...tokens],
     };
-}
-
-/**
- * Create an empty argument.
- */
-function emptyArg(): Ast.Argument {
-    return arg([], { openMark: "", closeMark: "" });
 }

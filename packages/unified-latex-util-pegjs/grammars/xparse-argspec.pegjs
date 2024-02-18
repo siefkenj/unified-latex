@@ -12,13 +12,11 @@
         return { type, ...computedOptions, ...options };
     }
     /**
-     * Recursively return the content of a group until there are no more groups
+     * Recursively return the content of an array until there are no more arrays
      */
-    function groupContent(node) {
-        if (node.type === "group") {
-            return node.content.map(groupContent).flat();
-        }
-        return node;
+    function arrayContent(node) {
+        if (typeof node === 'string') { return node; }
+        return '{' + node.map(arrayContent).join('') + '}'
     }
 }
 
@@ -56,7 +54,7 @@ optional
         }
 
 optional_delimited
-    = "D" braceSpec:brace_spec defaultArg:braced_group {
+    = "D" braceSpec:brace_spec defaultArg:token_or_group {
             return createNode("optional", { ...braceSpec, defaultArg });
         }
     / "d" braceSpec:brace_spec { return createNode("optional", braceSpec); }
@@ -64,21 +62,19 @@ optional_delimited
 optional_star = "s" { return createNode("optionalStar"); }
 
 optional_standard
-    = "O" g:braced_group { return createNode("optional", { defaultArg: g }); }
+    = "O" g:token_or_group { return createNode("optional", { defaultArg: g }); }
     / "o" { return createNode("optional"); }
 
 optional_embellishment
-    = "e" args:braced_group {
-            // Embellishments ignore groups around tokens. E.g. `e{x}` and `e{{x}}`
-            // are the same.
+    = "e" args:token_or_collection {
             return createNode("embellishment", {
-                embellishmentTokens: args.content.map(groupContent).flat(),
+                tokens:args
             });
         }
-    / "E" args:braced_group g:braced_group {
+    / "E" args:token_or_collection g:token_or_collection {
             return createNode("embellishment", {
-                embellishmentTokens: args.content.map(groupContent).flat(),
-                defaultArg: g,
+                tokens: args,
+                defaultArgs: g
             });
         }
 
@@ -87,34 +83,65 @@ optional_token
 
 // Required arguments
 required
-    = "R" braceSpec:brace_spec defaultArg:braced_group {
+    = "R" braceSpec:brace_spec defaultArg:token_or_group {
             return createNode("mandatory", { ...braceSpec, defaultArg });
         }
     / "r" braceSpec:brace_spec { return createNode("mandatory", braceSpec); }
 
-// An "until" argument gobbles tokens until the specified stop token(s)
+// An "until" argument gobbles tokens until the specified stop token(s). Until token allows whitespace.
+// TODO: in order to match xparse's behavior, multiple spaces at the start or in a middle
+// should be collapsed to a single whitespace token, and spaces at the end should be ignored.
 until
-    = "u" stopTokens:until_stop_token {
+    = "u" stopTokens:(x:token { return [x] } / '{' @(token_or_whitespace+) '}') {
             return createNode("until", { stopTokens });
         }
-
-until_stop_token
-    = ![{ ] x:. { return [x]; }
-    / g:braced_group { return g.content; }
 
 // A mandatory argument is a required argument with the default braces {...}
 mandatory = "m" { return createNode("mandatory"); }
 
 // Used to specify a pair of opening and closing braces
+// Normally "d{}" doesn't work in plain LaTeX, but a lot of strange commands
+// in beamer are modeled by d{}, so we provide a special casing here.
 brace_spec
-    = openBrace:$(!whitespace_token .)? closeBrace:$(!whitespace_token .)? {
+    = openBrace:token_or_group closeBrace:token_or_group {
             return { openBrace, closeBrace };
         }
+    / "{}" { return { openBrace: "{", closeBrace: "}"}}
 
 braced_group
-    = "{" content:($(!"}" !braced_group .) / braced_group)* "}" {
-            return { type: "group", content: content };
+    = "{" content:( token_or_whitespace / braced_group)* "}" {
+            return content;
         }
+
+non_brace
+    = ![{} ] @.
+
+// https://tex.stackexchange.com/questions/422966/which-characters-are-technically-legal-in-macro-names-with-t1
+macro_name
+    = $("\\"[a-zA-Z]+)
+    / $("\\"![a-zA-Z] .)
+
+token
+    = macro_name / non_brace
+
+token_or_whitespace
+	= token / whitespace_token
+
+// No need to separate individual characters here, just need to trim enclosing whitespaces
+group
+    = x:braced_group { return x.map(arrayContent).join('').trim(); }
+
+token_or_group
+    = token / group
+
+// Collections are "groups with one level deep", and are used in `e,E`.
+// Whitespaces are ignored in e{***}, e.g. e{^ _} is the same as e{^_}.
+collection
+    = "{" content:(whitespace @token_or_group whitespace)* "}" { return content; }
+
+token_or_collection
+    = x:token { return [x]; }
+    / collection
 
 whitespace = whitespace_token* { return ""; }
 

@@ -60,6 +60,19 @@ describe("unified-latex-utils-macros", () => {
             },
         ]);
     });
+
+    it("Can list new commands with optional arguments", () => {
+        let ast = strToNodes("\\newcommand{\\foo}[3][\\LaTeX]{bar}");
+
+        expect(normalizeCommands(listNewcommands(ast))).toEqual([
+            {
+                body: "bar",
+                name: "foo",
+                signature: "O{\\LaTeX} m m",
+            },
+        ]);
+    });
+
     it("trims whitespace around defined command", () => {
         let ast = strToNodes("\\newcommand{ xxx }{bar}");
 

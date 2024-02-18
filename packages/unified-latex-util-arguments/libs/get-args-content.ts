@@ -1,5 +1,5 @@
 import * as Ast from "@unified-latex/unified-latex-types";
-
+import { blankArgument } from "@unified-latex/unified-latex-util-match";
 /**
  * Returns the content of `args` for a macro or environment as an array. If an argument
  * was omitted (e.g., because it was an optional arg that wasn't included), then `null` is returned.
@@ -12,7 +12,7 @@ export function getArgsContent(
     }
 
     return node.args.map((arg) => {
-        if (arg.openMark === "" && arg.content.length === 0) {
+        if (blankArgument(arg)) {
             return null;
         }
         return arg.content;
@@ -48,7 +48,7 @@ export function getNamedArgsContent(
             return;
         }
         let val: Ast.Node[] | null = arg.content;
-        if (arg.openMark === "" && arg.content.length === 0) {
+        if (blankArgument(arg)) {
             val = null;
         }
         ret[name] = val;

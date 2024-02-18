@@ -498,6 +498,7 @@ describe("unified-latex-util-arguments", () => {
             { type: "string", content: "]" },
             { type: "string", content: "y" },
         ];
+
         expect(
             gobbleSingleArgument([...ast], parseArgspec("!o")[0])
         ).toMatchObject({
@@ -599,6 +600,37 @@ describe("unified-latex-util-arguments", () => {
         });
         expect(nodes).toEqual([{ content: "yx", type: "string" }]);
     });
+    it("can gobble an 'until' argument with multiple stop tokens", () => {
+        let argspec = parseArgspec("u{| \\stop}")[0];
+        value = "|ThisBarIsNotAStop|{Token}This| \\stop Is.";
+        file = processLatexToAstViaUnified().processSync({ value });
+        let nodes = trimRenderInfo((file.result as any).content) as Ast.Node[];
+        expect(gobbleSingleArgument(nodes, argspec)).toEqual({
+            argument: {
+                type: "argument",
+                content: [
+                    // Due to a current implementation of gobbleSingleArgument,
+                    // we may introduce extra string split during the search.
+                    { type: "string", content: "|" },
+                    { type: "string", content: "ThisBarIsNotAStop" },
+                    { type: "string", content: "|" },
+                    {
+                        type: "group",
+                        content: [{ type: "string", content: "Token" }],
+                    },
+                    { type: "string", content: "This" },
+                ],
+                openMark: "",
+                closeMark: "| \\stop",
+            },
+            nodesRemoved: 8,
+        });
+        expect(nodes).toEqual([
+            { type: "whitespace" },
+            { type: "string", content: "Is" },
+            { type: "string", content: "." },
+        ]);
+    });
     it("gobbleSingleArgument gobbles non-punctuation delimited arguments", () => {
         let ast: Ast.Node[] = [
             { type: "whitespace" },
@@ -692,6 +724,46 @@ describe("unified-latex-util-arguments", () => {
             }
         );
     });
+    it("gobbleSingleArgument gobbles arguments delimited by tokens", () => {
+        let ast: Ast.Node[] = [
+            { type: "macro", content: "a" },
+            { type: "group", content: [{ type: "string", content: "123" }] },
+            { type: "string", content: "1" },
+        ];
+        expect(
+            gobbleSingleArgument(ast, parseArgspec("r\\a{ 1 }")[0])
+        ).toMatchObject({
+            argument: {
+                type: "argument",
+                content: [
+                    {
+                        type: "group",
+                        content: [{ type: "string", content: "123" }],
+                    },
+                ],
+                openMark: "\\a",
+                closeMark: "1",
+            },
+            nodesRemoved: 3,
+        });
+
+        ast = [
+            { type: "macro", content: "abc" },
+            { type: "string", content: "123" },
+            { type: "macro", content: "def" },
+        ];
+        expect(
+            gobbleSingleArgument(ast, parseArgspec("r\\abc\\def")[0])
+        ).toMatchObject({
+            argument: {
+                type: "argument",
+                content: [{ type: "string", content: "123" }],
+                openMark: "\\abc",
+                closeMark: "\\def",
+            },
+            nodesRemoved: 3,
+        });
+    });
     it("can gobble embellishments", () => {
         let ast: Ast.Node[] = [{ type: "string", content: "xxx" }];
         expect(gobbleSingleArgument(ast, parseArgspec("e{}")[0])).toMatchObject(
@@ -748,5 +820,33 @@ describe("unified-latex-util-arguments", () => {
             },
             nodesRemoved: 2,
         });
+    });
+    it("can skip optional argument with default argument", () => {
+        const expectNoMatch = (ast: Ast.Node[]) => {
+            expect(
+                gobbleSingleArgument(ast, parseArgspec("O{default}")[0])
+            ).toMatchObject({
+                argument: null,
+                nodesRemoved: 0,
+            });
+
+            expect(
+                gobbleSingleArgument(ast, parseArgspec("D(){\\LaTeX}")[0])
+            ).toMatchObject({
+                argument: null,
+                nodesRemoved: 0,
+            });
+
+            expect(
+                gobbleSingleArgument(ast, parseArgspec("R^_{default}")[0])
+            ).toMatchObject({
+                argument: null,
+                nodesRemoved: 0,
+            });
+        };
+
+        expectNoMatch([{ type: "string", content: "this_should_not_match" }]);
+        expectNoMatch([{ type: "whitespace" }, { type: "parbreak" }]);
+        expectNoMatch([]);
     });
 });

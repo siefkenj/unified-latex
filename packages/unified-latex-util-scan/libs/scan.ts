@@ -16,7 +16,11 @@ export function scan(
          */
         startIndex?: number;
         /**
-         * If `true`, whitespace and comments will be skilled but any other
+         * Index to end scanning.
+         */
+        endIndex?: number;
+        /**
+         * If `true`, whitespace and comments will be skipped but any other
          * node that doesn't match `token` will cause the scan to terminate.
          */
         onlySkipWhitespaceAndComments?: boolean;
@@ -27,13 +31,17 @@ export function scan(
         allowSubstringMatches?: boolean;
     }
 ): number | null {
-    const { startIndex, onlySkipWhitespaceAndComments, allowSubstringMatches } =
-        options || {};
+    const {
+        startIndex = 0,
+        endIndex = nodes.length - 1,
+        onlySkipWhitespaceAndComments,
+        allowSubstringMatches,
+    } = options || {};
     if (typeof token === "string") {
         token = { type: "string", content: token } as Ast.String;
     }
 
-    for (let i = startIndex || 0; i < nodes.length; i++) {
+    for (let i = startIndex; i <= endIndex; i++) {
         const node = nodes[i];
         if (node.type === token.type) {
             switch (node.type) {

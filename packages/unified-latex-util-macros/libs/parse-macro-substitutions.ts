@@ -1,14 +1,9 @@
-import { MacroSubstitutionPegParser } from "@unified-latex/unified-latex-util-pegjs";
 import * as Ast from "@unified-latex/unified-latex-types";
 import { match } from "@unified-latex/unified-latex-util-match";
-import { decorateArrayForPegjs } from "@unified-latex/unified-latex-util-pegjs";
-
-// The types returned by the grammar
-
-export interface HashNumber {
-    type: "hash_number";
-    number: number;
-}
+import {
+    MacroSubstitutionPegParser,
+    decorateArrayForPegjs,
+} from "@unified-latex/unified-latex-util-pegjs";
 
 export function createMatchers() {
     return {
@@ -35,9 +30,7 @@ export function createMatchers() {
  *
  * The resulting AST is ready for substitutions to be applied to it.
  */
-export function parseMacroSubstitutions(
-    ast: Ast.Node[]
-): (Ast.Node | HashNumber)[] {
+export function parseMacroSubstitutions(ast: Ast.Node[]): Ast.Node[] {
     if (!Array.isArray(ast)) {
         throw new Error("You must pass an array of nodes");
     }

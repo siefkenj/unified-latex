@@ -182,6 +182,16 @@ export function arg(
 }
 
 /**
+ * Creates an empty argument. This can only present in Ast as a result of -NoValue-.
+ */
+export function emptyArg() {
+    return arg([], {
+        openMark: "",
+        closeMark: "",
+    });
+}
+
+/**
  * Create a Macro with the given `name`. The macro
  * may be followed by any number of arguments.
  */

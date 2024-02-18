@@ -23,34 +23,38 @@ exports[`unified-latex-util-argspec > parses xparse argument specification strin
 
 exports[`unified-latex-util-argspec > parses xparse argument specification string "" 1`] = `[]`;
 
+exports[`unified-latex-util-argspec > parses xparse argument specification string "D(ab" 1`] = `
+[
+  {
+    "closeBrace": "a",
+    "defaultArg": "b",
+    "openBrace": "(",
+    "type": "optional",
+  },
+]
+`;
+
+exports[`unified-latex-util-argspec > parses xparse argument specification string "E{\\token ^}{{D1}2}" 1`] = `
+[
+  {
+    "defaultArgs": [
+      "D1",
+      "2",
+    ],
+    "tokens": [
+      "\\\\token",
+      "^",
+    ],
+    "type": "embellishment",
+  },
+]
+`;
+
 exports[`unified-latex-util-argspec > parses xparse argument specification string "O{nested{defaults}}" 1`] = `
 [
   {
     "closeBrace": "]",
-    "defaultArg": {
-      "content": [
-        "n",
-        "e",
-        "s",
-        "t",
-        "e",
-        "d",
-        {
-          "content": [
-            "d",
-            "e",
-            "f",
-            "a",
-            "u",
-            "l",
-            "t",
-            "s",
-          ],
-          "type": "group",
-        },
-      ],
-      "type": "group",
-    },
+    "defaultArg": "nested{defaults}",
     "openBrace": "[",
     "type": "optional",
   },
@@ -61,22 +65,7 @@ exports[`unified-latex-util-argspec > parses xparse argument specification strin
 [
   {
     "closeBrace": "]",
-    "defaultArg": {
-      "content": [
-        "s",
-        "o",
-        "m",
-        "e",
-        "d",
-        "e",
-        "f",
-        "a",
-        "u",
-        "l",
-        "t",
-      ],
-      "type": "group",
-    },
+    "defaultArg": "somedefault",
     "openBrace": "[",
     "type": "optional",
   },
@@ -89,6 +78,28 @@ exports[`unified-latex-util-argspec > parses xparse argument specification strin
     "closeBrace": "]",
     "openBrace": "[",
     "type": "optional",
+  },
+]
+`;
+
+exports[`unified-latex-util-argspec > parses xparse argument specification string "Ox" 1`] = `
+[
+  {
+    "closeBrace": "]",
+    "defaultArg": "x",
+    "openBrace": "[",
+    "type": "optional",
+  },
+]
+`;
+
+exports[`unified-latex-util-argspec > parses xparse argument specification string "R\\a1{default}" 1`] = `
+[
+  {
+    "closeBrace": "1",
+    "defaultArg": "default",
+    "openBrace": "\\\\a",
+    "type": "mandatory",
   },
 ]
 `;
@@ -102,21 +113,14 @@ exports[`unified-latex-util-argspec > parses xparse argument specification strin
   },
   {
     "closeBrace": "-",
-    "defaultArg": {
-      "content": [
-        "d",
-        "e",
-        "f",
-      ],
-      "type": "group",
-    },
+    "defaultArg": "def",
     "openBrace": "-",
     "type": "optional",
   },
 ]
 `;
 
-exports[`unified-latex-util-argspec > parses xparse argument specification string "m e{^}" 1`] = `
+exports[`unified-latex-util-argspec > parses xparse argument specification string "m e^" 1`] = `
 [
   {
     "closeBrace": "}",
@@ -124,7 +128,7 @@ exports[`unified-latex-util-argspec > parses xparse argument specification strin
     "type": "mandatory",
   },
   {
-    "embellishmentTokens": [
+    "tokens": [
       "^",
     ],
     "type": "embellishment",
@@ -140,7 +144,7 @@ exports[`unified-latex-util-argspec > parses xparse argument specification strin
     "type": "mandatory",
   },
   {
-    "embellishmentTokens": [
+    "tokens": [
       "_",
       "^",
     ],
@@ -214,6 +218,16 @@ exports[`unified-latex-util-argspec > parses xparse argument specification strin
   {
     "closeBrace": "}",
     "openBrace": "{",
+    "type": "mandatory",
+  },
+]
+`;
+
+exports[`unified-latex-util-argspec > parses xparse argument specification string "r\\abc\\d" 1`] = `
+[
+  {
+    "closeBrace": "\\\\d",
+    "openBrace": "\\\\abc",
     "type": "mandatory",
   },
 ]

@@ -1,11 +1,10 @@
 import * as Ast from "@unified-latex/unified-latex-types";
+import { attachMacroArgs } from "@unified-latex/unified-latex-util-arguments";
 import {
-    expandMacros,
     expandMacrosExcludingDefinitions,
     listNewcommands,
 } from "@unified-latex/unified-latex-util-macros";
 import { Plugin } from "unified";
-import { attachMacroArgs } from "@unified-latex/unified-latex-util-arguments";
 
 type PluginOptions = {
     macros?: string[];

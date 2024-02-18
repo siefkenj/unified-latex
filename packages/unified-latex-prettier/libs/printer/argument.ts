@@ -19,11 +19,7 @@ export function printArgument(
     );
 
     // We can return early for empty arguments (this is common for omitted optional arguments)
-    if (
-        node.openMark === "" &&
-        node.closeMark === "" &&
-        node.content.length === 0
-    ) {
+    if (match.blankArgument(node)) {
         return [];
     }
     const parentNode = path.getParentNode();

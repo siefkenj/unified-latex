@@ -114,6 +114,11 @@ export function toHastWithLoggerFactory(
                 );
             case "root":
                 return node.content.flatMap(toHast);
+            case "hash_number":
+                return {
+                    type: "text",
+                    value: `#${node.number}`,
+                };
             default: {
                 const _exhaustiveCheck: never = node;
                 throw new Error(
