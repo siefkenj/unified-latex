@@ -59,6 +59,7 @@
     "wireit": {
         "deps": {
             "dependencies": [
+                "../unified-latex-types:compile",
                 "../unified-latex-util-match:compile"
             ]
         },
@@ -78,8 +79,7 @@
                 "vite.config.ts"
             ],
             "output": [
-                "dist/**/*.cjs",
-                "dist/**/*.cjs.map"
+                "dist/**/*.cjs*"
             ],
             "dependencies": [
                 "deps"
@@ -95,11 +95,10 @@
                 "vite.config.ts"
             ],
             "output": [
-                "dist/**/*.js",
-                "dist/**/*.js.map",
+                "dist/**/*.js*",
+                "dist/**/*.json",
                 "dist/**/*.d.ts",
-                "dist/**/*.md",
-                "dist/**/*.json"
+                "dist/**/*.md"
             ],
             "dependencies": [
                 "deps"

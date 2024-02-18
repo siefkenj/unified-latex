@@ -84,7 +84,10 @@
                 "vite.config.ts"
             ],
             "output": [
-                "dist/**/*.cjs"
+                "dist/**/*.cjs*"
+            ],
+            "dependencies": [
+                "deps"
             ]
         },
         "compile:esm": {
@@ -97,8 +100,20 @@
                 "vite.config.ts"
             ],
             "output": [
-                "dist/**/*.js",
-                "dist/**/*.json"
+                "dist/**/*.js*",
+                "dist/**/*.json",
+                "dist/**/*.d.ts",
+                "dist/**/*.md"
+            ],
+            "dependencies": [
+                "deps"
+            ]
+        },
+        "deps": {
+            "dependencies": [
+                "../unified-latex:compile",
+                "../unified-latex-to-hast:compile",
+                "../unified-latex-types:compile"
             ]
         }
     }

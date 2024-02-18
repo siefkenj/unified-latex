@@ -55,20 +55,20 @@
     "scripts": {
         "build": "npm run clean && mkdirp ./dist && npm run compile",
         "clean": "rimraf ./dist",
-        "compile:esm": "wireit",
-        "compile:cjs": "wireit",
-        "compile:executable": "echo '#!/usr/bin/env node' > dist/unified-latex-cli.mjs && cat dist/index.js >> dist/unified-latex-cli.mjs",
         "compile": "wireit",
+        "compile:cjs": "wireit",
+        "compile:esm": "wireit",
+        "compile:executable": "echo '#!/usr/bin/env node' > dist/unified-latex-cli.mjs && cat dist/index.js >> dist/unified-latex-cli.mjs",
         "package": "node ../../scripts/make-package.mjs",
-        "test": "vitest",
-        "publish": "cd dist && npm publish"
+        "publish": "cd dist && npm publish",
+        "test": "vitest"
     },
     "wireit": {
         "compile": {
+            "command": "npm run compile:executable",
             "dependencies": [
                 "compile:cjs",
-                "compile:esm",
-                "compile:executable"
+                "compile:esm"
             ]
         },
         "compile:cjs": {
@@ -81,7 +81,10 @@
                 "vite.config.ts"
             ],
             "output": [
-                "dist/**/*.cjs"
+                "dist/**/*.cjs*"
+            ],
+            "dependencies": [
+                "deps"
             ]
         },
         "compile:esm": {
@@ -94,8 +97,27 @@
                 "vite.config.ts"
             ],
             "output": [
-                "dist/**/*.js",
-                "dist/**/*.json"
+                "dist/**/*.js*",
+                "dist/**/*.json",
+                "dist/**/*.d.ts",
+                "dist/**/*.md"
+            ],
+            "dependencies": [
+                "deps"
+            ]
+        },
+        "deps": {
+            "dependencies": [
+                "../unified-latex-lint:compile",
+                "../unified-latex-to-hast:compile",
+                "../unified-latex-to-mdast:compile",
+                "../unified-latex-types:compile",
+                "../unified-latex-util-arguments:compile",
+                "../unified-latex-util-macros:compile",
+                "../unified-latex-util-packages:compile",
+                "../unified-latex-util-parse:compile",
+                "../unified-latex-util-print-raw:compile",
+                "../unified-latex-util-to-string:compile"
             ]
         }
     },

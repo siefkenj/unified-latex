@@ -30,12 +30,12 @@
     "scripts": {
         "build": "npm run clean && mkdirp ./dist && npm run compile",
         "clean": "rimraf ./dist",
+        "compile": "wireit",
         "compile:cjs": "wireit",
         "compile:esm": "wireit",
-        "compile": "wireit",
-        "test": "vitest",
         "package": "node ../../scripts/make-package.mjs",
-        "publish": "cd dist && npm publish"
+        "publish": "cd dist && npm publish",
+        "test": "vitest"
     },
     "wireit": {
         "compile": {
@@ -54,7 +54,10 @@
                 "vite.config.ts"
             ],
             "output": [
-                "dist/**/*.cjs"
+                "dist/**/*.cjs*"
+            ],
+            "dependencies": [
+                "deps"
             ]
         },
         "compile:esm": {
@@ -67,8 +70,19 @@
                 "vite.config.ts"
             ],
             "output": [
-                "dist/**/*.js",
-                "dist/**/*.json"
+                "dist/**/*.js*",
+                "dist/**/*.json",
+                "dist/**/*.d.ts",
+                "dist/**/*.md"
+            ],
+            "dependencies": [
+                "deps"
+            ]
+        },
+        "deps": {
+            "dependencies": [
+                "../unified-latex-types:compile",
+                "../unified-latex-util-print-raw:compile"
             ]
         }
     },

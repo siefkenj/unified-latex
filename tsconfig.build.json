@@ -5,6 +5,7 @@
         "**/*.config.ts",
         "node_modules",
         "**/tests/",
+        "**/test-common/",
         "**/dist/**/*"
     ],
     "compilerOptions": {

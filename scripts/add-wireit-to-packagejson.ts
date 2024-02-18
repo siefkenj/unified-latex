@@ -19,12 +19,25 @@ async function main() {
             }
 
             pkg.wireit["compile:cjs"].output = ["dist/**/*.cjs*"];
+            pkg.wireit["compile:cjs"].dependencies = ["deps"];
             pkg.wireit["compile:esm"].output = [
                 "dist/**/*.js*",
                 "dist/**/*.json",
                 "dist/**/*.d.ts",
                 "dist/**/*.md",
             ];
+            pkg.wireit["compile:esm"].dependencies = ["deps"];
+
+            // Compute the dependencies. They are all the `@unified-latex/*` packages
+            const dependencies = (Object.keys(pkg.dependencies) as string[])
+                .map((s) =>
+                    s.startsWith("@unified-latex/")
+                        ? s.replace("@unified-latex/", "")
+                        : null
+                )
+                .filter((s) => s !== null)
+                .map((s) => `../${s}:compile`);
+            pkg.wireit.deps = { dependencies };
 
             //pkg.wireit = {
             //    compile: {
@@ -68,8 +81,8 @@ async function main() {
             );
 
             console.log(pkgJsonPath);
-            console.log("NEW JSON\n", JSON.stringify(pkg, null, 4));
-            //await fs.writeFile(pkgJsonPath, JSON.stringify(pkg, null, 4));
+            //console.log("NEW JSON\n", JSON.stringify(pkg, null, 4));
+            await fs.writeFile(pkgJsonPath, JSON.stringify(pkg, null, 4));
         } catch (e) {
             console.log(e);
         }

@@ -76,7 +76,10 @@
                 "vite.config.ts"
             ],
             "output": [
-                "dist/**/*.cjs"
+                "dist/**/*.cjs*"
+            ],
+            "dependencies": [
+                "deps"
             ]
         },
         "compile:esm": {
@@ -89,8 +92,22 @@
                 "vite.config.ts"
             ],
             "output": [
-                "dist/**/*.js",
-                "dist/**/*.json"
+                "dist/**/*.js*",
+                "dist/**/*.json",
+                "dist/**/*.d.ts",
+                "dist/**/*.md"
+            ],
+            "dependencies": [
+                "deps"
+            ]
+        },
+        "deps": {
+            "dependencies": [
+                "../unified-latex-types:compile",
+                "../unified-latex-util-match:compile",
+                "../unified-latex-util-print-raw:compile",
+                "../unified-latex-util-trim:compile",
+                "../unified-latex-util-visit:compile"
             ]
         }
     }

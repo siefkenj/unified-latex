@@ -27,8 +27,7 @@ export default defineConfig(({ mode }) => {
             sourcemap: true,
             outDir: "dist",
             lib: {
-                entry: "index.ts",
-                fileName: (format) => `index.${format === "es" ? "js" : "cjs"}`,
+                entry: ["./katex-support.ts", "./ligature-macros.ts"],
                 formats,
             },
             rollupOptions: {

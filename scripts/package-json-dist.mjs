@@ -19,6 +19,7 @@ export function packageJsonDist(json) {
         scripts: _ignore5,
         devDependencies: _ignore6,
         typesVersions: _ignore7,
+        wireit: _ignore8,
         ...distPackage
     } = originalPackage;
 
