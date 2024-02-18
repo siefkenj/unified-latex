@@ -126,6 +126,7 @@ special_macro "special macro" // for the special macros like \[ \] and \begin{} 
     // verbatim macro in minted package
     / verbatim_minted
     // verbatim environment
+    / verbatim_minted_environment
     / verbatim_environment
     // display math with \[...\]
     / begin_display_math
@@ -221,22 +222,28 @@ verbatim_minted_environment "verbatim minted environment"
         begin_group
         env:"minted"
         end_group
-        lang:group
-        body:(
+        option:square_bracket_argument?
+        language:group
+        body:$(
             !(
                     end_env
                         end_env:group
                         & { return compare_env({ content: [env] }, end_env); }
                 )
-                x:. { return x; }
+                .
         )*
         end_env
         begin_group
-        verbatim_env_name
+        "minted"
         end_group {
-            return createNode("verbatim", {
-                env: `${env}{${lang.content.content}}`,
-                content: body.join(""),
+            const content = [
+                ...(option || []),
+                language,
+                { type: "string", content: body },
+            ];
+            return createNode("environment", {
+                env,
+                content,
             });
         }
 
@@ -245,7 +252,7 @@ verbatim_environment "verbatim environment"
         begin_group
         env:verbatim_env_name
         end_group
-        body:(
+        body:$(
             !(
                     end_env
                         end_env:group
@@ -258,8 +265,8 @@ verbatim_environment "verbatim environment"
         verbatim_env_name
         end_group {
             return createNode("verbatim", {
-                env: env,
-                content: body.join(""),
+                env,
+                content: body,
             });
         }
 

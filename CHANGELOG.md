@@ -3,6 +3,7 @@
 ### v1.6.1
 - Pass `VisitInfo` as an additional argument ot `macroReplacers` and `environmentReplacers` in `unifiedLatexToHast`.
 - Allow skipping of HTML validation in `unifiedLatexToHast`.
+- The `minted` environment parses its contents as a verbatim.
 
 ### v1.6.0
 - Embellishment tokens are now supported in macro `signature`s. E.g., a `xxx: {signature: "e{^_}"}` will allow `\xxx_{foo}^{bar}` and `\xxx^{foo}_{bar}` to parse correctly.
