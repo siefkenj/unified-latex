@@ -94,6 +94,85 @@ PluginOptions
 function unifiedLatexFromStringMinimal(options: PluginOptions): void;
 ```
 
+## `unifiedLatexProcessAtLetterAndExplMacros`
+
+Unified plugin to reprocess macros names to possibly include `@`, `_`, or `:`.
+This plugin detects the `\makeatletter` and `\ExplSyntaxOn` commands and reprocesses macro names
+inside of those blocks to include those characters.
+
+### Usage
+
+`unified().use(unifiedLatexProcessAtLetterAndExplMacros[, options])`
+
+#### options
+
+```typescript
+{ atLetter?: boolean; expl3?: boolean; autodetectExpl3AndAtLetter?: boolean; }
+```
+
+### Type
+
+`Plugin<{ atLetter?: boolean; expl3?: boolean; autodetectExpl3AndAtLetter?: boolean; }[], Ast.Root, Ast.Root>`
+
+```typescript
+function unifiedLatexProcessAtLetterAndExplMacros(options: {
+  atLetter?: boolean;
+  expl3?: boolean;
+  autodetectExpl3AndAtLetter?: boolean;
+}): (tree: Ast.Root) => void;
+```
+
+## `unifiedLatexProcessMacrosAndEnvironmentsWithMathReparse`
+
+Unified plugin to process macros and environments. Any environments that contain math content
+are reparsed (if needed) in math mode.
+
+### Usage
+
+`unified().use(unifiedLatexProcessMacrosAndEnvironmentsWithMathReparse[, options])`
+
+#### options
+
+```typescript
+{ environments: Ast.EnvInfoRecord; macros: Ast.MacroInfoRecord; }
+```
+
+### Type
+
+`Plugin<{ environments: Ast.EnvInfoRecord; macros: Ast.MacroInfoRecord; }[], Ast.Root, Ast.Root>`
+
+```typescript
+function unifiedLatexProcessMacrosAndEnvironmentsWithMathReparse(options: {
+  environments: Ast.EnvInfoRecord;
+  macros: Ast.MacroInfoRecord;
+}): (tree: Ast.Root) => void;
+```
+
+## `unifiedLatexReparseMath`
+
+Reparse math environments/macro contents that should have been parsed in math mode but weren't.
+
+### Usage
+
+`unified().use(unifiedLatexReparseMath[, options])`
+
+#### options
+
+```typescript
+{ mathEnvs: string[]; mathMacros: string[]; }
+```
+
+### Type
+
+`Plugin<{ mathEnvs: string[]; mathMacros: string[]; }[], Ast.Root, Ast.Root>`
+
+```typescript
+function unifiedLatexReparseMath(options: {
+  mathEnvs: string[];
+  mathMacros: string[];
+}): (tree: Ast.Root) => void;
+```
+
 # Functions
 
 ## `getParser(options)`
@@ -183,6 +262,30 @@ function parseMinimal(str: String): Ast.Root;
 | Param | Type     |
 | :---- | :------- |
 | str   | `String` |
+
+`unifiedLatexReparseMathConstructPlugin({
+    mathEnvs,
+    mathMacros,
+})`
+---
+
+Construct the inner function for the `unifiedLatexReparseMath` plugin. This function should not be used by libraries.
+
+```typescript
+function unifiedLatexReparseMathConstructPlugin({
+  mathEnvs,
+  mathMacros,
+}: {
+  mathEnvs: string[];
+  mathMacros: string[];
+}): (tree: Ast.Root) => void;
+```
+
+**Parameters**
+
+| Param                                         | Type                              |
+| :-------------------------------------------- | :-------------------------------- |
+| {&#xA;    mathEnvs,&#xA;    mathMacros,&#xA;} | <span color='gray'>Omitted</span> |
 
 # Types
 
