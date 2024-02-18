@@ -6,16 +6,16 @@ These packages provide a JS/TypeScript interface for creating, manipulating, and
 
 Most of the action lies in the
 
-  - `packages/`
-directory, where you'll find plugins for [Unifiedjs](https://unifiedjs.com/) and standalone tools for parsing
-LaTeX to an Abstract Syntax Tree (AST). Though *parsing* LaTeX isn't possible
-since it effectively has no grammar, *unified-latex* makes some
-practical assumptions. It should work on your code, unless you do complicated things like redefine control sequences
-or embed complicated TeX-style macros.
+-   `packages/`
+    directory, where you'll find plugins for [Unifiedjs](https://unifiedjs.com/) and standalone tools for parsing
+    LaTeX to an Abstract Syntax Tree (AST). Though _parsing_ LaTeX isn't possible
+    since it effectively has no grammar, _unified-latex_ makes some
+    practical assumptions. It should work on your code, unless you do complicated things like redefine control sequences
+    or embed complicated TeX-style macros.
 
 ## How it works
 
-*unified-latex* uses PEG.js to define a PEG grammar for LaTeX.
+_unified-latex_ uses PEG.js to define a PEG grammar for LaTeX.
 LaTeX source is first parsed with this grammar. Then it is post-processed
 based on knowledge of special macros. (e.g., some macros are known to take
 an argument, like `\mathbb`. Such arguments are not detected in the PEG
@@ -32,7 +32,7 @@ If you have `node.js` and `npm` installed, run
 npm install
 ```
 
-in **this \(the root\)** directory. Then  \-\- after doing a full build as explained below first! \-\- you may build any particular package \(for example\)
+in **this \(the root\)** directory. Then — after doing a full build as explained below first! — you may build any particular package \(for example\)
 
 ```sh
 cd packages/unified-latex
@@ -62,7 +62,7 @@ directly to the correct folder during development.
 
 ### Testing
 
-Tests in a specific workspace can be run via `npx jest` in that workspace. These for the whole project can be run via `npm run test` in the
+Tests in a specific workspace can be run via `npx vitest` in that workspace. These for the whole project can be run via `npm run test` in the
 root directory.
 
 ### Readme Generation and Consistency
@@ -105,6 +105,7 @@ in the local playground repository. This will mirror your development version of
 
 ## Related Projects
 
-  * Some code was borrowed from Michael Brade's `LaTeX.js` project https://github.com/michael-brade/LaTeX.js
-  * Prettier is a code-formatting library https://prettier.io/
-
+-   Some code was borrowed from Michael Brade's [`LaTeX.js`](https://github.com/michael-brade/LaTeX.js) project
+-   [Prettier](https://prettier.io/) is a code-formatting library
+-   [`tree-sitter-latex`](https://github.com/latex-lsp/tree-sitter-latex) a [`tree-sitter`](https://github.com/tree-sitter/tree-sitter) grammar for incremental parsing of LaTeX
+-   [Texlab](https://github.com/latex-lsp/texlab) a Rust implementation of the Language Server Protocol for LaTeX
