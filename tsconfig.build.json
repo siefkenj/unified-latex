@@ -2,6 +2,7 @@
     "exclude": [
         "**/*.test.ts",
         "**/*.stub.ts",
+        "**/*.config.ts",
         "node_modules",
         "**/tests/",
         "**/dist/**/*"

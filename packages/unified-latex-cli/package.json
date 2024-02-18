@@ -55,9 +55,10 @@
     "scripts": {
         "build": "npm run clean && mkdirp ./dist && npm run compile",
         "clean": "rimraf ./dist",
-        "compile:tsc": "tsc",
-        "compile:esm_and_cjs": "node build.js",
-        "compile": "run-p compile:tsc compile:esm_and_cjs",
+        "compile:esm": "npx vite build",
+        "compile:cjs": "npx vite build --mode commonjs",
+        "compile:executable": "echo '#!/usr/bin/env node' > dist/unified-latex-cli.mjs && cat dist/index.js >> dist/unified-latex-cli.mjs",
+        "compile": "run-p compile:esm compile:cjs && npm run compile:executable",
         "package": "node ../../scripts/make-package.mjs",
         "test": "vitest",
         "publish": "cd dist && npm publish"

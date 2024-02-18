@@ -2,6 +2,7 @@ import esbuild from "esbuild";
 import fs from "node:fs/promises";
 import glob from "glob";
 import { isCjsPackage } from "../../scripts/esbuild-module-check.mjs";
+import { packageReadmeAndPackageJson } from "../../scripts/vite-plugins";
 
 (async () => {
     const packageJson = JSON.parse(
