@@ -1,6 +1,7 @@
 /**
  * This is a test file to make sure that the unified-latex imports are working.
  */
+import { getParser } from "@unified-latex/unified-latex-util-parse";
 const { getParser } = require("@unified-latex/unified-latex-util-parse");
 const { printRaw } = require("@unified-latex/unified-latex-util-print-raw");
 const { toString } = require("@unified-latex/unified-latex-util-to-string");
