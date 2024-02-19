@@ -1,0 +1,114 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`unified-latex-doc-examples > example count-macros.ts 1`] = `
+"Building in mode: development.
+
+Macro statistics:
+
+All macros: {
+  textbf: [ '\\\\\\\\textbf{an}', '\\\\\\\\textbf{amazing}' ],
+  LaTeX: [ '\\\\\\\\LaTeX' ],
+  textit: [ '\\\\\\\\textit{some}', '\\\\\\\\textit{\\\\\\\\textbf{amazing}}' ],
+  '^': [ '^{x}', '^{\\\\\\\\infty}', '^{n}' ],
+  sum: [ '\\\\\\\\sum' ],
+  _: [ '_{n=0}' ],
+  infty: [ '\\\\\\\\infty' ],
+  frac: [ '\\\\\\\\frac{x^{n}}{n!}' ]
+}
+Math mode macros: [ '^', 'sum', '_', '^', 'infty', 'frac', '^' ]
+"
+`;
+
+exports[`unified-latex-doc-examples > example custom-macros.ts 1`] = `
+"Building in mode: development.
+
+\\\\textbf{custom} \\\\abc
+\\\\textbf{custom} \\\\abc{macro}
+\\\\textbf \\\\abc{macro}  
+"
+`;
+
+exports[`unified-latex-doc-examples > example expanding-or-replacing-macros.ts 1`] = `
+"Building in mode: development.
+
+\\\\newcommand{\\\\abc}[1]{ABC} My \\\\textbf{custom} \\\\abc{macro}.
+ My \\\\textbf{custom} ABC.
+\\\\abc{fun} $x=ABC$
+ My \\\\textbf{custom} ABC.
+ My \\\\textbf{custom} ABC.
+"
+`;
+
+exports[`unified-latex-doc-examples > example ignore-defaults.ts 1`] = `
+"Building in mode: development.
+
+\\\\textbf \\\\abc
+^
+\\\\color{blue} \\\\textbf {foo}
+"
+`;
+
+exports[`unified-latex-doc-examples > example using-unified.ts 1`] = `
+"Building in mode: development.
+
+{
+  type: 'macro',
+  content: 'textbf',
+  position: {
+    source: undefined,
+    start: { offset: 9, line: 2, column: 9 },
+    end: { offset: 16, line: 2, column: 16 }
+  },
+  _renderInfo: { inParMode: true },
+  args: [
+    {
+      type: 'argument',
+      content: [Array],
+      openMark: '{',
+      closeMark: '}'
+    }
+  ]
+}
+{
+  type: 'macro',
+  content: 'emph',
+  position: {
+    source: undefined,
+    start: { offset: 9, line: 2, column: 9 },
+    end: { offset: 16, line: 2, column: 16 }
+  },
+  _renderInfo: { inParMode: true },
+  args: [
+    {
+      type: 'argument',
+      content: [Array],
+      openMark: '{',
+      closeMark: '}'
+    }
+  ]
+}
+This is \\\\emph{an} example of a \\\\LaTeX{} document with \\\\textit{some} macros.
+\\\\[
+	e^{x} = \\\\sum_{n=0}^{\\\\infty}\\\\frac{x^{n}}{n!}.
+\\\\]
+What an \\\\textit{\\\\emph{amazing}} formula!
+{
+  type: 'macro',
+  content: 'emph',
+  position: {
+    source: undefined,
+    start: { offset: 9, line: 2, column: 9 },
+    end: { offset: 16, line: 2, column: 16 }
+  },
+  _renderInfo: { inParMode: true },
+  args: [
+    {
+      type: 'argument',
+      content: [Array],
+      openMark: '{',
+      closeMark: '}'
+    }
+  ]
+}
+"
+`;
