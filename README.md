@@ -21,6 +21,8 @@ based on knowledge of special macros. (e.g., some macros are known to take
 an argument, like `\mathbb`. Such arguments are not detected in the PEG
 processing stage).
 
+See the [`examples/`](https://github.com/siefkenj/unified-latex/tree/main/examples) folder for usage samples.
+
 ## Development
 
 You should develop in each project's subfolder in the `packages/` directory.
