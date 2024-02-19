@@ -1,7 +1,14 @@
 {
     "extends": "./tsconfig.build.json",
     "include": ["**/*.ts"],
-    "exclude": ["**/*.d.ts", "node_modules", "scripts", "*.config.ts"],
+    "exclude": [
+        "**/*.d.ts",
+        "node_modules",
+        "scripts",
+        "*.config.ts",
+        "examples/**/*",
+        "test/**/*"
+    ],
     "compilerOptions": {
         "rootDir": "./packages",
         "paths": {

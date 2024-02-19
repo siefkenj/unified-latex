@@ -12,11 +12,13 @@
     ],
     "exports": {
         ".": {
-            "default": "./index.ts"
+            "prebuilt": "./dist/index.js",
+            "import": "./index.ts"
         },
         "./*js": "./dist/*js",
         "./*": {
-            "default": "./dist/*.ts"
+            "prebuilt": "./dist/*.js",
+            "import": "./*.ts"
         }
     },
     "scripts": {
