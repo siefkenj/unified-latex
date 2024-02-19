@@ -31,9 +31,11 @@ export function printRaw(
     }
 
     const decorators = getDecorators(node);
-    const defaultArg = (node as ArgSpec.DefaultArgument).defaultArg
-        ? printRaw((node as ArgSpec.DefaultArgument).defaultArg!)
-        : "";
+    const defaultArg = printDefaultArg(
+        "defaultArg" in node ? node.defaultArg : undefined,
+        // `embellishment`s are the only spec that can have multiple default args
+        node.type === "embellishment"
+    );
     let spec = decorators;
 
     const type = node.type;
@@ -100,4 +102,20 @@ const parseCache: { [argStr: string]: ArgSpec.Node[] } = {};
 export function parse(str = ""): ArgSpec.Node[] {
     parseCache[str] = parseCache[str] || PegParser.parse(str);
     return parseCache[str];
+}
+
+function printDefaultArg(
+    args: string | string[] | undefined,
+    multipleArgs: boolean
+): string {
+    if (!args) {
+        return "";
+    }
+    if (typeof args === "string") {
+        args = [args];
+    }
+    if (!multipleArgs) {
+        return `{${args.join("")}}`;
+    }
+    return `{${args.map((a) => `{${a}}`).join("")}}`;
 }

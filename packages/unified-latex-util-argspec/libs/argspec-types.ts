@@ -12,7 +12,10 @@ export interface LeadingWhitespace {
     noLeadingWhitespace: boolean | undefined;
 }
 export interface DefaultArgument {
-    defaultArg?: Group;
+    defaultArg?: string;
+}
+export interface DefaultArguments {
+    defaultArg?: string[];
 }
 interface Verbatim extends Arg {
     type: "verbatim";
@@ -27,7 +30,7 @@ interface OptionalToken extends LeadingWhitespace, AstNode {
     type: "optionalToken";
     token: string;
 }
-export interface Embellishment extends DefaultArgument, AstNode {
+export interface Embellishment extends DefaultArguments, AstNode {
     type: "embellishment";
     embellishmentTokens: string[];
 }
