@@ -2,6 +2,9 @@ export * from "./libs/ast-types";
 export * from "./libs/type-guard";
 export * from "./libs/info-specs";
 
+// Export something for importing packages
+export default {};
+
 // NOTE: The docstring comment must be the last item in the index.ts file!
 /**
  * ## What is this?

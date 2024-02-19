@@ -13,12 +13,14 @@
     "exports": {
         ".": {
             "prebuilt": "./dist/index.js",
-            "import": "./index.ts"
+            "import": "./index.ts",
+            "require": "./dist/index.cjs"
         },
         "./*js": "./dist/*js",
         "./*": {
             "prebuilt": "./dist/*.js",
-            "import": "./*.ts"
+            "import": "./*.ts",
+            "require": "./dist/*.cjs"
         }
     },
     "scripts": {

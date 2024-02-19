@@ -11,8 +11,9 @@ export interface GenericNode {
 // Abstract nodes
 interface BaseNode {
     type: string;
-    _renderInfo?: (MacroInfo["renderInfo"] | EnvInfo["renderInfo"]) &
-        Record<string, unknown>;
+    _renderInfo?: (MacroInfo["renderInfo"] | EnvInfo["renderInfo"]) & {
+        defaultArg?: string;
+    } & Record<string, unknown>;
     position?: {
         start: { offset: number; line: number; column: number };
         end: { offset: number; line: number; column: number };

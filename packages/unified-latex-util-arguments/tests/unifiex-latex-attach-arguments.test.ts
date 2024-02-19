@@ -1,3 +1,4 @@
+import { describe, it, expect } from "vitest";
 import { unified } from "unified";
 import { VFile } from "unified-lint-rule/lib";
 import util from "util";

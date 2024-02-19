@@ -6,6 +6,7 @@ import {
     parse as parseArgspec,
 } from "@unified-latex/unified-latex-util-argspec";
 import { gobbleSingleArgument } from "./gobble-single-argument";
+import { updateRenderInfo } from "@unified-latex/unified-latex-util-render-info";
 
 /**
  * Gobbles an argument of whose type is specified
@@ -38,7 +39,12 @@ export function gobbleArguments(
             // we need to keep gobbling arguments until we've got them all.
             const remainingTokens = new Set(spec.embellishmentTokens);
             const argForToken = Object.fromEntries(
-                spec.embellishmentTokens.map((t) => [t, emptyArg()])
+                spec.embellishmentTokens.map((t, i) => {
+                    // For empty arguments, we also store their default.
+                    const defaultArg =
+                        "defaultArg" in spec ? spec.defaultArg?.[i] : undefined;
+                    return [t, emptyArg(defaultArg)];
+                })
             );
 
             let { argument, nodesRemoved: removed } = gobbleSingleArgument(
@@ -66,7 +72,10 @@ export function gobbleArguments(
                 spec,
                 startPos
             );
-            args.push(argument || emptyArg());
+            // For empty arguments, we also store their default.
+            const defaultArg =
+                "defaultArg" in spec ? spec.defaultArg : undefined;
+            args.push(argument || emptyArg(defaultArg));
             nodesRemoved += removed;
         }
     }
@@ -87,6 +96,10 @@ function embellishmentSpec(tokens: Set<string>): ArgSpec.Embellishment {
 /**
  * Create an empty argument.
  */
-function emptyArg(): Ast.Argument {
-    return arg([], { openMark: "", closeMark: "" });
+function emptyArg(defaultArg?: string): Ast.Argument {
+    const ret = arg([], { openMark: "", closeMark: "" });
+    if (defaultArg != null) {
+        updateRenderInfo(ret, { defaultArg });
+    }
+    return ret;
 }
