@@ -1,4 +1,3 @@
-import Prettier from "prettier/standalone";
 import { unified } from "unified";
 import * as Ast from "@unified-latex/unified-latex-types";
 import { unifiedLatexStringCompiler } from "./compiler-string";
