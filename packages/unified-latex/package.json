@@ -32,12 +32,12 @@
     "scripts": {
         "build": "npm run clean && mkdirp ./dist && npm run compile",
         "clean": "rimraf ./dist",
-        "compile:tsc": "tsc",
-        "compile:esm_and_cjs": "node build.js",
-        "compile": "run-p compile:tsc compile:esm_and_cjs",
-        "test": "vitest",
+        "compile": "wireit",
+        "compile:cjs": "wireit",
+        "compile:esm": "wireit",
         "package": "node ../../scripts/make-package.mjs",
-        "publish": "cd dist && npm publish"
+        "publish": "cd dist && npm publish",
+        "test": "vitest"
     },
     "repository": {
         "type": "git",
@@ -57,5 +57,55 @@
         "url": "https://github.com/siefkenj/unified-latex/issues"
     },
     "homepage": "https://github.com/siefkenj/unified-latex#readme",
-    "private": true
+    "private": true,
+    "wireit": {
+        "compile": {
+            "dependencies": [
+                "compile:cjs",
+                "compile:esm"
+            ]
+        },
+        "compile:cjs": {
+            "command": "vite build --mode commonjs",
+            "files": [
+                "index.ts",
+                "libs/**/*.ts",
+                "libs/**/*.json",
+                "tsconfig.json",
+                "vite.config.ts"
+            ],
+            "output": [
+                "dist/**/*.cjs*"
+            ],
+            "dependencies": [
+                "deps"
+            ]
+        },
+        "compile:esm": {
+            "command": "vite build",
+            "files": [
+                "index.ts",
+                "libs/**/*.ts",
+                "libs/**/*.json",
+                "tsconfig.json",
+                "vite.config.ts"
+            ],
+            "output": [
+                "dist/**/*.js*",
+                "dist/**/*.json",
+                "dist/**/*.d.ts",
+                "dist/**/*.md"
+            ],
+            "dependencies": [
+                "deps"
+            ]
+        },
+        "deps": {
+            "dependencies": [
+                "../unified-latex-types:compile",
+                "../unified-latex-util-parse:compile",
+                "../unified-latex-util-to-string:compile"
+            ]
+        }
+    }
 }

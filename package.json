@@ -16,6 +16,9 @@
         "publish": "npm run publish -ws",
         "test": "vitest ./packages",
         "test:ci": "vitest ./packages --maxWorkers=1",
+        "test:packages-esm": "cd test/esm && npm install && npm run test",
+        "test:packages-cjs": "cd test/cjs && npm install && npm run test",
+        "test:packages-install": "cd test && npx vite-node make-packages.ts",
         "prettier": "prettier \"**/*.ts\" \"**/*.json\" --write",
         "eslint": "eslint \"**/*.ts\" --ignore-pattern dist"
     },
@@ -26,6 +29,7 @@
     "devDependencies": {
         "@types/node": "^20.5.9",
         "@types/prettier": "^2.7.3",
+        "@types/shelljs": "^0.8.15",
         "esbuild": "^0.19.2",
         "esbuild-runner": "^2.2.2",
         "lerna": "^7.2.0",
@@ -40,10 +44,15 @@
         "remark-parse": "^10.0.2",
         "remark-stringify": "^10.0.3",
         "rimraf": "^5.0.5",
+        "shx": "^0.3.4",
         "ts-morph": "^19.0.0",
         "typedoc": "^0.25.8",
         "typescript": "^5.2.2",
-        "vitest": "^0.34.3"
+        "vite": "^5.1.3",
+        "vite-plugin-dts": "^3.7.2",
+        "vite-plugin-static-copy": "^1.0.1",
+        "vitest": "^0.34.3",
+        "wireit": "^0.14.4"
     },
     "dependencies": {
         "@types/color": "^3.0.4",

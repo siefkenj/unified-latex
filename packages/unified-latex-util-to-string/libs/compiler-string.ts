@@ -1,4 +1,4 @@
-import * as Prettier from "prettier/standalone";
+import Prettier from "prettier/standalone.js";
 import { Plugin } from "unified";
 import { printLatexAst } from "@unified-latex/unified-latex-prettier";
 import * as Ast from "@unified-latex/unified-latex-types";

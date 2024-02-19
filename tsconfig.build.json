@@ -2,8 +2,10 @@
     "exclude": [
         "**/*.test.ts",
         "**/*.stub.ts",
+        "**/*.config.ts",
         "node_modules",
         "**/tests/",
+        "**/test-common/",
         "**/dist/**/*"
     ],
     "compilerOptions": {

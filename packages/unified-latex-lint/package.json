@@ -53,9 +53,9 @@
     "scripts": {
         "build": "npm run clean && mkdirp ./dist && npm run compile",
         "clean": "rimraf ./dist",
-        "compile:tsc": "tsc",
-        "compile:esm_and_cjs": "node build.js",
-        "compile": "run-p compile:tsc compile:esm_and_cjs",
+        "compile": "wireit",
+        "compile:cjs": "wireit",
+        "compile:esm": "wireit",
         "package": "node ../../scripts/make-package.mjs",
         "publish": "cd dist && npm publish"
     },
@@ -77,5 +77,67 @@
         "url": "https://github.com/siefkenj/unified-latex/issues"
     },
     "homepage": "https://github.com/siefkenj/unified-latex#readme",
-    "private": true
+    "private": true,
+    "wireit": {
+        "compile": {
+            "dependencies": [
+                "compile:cjs",
+                "compile:esm"
+            ]
+        },
+        "compile:cjs": {
+            "command": "vite build --mode commonjs",
+            "files": [
+                "index.ts",
+                "rules/**/*.ts",
+                "rules/**/*.json",
+                "utils/**/*.ts",
+                "utils/**/*.json",
+                "tsconfig.json",
+                "vite.config.ts"
+            ],
+            "output": [
+                "dist/**/*.cjs*"
+            ],
+            "dependencies": [
+                "deps"
+            ]
+        },
+        "compile:esm": {
+            "command": "vite build",
+            "files": [
+                "index.ts",
+                "rules/**/*.ts",
+                "rules/**/*.json",
+                "utils/**/*.ts",
+                "utils/**/*.json",
+                "tsconfig.json",
+                "vite.config.ts"
+            ],
+            "output": [
+                "dist/**/*.js*",
+                "dist/**/*.json",
+                "dist/**/*.d.ts",
+                "dist/**/*.md"
+            ],
+            "dependencies": [
+                "deps"
+            ]
+        },
+        "deps": {
+            "dependencies": [
+                "../unified-latex-builder:compile",
+                "../unified-latex-ctan:compile",
+                "../unified-latex-types:compile",
+                "../unified-latex-util-glue:compile",
+                "../unified-latex-util-match:compile",
+                "../unified-latex-util-packages:compile",
+                "../unified-latex-util-print-raw:compile",
+                "../unified-latex-util-replace:compile",
+                "../unified-latex-util-scan:compile",
+                "../unified-latex-util-trim:compile",
+                "../unified-latex-util-visit:compile"
+            ]
+        }
+    }
 }

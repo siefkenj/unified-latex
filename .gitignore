@@ -7,3 +7,5 @@ debugging
 vscode*
 table-generation/generated
 .wireit
+test/esm/package-lock.json
+test/cjs/package-lock.json

@@ -2,8 +2,6 @@ import util from "util";
 import { parse } from "../libs/parse";
 import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 import { parseMath } from "../libs/parse-math";
-import { trimRenderInfo } from "@unified-latex/unified-latex-util-render-info";
-import { SP, arg, args, m, s } from "@unified-latex/unified-latex-builder";
 
 /* eslint-env jest */
 

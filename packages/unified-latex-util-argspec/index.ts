@@ -1,5 +1,6 @@
 export * from "./libs/argspec-parser";
-export * as ArgSpecAst from "./libs/argspec-types";
+import * as ArgSpecAst from "./libs/argspec-types";
+export { ArgSpecAst };
 
 // NOTE: The docstring comment must be the last item in the index.ts file!
 /**
