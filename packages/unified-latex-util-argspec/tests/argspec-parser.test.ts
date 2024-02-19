@@ -133,7 +133,7 @@ describe("unified-latex-util-argspec", () => {
             },
         ]);
     });
-    it.skip("Embellishments keep default args", () => {
+    it("Embellishments keep default args", () => {
         ast = argspecParser.parse("E{{x}y{z}}{{One}{Two}{Three}}");
         expect(ast).toEqual([
             {
