@@ -47,8 +47,8 @@ async function main() {
             //        command: "vite build --mode commonjs",
             //        files: [
             //            "index.ts",
-            //            "src/**/*.ts",
-            //            "src/**/*.json",
+            //            "libs/**/*.ts",
+            //            "libs/**/*.json",
             //            "tsconfig.json",
             //            "vite.config.ts",
             //        ],
@@ -58,8 +58,8 @@ async function main() {
             //        command: "vite build",
             //        files: [
             //            "index.ts",
-            //            "src/**/*.ts",
-            //            "src/**/*.json",
+            //            "libs/**/*.ts",
+            //            "libs/**/*.json",
             //            "tsconfig.json",
             //            "vite.config.ts",
             //        ],

@@ -92,8 +92,10 @@
             "command": "vite build --mode commonjs",
             "files": [
                 "index.ts",
-                "src/**/*.ts",
-                "src/**/*.json",
+                "package/**/*.ts",
+                "package/**/*.json",
+                "utils/**/*.ts",
+                "utils/**/*.json",
                 "tsconfig.json",
                 "vite.config.ts"
             ],
@@ -108,8 +110,10 @@
             "command": "vite build",
             "files": [
                 "index.ts",
-                "src/**/*.ts",
-                "src/**/*.json",
+                "package/**/*.ts",
+                "package/**/*.json",
+                "utils/**/*.ts",
+                "utils/**/*.json",
                 "tsconfig.json",
                 "vite.config.ts"
             ],
