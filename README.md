@@ -42,8 +42,7 @@ npm run build
 
 ### Building
 
-Building is a two-stage process. `esbuild` is used to create bundled packages in the esm and commonjs formats. Secondly, the TypeScript
-compiler is used to create the needed type information. All compiled files are stored in the `dist/` directory of a workspace.
+`vite` is used to create bundled packages in the esm and commonjs formats. Builds are managed by `wireit` which can intelligently rebuild dependencies when they change. All compiled files are stored in the `dist/` directory of a workspace.
 
 To build code for all workspaces, run
 
@@ -64,6 +63,17 @@ directly to the correct folder during development.
 
 Tests in a specific workspace can be run via `npx vitest` in that workspace. These for the whole project can be run via `npm run test` in the
 root directory.
+
+Since built packages are expected to support both `esm` and `commonjs`, testing of the built packages occurs in `test/esm` and `test/cjs`. To run these tests, make sure you have built all packages **first**. Run the following:
+
+```bash
+npm run build
+npm run test:packages-install
+npm run test:packages-esm
+npm run test:packages-cjs
+```
+
+The `test:packages-install` runs `npm pack` on each `dist/` directory and then copies the packaged files into the `test/dist` directory. Both `test/esm` and `test/cjs` install from these files (not the files hosted by `npm`).
 
 ### Readme Generation and Consistency
 
