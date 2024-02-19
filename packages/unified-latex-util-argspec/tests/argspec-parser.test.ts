@@ -110,7 +110,7 @@ describe("unified-latex-util-argspec", () => {
 
     it("Embellishment default args can be a mix of tokens and groups", () => {
         ast = argspecParser.parse("E{\\token^}{{D1}2}");
-        expect(ast).toMatchInlineSnapshot([
+        expect(ast).toEqual([
             {
                 defaultArg: ["D1", "2"],
                 embellishmentTokens: ["\\token", "^"],
