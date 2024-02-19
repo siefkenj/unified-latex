@@ -33,3 +33,10 @@ jobs:
 
             - name: Test
               run: npm test
+
+            # This test tests the actual packages that will be distributed
+            - name: Test Packages run on ESM and CJS
+              run: |
+                  npm run test:packages-install
+                  npm run test:packages-esm
+                  npm run test:packages-cjs
