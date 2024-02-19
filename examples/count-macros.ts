@@ -41,7 +41,7 @@ visit(ast, (node, info) => {
 //
 // ```
 // Macro statistics:
-// 
+//
 // All macros: {
 //   textbf: [ '\\textbf{an}', '\\textbf{amazing}' ],
 //   LaTeX: [ '\\LaTeX' ],
