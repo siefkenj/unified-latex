@@ -27,30 +27,7 @@ exports[`unified-latex-util-argspec > parses xparse argument specification strin
 [
   {
     "closeBrace": "]",
-    "defaultArg": {
-      "content": [
-        "n",
-        "e",
-        "s",
-        "t",
-        "e",
-        "d",
-        {
-          "content": [
-            "d",
-            "e",
-            "f",
-            "a",
-            "u",
-            "l",
-            "t",
-            "s",
-          ],
-          "type": "group",
-        },
-      ],
-      "type": "group",
-    },
+    "defaultArg": "nested{defaults}",
     "openBrace": "[",
     "type": "optional",
   },
@@ -61,22 +38,7 @@ exports[`unified-latex-util-argspec > parses xparse argument specification strin
 [
   {
     "closeBrace": "]",
-    "defaultArg": {
-      "content": [
-        "s",
-        "o",
-        "m",
-        "e",
-        "d",
-        "e",
-        "f",
-        "a",
-        "u",
-        "l",
-        "t",
-      ],
-      "type": "group",
-    },
+    "defaultArg": "somedefault",
     "openBrace": "[",
     "type": "optional",
   },
@@ -93,6 +55,17 @@ exports[`unified-latex-util-argspec > parses xparse argument specification strin
 ]
 `;
 
+exports[`unified-latex-util-argspec > parses xparse argument specification string "R\\a1{default}" 1`] = `
+[
+  {
+    "closeBrace": "1",
+    "defaultArg": "default",
+    "openBrace": "\\\\a",
+    "type": "mandatory",
+  },
+]
+`;
+
 exports[`unified-latex-util-argspec > parses xparse argument specification string "d++ D--{def}" 1`] = `
 [
   {
@@ -102,14 +75,7 @@ exports[`unified-latex-util-argspec > parses xparse argument specification strin
   },
   {
     "closeBrace": "-",
-    "defaultArg": {
-      "content": [
-        "d",
-        "e",
-        "f",
-      ],
-      "type": "group",
-    },
+    "defaultArg": "def",
     "openBrace": "-",
     "type": "optional",
   },
@@ -214,6 +180,16 @@ exports[`unified-latex-util-argspec > parses xparse argument specification strin
   {
     "closeBrace": "}",
     "openBrace": "{",
+    "type": "mandatory",
+  },
+]
+`;
+
+exports[`unified-latex-util-argspec > parses xparse argument specification string "r\\abc\\d" 1`] = `
+[
+  {
+    "closeBrace": "\\\\d",
+    "openBrace": "\\\\abc",
     "type": "mandatory",
   },
 ]

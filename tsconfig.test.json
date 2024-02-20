@@ -1,6 +1,11 @@
 {
     "extends": "./tsconfig.build.json",
-    "include": ["**/*.ts"],
+    "include": [
+        "**/*.ts",
+        // I have no idea why this needs to be included specifically
+        // and none of the other packages do.
+        "packages/unified-latex-types/dist/index.js"
+    ],
     "exclude": [
         "**/*.d.ts",
         "node_modules",
@@ -12,7 +17,7 @@
     "compilerOptions": {
         "rootDir": "./packages",
         "paths": {
-            "@unified-latex/*": ["./packages/*/dist"]
+            "@unified-latex/*": ["./packages/*"]
         },
         "types": ["vitest/globals"]
     }

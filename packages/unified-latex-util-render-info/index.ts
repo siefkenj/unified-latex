@@ -9,7 +9,7 @@ import { visit } from "@unified-latex/unified-latex-util-visit";
  * *This operation mutates `node`*
  */
 export function updateRenderInfo(
-    node: Ast.Node,
+    node: Ast.Node | Ast.Argument,
     renderInfo: object | null | undefined
 ) {
     if (renderInfo != null) {

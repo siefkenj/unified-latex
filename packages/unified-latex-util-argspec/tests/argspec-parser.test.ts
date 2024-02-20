@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { VFile } from "unified-lint-rule/lib";
 import util from "util";
-import * as argspecParser from "..";
+import * as argspecParser from "../index";
 
 /* eslint-env jest */
 
@@ -18,6 +18,7 @@ function removeWhitespace(x: string) {
 describe("unified-latex-util-argspec", () => {
     let value: string | undefined;
     let file: VFile | undefined;
+    let ast: ReturnType<typeof argspecParser.parse>;
 
     const SPEC_STRINGS = [
         "",
@@ -35,6 +36,8 @@ describe("unified-latex-util-argspec", () => {
         "u{xx;}",
         "u;",
         "u{ }",
+        "r\\abc\\d",
+        "R\\a1{default}",
     ];
 
     for (const spec of SPEC_STRINGS) {
@@ -45,17 +48,98 @@ describe("unified-latex-util-argspec", () => {
         });
     }
 
+    it("Default args need not be enclosed in braces", () => {
+        ast = argspecParser.parse("Ox");
+        expect(ast).toEqual([
+            {
+                closeBrace: "]",
+                defaultArg: "x",
+                openBrace: "[",
+                type: "optional",
+            },
+        ]);
+
+        ast = argspecParser.parse("D(ab");
+        expect(ast).toEqual([
+            {
+                closeBrace: "a",
+                defaultArg: "b",
+                openBrace: "(",
+                type: "optional",
+            },
+        ]);
+    });
+
+    it("Embellishment tokens can be single characters specified without a group", () => {
+        ast = argspecParser.parse("e^");
+        expect(ast).toEqual([
+            {
+                type: "embellishment",
+                embellishmentTokens: ["^"],
+            },
+        ]);
+
+        // Macros count as a single token
+        ast = argspecParser.parse("e\\foo");
+        expect(ast).toEqual([
+            {
+                type: "embellishment",
+                embellishmentTokens: ["\\foo"],
+            },
+        ]);
+
+        ast = argspecParser.parse("Ex{}");
+        expect(ast).toEqual([
+            {
+                type: "embellishment",
+                embellishmentTokens: ["x"],
+                defaultArg: [],
+            },
+        ]);
+    });
+
+    it("Embellishment tokens ignore whitespace", () => {
+        ast = argspecParser.parse("e { ^ }");
+        expect(ast).toEqual([
+            {
+                type: "embellishment",
+                embellishmentTokens: ["^"],
+            },
+        ]);
+    });
+
+    it("Embellishment default args can be a mix of tokens and groups", () => {
+        ast = argspecParser.parse("E{\\token^}{{D1}2}");
+        expect(ast).toEqual([
+            {
+                defaultArg: ["D1", "2"],
+                embellishmentTokens: ["\\token", "^"],
+                type: "embellishment",
+            },
+        ]);
+    });
+
     it("Embellishments always return a string", () => {
-        let ast = argspecParser.parse("e{{{x}}y{z}}");
+        ast = argspecParser.parse("e{{x}y{z}}");
         expect(ast).toEqual([
             { type: "embellishment", embellishmentTokens: ["x", "y", "z"] },
         ]);
-        ast = argspecParser.parse("E{{{x}}y{z}}{}");
+        ast = argspecParser.parse("E{{x}y{z}}{}");
         expect(ast).toEqual([
             {
                 type: "embellishment",
                 embellishmentTokens: ["x", "y", "z"],
-                defaultArg: { type: "group", content: [] },
+                defaultArg: [],
+            },
+        ]);
+    });
+    it("Embellishments keep default args", () => {
+        ast = argspecParser.parse("E{{x}y{z}}{{One}{Two}{Three}}");
+        expect(ast).toEqual([
+            {
+                type: "embellishment",
+                embellishmentTokens: ["x", "y", "z"],
+                defaultArg: ["One", "Two", "Three"],
             },
         ]);
     });

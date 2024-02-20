@@ -11,12 +11,16 @@
         const computedOptions = DEFAULT_OPTIONS[type] || {};
         return { type, ...computedOptions, ...options };
     }
+
     /**
-     * Recursively return the content of a group until there are no more groups
+     * Convert a group to a string, preserving {} braces.
      */
-    function groupContent(node) {
+    function groupToStr(node) {
+        if (typeof node !== "object" || !node) {
+            return node;
+        }
         if (node.type === "group") {
-            return node.content.map(groupContent).flat();
+            return `{${node.content.map(groupToStr).join("")}}`;
         }
         return node;
     }
@@ -56,7 +60,7 @@ optional
         }
 
 optional_delimited
-    = "D" braceSpec:brace_spec defaultArg:braced_group {
+    = "D" braceSpec:brace_spec defaultArg:arg {
             return createNode("optional", { ...braceSpec, defaultArg });
         }
     / "d" braceSpec:brace_spec { return createNode("optional", braceSpec); }
@@ -64,20 +68,18 @@ optional_delimited
 optional_star = "s" { return createNode("optionalStar"); }
 
 optional_standard
-    = "O" g:braced_group { return createNode("optional", { defaultArg: g }); }
+    = "O" whitespace g:arg { return createNode("optional", { defaultArg: g }); }
     / "o" { return createNode("optional"); }
 
 optional_embellishment
-    = "e" args:braced_group {
-            // Embellishments ignore groups around tokens. E.g. `e{x}` and `e{{x}}`
-            // are the same.
+    = "e" whitespace args:args {
             return createNode("embellishment", {
-                embellishmentTokens: args.content.map(groupContent).flat(),
+                embellishmentTokens: args,
             });
         }
-    / "E" args:braced_group g:braced_group {
+    / "E" whitespace args:args whitespace g:args {
             return createNode("embellishment", {
-                embellishmentTokens: args.content.map(groupContent).flat(),
+                embellishmentTokens: args,
                 defaultArg: g,
             });
         }
@@ -87,7 +89,7 @@ optional_token
 
 // Required arguments
 required
-    = "R" braceSpec:brace_spec defaultArg:braced_group {
+    = "R" braceSpec:brace_spec defaultArg:arg {
             return createNode("mandatory", { ...braceSpec, defaultArg });
         }
     / "r" braceSpec:brace_spec { return createNode("mandatory", braceSpec); }
@@ -98,6 +100,10 @@ until
             return createNode("until", { stopTokens });
         }
 
+//
+// HELPER RULES
+//
+
 until_stop_token
     = ![{ ] x:. { return [x]; }
     / g:braced_group { return g.content; }
@@ -107,14 +113,30 @@ mandatory = "m" { return createNode("mandatory"); }
 
 // Used to specify a pair of opening and closing braces
 brace_spec
-    = openBrace:$(!whitespace_token .)? closeBrace:$(!whitespace_token .)? {
+    = openBrace:$(!whitespace_token (macro / .))?
+        closeBrace:$(!whitespace_token (macro / .))? {
             return { openBrace, closeBrace };
         }
 
-braced_group
-    = "{" content:($(!"}" !braced_group .) / braced_group)* "}" {
-            return { type: "group", content: content };
+// A `default_arg` is a braced group, but its content will be processed as a string (or array of strings).
+// For example `{foo}` -> `["foo"]` and `{{foo}{bar}}` -> `["foo", "bar"]`
+arg
+    = token
+    / g:braced_group { return g.content.map(groupToStr).join(""); }
+
+args
+    = t:token { return [t]; }
+    / "{" args:(arg / whitespace_token)* "}" {
+            return args.filter((a) => !a.match(/^\s*$/));
         }
+
+braced_group
+    = "{"
+        content:(
+            $(!"}" !braced_group (token / whitespace_token))
+            / braced_group
+        )*
+        "}" { return { type: "group", content: content }; }
 
 whitespace = whitespace_token* { return ""; }
 
@@ -122,3 +144,11 @@ whitespace_token
     = " "
     / "\n"
     / "\r"
+
+macro
+    = $("\\" [a-zA-Z]+)
+    / $("\\" ![a-zA-Z] .)
+
+token
+    = macro
+    / ![{}] !whitespace_token @.

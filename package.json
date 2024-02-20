@@ -19,7 +19,7 @@
         "test:packages-esm": "cd test/esm && npm install && npm run test",
         "test:packages-cjs": "cd test/cjs && npm install && npm run test",
         "test:packages-install": "cd test && npx vite-node make-packages.ts",
-        "prettier": "prettier \"**/*.ts\" \"**/*.json\" --write",
+        "prettier": "prettier \"**/*.ts\" \"**/*.json\" --ignore-path .gitignore --write",
         "eslint": "eslint \"**/*.ts\" --ignore-pattern dist"
     },
     "prettier": {

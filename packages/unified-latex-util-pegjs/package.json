@@ -67,6 +67,7 @@
                 "index.ts",
                 "libs/**/*.ts",
                 "libs/**/*.json",
+                "grammars/**/*.pegjs",
                 "tsconfig.json",
                 "vite.config.ts"
             ],
@@ -83,6 +84,7 @@
                 "index.ts",
                 "libs/**/*.ts",
                 "libs/**/*.json",
+                "grammars/**/*.pegjs",
                 "tsconfig.json",
                 "vite.config.ts"
             ],
