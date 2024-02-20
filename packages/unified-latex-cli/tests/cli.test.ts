@@ -67,6 +67,16 @@ describe(
                 ]);
                 expect(stdout).toMatchSnapshot();
             }
+            {
+                let stdout = await execCLI([
+                    `${examplesPath}/needs-expanding.tex`,
+                    `-e`,
+                    "\\newcommand{foo}[2][FOO]{#1(#2)}",
+                    `-e`,
+                    '{name: "bar", signature: "O{baz}", body: "#1"}',
+                ]);
+                expect(stdout).toMatchSnapshot();
+            }
         });
         it("can expand macros defined in document", async () => {
             const stdout = await execCLI([

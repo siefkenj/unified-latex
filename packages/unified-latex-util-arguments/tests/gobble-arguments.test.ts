@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { VFile } from "unified-lint-rule/lib";
 import util from "util";
 import { trimRenderInfo } from "../../unified-latex-util-render-info";
-import * as Ast from "@unified-latex/unified-latex-types";
+import * as Ast from "@unified-latex/unified-latex-types/index";
 import { parse as parseArgspec } from "@unified-latex/unified-latex-util-argspec";
 import { gobbleArguments } from "../libs/gobble-arguments";
 import { processLatexToAstViaUnified } from "@unified-latex/unified-latex";
@@ -238,5 +238,54 @@ describe("unified-latex-util-arguments", () => {
             nodesRemoved: 6,
         });
         expect(nodes).toEqual([s("x"), SP, s("x")]);
+    });
+    it("can gobble arguments that represents multiple embellishments with default arguments", () => {
+        let argspec = parseArgspec("E{^_}{{UP}{DOWN}}");
+
+        value = "^{SuperscriptOnly}";
+        file = processLatexToAstViaUnified().processSync({ value });
+        let nodes = trimRenderInfo((file.result as any).content) as Ast.Node[];
+        expect(gobbleArguments(nodes, argspec)).toEqual({
+            args: [
+                {
+                    type: "argument",
+                    content: [{ type: "string", content: "SuperscriptOnly" }],
+                    openMark: "^",
+                    closeMark: "",
+                },
+                {
+                    _renderInfo: { defaultArg: "DOWN" },
+                    type: "argument",
+                    content: [],
+                    openMark: "",
+                    closeMark: "",
+                },
+            ],
+            nodesRemoved: 2,
+        });
+        expect(nodes).toEqual([]);
+
+        value = "_{SubscriptOnly}";
+        file = processLatexToAstViaUnified().processSync({ value });
+        nodes = trimRenderInfo((file.result as any).content) as Ast.Node[];
+        expect(gobbleArguments(nodes, argspec)).toEqual({
+            args: [
+                {
+                    _renderInfo: { defaultArg: "UP" },
+                    type: "argument",
+                    content: [],
+                    openMark: "",
+                    closeMark: "",
+                },
+                {
+                    type: "argument",
+                    content: [{ type: "string", content: "SubscriptOnly" }],
+                    openMark: "_",
+                    closeMark: "",
+                },
+            ],
+            nodesRemoved: 2,
+        });
+        expect(nodes).toEqual([]);
     });
 });

@@ -1,5 +1,9 @@
 # unified-latex Changelog
 
+### v1.7.0
+- Switch build system to `vite`. Should result in smaller bundles.
+- Save default arguments when parsing if the macro signature specifies them e.g. `{signature: "O{foo}"}`. The defaults are substituted in when expanding the macros with the optional arguments omitted.
+
 ### v1.6.1
 - Pass `VisitInfo` as an additional argument ot `macroReplacers` and `environmentReplacers` in `unifiedLatexToHast`.
 - Allow skipping of HTML validation in `unifiedLatexToHast`.
