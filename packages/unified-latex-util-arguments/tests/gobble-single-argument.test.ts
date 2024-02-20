@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { VFile } from "unified-lint-rule/lib";
 import util from "util";
 import { trimRenderInfo } from "../../unified-latex-util-render-info";
-import * as Ast from "@unified-latex/unified-latex-types";
+import type * as Ast from "../../unified-latex-types/index";
 import { parse as parseArgspec } from "@unified-latex/unified-latex-util-argspec";
 import { gobbleSingleArgument } from "../libs/gobble-single-argument";
 import { processLatexToAstViaUnified } from "@unified-latex/unified-latex";
@@ -748,5 +748,106 @@ describe("unified-latex-util-arguments", () => {
             },
             nodesRemoved: 2,
         });
+    });
+    it("can skip optional argument with default argument", () => {
+        const expectNoMatch = (ast: Ast.Node[]) => {
+            expect(
+                gobbleSingleArgument(ast, parseArgspec("O{default}")[0])
+            ).toMatchObject({
+                argument: null,
+                nodesRemoved: 0,
+            });
+
+            expect(
+                gobbleSingleArgument(ast, parseArgspec("D(){\\LaTeX}")[0])
+            ).toMatchObject({
+                argument: null,
+                nodesRemoved: 0,
+            });
+
+            expect(
+                gobbleSingleArgument(ast, parseArgspec("R^_{default}")[0])
+            ).toMatchObject({
+                argument: null,
+                nodesRemoved: 0,
+            });
+        };
+
+        expectNoMatch([{ type: "string", content: "this_should_not_match" }]);
+        expectNoMatch([{ type: "whitespace" }, { type: "parbreak" }]);
+        expectNoMatch([]);
+    });
+    it.skip("gobbleSingleArgument gobbles arguments delimited by tokens", () => {
+        let ast: Ast.Node[] = [
+            { type: "macro", content: "a" },
+            { type: "group", content: [{ type: "string", content: "123" }] },
+            { type: "string", content: "1" },
+        ];
+        expect(
+            gobbleSingleArgument(ast, parseArgspec("r\\a{ 1 }")[0])
+        ).toMatchObject({
+            argument: {
+                type: "argument",
+                content: [
+                    {
+                        type: "group",
+                        content: [{ type: "string", content: "123" }],
+                    },
+                ],
+                openMark: "\\a",
+                closeMark: "1",
+            },
+            nodesRemoved: 3,
+        });
+
+        ast = [
+            { type: "macro", content: "abc" },
+            { type: "string", content: "123" },
+            { type: "macro", content: "def" },
+        ];
+        expect(
+            gobbleSingleArgument(ast, parseArgspec("r\\abc\\def")[0])
+        ).toMatchObject({
+            argument: {
+                type: "argument",
+                content: [{ type: "string", content: "123" }],
+                openMark: "\\abc",
+                closeMark: "\\def",
+            },
+            nodesRemoved: 3,
+        });
+    });
+    // XXX: Test copied from PR #62. Output should be updated when `until` arguments
+    // are more properly implemented.
+    it.skip("can gobble an 'until' argument with multiple stop tokens", () => {
+        let argspec = parseArgspec("u{| \\stop}")[0];
+        value = "|ThisBarIsNotAStop|{Token}This| \\stop Is.";
+        file = processLatexToAstViaUnified().processSync({ value });
+        let nodes = trimRenderInfo((file.result as any).content) as Ast.Node[];
+        expect(gobbleSingleArgument(nodes, argspec)).toEqual({
+            argument: {
+                type: "argument",
+                content: [
+                    // Due to a current implementation of gobbleSingleArgument,
+                    // we may introduce extra string split during the search.
+                    { type: "string", content: "|" },
+                    { type: "string", content: "ThisBarIsNotAStop" },
+                    { type: "string", content: "|" },
+                    {
+                        type: "group",
+                        content: [{ type: "string", content: "Token" }],
+                    },
+                    { type: "string", content: "This" },
+                ],
+                openMark: "",
+                closeMark: "| \\stop",
+            },
+            nodesRemoved: 8,
+        });
+        expect(nodes).toEqual([
+            { type: "whitespace" },
+            { type: "string", content: "Is" },
+            { type: "string", content: "." },
+        ]);
     });
 });
