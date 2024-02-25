@@ -13,7 +13,7 @@ async function getImportsInDir(dirname): Promise<string[]> {
     const files = glob.sync(`${dirname}/**/*.ts`);
     let ret: string[] = [];
     for (const f of files) {
-        if (f.match(/test/)) {
+        if (f.match(/test/) || f.includes("/vite.config")) {
             continue;
         }
         const contents = await fs.readFile(f, "utf-8");
@@ -66,9 +66,9 @@ async function getImportsInDir(dirname): Promise<string[]> {
         const excessImport = jsonImports.filter(
             (i) => !trueImports.includes(i)
         );
-        const missingImport = trueImports.filter(
-            (i) => !jsonImports.includes(i)
-        );
+        const missingImport = trueImports
+            .filter((i) => !jsonImports.includes(i))
+            .filter((i) => !["vite", "vite-plugin-dts"].includes(i));
 
         console.log(packageJsonFile);
 

@@ -11,7 +11,8 @@
         "@unified-latex/unified-latex-util-pegjs": "^1.6.1",
         "@unified-latex/unified-latex-util-print-raw": "^1.6.1",
         "@unified-latex/unified-latex-util-replace": "^1.6.1",
-        "@unified-latex/unified-latex-util-visit": "^1.6.1"
+        "@unified-latex/unified-latex-util-visit": "^1.6.1",
+        "@unified-latex/unified-latex-util-parse": "^1.6.1"
     },
     "files": [
         "dist/**/*.ts",

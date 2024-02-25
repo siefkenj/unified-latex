@@ -1,6 +1,5 @@
 import * as Ast from "@unified-latex/unified-latex-types";
 import { match } from "@unified-latex/unified-latex-util-match";
-import { updateRenderInfo } from "@unified-latex/unified-latex-util-render-info";
 
 /**
  * Trims whitespace and parbreaks from the start and end
