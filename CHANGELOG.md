@@ -1,5 +1,9 @@
 # unified-latex Changelog
 
+### v1.7.1
+
+-   Types fix for `@unified-latex/unified-latex-types`
+
 ### v1.7.0
 
 -   Switch build system to `vite`. Should result in smaller bundles.
