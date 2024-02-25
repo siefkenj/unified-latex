@@ -80,7 +80,6 @@ export function trimEnd(nodes: Ast.Node[]): { trimmedEnd: number } {
             !trailingToken.sameline
         ) {
             trailingToken.leadingWhitespace = false;
-            delete trailingToken.position;
         }
     }
 
