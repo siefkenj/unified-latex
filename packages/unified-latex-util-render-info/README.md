@@ -49,12 +49,15 @@ is null, no update is performed.
 *This operation mutates `node`*
 
 ```typescript
-function updateRenderInfo(node: Ast.Node, renderInfo: {}): Ast.Node;
+function updateRenderInfo(
+  node: Ast.Node | Ast.Argument,
+  renderInfo: {}
+): Ast.Node | Ast.Argument;
 ```
 
 **Parameters**
 
-| Param      | Type       |
-| :--------- | :--------- |
-| node       | `Ast.Node` |
-| renderInfo | `{}`       |
+| Param      | Type                       |
+| :--------- | :------------------------- |
+| node       | `Ast.Node \| Ast.Argument` |
+| renderInfo | `{}`                       |
