@@ -39,15 +39,12 @@ export function trimStart(nodes: Ast.Node[]): { trimmedStart: number } {
         }
         if (leadingToken.leadingWhitespace || leadingToken.sameline) {
             leadingToken.leadingWhitespace = false;
-            // We remove the position information from this token to indicate that we've edited it
-            delete leadingToken.position;
         }
         // Special care must be taken. If the comment was on the same line as a
         // parskip, it will no longer be on the same line after the trimming.
         // Thus, we must modify the comment.
         if (start > 0 && leadingToken.sameline) {
             leadingToken.sameline = false;
-            delete leadingToken.position;
         }
     }
 

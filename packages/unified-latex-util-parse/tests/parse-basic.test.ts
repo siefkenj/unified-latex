@@ -1,3 +1,4 @@
+import { describe, it, expect } from "vitest";
 import util from "util";
 import { parse } from "../libs/parse";
 import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
