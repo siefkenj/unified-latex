@@ -22,6 +22,10 @@ jobs:
               with:
                   node-version: ${{ matrix.node-version }}
                   cache: "npm"
+            
+            # Expose some environment variables for wireit
+            - uses: google/wireit@setup-github-actions-caching/v1
+            
             - run: npm ci
 
             - name: Build
