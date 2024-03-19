@@ -3,6 +3,7 @@
 ### v1.7.1
 
 -   Types fix for `@unified-latex/unified-latex-types`
+-   Fixed AST when expanding `\sysdelim` macros for rendering `\systeme{}` macros with KaTeX
 
 ### v1.7.0
 

@@ -16,7 +16,7 @@ export default defineConfig(({ mode }) => {
     const plugins =
         mode === "commonjs"
             ? []
-            : [dts({ rollupTypes: true }), packageReadmeAndPackageJson()];
+            : [dts({ rollupTypes: false }), packageReadmeAndPackageJson()];
     console.log(`Building in mode: ${mode}.\n`);
 
     return {
