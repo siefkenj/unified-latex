@@ -84,7 +84,20 @@ export function printLatexAst(
         case "whitespace":
             return line;
         default:
-            console.warn("Printing unknown type", node);
+            console.warn(`Printing unknown type ${readableType(node)}`, node);
             return printRaw(node);
     }
+}
+
+/**
+ * Get a printable type for an object.
+ */
+function readableType(obj: any): string {
+    if (obj == null) {
+        return "null";
+    }
+    if (Array.isArray(obj)) {
+        return "array";
+    }
+    return typeof obj;
 }

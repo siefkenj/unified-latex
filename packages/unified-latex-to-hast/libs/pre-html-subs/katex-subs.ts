@@ -28,11 +28,17 @@ export const katexSpecificMacroReplacements: Record<
             });
 
             // If we have information about the sysdelims, then apply them
-            if (node._renderInfo?.sysdelims) {
-                const [frontDelim, backDelim]: [Ast.Node, Ast.Node] = node
+            if (node?._renderInfo?.sysdelims) {
+                const [frontDelim, backDelim]: [Ast.Node[], Ast.Node[]] = node
                     ._renderInfo?.sysdelims as any;
 
-                return [LEFT, frontDelim, ret, RIGHT, backDelim];
+                return [
+                    LEFT,
+                    ...(frontDelim || []),
+                    ret,
+                    RIGHT,
+                    ...(backDelim || []),
+                ];
             }
 
             return [LEFT, DEFAULT_LEFT_DELIM, ret, RIGHT, DEFAULT_RIGHT_DELIM];
