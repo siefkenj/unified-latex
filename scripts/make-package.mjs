@@ -17,7 +17,7 @@ import { packageJsonDist } from "./package-json-dist.mjs";
     console.log("writing", filename);
     await fs.writeFile(
         filename,
-        JSON.stringify(packageJsonDist(json), null, 4),
+        packageJsonDist(json),
         "utf-8"
     );
 
