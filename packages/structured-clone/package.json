@@ -1,6 +1,6 @@
 {
     "name": "@unified-latex/structured-clone",
-    "version": "1.7.0",
+    "version": "1.7.1",
     "description": "A cheap (and not correct) structured-clone polyfill with types",
     "main": "dist/index.js",
     "type": "module",

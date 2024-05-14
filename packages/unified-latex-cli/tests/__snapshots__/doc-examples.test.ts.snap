@@ -4,39 +4,39 @@ exports[`unified-latex-doc-examples > example count-macros.ts 1`] = `
 "Macro statistics:
 
 All macros: {
-  textbf: [ '\\\\\\\\textbf{an}', '\\\\\\\\textbf{amazing}' ],
-  LaTeX: [ '\\\\\\\\LaTeX' ],
-  textit: [ '\\\\\\\\textit{some}', '\\\\\\\\textit{\\\\\\\\textbf{amazing}}' ],
-  '^': [ '^{x}', '^{\\\\\\\\infty}', '^{n}' ],
-  sum: [ '\\\\\\\\sum' ],
+  textbf: [ '\\\\textbf{an}', '\\\\textbf{amazing}' ],
+  LaTeX: [ '\\\\LaTeX' ],
+  textit: [ '\\\\textit{some}', '\\\\textit{\\\\textbf{amazing}}' ],
+  '^': [ '^{x}', '^{\\\\infty}', '^{n}' ],
+  sum: [ '\\\\sum' ],
   _: [ '_{n=0}' ],
-  infty: [ '\\\\\\\\infty' ],
-  frac: [ '\\\\\\\\frac{x^{n}}{n!}' ]
+  infty: [ '\\\\infty' ],
+  frac: [ '\\\\frac{x^{n}}{n!}' ]
 }
 Math mode macros: [ '^', 'sum', '_', '^', 'infty', 'frac', '^' ]
 "
 `;
 
 exports[`unified-latex-doc-examples > example custom-macros.ts 1`] = `
-"\\\\textbf{custom} \\\\abc
-\\\\textbf{custom} \\\\abc{macro}
-\\\\textbf \\\\abc{macro}  
+"\\textbf{custom} \\abc
+\\textbf{custom} \\abc{macro}
+\\textbf \\abc{macro}  
 "
 `;
 
 exports[`unified-latex-doc-examples > example expanding-or-replacing-macros.ts 1`] = `
-"\\\\newcommand{\\\\abc}[1]{ABC} My \\\\textbf{custom} \\\\abc{macro}.
- My \\\\textbf{custom} ABC.
-\\\\abc{fun} $x=ABC$
- My \\\\textbf{custom} ABC.
- My \\\\textbf{custom} ABC.
+"\\newcommand{\\abc}[1]{ABC} My \\textbf{custom} \\abc{macro}.
+ My \\textbf{custom} ABC.
+\\abc{fun} $x=ABC$
+ My \\textbf{custom} ABC.
+ My \\textbf{custom} ABC.
 "
 `;
 
 exports[`unified-latex-doc-examples > example ignore-defaults.ts 1`] = `
-"\\\\textbf \\\\abc
+"\\textbf \\abc
 ^
-\\\\color{blue} \\\\textbf {foo}
+\\color{blue} \\textbf {foo}
 "
 `;
 
@@ -77,11 +77,11 @@ exports[`unified-latex-doc-examples > example using-unified.ts 1`] = `
     }
   ]
 }
-This is \\\\emph{an} example of a \\\\LaTeX{} document with \\\\textit{some} macros.
-\\\\[
-	e^{x} = \\\\sum_{n=0}^{\\\\infty}\\\\frac{x^{n}}{n!}.
-\\\\]
-What an \\\\textit{\\\\emph{amazing}} formula!
+This is \\emph{an} example of a \\LaTeX{} document with \\textit{some} macros.
+\\[
+	e^{x} = \\sum_{n=0}^{\\infty}\\frac{x^{n}}{n!}.
+\\]
+What an \\textit{\\emph{amazing}} formula!
 {
   type: 'macro',
   content: 'emph',

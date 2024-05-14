@@ -60,7 +60,7 @@ exports[`unified-latex-util-argspec > parses xparse argument specification strin
   {
     "closeBrace": "1",
     "defaultArg": "default",
-    "openBrace": "\\\\a",
+    "openBrace": "\\a",
     "type": "mandatory",
   },
 ]
@@ -188,8 +188,8 @@ exports[`unified-latex-util-argspec > parses xparse argument specification strin
 exports[`unified-latex-util-argspec > parses xparse argument specification string "r\\abc\\d" 1`] = `
 [
   {
-    "closeBrace": "\\\\d",
-    "openBrace": "\\\\abc",
+    "closeBrace": "\\d",
+    "openBrace": "\\abc",
     "type": "mandatory",
   },
 ]
