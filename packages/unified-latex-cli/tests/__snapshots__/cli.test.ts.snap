@@ -1,15 +1,15 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`unified-latex-cli > can convert to html 1`] = `
-"<h3 class=\\"starred\\">Really Cool Math</h3>
+"<h3 class="starred">Really Cool Math</h3>
 <p>Below you’ll find some really cool math.</p>
 <p>Check it out!</p>
-<ol class=\\"enumerate\\">
-	<li style=\\"list-style-type: &#x27;(a) &#x27;\\"><p>Hi there</p></li>
+<ol class="enumerate">
+	<li style="list-style-type: &#x27;(a) &#x27;"><p>Hi there</p></li>
 	<li>
-		<p><span class=\\"inline-math\\">e^{2}</span> is math mode!</p>
-		<div class=\\"display-math\\">
-			\\\\begin{bmatrix}12&#x26;3^{e}\\\\\\\\ \\\\pi&#x26;0\\\\end{bmatrix}
+		<p><span class="inline-math">e^{2}</span> is math mode!</p>
+		<div class="display-math">
+			\\begin{bmatrix}12&#x26;3^{e}\\\\ \\pi&#x26;0\\end{bmatrix}
 		</div>
 	</li>
 </ol>
@@ -28,68 +28,68 @@ Check it out!
 2.  $e^{2}$ is math mode!
 
     \`\`\`math
-    \\\\begin{bmatrix}12&3^{e}\\\\\\\\ \\\\pi&0\\\\end{bmatrix}
+    \\begin{bmatrix}12&3^{e}\\\\ \\pi&0\\end{bmatrix}
     \`\`\`
 "
 `;
 
 exports[`unified-latex-cli > can expand macro 1`] = `
-"% Expand via> tests/needs-expanding.tex --stats -e \\"\\\\\\\\newcommand{foo}[1]{FOO(#1)}\\" -e '{name: \\"bar\\", body: \\"baz\\"}'
+"% Expand via> tests/needs-expanding.tex --stats -e "\\\\newcommand{foo}[1]{FOO(#1)}" -e '{name: "bar", body: "baz"}'
 hi FOO(fooArg) and baz!
 "
 `;
 
 exports[`unified-latex-cli > can expand macro 2`] = `
-"% Expand via> tests/needs-expanding.tex --stats -e \\"\\\\\\\\newcommand{foo}[1]{FOO(#1)}\\" -e '{name: \\"bar\\", body: \\"baz\\"}'
-hi $\\\\x fooArg$ and baz!
+"% Expand via> tests/needs-expanding.tex --stats -e "\\\\newcommand{foo}[1]{FOO(#1)}" -e '{name: "bar", body: "baz"}'
+hi $\\x fooArg$ and baz!
 "
 `;
 
 exports[`unified-latex-cli > can expand macro 3`] = `
-"% Expand via> tests/needs-expanding.tex --stats -e \\"\\\\\\\\newcommand{foo}[1]{FOO(#1)}\\" -e '{name: \\"bar\\", body: \\"baz\\"}'
+"% Expand via> tests/needs-expanding.tex --stats -e "\\\\newcommand{foo}[1]{FOO(#1)}" -e '{name: "bar", body: "baz"}'
 hi FOO(fooArg) and baz!
 "
 `;
 
 exports[`unified-latex-cli > can expand macros defined in document 1`] = `
-"\\\\newcommand{\\\\foo}[1]{$BAR #1$}
-\\\\DeclareDocumentCommand{\\\\baz}{m}{\\\\foo{xxx} .#1.}
-We $BAR ME$ and \\\\foo{xxx} .YOU.
+"\\newcommand{\\foo}[1]{$BAR #1$}
+\\DeclareDocumentCommand{\\baz}{m}{\\foo{xxx} .#1.}
+We $BAR ME$ and \\foo{xxx} .YOU.
 "
 `;
 
 exports[`unified-latex-cli > can format document 1`] = `
-"\\\\section*{Really Cool Math}
-Below you'll$x$ $x$ find some {\\\\bf really} cool {\\\\em math} {\\\\em foo}.
+"\\section*{Really Cool Math}
+Below you'll$x$ $x$ find some {\\bf really} cool {\\em math} {\\em foo}.
 
-\\\\def\\\\foo{FOO}
+\\def\\foo{FOO}
 
 Check it out!
-\\\\begin{enumerate}
-	\\\\item[(a)] Hi there $sin(x)$
+\\begin{enumerate}
+	\\item[(a)] Hi there $sin(x)$
 
-	\\\\item $e^{2}$ is math mode!
-		\\\\[
-			\\\\begin{bmatrix}
-				12  & 3^{e} \\\\\\\\
-				\\\\pi & 0
-			\\\\end{bmatrix}
-		\\\\]
-\\\\end{enumerate}
+	\\item $e^{2}$ is math mode!
+		\\[
+			\\begin{bmatrix}
+				12  & 3^{e} \\\\
+				\\pi & 0
+			\\end{bmatrix}
+		\\]
+\\end{enumerate}
 "
 `;
 
 exports[`unified-latex-cli > can override default macros 1`] = `
-"$\\\\mathbb{X} Y$
+"$\\mathbb{X} Y$
 "
 `;
 
 exports[`unified-latex-cli > can override default macros 2`] = `
-"$\\\\mathbb X Y$
+"$\\mathbb X Y$
 "
 `;
 
 exports[`unified-latex-cli > can override default macros 3`] = `
-"$\\\\mathbb{X}{Y}$
+"$\\mathbb{X}{Y}$
 "
 `;
