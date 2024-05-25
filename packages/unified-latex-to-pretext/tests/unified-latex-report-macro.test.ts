@@ -1,0 +1,24 @@
+import { describe, it, expect } from "vitest";
+import Prettier from "prettier";
+import util from "util";
+import { getParser } from "@unified-latex/unified-latex-util-parse";
+import { parse_macros } from "../libs/report-math-mode-macros";
+
+// Make console.log pretty-print by default
+const origLog = console.log;
+console.log = (...args) => {
+    origLog(...args.map((x) => util.inspect(x, false, 10, true)));
+};
+
+describe("unified-latex-to-pretext:unified-latex-report-macro", () => {
+    let value: string | undefined;
+
+    it("can reported unsupported macros", () => {
+        value = String.raw`$\\mathbb{R} \\fakemacro{X}$`;
+
+        const parser = getParser();
+        const ast = parser.parse(value);
+        
+        expect(parse_macros(ast)).toEqual(["fakemacro"]);
+    });
+});
