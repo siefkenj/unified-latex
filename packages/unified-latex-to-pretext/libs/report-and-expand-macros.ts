@@ -5,7 +5,7 @@ import { anyMacro, match } from "@unified-latex/unified-latex-util-match";
 import { visit } from "@unified-latex/unified-latex-util-visit";
 import { katexSpecificMacroReplacements } from "./pre-conversion-subs/katex-subs";
 
-// return list of unsupported macros?
+// return list of unsupported macros
 export function report_macros(ast: Ast.Ast): string[] {
     let unsupported: string[] = [];
 
