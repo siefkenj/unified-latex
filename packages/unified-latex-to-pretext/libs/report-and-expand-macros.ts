@@ -1,9 +1,8 @@
 import * as Ast from "@unified-latex/unified-latex-types";
-import { newcommandMatcher,listNewcommands, newcommandMacroToSubstitutionAst, expandMacrosExcludingDefinitions, expandMacros } from "@unified-latex/unified-latex-util-macros";
+import { newcommandMatcher, newcommandMacroToSubstitutionAst } from "@unified-latex/unified-latex-util-macros";
 import { anyMacro, match } from "@unified-latex/unified-latex-util-match";
 import { visit } from "@unified-latex/unified-latex-util-visit";
-import { attachNeededRenderInfo, katexSpecificMacroReplacements, KATEX_SUPPORT } from "./pre-conversion-subs/katex-subs";
-import { attachMacroArgs } from "@unified-latex/unified-latex-util-arguments";
+import { KATEX_SUPPORT } from "./pre-conversion-subs/katex-subs";
 import { replaceNode } from "@unified-latex/unified-latex-util-replace";
 
 /**
@@ -11,22 +10,18 @@ import { replaceNode } from "@unified-latex/unified-latex-util-replace";
  */
 export function report_macros(ast: Ast.Ast): string[] {
     let unsupported: string[] = [];
-    //attachNeededRenderInfo(ast);
 
     // match a macro supported by Katex
-    // const isKatexMacro = match.createMacroMatcher(katexSpecificMacroReplacements);
+    const isSupported = match.createMacroMatcher(KATEX_SUPPORT.macros);
 
     // visit all nodes
     visit(ast, (node, info) => {
         // macro in math mode
         if (anyMacro(node) && info.context.hasMathModeAncestor) {
             const macro_name = node.content;
-            //console.log(node);
-            //console.log(katexSpecificMacroReplacements[node.content]);
 
             // check if not supported by katex
-            // if (!isKatexMacro(node)) {
-            if (!KATEX_SUPPORT.macros.includes(macro_name)) {
+            if (!isSupported(node)) {
                 unsupported.push(macro_name);
             }
         }
@@ -38,11 +33,10 @@ export function report_macros(ast: Ast.Ast): string[] {
 /**
  * Expands user-defined macros
  */
-export function expand_user_macros(ast: Ast.Ast): void  {
+export function expand_user_macros(ast: Ast.Ast): void {
     replaceNode(ast, (node) => {
         if (anyMacro(node) && newcommandMatcher(node)) {
             return newcommandMacroToSubstitutionAst(node);
         }
     });
 }
-
