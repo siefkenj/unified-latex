@@ -30,13 +30,21 @@ describe("unified-latex-to-pretext:report-unsupported-macro-katex", () => {
         expect(reportMacrosUnsupportedByKatex(ast)).toEqual([]);
     });
 
-    // change to Unsupported macros outside of math mode.
-    it("can report no unsupported macros not in mathmode", () => {
-        value = String.raw`\underline{text} \textbf{bold} \subsection{section}`;
+    it("can not report any unsupported macros outside of math mode", () => {
+        value = String.raw`\fakemacro`;
 
         const parser = getParser();
         const ast = parser.parse(value);
 
         expect(reportMacrosUnsupportedByKatex(ast)).toEqual([]);
+    });
+
+    it("can report unsupported macros in text mode with a math anscestor", () => {
+        value = String.raw`$\frac{1}{\text{ hi \unsupported}}$`;
+
+        const parser = getParser();
+        const ast = parser.parse(value);
+
+        expect(reportMacrosUnsupportedByKatex(ast)).toEqual(["unsupported"]);
     });
 });
