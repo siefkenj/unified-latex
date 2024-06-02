@@ -1,7 +1,8 @@
 import { describe, it, expect } from "vitest";
 import util from "util";
-import { getParser } from "@unified-latex/unified-latex-util-parse";
+import { getParser, parseMath } from "@unified-latex/unified-latex-util-parse";
 import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
+import { breakOnBoundaries } from "../libs/break-on-boundaries";
 
 // Make console.log pretty-print by default
 const origLog = console.log;
@@ -14,8 +15,8 @@ describe("unified-latex-to-pretext:break-on-boundaries", () => {
     let value: string;
 
     it("can break on sections", () => {
-        value = String.raw`\section{Foo}
-                            Hi, this is a section
+        value = String.raw`{\section{Foo}
+                            Hi, this is a section}
                                 
                             \section{Bar}
                             This is another section`;
@@ -24,6 +25,8 @@ describe("unified-latex-to-pretext:break-on-boundaries", () => {
         const ast = parser.parse(value);
 
         // break-on-boundaries work done here
+        breakOnBoundaries(ast);
+        // console.log(ast);
 
         expect(printRaw(ast)).toEqual([String.raw`\begin{_section}
                                                 \title{Foo}
