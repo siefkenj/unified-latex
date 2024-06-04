@@ -11,15 +11,10 @@ console.log = (...args) => {
 };
 
 describe("unified-latex-to-pretext:break-on-boundaries", () => {
-   
     let value: string;
 
-    it("can break on sections", () => {
-        value = String.raw`{\section{Foo}
-                            Hi, this is a section}
-                                
-                            \section{Bar}
-                            This is another section`;
+    it("can break on parts", () => {
+        value = String.raw`\part{Foo}Hi, this is a part\part{Bar}This is another part`;
 
         const parser = getParser();
         const ast = parser.parse(value);
@@ -28,14 +23,9 @@ describe("unified-latex-to-pretext:break-on-boundaries", () => {
         breakOnBoundaries(ast);
         // console.log(ast);
 
-        expect(printRaw(ast)).toEqual([String.raw`\begin{_section}
-                                                \title{Foo}
-                                                Hi, this is a section
-                                            \end{_section}
-                                            \begin{_section}
-                                                \title{Bar}
-                                                This is another section
-                                            \end{_section}`]);
+        expect(printRaw(ast)).toEqual(
+            String.raw`\begin{_part}\title{Foo}Hi, this is a part\end{_part}\begin{_part}\title{Bar}This is another part\end{_part}`
+        );
     });
     it("can break on a subsection", () => {
         value = String.raw`\subsection{subsection}
@@ -46,7 +36,7 @@ describe("unified-latex-to-pretext:break-on-boundaries", () => {
 
         // break-on-boundaries work done here
 
-        expect(printRaw(ast)).toEqual([String.raw``]);
+        expect(printRaw(ast)).toEqual(String.raw``);
     });
     it("can break on subsection between subsections properly", () => {
         value = String.raw`\section{First Section}
@@ -61,6 +51,6 @@ describe("unified-latex-to-pretext:break-on-boundaries", () => {
 
         // break-on-boundaries work done here
 
-        expect(printRaw(ast)).toEqual([String.raw``]);
+        expect(printRaw(ast)).toEqual(String.raw``);
     });
 });
