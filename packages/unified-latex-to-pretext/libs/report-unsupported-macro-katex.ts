@@ -16,11 +16,9 @@ export function reportMacrosUnsupportedByKatex(ast: Ast.Ast): string[] {
     visit(ast, (node, info) => {
         // macro in math mode
         if (anyMacro(node) && info.context.hasMathModeAncestor) {
-            const macro_name = node.content;
-
             // check if not supported by katex
             if (!isSupported(node)) {
-                unsupported.push(macro_name);
+                unsupported.push((node as Ast.Macro).content);
             }
         }
     });

@@ -15,7 +15,7 @@ export function ExpandUserDefinedMacros(ast: Ast.Ast): void {
         newcommands.map((m) => [m.name, { signature: m.signature }])
     );
 
-    // attach the arguments to each macro before prcoessing it
+    // attach the arguments to each macro before processing it
     attachMacroArgs(ast, macroInfo);
     expandMacrosExcludingDefinitions(ast, newcommands);
 }

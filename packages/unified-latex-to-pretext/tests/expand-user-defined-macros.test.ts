@@ -25,7 +25,7 @@ describe("unified-latex-to-pretext:expand-user-deifned-macros", () => {
     });
 
     it("can expand renewcommand", () => {
-        value = String.raw`\renewcommand{\N}{\mathbb{N}} \mathbb{N}`; // not subbing at all
+        value = String.raw`\renewcommand{\O}{\mathcal{O}} \mathcal{O}`; // not subbing at all
 
         const parser = getParser();
         const ast = parser.parse(value);
@@ -33,7 +33,7 @@ describe("unified-latex-to-pretext:expand-user-deifned-macros", () => {
         ExpandUserDefinedMacros(ast);
 
         expect(printRaw(ast)).toEqual(
-            String.raw`\renewcommand{\N}{\mathbb{N}} \N`
+            String.raw`\renewcommand{\O}{\mathcal{O}} \O`
         );
     });
 
