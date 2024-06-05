@@ -21,7 +21,6 @@ describe("unified-latex-to-pretext:break-on-boundaries", () => {
 
         // break-on-boundaries work done here
         breakOnBoundaries(ast);
-        // console.log(ast);
 
         expect(printRaw(ast)).toEqual(
             String.raw`\begin{_part}\title{Foo}Hi, this is a part\end{_part}\begin{_part}\title{Bar}This is another part\end{_part}`
@@ -51,7 +50,10 @@ describe("unified-latex-to-pretext:break-on-boundaries", () => {
         breakOnBoundaries(ast);
 
         expect(printRaw(ast)).toEqual(
-            String.raw`\begin{_part}\title{part1}\begin{_section}\title{Section1}Hi, this is a section\end{_section}\begin{_chapter}\title{chap1}This is a chapter\begin{_section}\title{Subsection2}\end{_section}\end{_chapter}\end{_part}`
+            String.raw`\begin{_part}\title{part1}` +
+                String.raw`\begin{_section}\title{Section1}Hi, this is a section\end{_section}` + 
+                String.raw`\begin{_chapter}\title{chap1}This is a chapter` + 
+                String.raw`\begin{_section}\title{Subsection2}\end{_section}\end{_chapter}\end{_part}`
         );
     });
 });
