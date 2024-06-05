@@ -25,7 +25,7 @@ describe("unified-latex-to-pretext:expand-user-deifned-macros", () => {
     });
 
     it("can expand renewcommand", () => {
-        value = String.raw`\renewcommand{\O}{\mathcal{O}} \mathcal{O}`; // not subbing at all
+        value = String.raw`\renewcommand{\O}{\mathcal{O}} \O`; // not subbing at all
 
         const parser = getParser();
         const ast = parser.parse(value);
@@ -33,24 +33,22 @@ describe("unified-latex-to-pretext:expand-user-deifned-macros", () => {
         ExpandUserDefinedMacros(ast);
 
         expect(printRaw(ast)).toEqual(
-            String.raw`\renewcommand{\O}{\mathcal{O}} \O`
+            String.raw`\renewcommand{\O}{\mathcal{O}} \mathcal{O}`
         );
     });
 
-    it("can expand multiple user-defined commands", () => {
+    it("can recursively expand multiple user-defined commands", () => {
         value = String.raw`\newcommand{\join}{\vee} 
                             \join
                             \renewcommand{\vee}{\foo}
-                            \join`;
+                            \vee`;
 
         const parser = getParser();
         const ast = parser.parse(value);
 
         ExpandUserDefinedMacros(ast);
 
-        expect(printRaw(ast)).toEqual(String.raw`\newcommand{\join}{\vee} 
-                                                \vee
-                                                \renewcommand{\vee}{\foo}
-                                                \foo`);
+        expect(printRaw(ast)).toEqual(String.raw`\newcommand{\join}{\vee} `+
+                                                String.raw`\foo \renewcommand{\vee}{\foo} \foo`);
     });
 });
