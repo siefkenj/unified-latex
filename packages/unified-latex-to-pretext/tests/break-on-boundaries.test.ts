@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import util from "util";
-import { getParser, parseMath } from "@unified-latex/unified-latex-util-parse";
+import { getParser } from "@unified-latex/unified-latex-util-parse";
 import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 import { breakOnBoundaries } from "../libs/break-on-boundaries";
 
@@ -27,30 +27,31 @@ describe("unified-latex-to-pretext:break-on-boundaries", () => {
             String.raw`\begin{_part}\title{Foo}Hi, this is a part\end{_part}\begin{_part}\title{Bar}This is another part\end{_part}`
         );
     });
-    it("can break on a subsection", () => {
-        value = String.raw`\subsection{subsection}
-                            Hi, this is a subsection`;
+
+    it("can break on a section", () => {
+        value = String.raw`\section{name}Hi, this is a subsection`;
 
         const parser = getParser();
         const ast = parser.parse(value);
 
         // break-on-boundaries work done here
+        breakOnBoundaries(ast);
 
-        expect(printRaw(ast)).toEqual(String.raw``);
+        expect(printRaw(ast)).toEqual(
+            String.raw`\begin{_section}\title{name}Hi, this is a subsection\end{_section}`
+        );
     });
-    it("can break on subsection between subsections properly", () => {
-        value = String.raw`\section{First Section}
-                            Hi, this is a section
-                            \subsection{Inner Subsection}
-                            This is a subsection
-                            \section{Second Subsection}
-                            This is another section`;
+    it("can break on combination of divisions", () => {
+        value = String.raw`\part{part1}\section{Section1}Hi, this is a section\chapter{chap1}This is a chapter\section{Subsection2}`;
 
         const parser = getParser();
         const ast = parser.parse(value);
 
         // break-on-boundaries work done here
+        breakOnBoundaries(ast);
 
-        expect(printRaw(ast)).toEqual(String.raw``);
+        expect(printRaw(ast)).toEqual(
+            String.raw`\begin{_part}\title{part1}\begin{_section}\title{Section1}Hi, this is a section\end{_section}\begin{_chapter}\title{chap1}This is a chapter\begin{_section}\title{Subsection2}\end{_section}\end{_chapter}\end{_part}`
+        );
     });
 });
