@@ -38,17 +38,22 @@ describe("unified-latex-to-pretext:expand-user-deifned-macros", () => {
     });
 
     it("can recursively expand multiple user-defined commands", () => {
-        value = String.raw`\newcommand{\join}{\vee} 
-                            \join
-                            \renewcommand{\vee}{\foo}
-                            \vee`;
+        value =
+            String.raw`\newcommand{\join}{\vee}` +
+            String.raw`\join` +
+            String.raw`\renewcommand{\vee}{\foo}` +
+            String.raw`\vee`;
 
         const parser = getParser();
         const ast = parser.parse(value);
 
         ExpandUserDefinedMacros(ast);
 
-        expect(printRaw(ast)).toEqual(String.raw`\newcommand{\join}{\vee} `+
-                                                String.raw`\foo \renewcommand{\vee}{\foo} \foo`);
+        expect(printRaw(ast)).toEqual(
+            String.raw`\newcommand{\join}{\vee}` +
+                String.raw`\foo` +
+                String.raw`\renewcommand{\vee}{\foo}` +
+                String.raw`\foo`
+        );
     });
 });
