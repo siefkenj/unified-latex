@@ -12,7 +12,7 @@ console.log = (...args) => {
 describe("unified-latex-to-pretext:report-unsupported-macro-katex", () => {
     let value: string;
 
-    it("can reported unsupported macros", () => {
+    it("can reported unsupported macros in mathmode", () => {
         value = String.raw`$\mathbb{R} \fakemacro{X}$`;
 
         const parser = getParser();
@@ -30,7 +30,7 @@ describe("unified-latex-to-pretext:report-unsupported-macro-katex", () => {
         expect(reportMacrosUnsupportedByKatex(ast)).toEqual([]);
     });
 
-    it("can not report any unsupported macros outside of math mode", () => {
+    it("can report no unsupported macros outside of math mode", () => {
         value = String.raw`\fakemacro`;
 
         const parser = getParser();
