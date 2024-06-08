@@ -12,7 +12,7 @@ console.log = (...args) => {
 describe("unified-latex-to-pretext:report-unsupported-macro-katex", () => {
     let value: string;
 
-    it("can reported unsupported macros in mathmode", () => {
+    it("can report unsupported macros in inline mathmode", () => {
         value = String.raw`$\mathbb{R} \fakemacro{X}$`;
 
         const parser = getParser();
@@ -30,7 +30,7 @@ describe("unified-latex-to-pretext:report-unsupported-macro-katex", () => {
         expect(reportMacrosUnsupportedByKatex(ast)).toEqual([]);
     });
 
-    it("can report no unsupported macros outside of math mode", () => {
+    it("doesn't report unsupported macros outside of math mode", () => {
         value = String.raw`\fakemacro`;
 
         const parser = getParser();
@@ -39,12 +39,30 @@ describe("unified-latex-to-pretext:report-unsupported-macro-katex", () => {
         expect(reportMacrosUnsupportedByKatex(ast)).toEqual([]);
     });
 
-    it("can report unsupported macros in text mode with a math anscestor", () => {
+    it("reports unsupported macros in text mode with a math anscestor", () => {
         value = String.raw`$\frac{1}{\text{ hi \unsupported}}$`;
 
         const parser = getParser();
         const ast = parser.parse(value);
 
         expect(reportMacrosUnsupportedByKatex(ast)).toEqual(["unsupported"]);
+    });
+
+    it("can report unsupported macros in display mathmode", () => {
+        value = String.raw`\[ \frac{a}{b} \fake \text{bar \baz}\] \bang`;
+
+        const parser = getParser();
+        const ast = parser.parse(value);
+
+        expect(reportMacrosUnsupportedByKatex(ast)).toEqual(["fake", "baz"]);
+    });
+
+    it("can report unsupported macros in equation environment", () => {
+        value = String.raw`\unsupported \begin{equation} \mathbb{N} \unsupported \text{\baz}\end{equation}`;
+
+        const parser = getParser();
+        const ast = parser.parse(value);
+
+        expect(reportMacrosUnsupportedByKatex(ast)).toEqual(["unsupported", "baz"]);
     });
 });
