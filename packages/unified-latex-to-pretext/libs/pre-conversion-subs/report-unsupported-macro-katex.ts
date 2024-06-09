@@ -1,7 +1,7 @@
 import * as Ast from "@unified-latex/unified-latex-types";
 import { anyMacro, match } from "@unified-latex/unified-latex-util-match";
 import { visit } from "@unified-latex/unified-latex-util-visit";
-import { KATEX_SUPPORT } from "./pre-conversion-subs/katex-subs";
+import { KATEX_SUPPORT } from "./katex-subs";
 
 /**
  * Return list of macros unsupported by Katex

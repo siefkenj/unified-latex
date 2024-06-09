@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import util from "util";
 import { getParser } from "@unified-latex/unified-latex-util-parse";
 import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
-import { expandUserDefinedMacros } from "@unified-latex/unified-latex-to-pretext/libs/expand-user-defined-macros";
+import { expandUserDefinedMacros } from "@unified-latex/unified-latex-to-pretext/libs/pre-conversion-subs/expand-user-defined-macros";
 
 // Make console.log pretty-print by default
 const origLog = console.log;
