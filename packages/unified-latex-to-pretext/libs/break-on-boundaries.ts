@@ -1,12 +1,19 @@
 import { env, m } from "@unified-latex/unified-latex-builder";
 import * as Ast from "@unified-latex/unified-latex-types";
 import { getNamedArgsContent } from "@unified-latex/unified-latex-util-arguments";
-import { anyMacro } from "@unified-latex/unified-latex-util-match";
-import { replaceNode } from "@unified-latex/unified-latex-util-replace";
+import {
+    anyEnvironment,
+    anyMacro,
+    match
+} from "@unified-latex/unified-latex-util-match";
+import {
+    replaceNode
+} from "@unified-latex/unified-latex-util-replace";
 import {
     splitOnMacro,
     unsplitOnMacro,
 } from "@unified-latex/unified-latex-util-split";
+import { visit } from "@unified-latex/unified-latex-util-visit";
 
 export function breakOnBoundaries(ast: Ast.Ast): void {
     const divisions = [
@@ -19,29 +26,65 @@ export function breakOnBoundaries(ast: Ast.Ast): void {
         "subparagraph",
     ];
 
-    // get list of nodes
-    const content = (ast as Ast.Root).content;
+    const new_boundaries = [
+        "_part",
+        "_chapter",
+        "_section",
+        "_subsection",
+        "_subsubsection",
+        "_paragraph",
+        "_subparagraph",
+    ];
 
-    // split by parts first
-    const splits = splitOnMacro(content, "part");
+    visit(ast, (node, info) => {
+        // needs to be an environment, root, or group node
+        if (
+            !(anyEnvironment(node) || node.type === "root" || match.group(node)) ||
+            info.context.hasMathModeAncestor
+        ) {
+            return;
+        }
 
-    // keep each segment seperated
-    for (let i = 0; i < splits.segments.length; i++) {
-        splits.segments[i] = breakOnChapters(splits.segments[i]);
-    }
+        // if it's an environment, make sure it isn't a newly created one
+        else if (anyEnvironment(node) && new_boundaries.includes(node.env)) {
+            return;
+        }
 
-    // create the environments
-    createEnvironments(splits, "_part");
+        // now break up the divisions, starting at part
+        node.content = breakUp(node.content, divisions, 0);
+    });
 
-    // rebuild the ast
-    (ast as Ast.Root).content = unsplitOnMacro(splits);
-
-    // remove all empty nodes
+    // remove all old division nodes
     replaceNode(ast, (node) => {
         if (anyMacro(node) && divisions.includes(node.content)) {
             return null;
         }
     });
+}
+
+function breakUp(
+    content: Ast.Node[],
+    divisions: string[],
+    index: number
+): Ast.Node[] {
+    // went through all the divisions
+    if (index > 6) {
+        return content;
+    }
+
+    const splits = splitOnMacro(content, divisions[index]);
+
+    // go through each segment to recursively break
+    for (let i = 0; i < splits.segments.length; i++) {
+        splits.segments[i] = breakUp(splits.segments[i], divisions, index + 1);
+    }
+
+    createEnvironments(splits, "_" + divisions[index]);
+
+    index++; // go to next division
+
+    // rebuild this part of the ast
+    return unsplitOnMacro(splits);
 }
 
 function createEnvironments(
@@ -63,37 +106,4 @@ function createEnvironments(
         // wrap segment around an environment
         splits.segments[i] = [env(name, splits.segments[i])];
     }
-}
-
-function breakOnChapters(segment: Ast.Node[]): Ast.Node[] {
-    // split by chapters
-    const splits = splitOnMacro(segment, "chapter");
-    console.log(splits);
-
-    // keep each segment seperated
-    for (let i = 0; i < splits.segments.length; i++) {
-        splits.segments[i] = breakOnSections(splits.segments[i]);
-    }
-
-    // create the environments
-    createEnvironments(splits, "_chapter");
-
-    // rebuild the ast
-    return unsplitOnMacro(splits);
-}
-
-function breakOnSections(segment: Ast.Node[]): Ast.Node[] {
-    // split by chapters
-    const splits = splitOnMacro(segment, "section");
-
-    // keep each segment seperated
-    // for (let i = 0; i < splits.segments.length; i++) {
-    //     splits.segments[i] = breakOnSections(splits.segments[i]);
-    // }
-
-    // create the environments
-    createEnvironments(splits, "_section");
-
-    // rebuild the ast
-    return unsplitOnMacro(splits);
 }
