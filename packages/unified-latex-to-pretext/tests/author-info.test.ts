@@ -1,17 +1,8 @@
 import { describe, it, expect } from "vitest";
 import Prettier from "prettier";
 import util from "util";
-import { unifiedLatexToPretext } from "../libs/unified-latex-plugin-to-pretext";
-import { htmlLike } from "@unified-latex/unified-latex-util-html-like";
-import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
-import { convertToPretext, xmlCompilePlugin } from "../libs/convert-to-pretext";
-import { Node } from "@unified-latex/unified-latex-types";
-import {
-    getParser,
-    unifiedLatexFromString,
-} from "@unified-latex/unified-latex-util-parse";
-import { unified } from "unified";
-import { getArgsContent } from "@unified-latex/unified-latex-util-arguments";
+import { getParser } from "@unified-latex/unified-latex-util-parse";
+import { renderAuthorInfo } from "../libs/author-info";
 
 function normalizeHtml(str: string) {
     try {
@@ -29,4 +20,32 @@ console.log = (...args) => {
     origLog(...args.map((x) => util.inspect(x, false, 10, true)));
 };
 
-describe("unified-latex-to-pretext:author-info", () => {});
+describe("unified-latex-to-pretext:author-info", () => {
+    let html: string;
+    const parser = getParser();
+
+    it("converts author, department, institution, and email information", () => {
+        html =
+            "\\author{First Middle LastName} \n \\address{Department, Address}";
+        expect(renderAuthorInfo(parser.parse(html))).toEqual(
+            normalizeHtml(
+                "<author>\n <personname>First Middle LastName</personname>\n <department>Department, Address</department>\n </author>"
+            )
+        );
+
+        html = "\\affil{Affiliation}";
+        expect(renderAuthorInfo(parser.parse(html))).toEqual(
+            normalizeHtml(
+                "<author>\n <institution>Affiliation</institution>\n </author>"
+            )
+        );
+
+        html =
+            "\\author{First Author} \n \\email{example@example.com} \n \\author{Second Author}";
+        expect(renderAuthorInfo(parser.parse(html))).toEqual(
+            normalizeHtml(
+                "<author>\n <personname>First Author</personname>\n <email>example@example.com</email>\n <personname>Second Author</personname> \n </author>"
+            )
+        );
+    });
+});
