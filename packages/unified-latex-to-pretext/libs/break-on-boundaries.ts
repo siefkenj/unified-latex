@@ -4,17 +4,18 @@ import { getNamedArgsContent } from "@unified-latex/unified-latex-util-arguments
 import {
     anyEnvironment,
     anyMacro,
-    match
+    match,
 } from "@unified-latex/unified-latex-util-match";
-import {
-    replaceNode
-} from "@unified-latex/unified-latex-util-replace";
+import { replaceNode } from "@unified-latex/unified-latex-util-replace";
 import {
     splitOnMacro,
     unsplitOnMacro,
 } from "@unified-latex/unified-latex-util-split";
 import { visit } from "@unified-latex/unified-latex-util-visit";
 
+/**
+ * Breaks up division macros into environments
+ */
 export function breakOnBoundaries(ast: Ast.Ast): void {
     const divisions = [
         "part",
@@ -39,7 +40,11 @@ export function breakOnBoundaries(ast: Ast.Ast): void {
     visit(ast, (node, info) => {
         // needs to be an environment, root, or group node
         if (
-            !(anyEnvironment(node) || node.type === "root" || match.group(node)) ||
+            !(
+                anyEnvironment(node) ||
+                node.type === "root" ||
+                match.group(node)
+            ) ||
             info.context.hasMathModeAncestor
         ) {
             return;
@@ -67,7 +72,7 @@ function breakUp(
     divisions: string[],
     index: number
 ): Ast.Node[] {
-    // went through all the divisions
+    // broke up all divisions
     if (index > 6) {
         return content;
     }
@@ -89,12 +94,12 @@ function breakUp(
 
 function createEnvironments(
     splits: { segments: Ast.Node[][]; macros: Ast.Macro[] },
-    name: string
+    newEnviron: string
 ): void {
     // loop through segments (skipping first segment)
     for (let i = 1; i < splits.segments.length; i++) {
         // create the title
-        const title = getNamedArgsContent(splits.macros[i - 1] || [])["title"];
+        const title = getNamedArgsContent(splits.macros[i - 1])["title"];
 
         // add title to the front of the segment
         if (title) {
@@ -103,7 +108,7 @@ function createEnvironments(
             );
         }
 
-        // wrap segment around an environment
-        splits.segments[i] = [env(name, splits.segments[i])];
+        // wrap segment around a new environment
+        splits.segments[i] = [env(newEnviron, splits.segments[i])];
     }
 }
