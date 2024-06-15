@@ -22,7 +22,7 @@ describe("unified-latex-to-pretext:break-on-boundaries", () => {
         breakOnBoundaries(ast);
 
         expect(printRaw(ast)).toEqual(
-            String.raw`\begin{_part}\title{Foo}Hi, this is a part\end{_part}\begin{_part}\title{Bar}This is another part\end{_part}`
+            String.raw`\begin{_part}[Foo]Hi, this is a part\end{_part}\begin{_part}[Bar]This is another part\end{_part}`
         );
     });
 
@@ -35,10 +35,10 @@ describe("unified-latex-to-pretext:break-on-boundaries", () => {
         breakOnBoundaries(ast);
 
         expect(printRaw(ast)).toEqual(
-            String.raw`\begin{_part}\title{part1}` +
-                String.raw`\begin{_section}\title{Section1}Hi, this is a section\end{_section}` +
-                String.raw`\begin{_chapter}\title{chap1}This is a chapter` +
-                String.raw`\begin{_section}\title{Subsection2}\end{_section}\end{_chapter}\end{_part}`
+            String.raw`\begin{_part}[part1]` +
+                String.raw`\begin{_section}[Section1]Hi, this is a section\end{_section}` +
+                String.raw`\begin{_chapter}[chap1]This is a chapter` +
+                String.raw`\begin{_section}[Subsection2]\end{_section}\end{_chapter}\end{_part}`
         );
     });
 
@@ -51,8 +51,8 @@ describe("unified-latex-to-pretext:break-on-boundaries", () => {
         breakOnBoundaries(ast);
 
         expect(printRaw(ast)).toEqual(
-            String.raw`\begin{document}\begin{_section}\title{name}Hi, this is a subsection` +
-                String.raw`\begin{_subsubsection}\title{title}description.\end{_subsubsection}` +
+            String.raw`\begin{document}\begin{_section}[name]Hi, this is a subsection` +
+                String.raw`\begin{_subsubsection}[title]description.\end{_subsubsection}` +
                 String.raw`\end{_section}\end{document}`
         );
     });
@@ -68,8 +68,8 @@ describe("unified-latex-to-pretext:break-on-boundaries", () => {
         breakOnBoundaries(ast);
 
         expect(printRaw(ast)).toEqual(
-            String.raw`\begin{center}\begin{_part}\title{name}Hi, this is a part` +
-                String.raw`\begin{environ}\begin{_subparagraph}\title{title}description.` +
+            String.raw`\begin{center}\begin{_part}[name]Hi, this is a part` +
+                String.raw`\begin{environ}\begin{_subparagraph}[title]description.` +
                 String.raw`\end{_subparagraph}\end{environ}\end{_part}\end{center}`
         );
     });
@@ -86,8 +86,8 @@ describe("unified-latex-to-pretext:break-on-boundaries", () => {
         breakOnBoundaries(ast);
 
         expect(printRaw(ast)).toEqual(
-            String.raw`\begin{document}\begin{_chapter}\title{Chap}{\begin{_paragraph}\title{Intro}Introduction.` +
-                String.raw`\begin{center}\begin{_subparagraph}\title{Conclusion}Conclusion.\end{_subparagraph}` +
+            String.raw`\begin{document}\begin{_chapter}[Chap]{\begin{_paragraph}[Intro]Introduction.` +
+                String.raw`\begin{center}\begin{_subparagraph}[Conclusion]Conclusion.\end{_subparagraph}` +
                 String.raw`\end{center}\end{_paragraph}}Chapter finished.\end{_chapter}\end{document}`
         );
     });
