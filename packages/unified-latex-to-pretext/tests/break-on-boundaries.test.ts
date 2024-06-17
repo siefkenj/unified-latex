@@ -43,7 +43,7 @@ describe("unified-latex-to-pretext:break-on-boundaries", () => {
     });
 
     it("can break on divisions wrapped around by a document environment", () => {
-        value = String.raw`\begin{document}\section{name}Hi, this is a subsection\subsubsection{title}description.\end{document}`;
+        value = String.raw`\begin{document}\section{Baz}Hi, this is a subsection\subsubsection{Foo}description.\end{document}`;
 
         const parser = getParser();
         const ast = parser.parse(value);
@@ -51,8 +51,8 @@ describe("unified-latex-to-pretext:break-on-boundaries", () => {
         breakOnBoundaries(ast);
 
         expect(printRaw(ast)).toEqual(
-            String.raw`\begin{document}\begin{_section}[name]Hi, this is a subsection` +
-                String.raw`\begin{_subsubsection}[title]description.\end{_subsubsection}` +
+            String.raw`\begin{document}\begin{_section}[Baz]Hi, this is a subsection` +
+                String.raw`\begin{_subsubsection}[Foo]description.\end{_subsubsection}` +
                 String.raw`\end{_section}\end{document}`
         );
     });
@@ -86,9 +86,57 @@ describe("unified-latex-to-pretext:break-on-boundaries", () => {
         breakOnBoundaries(ast);
 
         expect(printRaw(ast)).toEqual(
-            String.raw`\begin{document}\begin{_chapter}[Chap]{\begin{_paragraph}[Intro]Introduction.` +
+            String.raw`\begin{document}\begin{_chapter}[Chap]\begin{_paragraph}[Intro]Introduction.` +
                 String.raw`\begin{center}\begin{_subparagraph}[Conclusion]Conclusion.\end{_subparagraph}` +
-                String.raw`\end{center}\end{_paragraph}}Chapter finished.\end{_chapter}\end{document}`
+                String.raw`\end{center}\end{_paragraph}Chapter finished.\end{_chapter}\end{document}`
+        );
+    });
+
+    it("can break on divisions in nested groups", () => {
+        value =
+            String.raw`\part{part1}{\subsection{Intro}description.` +
+            String.raw`\subsubsection{body}more text.{\subparagraph{Conclusion}Conclusion.}}` +
+            String.raw``;
+
+        const parser = getParser();
+        const ast = parser.parse(value);
+
+        breakOnBoundaries(ast);
+
+        expect(printRaw(ast)).toEqual(
+            String.raw`\begin{_part}[part1]\begin{_subsection}[Intro]description.` +
+                String.raw`\begin{_subsubsection}[body]more text.\begin{_subparagraph}[Conclusion]Conclusion.` +
+                String.raw`\end{_subparagraph}\end{_subsubsection}\end{_subsection}\end{_part}`
+        );
+    });
+
+    it("can break on divisions with latex in their titles", () => {
+        value = String.raw`\chapter{$x = \frac{1}{2}$}Chapter 1\subsection{\"name\_1\" \(\mathbb{R}\)}This is subsection`;
+
+        const parser = getParser();
+        const ast = parser.parse(value);
+
+        breakOnBoundaries(ast);
+
+        expect(printRaw(ast)).toEqual(
+            String.raw`\begin{_chapter}[$x = \frac{1}{2}$]Chapter 1` +
+                String.raw`\begin{_subsection}[\"name\_1\" \(\mathbb{R}\)]This is subsection` +
+                String.raw`\end{_subsection}\end{_chapter}`
+        );
+    });
+
+    it("can break on divisions and trim whitespace around division beginnings and endings", () => {
+        value = String.raw` \subsubsection{first}subsection 1  \paragraph{body}This is paragraph    `;
+
+        const parser = getParser();
+        const ast = parser.parse(value);
+
+        breakOnBoundaries(ast);
+
+        expect(printRaw(ast)).toEqual(
+            String.raw`\begin{_subsubsection}[first]subsection 1` +
+                String.raw`\begin{_paragraph}[body]This is paragraph` +
+                String.raw`\end{_paragraph}\end{_subsubsection}`
         );
     });
 });

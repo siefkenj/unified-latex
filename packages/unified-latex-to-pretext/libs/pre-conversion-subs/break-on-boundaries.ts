@@ -1,4 +1,4 @@
-import { env, m, arg } from "@unified-latex/unified-latex-builder";
+import { env, arg } from "@unified-latex/unified-latex-builder";
 import * as Ast from "@unified-latex/unified-latex-types";
 import { getNamedArgsContent } from "@unified-latex/unified-latex-util-arguments";
 import {
@@ -15,8 +15,10 @@ import { visit } from "@unified-latex/unified-latex-util-visit";
 
 /**
  * Breaks up division macros into environments
+ *
+ * Returns a list of warning messages if a group was hoisted. CHANGE FORMAT?
  */
-export function breakOnBoundaries(ast: Ast.Ast): void {
+export function breakOnBoundaries(ast: Ast.Ast): string[] {
     // messages for any groups removed
     const messages: string[] = [];
 
@@ -48,11 +50,11 @@ export function breakOnBoundaries(ast: Ast.Ast): void {
                 node.type === "root" ||
                 match.group(node)
             ) ||
+            // skip math mode
             info.context.hasMathModeAncestor
         ) {
             return;
         }
-
         // if it's an environment, make sure it isn't a newly created one
         else if (anyEnvironment(node) && newBoundaries.includes(node.env)) {
             return;
@@ -62,12 +64,19 @@ export function breakOnBoundaries(ast: Ast.Ast): void {
         node.content = breakUp(node.content, divisions, 0);
     });
 
-    // remove all old division nodes
     replaceNode(ast, (node) => {
+        // remove all old division nodes
         if (anyMacro(node) && divisions.includes(node.content)) {
             return null;
         }
+        // remove groups
+        else if (match.group(node)) {
+            messages.push("Hoisted out of a group."); // prob make more specific
+            return node.content;
+        }
     });
+
+    return messages;
 }
 
 /**
@@ -92,8 +101,6 @@ function breakUp(
 
     createEnvironments(splits, "_" + divisions[depth]);
 
-    depth++; // go to next division
-
     // rebuild this part of the ast
     return unsplitOnMacro(splits);
 }
@@ -110,14 +117,10 @@ function createEnvironments(
 
         // create title argument
         if (title) {
-            titleArg.push(
-                arg((title[0] as Ast.Macro).content, { braces: "[]" })
-            );
+            titleArg.push(arg(title, { braces: "[]" }));
         }
 
-        console.log(titleArg);
-
-        // wrap segment around a new environment
+        // wrap segment with a new environment
         splits.segments[i] = [env(newEnviron, splits.segments[i], titleArg)];
     }
 }
