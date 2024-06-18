@@ -13,6 +13,17 @@ import {
 } from "@unified-latex/unified-latex-util-split";
 import { visit } from "@unified-latex/unified-latex-util-visit";
 
+// all divisions [division macro, environment]
+const divisions: [string, string][] = [
+    ["part", "_part"],
+    ["chapter", "_chapter"],
+    ["section", "_section"],
+    ["subsection", "_subsection"],
+    ["subsubsection", "_subsubsection"],
+    ["paragraph", "_paragraph"],
+    ["subparagraph", "_subparagraph"],
+];
+
 /**
  * Breaks up division macros into environments
  *
@@ -21,26 +32,6 @@ import { visit } from "@unified-latex/unified-latex-util-visit";
 export function breakOnBoundaries(ast: Ast.Ast): string[] {
     // messages for any groups removed
     const messages: string[] = [];
-
-    const divisions = [
-        "part",
-        "chapter",
-        "section",
-        "subsection",
-        "subsubsection",
-        "paragraph",
-        "subparagraph",
-    ];
-
-    const newBoundaries = [
-        "_part",
-        "_chapter",
-        "_section",
-        "_subsection",
-        "_subsubsection",
-        "_paragraph",
-        "_subparagraph",
-    ];
 
     visit(ast, (node, info) => {
         // needs to be an environment, root, or group node
@@ -56,7 +47,10 @@ export function breakOnBoundaries(ast: Ast.Ast): string[] {
             return;
         }
         // if it's an environment, make sure it isn't a newly created one
-        else if (anyEnvironment(node) && newBoundaries.includes(node.env)) {
+        else if (
+            anyEnvironment(node) &&
+            divisions.map((x) => x[1]).includes(node.env)
+        ) {
             return;
         }
 
@@ -66,7 +60,10 @@ export function breakOnBoundaries(ast: Ast.Ast): string[] {
 
     replaceNode(ast, (node) => {
         // remove all old division nodes
-        if (anyMacro(node) && divisions.includes(node.content)) {
+        if (
+            anyMacro(node) &&
+            divisions.map((x) => x[0]).includes(node.content)
+        ) {
             return null;
         }
         // remove groups
@@ -80,11 +77,11 @@ export function breakOnBoundaries(ast: Ast.Ast): string[] {
 }
 
 /**
- * Recursively breaks up the ast at the parts macro to the subparagraph macro
+ * Recursively breaks up the ast at the division macros
  */
 function breakUp(
     content: Ast.Node[],
-    divisions: string[],
+    divisions: [string, string][],
     depth: number
 ): Ast.Node[] {
     // broke up all divisions
@@ -92,19 +89,22 @@ function breakUp(
         return content;
     }
 
-    const splits = splitOnMacro(content, divisions[depth]);
+    const splits = splitOnMacro(content, divisions[depth][0]);
 
     // go through each segment to recursively break
     for (let i = 0; i < splits.segments.length; i++) {
         splits.segments[i] = breakUp(splits.segments[i], divisions, depth + 1);
     }
 
-    createEnvironments(splits, "_" + divisions[depth]);
+    createEnvironments(splits, divisions[depth][1]);
 
     // rebuild this part of the ast
     return unsplitOnMacro(splits);
 }
 
+/**
+ * Create the new environments that replace the division macros
+ */
 function createEnvironments(
     splits: { segments: Ast.Node[][]; macros: Ast.Macro[] },
     newEnviron: string
