@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import Prettier from "prettier";
 import util from "util";
 import { getParser } from "@unified-latex/unified-latex-util-parse";
-import { renderAuthorInfo } from "../libs/author-info";
+import { gatherAuthorInfo, renderAuthorInfo } from "../libs/author-info";
 
 function normalizeHtml(str: string) {
     try {
@@ -21,30 +21,30 @@ console.log = (...args) => {
 };
 
 describe("unified-latex-to-pretext:author-info", () => {
-    let html: string;
+    let sample: string;
     const parser = getParser();
 
     it("converts author, department, institution, and email information", () => {
-        html =
-            "\\author{First Middle LastName} \n \\address{Department, Address}";
-        expect(renderAuthorInfo(parser.parse(html))).toEqual(
+        sample =
+            "\\author{First Middle LastName} \\address{Department, Address}";
+        expect(gatherAuthorInfo(parser.parse(sample))).toEqual(
             normalizeHtml(
-                "<author>\n <personname>First Middle LastName</personname>\n <department>Department, Address</department>\n </author>"
+                "<author> <personname>First Middle LastName</personname> <department>Department, Address</department> </author>"
             )
         );
 
-        html = "\\affil{Affiliation}";
-        expect(renderAuthorInfo(parser.parse(html))).toEqual(
+        sample = "\\affil{Affiliation}";
+        expect(gatherAuthorInfo(parser.parse(sample))).toEqual(
             normalizeHtml(
-                "<author>\n <institution>Affiliation</institution>\n </author>"
+                "<author> <institution>Affiliation</institution> </author>"
             )
         );
 
-        html =
-            "\\author{First Author} \n \\email{example@example.com} \n \\author{Second Author}";
-        expect(renderAuthorInfo(parser.parse(html))).toEqual(
+        sample =
+            "\\author{First Author} \\email{example@example.com} \\author{Second Author}";
+        expect(gatherAuthorInfo(parser.parse(sample))).toEqual(
             normalizeHtml(
-                "<author>\n <personname>First Author</personname>\n <email>example@example.com</email>\n <personname>Second Author</personname> \n </author>"
+                "<author> <personname>First Author</personname> <email>example@example.com</email> <personname>Second Author</personname> </author>"
             )
         );
     });
