@@ -6,6 +6,7 @@ import {
     anyMacro,
     match,
 } from "@unified-latex/unified-latex-util-match";
+import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 import { replaceNode } from "@unified-latex/unified-latex-util-replace";
 import {
     splitOnMacro,
@@ -25,9 +26,8 @@ const divisions: [string, string][] = [
 ];
 
 /**
- * Breaks up division macros into environments
- *
- * Returns a list of warning messages if a group was hoisted. CHANGE FORMAT?
+ * Breaks up division macros into environments. Returns a list of warning messages
+ * for any groups that were removed.
  */
 export function breakOnBoundaries(ast: Ast.Ast): string[] {
     // messages for any groups removed
@@ -54,6 +54,15 @@ export function breakOnBoundaries(ast: Ast.Ast): string[] {
             return;
         }
 
+        // if it's a group, push a warning message
+        if (match.group(node)) {
+            messages.push(
+                `Warning: hoisted out of a group, which might break the LaTeX code. { group: ${printRaw(
+                    node
+                )} }`
+            );
+        }
+
         // now break up the divisions, starting at part
         node.content = breakUp(node.content, divisions, 0);
     });
@@ -68,7 +77,6 @@ export function breakOnBoundaries(ast: Ast.Ast): string[] {
         }
         // remove groups
         else if (match.group(node)) {
-            messages.push("Hoisted out of a group."); // prob make more specific
             return node.content;
         }
     });
@@ -77,7 +85,7 @@ export function breakOnBoundaries(ast: Ast.Ast): string[] {
 }
 
 /**
- * Recursively breaks up the ast at the division macros
+ * Recursively breaks up the ast at the division macros.
  */
 function breakUp(
     content: Ast.Node[],
