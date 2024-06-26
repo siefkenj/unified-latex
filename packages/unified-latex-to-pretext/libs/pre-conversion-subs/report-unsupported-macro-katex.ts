@@ -4,7 +4,7 @@ import { visit } from "@unified-latex/unified-latex-util-visit";
 import { KATEX_SUPPORT } from "./katex-subs";
 
 /**
- * Return list of macros unsupported by Katex
+ * Return a list of macros used in ast that are unsupported by KaTeX
  */
 export function reportMacrosUnsupportedByKatex(ast: Ast.Ast): string[] {
     const unsupported: string[] = [];
