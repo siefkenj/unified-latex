@@ -14,7 +14,10 @@ import {
 } from "@unified-latex/unified-latex-util-split";
 import { visit } from "@unified-latex/unified-latex-util-visit";
 
-// all divisions [division macro, environment]
+/**
+ * All the divisions, where each item is [division macro, environment]
+ * Note that this is ordered from the "largest" division to the "smallest" division.
+ */
 const divisions: [string, string][] = [
     ["part", "_part"],
     ["chapter", "_chapter"],
@@ -29,9 +32,9 @@ const divisions: [string, string][] = [
  * Breaks up division macros into environments. Returns a list of warning messages
  * for any groups that were removed.
  */
-export function breakOnBoundaries(ast: Ast.Ast): string[] {
+export function breakOnBoundaries(ast: Ast.Ast): { messages: string[] } {
     // messages for any groups removed
-    const messages: string[] = [];
+    const messagesLst: { messages: string[] } = { messages: [] };
 
     visit(ast, (node, info) => {
         // needs to be an environment, root, or group node
@@ -56,7 +59,7 @@ export function breakOnBoundaries(ast: Ast.Ast): string[] {
 
         // if it's a group, push a warning message
         if (match.group(node)) {
-            messages.push(
+            messagesLst.messages.push(
                 `Warning: hoisted out of a group, which might break the LaTeX code. { group: ${printRaw(
                     node
                 )} }`
@@ -81,11 +84,13 @@ export function breakOnBoundaries(ast: Ast.Ast): string[] {
         }
     });
 
-    return messages;
+    console.log(messagesLst);
+
+    return messagesLst;
 }
 
 /**
- * Recursively breaks up the ast at the division macros.
+ * Recursively breaks up the AST at the division macros.
  */
 function breakUp(
     content: Ast.Node[],

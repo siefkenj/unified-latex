@@ -19,7 +19,7 @@ describe("unified-latex-to-pretext:break-on-boundaries", () => {
         const parser = getParser();
         const ast = parser.parse(value);
 
-        expect(breakOnBoundaries(ast)).toEqual([]);
+        expect(breakOnBoundaries(ast)).toEqual({ messages: [] });
 
         expect(printRaw(ast)).toEqual(
             String.raw`\begin{_part}[Foo]Hi, this is a part\end{_part}\begin{_part}[Bar]This is another part\end{_part}`
@@ -32,10 +32,11 @@ describe("unified-latex-to-pretext:break-on-boundaries", () => {
         const parser = getParser();
         const ast = parser.parse(value);
 
-        expect(breakOnBoundaries(ast)).toEqual([]);
+        expect(breakOnBoundaries(ast)).toEqual({ messages: [] });
 
         expect(printRaw(ast)).toEqual(
-            String.raw`\begin{_part}[part1]` +
+            "" +
+                String.raw`\begin{_part}[part1]` +
                 String.raw`\begin{_section}[Section1]Hi, this is a section\end{_section}` +
                 String.raw`\begin{_chapter}[chap1]This is a chapter` +
                 String.raw`\begin{_section}[Subsection2]\end{_section}\end{_chapter}\end{_part}`
@@ -48,7 +49,7 @@ describe("unified-latex-to-pretext:break-on-boundaries", () => {
         const parser = getParser();
         const ast = parser.parse(value);
 
-        expect(breakOnBoundaries(ast)).toEqual([]);
+        expect(breakOnBoundaries(ast)).toEqual({ messages: [] });
 
         expect(printRaw(ast)).toEqual(
             String.raw`\begin{document}\begin{_section}[Baz]Hi, this is a subsection` +
@@ -65,7 +66,7 @@ describe("unified-latex-to-pretext:break-on-boundaries", () => {
         const parser = getParser();
         const ast = parser.parse(value);
 
-        expect(breakOnBoundaries(ast)).toEqual([]);
+        expect(breakOnBoundaries(ast)).toEqual({ messages: [] });
 
         expect(printRaw(ast)).toEqual(
             String.raw`\begin{center}\begin{_part}[name]Hi, this is a part` +
@@ -83,10 +84,12 @@ describe("unified-latex-to-pretext:break-on-boundaries", () => {
         const parser = getParser();
         const ast = parser.parse(value);
 
-        expect(breakOnBoundaries(ast)).toEqual([
-            String.raw`Warning: hoisted out of a group, which might break the LaTeX code. ` +
-                String.raw`{ group: {\paragraph{Intro}Introduction.\begin{center}\subparagraph{Conclusion}Conclusion.\end{center}} }`,
-        ]);
+        expect(breakOnBoundaries(ast)).toEqual({
+            messages: [
+                String.raw`Warning: hoisted out of a group, which might break the LaTeX code. ` +
+                    String.raw`{ group: {\paragraph{Intro}Introduction.\begin{center}\subparagraph{Conclusion}Conclusion.\end{center}} }`,
+            ],
+        });
 
         expect(printRaw(ast)).toEqual(
             String.raw`\begin{document}\begin{_chapter}[Chap]\begin{_paragraph}[Intro]Introduction.` +
@@ -103,12 +106,14 @@ describe("unified-latex-to-pretext:break-on-boundaries", () => {
         const parser = getParser();
         const ast = parser.parse(value);
 
-        expect(breakOnBoundaries(ast)).toEqual([
-            String.raw`Warning: hoisted out of a group, which might break the LaTeX code. ` +
-                String.raw`{ group: {\subsection{Intro}description.\subsubsection{body}more text.{\subparagraph{Conclusion}Conclusion.}} }`,
-            String.raw`Warning: hoisted out of a group, which might break the LaTeX code. ` +
-                String.raw`{ group: {\subparagraph{Conclusion}Conclusion.} }`,
-        ]);
+        expect(breakOnBoundaries(ast)).toEqual({
+            messages: [
+                String.raw`Warning: hoisted out of a group, which might break the LaTeX code. ` +
+                    String.raw`{ group: {\subsection{Intro}description.\subsubsection{body}more text.{\subparagraph{Conclusion}Conclusion.}} }`,
+                String.raw`Warning: hoisted out of a group, which might break the LaTeX code. ` +
+                    String.raw`{ group: {\subparagraph{Conclusion}Conclusion.} }`,
+            ],
+        });
 
         expect(printRaw(ast)).toEqual(
             String.raw`\begin{_part}[part1]\begin{_subsection}[Intro]description.` +
@@ -118,16 +123,16 @@ describe("unified-latex-to-pretext:break-on-boundaries", () => {
     });
 
     it("can break on divisions with latex in their titles", () => {
-        value = String.raw`\chapter{$x = \frac{1}{2}$}Chapter 1\subsection{\"name\_1\" \(\mathbb{R}\)}This is subsection`;
+        value = String.raw`\chapter{$x = \frac{1}{2}$}Chapter 1\subsection{\"name\_1\" \$}This is subsection`;
 
         const parser = getParser();
         const ast = parser.parse(value);
 
-        expect(breakOnBoundaries(ast)).toEqual([]);
+        expect(breakOnBoundaries(ast)).toEqual({ messages: [] });
 
         expect(printRaw(ast)).toEqual(
             String.raw`\begin{_chapter}[$x = \frac{1}{2}$]Chapter 1` +
-                String.raw`\begin{_subsection}[\"name\_1\" \(\mathbb{R}\)]This is subsection` +
+                String.raw`\begin{_subsection}[\"name\_1\" \$]This is subsection` +
                 String.raw`\end{_subsection}\end{_chapter}`
         );
     });
@@ -138,7 +143,7 @@ describe("unified-latex-to-pretext:break-on-boundaries", () => {
         const parser = getParser();
         const ast = parser.parse(value);
 
-        expect(breakOnBoundaries(ast)).toEqual([]);
+        expect(breakOnBoundaries(ast)).toEqual({ messages: [] });
 
         expect(printRaw(ast)).toEqual(
             String.raw`\begin{_subsubsection}[first]subsection 1` +
