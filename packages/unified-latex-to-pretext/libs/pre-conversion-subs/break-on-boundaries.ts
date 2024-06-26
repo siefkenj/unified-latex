@@ -36,6 +36,9 @@ export function breakOnBoundaries(ast: Ast.Ast): { messages: string[] } {
     // messages for any groups removed
     const messagesLst: { messages: string[] } = { messages: [] };
 
+    // check if a macro is a division macro
+    const isDivision = match.createMacroMatcher(divisions.map((x) => x[0]));
+
     visit(ast, (node, info) => {
         // needs to be an environment, root, or group node
         if (
@@ -72,10 +75,7 @@ export function breakOnBoundaries(ast: Ast.Ast): { messages: string[] } {
 
     replaceNode(ast, (node) => {
         // remove all old division nodes
-        if (
-            anyMacro(node) &&
-            divisions.map((x) => x[0]).includes(node.content)
-        ) {
+        if (anyMacro(node) && isDivision(node)) {
             return null;
         }
         // remove groups
