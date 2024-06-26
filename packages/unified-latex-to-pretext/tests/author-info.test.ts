@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import Prettier from "prettier";
 import util from "util";
 import { getParser } from "@unified-latex/unified-latex-util-parse";
-import { gatherAuthorInfo, renderAuthorInfo } from "../libs/author-info";
+import { gatherAuthorInfo } from "../libs/author-info";
 
 function normalizeHtml(str: string) {
     try {
@@ -24,9 +24,9 @@ describe("unified-latex-to-pretext:author-info", () => {
     let sample: string;
     const parser = getParser();
 
-    it("converts author, department, institution, and email information", () => {
+    it("converts author name, department, institution, and email information", () => {
         sample =
-            "\\author{First Middle LastName} \\address{Department, Address}";
+            "\\author{First Middle LastName} \n \\address{Department, Address}";
         expect(gatherAuthorInfo(parser.parse(sample))).toEqual(
             normalizeHtml(
                 "<author> <personname>First Middle LastName</personname> <department>Department, Address</department> </author>"
