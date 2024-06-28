@@ -111,7 +111,7 @@ describe("unified-latex-to-pretext:break-on-boundaries", () => {
                 String.raw`Warning: hoisted out of a group, which might break the LaTeX code. ` +
                     String.raw`{ group: {\subsection{Intro}description.\subsubsection{body}more text.{\subparagraph{Conclusion}Conclusion.}} }`,
                 String.raw`Warning: hoisted out of a group, which might break the LaTeX code. ` +
-                    String.raw`{ group: {\subparagraph{Conclusion}Conclusion.} }`,
+                    String.raw`{ group: {\subparagraph{Conclusion}Conclusion.} }`, // ** Doesn't keep nested group
             ],
         });
 
@@ -146,7 +146,7 @@ describe("unified-latex-to-pretext:break-on-boundaries", () => {
         expect(breakOnBoundaries(ast)).toEqual({ messages: [] });
 
         expect(printRaw(ast)).toEqual(
-            String.raw`\begin{_subsubsection}[first]subsection 1` +
+            String.raw`\begin{_subsubsection}[first]subsection 1 ` +
                 String.raw`\begin{_paragraph}[body]This is paragraph` +
                 String.raw`\end{_paragraph}\end{_subsubsection}`
         );
