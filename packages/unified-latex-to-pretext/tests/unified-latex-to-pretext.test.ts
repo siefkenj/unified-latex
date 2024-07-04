@@ -35,7 +35,7 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
 
     it.skip("wrap pars and streaming commands", () => {
         html = process("a\n\nb");
-        expect(html).toEqual("<p>a</p><p>b</p>");  // CORRECT
+        expect(html).toEqual("<p>a</p><p>b</p>"); // CORRECT
 
         html = process("\\bfseries a\n\nb");
         expect(html).toEqual(
@@ -272,8 +272,7 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
         // Custom labels are handled
         ast = process(`$a\\text{\\#}b$`);
         expect(normalizeHtml(ast)).toEqual(
-            // normalizeHtml(`<m>a\\text{\\#}b</m>`)
-            normalizeHtml(`<m>a\\text{#}b</m>`) // needs to be wrapped by <p></p>
+            normalizeHtml(`<m>a\\text{\\#}b</m>`)
         );
     });
 
@@ -285,9 +284,7 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
             // normalizeHtml(
             //     `<p>x</p><p>y</p><div class="display-math">a\\\\b</div><p>z</p>`
             // )
-            normalizeHtml(
-                `<p>x</p><p>y</p><p><me>a\\\\b</me></p><p>z</p>`
-            )
+            normalizeHtml(`<p>x</p><p>y</p><p><me>a\\\\b</me></p><p>z</p>`)
         );
     });
     it.skip("replaces command inside argument", () => {
