@@ -15,7 +15,7 @@ import {
 import { visit } from "@unified-latex/unified-latex-util-visit";
 
 /**
- * All the divisions, where each item is {division macro, mapped environment}
+ * All the divisions, where each item is {division macro, mapped environment}.
  * Note that this is ordered from the "largest" division to the "smallest" division.
  */
 const divisions: { division: string; mappedEnviron: string }[] = [
@@ -41,26 +41,6 @@ export function breakOnBoundaries(ast: Ast.Ast): { messages: string[] } {
         divisions.map((x) => x.division)
     );
 
-    // check if a node is a mapped environment
-    const isMappedEnviron = match.createMacroMatcher(
-        // *** not working
-        divisions.map((x) => x.mappedEnviron)
-    );
-
-    // first remove groups that contain a division as an immediate child
-    replaceNode(ast, (node) => {
-        if (match.group(node) && isDivision(node.content[0])) {
-            // push a warning message
-            messagesLst.messages.push(
-                `Warning: hoisted out of a group, which might break the LaTeX code. { group: ${printRaw(
-                    node
-                )} }`
-            );
-
-            return node.content;
-        }
-    });
-
     visit(ast, (node, info) => {
         // needs to be an environment, root, or group node
         if (
@@ -79,18 +59,41 @@ export function breakOnBoundaries(ast: Ast.Ast): { messages: string[] } {
             anyEnvironment(node) &&
             divisions.map((x) => x.mappedEnviron).includes(node.env)
         ) {
-            console.log("repeat");
             return;
+        }
+
+        // add message for groups to be removed that contain a division as an immediate child
+        if (match.group(node) && isDivision(node.content[0])) {
+            // push a warning message
+            messagesLst.messages.push(
+                `Warning: hoisted out of a group, which might break the LaTeX code. { group: ${printRaw(
+                    node
+                )} }`
+            );
         }
 
         // now break up the divisions, starting at part
         node.content = breakUp(node.content, 0);
     });
 
-    // remove all old division nodes
     replaceNode(ast, (node) => {
+        // remove all old division nodes
         if (anyMacro(node) && isDivision(node)) {
             return null;
+        }
+
+        // remove groups in messages
+        if (match.group(node)) {
+            // remove if it contains a division or new environment as an immediate child
+            if (
+                isDivision(node.content[0]) ||
+                (anyEnvironment(node.content[0]) &&
+                    divisions
+                        .map((x) => x.mappedEnviron)
+                        .includes(node.content[0].env))
+            ) {
+                return node.content;
+            }
         }
     });
 
@@ -120,7 +123,7 @@ function breakUp(content: Ast.Node[], depth: number): Ast.Node[] {
 }
 
 /**
- * Create the new environments that replace the division macros
+ * Create the new environments that replace the division macros.
  */
 function createEnvironments(
     splits: { segments: Ast.Node[][]; macros: Ast.Macro[] },

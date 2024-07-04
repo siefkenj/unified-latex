@@ -122,6 +122,28 @@ describe("unified-latex-to-pretext:break-on-boundaries", () => {
         );
     });
 
+    it("doesn't break on groups without a division as an immediate child", () => {
+        value =
+            String.raw`\part{part1}{not immediate\subsection{Intro}` +
+            String.raw`\subsubsection{body}{$\mathbb{N}$\subparagraph{Conclusion}Conclusion.}}{\paragraph{immediate} words}`;
+
+        const parser = getParser();
+        const ast = parser.parse(value);
+
+        expect(breakOnBoundaries(ast)).toEqual({
+            messages: [
+                String.raw`Warning: hoisted out of a group, which might break the LaTeX code. ` +
+                    String.raw`{ group: {\paragraph{immediate} words} }`,
+            ],
+        });
+
+        expect(printRaw(ast)).toEqual(
+            String.raw`\begin{_part}[part1]{not immediate\begin{_subsection}[Intro]\begin{_subsubsection}[body]` +
+                String.raw`{$\mathbb{N}$\begin{_subparagraph}[Conclusion]Conclusion.\end{_subparagraph}}` +
+                String.raw`\end{_subsubsection}\end{_subsection}}\begin{_paragraph}[immediate] words\end{_paragraph}\end{_part}`
+        );
+    });
+
     it("can break on divisions with latex in their titles", () => {
         value = String.raw`\chapter{$x = \frac{1}{2}$}Chapter 1\subsection{\"name\_1\" \$}This is subsection`;
 
