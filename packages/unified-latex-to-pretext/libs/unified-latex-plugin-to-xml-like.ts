@@ -35,7 +35,11 @@ export type PluginOptions = {
      */
     macroReplacements?: MacroReplacements;
 
-    producePretextFragment: boolean;
+    /**
+     * A boolean where if it's true then the output won't be wrapped in the <pretext><article> ... etc. tags.
+     * If it's false (default), a valid and complete PreTeXt document is returned.
+     */
+    producePretextFragment?: false;
 };
 
 /**

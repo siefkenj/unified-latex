@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import Prettier from "prettier";
 import util from "util";
 import { processLatexViaUnified } from "@unified-latex/unified-latex";
-import { unifiedLatexToPretext } from "../libs/unified-latex-plugin-to-pretext";
+import { unifiedLatexToPretext, PluginOptions } from "../libs/unified-latex-plugin-to-pretext";
 import { htmlLike } from "@unified-latex/unified-latex-util-html-like";
 import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 import { match } from "@unified-latex/unified-latex-util-match";
@@ -29,7 +29,7 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
 
     const process = (value: string) =>
         processLatexViaUnified({ macros: { xxx: { signature: "m m" } } })
-            .use(unifiedLatexToPretext)
+            .use(unifiedLatexToPretext, {producePretextFragment: true })
             .use(xmlCompilePlugin)
             .processSync({ value }).value as string;
 
@@ -39,27 +39,30 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
 
         html = process("\\bfseries a\n\nb");
         expect(html).toEqual(
-            '<p><b class="textbf">a</b></p><p><b class="textbf">b</b></p>'
+            // '<p><b class="textbf">a</b></p><p><b class="textbf">b</b></p>'
+            '<p><em>a</em></p><p><em>b</em></p>' // maybe alert instead, test difference
         );
 
         html = process("\\bf a\n\nb");
         expect(html).toEqual(
-            '<p><b class="textbf">a</b></p><p><b class="textbf">b</b></p>'
+            // '<p><b class="textbf">a</b></p><p><b class="textbf">b</b></p>'
+            '<p><em>a</em></p><p><em>b</em></p>'
         );
     });
 
     it.skip("Can replace text-style macros", () => {
         html = process(String.raw`a \textbf{different} word`);
         expect(normalizeHtml(html)).toEqual(
-            normalizeHtml(`a <b class="textbf">different</b> word`)
+            // normalizeHtml(`a <b class="textbf">different</b> word`)
+            normalizeHtml(`a <em>different</em> word`)
         );
 
-        html = process(String.raw`a \textsf{different} word`);
+        html = process(String.raw`a \textsf{different} word`); // no equivalent?
         expect(normalizeHtml(html)).toEqual(
             normalizeHtml(`a <span class="textsf">different</span> word`)
         );
 
-        html = process(String.raw`a \textrm{different} word`);
+        html = process(String.raw`a \textrm{different} word`); // no equivalent?
         expect(normalizeHtml(html)).toEqual(
             normalizeHtml(`a <span class="textrm">different</span> word`)
         );
@@ -74,19 +77,19 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
         html = process(String.raw`\chapter{My Chapter}`);
         expect(normalizeHtml(html)).toEqual(
             // normalizeHtml(`<h2>My Chapter</h2>`)
-            normalizeHtml(`<chapter>My Chapter</chapter>`)
+            normalizeHtml(`<chapter><title>My Chapter</title></chapter>`)
         );
 
         html = process(String.raw`\section{My Section}`);
         expect(normalizeHtml(html)).toEqual(
             // normalizeHtml(`<title>My Section</title>`)
-            normalizeHtml(`<section>My Section</section>`)
+            normalizeHtml(`<section><title>My Section</title></section>`)
         );
 
         html = process(String.raw`\section*{My Section}`);
         expect(normalizeHtml(html)).toEqual(
             // normalizeHtml(`<title>My Section</title>`)
-            normalizeHtml(`<section>My Section</section>`)
+            normalizeHtml(`<section><title>My Section</title></section>`)
         );
     });
 
@@ -108,13 +111,13 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
         html = process(`a\\url{foo.com}b`);
         expect(normalizeHtml(html)).toEqual(
             // normalizeHtml(`a<a class="url" href="foo.com">foo.com</a>b`)
-            normalizeHtml(`a<url href="foo.com" visual="foo.com"></url>b`) // ** or in between tags? (errored for me)
+            normalizeHtml(`a<url href="foo.com">foo.com</url>b`)
         );
 
         html = process(`a\\href{foo.com}{FOO}b`);
         expect(normalizeHtml(html)).toEqual(
             // normalizeHtml(`a<a class="href" href="foo.com">FOO</a>b`)
-            normalizeHtml(`a<url href="foo.com" visual="FOO"/>b`)
+            normalizeHtml(`a<url href="foo.com" visual="FOO"/>b`) // ? check diff with href in pretext
         );
     });
 
@@ -255,6 +258,7 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
         );
     });
 
+    // output used <m> inline instead
     it.skip("Macros aren't replaced with html code in math mode", () => {
         let ast;
 
@@ -262,7 +266,7 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
         ast = process(`\\[a\\\\b\\]`);
         expect(normalizeHtml(ast)).toEqual(
             // normalizeHtml(`<div class="display-math">a\\\\b</div>`)
-            normalizeHtml(`<me>a\\\\b<me>`) // needs to be wrapped by <p></p>
+            normalizeHtml(`<me>a\\\\b</me>`) // needs to be wrapped by <p></p>
         );
     });
 
