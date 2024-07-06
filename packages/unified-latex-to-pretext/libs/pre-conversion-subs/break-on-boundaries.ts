@@ -28,6 +28,17 @@ const divisions: { division: string; mappedEnviron: string }[] = [
     { division: "subparagraph", mappedEnviron: "_subparagraph" },
 ];
 
+
+// check if a macro is a division macro
+const isDivision = match.createMacroMatcher(
+    divisions.map((x) => x.division)
+);
+
+// check if an environment 
+const isMappedEnviron = match.createEnvironmentMatcher(
+    divisions.map((x) => x.mappedEnviron)
+);
+
 /**
  * Breaks up division macros into environments. Returns a list of warning messages
  * for any groups that were removed.
@@ -36,10 +47,27 @@ export function breakOnBoundaries(ast: Ast.Ast): { messages: string[] } {
     // messages for any groups removed
     const messagesLst: { messages: string[] } = { messages: [] };
 
-    // check if a macro is a division macro
-    const isDivision = match.createMacroMatcher(
-        divisions.map((x) => x.division)
-    );
+    replaceNode(ast, (node) => {
+        // remove groups in messages
+        if (match.group(node)) {
+        // remove if it contains a division or new environment as an immediate child
+            if (
+                isDivision(node.content[0]) ||
+                (anyEnvironment(node.content[0]) &&
+                    divisions
+                        .map((x) => x.mappedEnviron)
+                        .includes(node.content[0].env))
+            ) {
+                messagesLst.messages.push(
+                    `Warning: hoisted out of a group, which might break the LaTeX code. { group: ${printRaw(
+                        node
+                    )} }`
+                );
+
+                return node.content;
+            }
+        }
+    })
 
     visit(ast, (node, info) => {
         // needs to be an environment, root, or group node
@@ -65,11 +93,8 @@ export function breakOnBoundaries(ast: Ast.Ast): { messages: string[] } {
         // add message for groups to be removed that contain a division as an immediate child
         if (match.group(node) && isDivision(node.content[0])) {
             // push a warning message
-            messagesLst.messages.push(
-                `Warning: hoisted out of a group, which might break the LaTeX code. { group: ${printRaw(
-                    node
-                )} }`
-            );
+            
+            
         }
 
         // now break up the divisions, starting at part
@@ -80,20 +105,6 @@ export function breakOnBoundaries(ast: Ast.Ast): { messages: string[] } {
         // remove all old division nodes
         if (anyMacro(node) && isDivision(node)) {
             return null;
-        }
-
-        // remove groups in messages
-        if (match.group(node)) {
-            // remove if it contains a division or new environment as an immediate child
-            if (
-                isDivision(node.content[0]) ||
-                (anyEnvironment(node.content[0]) &&
-                    divisions
-                        .map((x) => x.mappedEnviron)
-                        .includes(node.content[0].env))
-            ) {
-                return node.content;
-            }
         }
     });
 
