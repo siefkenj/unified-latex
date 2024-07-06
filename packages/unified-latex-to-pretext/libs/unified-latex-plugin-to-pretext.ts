@@ -12,7 +12,7 @@ import {
     PluginOptions as HtmlLikePluginOptions,
 } from "./unified-latex-plugin-to-xml-like";
 
-export type PluginOptions = HtmlLikePluginOptions & {};
+export type PluginOptions = HtmlLikePluginOptions & {producePretextFragment: boolean};
 
 /**
  * Unified plugin to convert a `unified-latex` AST into a `xast` AST representation of PreTeXt source.

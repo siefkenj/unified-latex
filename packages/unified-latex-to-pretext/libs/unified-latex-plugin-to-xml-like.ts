@@ -34,6 +34,8 @@ export type PluginOptions = {
      * You probably want to use the function `htmlLike(...)` to return a node that gets converted to specific HTML.
      */
     macroReplacements?: MacroReplacements;
+
+    producePretextFragment: boolean;
 };
 
 /**
@@ -125,6 +127,11 @@ export const unifiedLatexToXmlLike: Plugin<
                 );
             }
         });
+
+        if (!options.producePretextFragment) {
+            // Wrap in enough tags to ensure a valid pretext document
+            // ...
+        }
 
         // Make sure we are actually mutating the current tree.
         originalTree.content = tree.content;
