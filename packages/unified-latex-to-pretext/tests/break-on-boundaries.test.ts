@@ -94,7 +94,7 @@ describe("unified-latex-to-pretext:break-on-boundaries", () => {
         expect(printRaw(ast)).toEqual(
             String.raw`\begin{document}\begin{_chapter}[Chap]\begin{_paragraph}[Intro]Introduction.` +
                 String.raw`\begin{center}\begin{_subparagraph}[Conclusion]Conclusion.\end{_subparagraph}` +
-                String.raw`\end{center}\end{_paragraph}Chapter finished.\end{_chapter}\end{document}`
+                String.raw`\end{center}Chapter finished.\end{_paragraph}\end{_chapter}\end{document}`
         );
     });
 
@@ -111,7 +111,7 @@ describe("unified-latex-to-pretext:break-on-boundaries", () => {
                 String.raw`Warning: hoisted out of a group, which might break the LaTeX code. ` +
                     String.raw`{ group: {\subsection{Intro}description.\subsubsection{body}more text.{\subparagraph{Conclusion}Conclusion.}} }`,
                 String.raw`Warning: hoisted out of a group, which might break the LaTeX code. ` +
-                    String.raw`{ group: {\subparagraph{Conclusion}Conclusion.} }`, // ** Doesn't keep nested group
+                    String.raw`{ group: {\subparagraph{Conclusion}Conclusion.} }`,
             ],
         });
 
@@ -124,8 +124,8 @@ describe("unified-latex-to-pretext:break-on-boundaries", () => {
 
     it("doesn't break on groups without a division as an immediate child", () => {
         value =
-            String.raw`\part{part1}{not immediate\subsection{Intro}` +
-            String.raw`\subsubsection{body}{$\mathbb{N}$\subparagraph{Conclusion}Conclusion.}}{\paragraph{immediate} words}`;
+            String.raw`\part{part1}{\subsection{Intro}` +
+            String.raw`\subsubsection{body}{$\mathbb{N}$\subparagraph{Conclusion}{no divisions 1}Conclusion.}}{no divisions 2}`;
 
         const parser = getParser();
         const ast = parser.parse(value);
@@ -133,14 +133,16 @@ describe("unified-latex-to-pretext:break-on-boundaries", () => {
         expect(breakOnBoundaries(ast)).toEqual({
             messages: [
                 String.raw`Warning: hoisted out of a group, which might break the LaTeX code. ` +
-                    String.raw`{ group: {\paragraph{immediate} words} }`,
+                    String.raw`{ group: {\subsection{Intro}\subsubsection{body}{$\mathbb{N}$\subparagraph{Conclusion}{no divisions 1}Conclusion.}} }`,
+                String.raw`Warning: hoisted out of a group, which might break the LaTeX code. ` +
+                    String.raw`{ group: {$\mathbb{N}$\subparagraph{Conclusion}{no divisions 1}Conclusion.} }`,
             ],
         });
 
         expect(printRaw(ast)).toEqual(
-            String.raw`\begin{_part}[part1]{not immediate\begin{_subsection}[Intro]\begin{_subsubsection}[body]` +
-                String.raw`{$\mathbb{N}$\begin{_subparagraph}[Conclusion]Conclusion.\end{_subparagraph}}` +
-                String.raw`\end{_subsubsection}\end{_subsection}}\begin{_paragraph}[immediate] words\end{_paragraph}\end{_part}`
+            String.raw`\begin{_part}[part1]\begin{_subsection}[Intro]\begin{_subsubsection}[body]` +
+                String.raw`$\mathbb{N}$\begin{_subparagraph}[Conclusion]{no divisions 1}Conclusion.{no divisions 2}` +
+                String.raw`\end{_subparagraph}\end{_subsubsection}\end{_subsection}\end{_part}`
         );
     });
 

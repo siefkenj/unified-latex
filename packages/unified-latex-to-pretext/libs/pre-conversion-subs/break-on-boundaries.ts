@@ -28,14 +28,14 @@ const divisions: { division: string; mappedEnviron: string }[] = [
     { division: "subparagraph", mappedEnviron: "_subparagraph" },
 ];
 
-
 // check if a macro is a division macro
-const isDivision = match.createMacroMatcher(
+const isDivisionMacro = match.createMacroMatcher(
     divisions.map((x) => x.division)
 );
 
-// check if an environment 
+// check if an environment is a newly created environment
 const isMappedEnviron = match.createEnvironmentMatcher(
+    // doesn't seem to work
     divisions.map((x) => x.mappedEnviron)
 );
 
@@ -48,15 +48,12 @@ export function breakOnBoundaries(ast: Ast.Ast): { messages: string[] } {
     const messagesLst: { messages: string[] } = { messages: [] };
 
     replaceNode(ast, (node) => {
-        // remove groups in messages
         if (match.group(node)) {
-        // remove if it contains a division or new environment as an immediate child
+            // remove if it contains a division as an immediate child
             if (
-                isDivision(node.content[0]) ||
-                (anyEnvironment(node.content[0]) &&
-                    divisions
-                        .map((x) => x.mappedEnviron)
-                        .includes(node.content[0].env))
+                node.content.some((child) => {
+                    return anyMacro(child) && isDivisionMacro(child);
+                })
             ) {
                 messagesLst.messages.push(
                     `Warning: hoisted out of a group, which might break the LaTeX code. { group: ${printRaw(
@@ -67,7 +64,7 @@ export function breakOnBoundaries(ast: Ast.Ast): { messages: string[] } {
                 return node.content;
             }
         }
-    })
+    });
 
     visit(ast, (node, info) => {
         // needs to be an environment, root, or group node
@@ -83,18 +80,8 @@ export function breakOnBoundaries(ast: Ast.Ast): { messages: string[] } {
             return;
         }
         // if it's an environment, make sure it isn't a newly created one
-        else if (
-            anyEnvironment(node) &&
-            divisions.map((x) => x.mappedEnviron).includes(node.env)
-        ) {
+        else if (anyEnvironment(node) && isMappedEnviron(node)) {
             return;
-        }
-
-        // add message for groups to be removed that contain a division as an immediate child
-        if (match.group(node) && isDivision(node.content[0])) {
-            // push a warning message
-            
-            
         }
 
         // now break up the divisions, starting at part
@@ -103,7 +90,7 @@ export function breakOnBoundaries(ast: Ast.Ast): { messages: string[] } {
 
     replaceNode(ast, (node) => {
         // remove all old division nodes
-        if (anyMacro(node) && isDivision(node)) {
+        if (anyMacro(node) && isDivisionMacro(node)) {
             return null;
         }
     });
