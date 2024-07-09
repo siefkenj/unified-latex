@@ -64,11 +64,10 @@ export const unifiedLatexToXmlLike: Plugin<
         _environmentReplacements,
         options?.environmentReplacements || {}
     );
-    const producePretextFragment = Object.assign(
-        {},
-        false,
-        options?.producePretextFragment || {}
-    );
+    const producePretextFragment = options?.producePretextFragment
+        ? options?.producePretextFragment
+        : false;
+
     const isReplaceableMacro = match.createMacroMatcher(macroReplacements);
     const isReplaceableEnvironment = match.createEnvironmentMatcher(
         environmentReplacements
@@ -136,8 +135,6 @@ export const unifiedLatexToXmlLike: Plugin<
                 );
             }
         });
-
-        // if (!options.producePretextFragment) {
         if (!producePretextFragment) {
             // Wrap in enough tags to ensure a valid pretext document
             // ...

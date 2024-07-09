@@ -117,7 +117,7 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
         html = process(`a\\href{foo.com}{FOO}b`);
         expect(normalizeHtml(html)).toEqual(
             // normalizeHtml(`a<a class="href" href="foo.com">FOO</a>b`)
-            normalizeHtml(`a<url href="foo.com" visual="FOO"/>b`) // ? check diff with href in pretext
+            normalizeHtml(`a<url href="foo.com"/>Foo</url>b`)
         );
     });
 
@@ -126,7 +126,8 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
         expect(normalizeHtml(html)).toEqual(
             normalizeHtml(
                 // don't need <p> tag for first two test cases
-                `<ol class="enumerate"><li><p>a</p></li><li><p>b</p></li></ol>` // correct, without class
+                // `<ol class="enumerate"><li><p>a</p></li><li><p>b</p></li></ol>`
+                `<ol><li><p>a</p></li><li><p>b</p></li></ol>`
             )
         );
 
@@ -136,7 +137,8 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
         );
         expect(normalizeHtml(html)).toEqual(
             normalizeHtml(
-                `<ol class="enumerate"><li><p>a</p></li><li><p>b</p></li></ol>` // correct, without class
+                // `<ol class="enumerate"><li><p>a</p></li><li><p>b</p></li></ol>`
+                `<ol><li><p>a</p></li><li><p>b</p></li></ol>`
             )
         );
 
@@ -193,6 +195,7 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
         );
     });
 
+    // make this more descriptive since adding another test
     it.skip("Converts tabular environment", () => {
         html = process(`\\begin{tabular}{l l}a & b\\\\c & d\\end{tabular}`);
         expect(normalizeHtml(html)).toEqual(
@@ -214,6 +217,128 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
             // centered tho
             normalizeHtml(
                 `<tabular>
+                    <row>
+                        <cell>a</cell>
+                        <cell>b</cell>
+                    </row>
+                    <row>
+                        <cell>c</cell>
+                        <cell>d</cell>
+                    </row>
+                </tabular>`
+            )
+        );
+    });
+
+    // add another tabular test here from PR
+
+    it("Can wrap in <p>...</p> tags", () => {
+        html = process(`a\\par b`);
+        expect(normalizeHtml(html)).toEqual(normalizeHtml(`<p>a</p><p>b</p>`));
+
+        html = process(`a\n\n b`);
+        expect(normalizeHtml(html)).toEqual(normalizeHtml(`<p>a</p><p>b</p>`));
+
+        html = process(`a\n b\n\nc`);
+        expect(normalizeHtml(html)).toEqual(
+            normalizeHtml(`<p>a b</p><p>c</p>`)
+        );
+        html = process(`a\\section{foo} b\n\nc`);
+        expect(normalizeHtml(html)).toEqual(
+            normalizeHtml(`<p>a</p><title>foo</title><p>b</p><p>c</p>`)
+        );
+        html = process(`a\\section{foo} b\\section{bar}\n\nc`);
+        expect(normalizeHtml(html)).toEqual(
+            normalizeHtml(
+                `<p>a</p><title>foo</title><p>b</p><title>bar</title><p>c</p>`
+            )
+        );
+        html = process(`a\n \\emph{b}\n\nc`);
+        expect(normalizeHtml(html)).toEqual(
+            normalizeHtml(`<p>a <em>b</em></p><p>c</p>`)
+        );
+        html = process(`a\n b\\begin{foo}x\\end{foo}c\n\nd`);
+        expect(normalizeHtml(html)).toEqual(
+            normalizeHtml(`<p>a b</p><div>x</div><p>c</p><p>d</p>`)
+        );
+    });
+
+    // output used <m> inline instead
+    it.skip("Macros aren't replaced with html code in math mode", () => {
+        let ast;
+
+        // Custom labels are handled
+        ast = process(`\\[a\\\\b\\]`);
+        expect(normalizeHtml(ast)).toEqual(
+            // normalizeHtml(`<div class="display-math">a\\\\b</div>`)
+            normalizeHtml(`<me>a\\\\b</me>`) // needs to be wrapped by <p></p>
+        );
+    });
+
+    it("Ligatures that are nested inside of math mode are not replaced", () => {
+        let ast;
+
+        // Custom labels are handled
+        ast = process(`$a\\text{\\#}b$`);
+        expect(normalizeHtml(ast)).toEqual(
+            normalizeHtml(`<m>a\\text{\\#}b</m>`)
+        );
+    });
+
+    it.skip("Pars are broken at display math", () => {
+        let ast;
+
+        ast = process(`x\n\ny\\[a\\\\b\\]z`);
+        expect(normalizeHtml(ast)).toEqual(
+            // normalizeHtml(
+            //     `<p>x</p><p>y</p><div class="display-math">a\\\\b</div><p>z</p>`
+            // )
+            normalizeHtml(`<p>x</p><p>y</p><p><me>a\\\\b</me></p><p>z</p>`)
+        );
+    });
+    it.skip("Converts tabular environment with same column alignments", () => {
+        html = process(`\\begin{tabular}{l l}a & b\\\\c & d\\end{tabular}`);
+        expect(normalizeHtml(html)).toEqual(
+            // normalizeHtml(
+            //     `<table class="tabular">
+            //     <tbody>
+            //         <tr>
+            //             <td>a</td>
+            //             <td>b</td>
+            //         </tr>
+            //         <tr>
+            //             <td>c</td>
+            //             <td>d</td>
+            //         </tr>
+            //     </tbody>
+            // </table>`
+            // )
+
+            // centered tho
+            // left is default alignment so don't need col here
+            normalizeHtml(
+                `<tabular>
+                    <row>
+                        <cell>a</cell>
+                        <cell>b</cell>
+                    </row>
+                    <row>
+                        <cell>c</cell>
+                        <cell>d</cell>
+                    </row>
+                </tabular>`
+            )
+        );
+    });
+
+    it.skip("Converts tabular environment with different column alignments", () => {
+        html = process(`\\begin{tabular}{r l}a & b\\\\c & d\\end{tabular}`);
+        expect(normalizeHtml(html)).toEqual(
+            // note: even though only one col is right aligned, need all cols
+            normalizeHtml(
+                `<tabular>
+                    <col halign="right"/>
+                    <col/>
                     <row>
                         <cell>a</cell>
                         <cell>b</cell>
