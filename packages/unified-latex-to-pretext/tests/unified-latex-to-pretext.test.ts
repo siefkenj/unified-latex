@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import Prettier from "prettier";
 import util from "util";
 import { processLatexViaUnified } from "@unified-latex/unified-latex";
-import { unifiedLatexToPretext, PluginOptions } from "../libs/unified-latex-plugin-to-pretext";
+import { unifiedLatexToPretext } from "../libs/unified-latex-plugin-to-pretext";
 import { htmlLike } from "@unified-latex/unified-latex-util-html-like";
 import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 import { match } from "@unified-latex/unified-latex-util-match";
@@ -29,7 +29,7 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
 
     const process = (value: string) =>
         processLatexViaUnified({ macros: { xxx: { signature: "m m" } } })
-            .use(unifiedLatexToPretext, {producePretextFragment: true })
+            .use(unifiedLatexToPretext, { producePretextFragment: true })
             .use(xmlCompilePlugin)
             .processSync({ value }).value as string;
 
@@ -40,13 +40,13 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
         html = process("\\bfseries a\n\nb");
         expect(html).toEqual(
             // '<p><b class="textbf">a</b></p><p><b class="textbf">b</b></p>'
-            '<p><em>a</em></p><p><em>b</em></p>' // maybe alert instead, test difference
+            "<p><em>a</em></p><p><em>b</em></p>" // maybe alert instead, test difference
         );
 
         html = process("\\bf a\n\nb");
         expect(html).toEqual(
             // '<p><b class="textbf">a</b></p><p><b class="textbf">b</b></p>'
-            '<p><em>a</em></p><p><em>b</em></p>'
+            "<p><em>a</em></p><p><em>b</em></p>"
         );
     });
 
@@ -346,6 +346,7 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
                         yyy: (node) =>
                             htmlLike({ tag: "yyy", content: node.content }),
                     },
+                    producePretextFragment: true,
                 })
                 .use(xmlCompilePlugin)
                 .processSync({ value }).value as string;
@@ -387,6 +388,7 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
                             });
                         },
                     },
+                    producePretextFragment: true,
                 })
                 .use(xmlCompilePlugin)
                 .processSync({ value }).value as string;

@@ -39,7 +39,7 @@ export type PluginOptions = {
      * A boolean where if it's true then the output won't be wrapped in the <pretext><article> ... etc. tags.
      * If it's false (default), a valid and complete PreTeXt document is returned.
      */
-    producePretextFragment?: false;
+    producePretextFragment?: boolean;
 };
 
 /**
@@ -63,6 +63,11 @@ export const unifiedLatexToXmlLike: Plugin<
         {},
         _environmentReplacements,
         options?.environmentReplacements || {}
+    );
+    const producePretextFragment = Object.assign(
+        {},
+        false,
+        options?.producePretextFragment || {}
     );
     const isReplaceableMacro = match.createMacroMatcher(macroReplacements);
     const isReplaceableEnvironment = match.createEnvironmentMatcher(
@@ -132,7 +137,8 @@ export const unifiedLatexToXmlLike: Plugin<
             }
         });
 
-        if (!options.producePretextFragment) {
+        // if (!options.producePretextFragment) {
+        if (!producePretextFragment) {
             // Wrap in enough tags to ensure a valid pretext document
             // ...
         }
