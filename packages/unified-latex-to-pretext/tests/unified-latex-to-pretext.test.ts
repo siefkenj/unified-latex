@@ -155,7 +155,7 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
                 `<dl>
                     <li><title>x)</title><p>a</p></li>
                     <li><title></title><p>b</p></li>
-                </dl>` // markers are bolded and list is centered though
+                </dl>` // list is centered though
             )
         );
     });
@@ -190,7 +190,7 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
                 `<dl>
                     <li><title>x)</title><p>a</p></li>
                     <li><title></title><p>b</p></li>
-                </dl>` // markers are bolded and list is centered though
+                </dl>` // list is centered though
             )
         );
     });
@@ -315,7 +315,6 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
             // )
 
             // centered tho
-            // left is default alignment so don't need col here
             normalizeHtml(
                 `<tabular>
                     <row>
@@ -429,11 +428,16 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
 
         ast = process(`\\begin{enumerate}\\item\\bfseries b\\end{enumerate}`);
         expect(normalizeHtml(ast)).toEqual(
-            normalizeHtml(`<ol class="enumerate">
-        <li>
-          <p><b class="textbf">b</b></p>
-        </li>
-      </ol>`)
+            // normalizeHtml(`<ol class="enumerate">
+            //                     <li>
+            //                     <p><b class="textbf">b</b></p>
+            //                     </li>
+            //                 </ol>`)
+            normalizeHtml(`<ol>
+                            <li>
+                                <p><em>b</em></p>
+                            </li>
+                        </ol>`)
         );
     });
     it("replaces paragraphs", () => {
@@ -443,7 +447,7 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
         expect(normalizeHtml(ast)).toEqual(
             normalizeHtml(`
                 <title>Important.</title> Paragraph
-            `)
+            `) 
         );
     });
     it("custom replacers work", () => {
