@@ -50,19 +50,19 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
         );
     });
 
-    it.skip("Can replace text-style macros", () => {
+    it("Can replace text-style macros", () => {
         html = process(String.raw`a \textbf{different} word`);
         expect(normalizeHtml(html)).toEqual(
             // normalizeHtml(`a <b class="textbf">different</b> word`)
             normalizeHtml(`a <em>different</em> word`)
         );
 
-        html = process(String.raw`a \textsf{different} word`); // no equivalent?
+        html = process(String.raw`a \textsf{different} word`); // no equivalent = em and warn
         expect(normalizeHtml(html)).toEqual(
             normalizeHtml(`a <span class="textsf">different</span> word`)
         );
 
-        html = process(String.raw`a \textrm{different} word`); // no equivalent?
+        html = process(String.raw`a \textrm{different} word`); // no equivalent = <em>, warn
         expect(normalizeHtml(html)).toEqual(
             normalizeHtml(`a <span class="textrm">different</span> word`)
         );
@@ -73,7 +73,7 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
             normalizeHtml(`a <em>different</em> word`)
         );
     });
-    it.skip("Can replace headings", () => {
+    it("Can replace headings", () => {
         html = process(String.raw`\chapter{My Chapter}`);
         expect(normalizeHtml(html)).toEqual(
             // normalizeHtml(`<h2>My Chapter</h2>`)
