@@ -8,8 +8,8 @@ import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
  *
  * Visits all the matching nodes and gathers author information, then send them to render and output pretext.
  */
-export function gatherAuthorInfo(ast: Ast.Ast): string[] {
-    const authorList: any[] = [];
+export function gatherAuthorInfo(ast: Ast.Ast): {infoType: string}[] {
+    const authorList: {infoType: string, info: string}[] = [];
 
     visit(ast, (node) => {
         if (match.macro(node, "author") && node.args) {

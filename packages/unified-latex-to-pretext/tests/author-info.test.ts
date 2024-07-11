@@ -28,9 +28,7 @@ describe("unified-latex-to-pretext:author-info", () => {
         sample =
             "\\author{First Middle LastName} \n \\address{Department, Address}";
         expect(gatherAuthorInfo(parser.parse(sample))).toEqual(
-            normalizeHtml(
-                "<author> <personname>First Middle LastName</personname> <department>Department, Address</department> </author>"
-            )
+            [{"personname": "First Middle LastName"}, {}]
         );
 
         sample = "\\affil{Affiliation}";
