@@ -6,13 +6,13 @@ import {
     anyMacro,
     match,
 } from "@unified-latex/unified-latex-util-match";
-import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 import { replaceNode } from "@unified-latex/unified-latex-util-replace";
 import {
     splitOnMacro,
     unsplitOnMacro,
 } from "@unified-latex/unified-latex-util-split";
 import { visit } from "@unified-latex/unified-latex-util-visit";
+import { VFileMessage } from "vfile-message";
 
 /**
  * All the divisions, where each item is {division macro, mapped environment}.
@@ -35,7 +35,6 @@ const isDivisionMacro = match.createMacroMatcher(
 
 // check if an environment is a newly created environment
 const isMappedEnviron = match.createEnvironmentMatcher(
-    // doesn't seem to work
     divisions.map((x) => x.mappedEnviron)
 );
 
@@ -43,9 +42,9 @@ const isMappedEnviron = match.createEnvironmentMatcher(
  * Breaks up division macros into environments. Returns a list of warning messages
  * for any groups that were removed.
  */
-export function breakOnBoundaries(ast: Ast.Ast): { messages: string[] } {
+export function breakOnBoundaries(ast: Ast.Ast): { messages: VFileMessage[] } {
     // messages for any groups removed
-    const messagesLst: { messages: string[] } = { messages: [] };
+    const messagesLst: { messages: VFileMessage[] } = { messages: [] };
 
     replaceNode(ast, (node) => {
         if (match.group(node)) {
@@ -55,11 +54,28 @@ export function breakOnBoundaries(ast: Ast.Ast): { messages: string[] } {
                     return anyMacro(child) && isDivisionMacro(child);
                 })
             ) {
-                messagesLst.messages.push(
-                    `Warning: hoisted out of a group, which might break the LaTeX code. { group: ${printRaw(
-                        node
-                    )} }`
+                const message = new VFileMessage(
+                    "Warning: hoisted out of a group, which might break the LaTeX code.",
+                    {
+                        line: node.position?.start.line,
+                        column: node.position?.start.column,
+                        position: {
+                          start: { line: node.position?.start.line, column: node.position?.start.column },
+                          end: { line: node.position?.end.line, column: node.position?.end.column }
+                        },
+                        source: 'LatexConversion'
+                    }
                 );
+                // line: null,
+                // column: null,
+                // position: {
+                //   start: { line: null, column: null },
+                //   end: { line: null, column: null }
+                // },
+                // source: null,
+                // ruleId: null
+
+                messagesLst.messages.push(message);
 
                 return node.content;
             }
@@ -94,6 +110,8 @@ export function breakOnBoundaries(ast: Ast.Ast): { messages: string[] } {
             return null;
         }
     });
+
+    console.log(messagesLst.messages);
 
     return messagesLst;
 }
