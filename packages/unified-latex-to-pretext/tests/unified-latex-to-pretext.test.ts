@@ -33,47 +33,47 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
             .use(xmlCompilePlugin)
             .processSync({ value }).value as string;
 
-    it.skip("wrap pars and streaming commands", () => {
+    it("wrap pars and streaming commands", () => {
         html = process("a\n\nb");
-        expect(html).toEqual("<p>a</p><p>b</p>"); // CORRECT
+        expect(html).toEqual("<p>a</p><p>b</p>");
 
         html = process("\\bfseries a\n\nb");
         expect(html).toEqual(
             // '<p><b class="textbf">a</b></p><p><b class="textbf">b</b></p>'
-            "<p><em>a</em></p><p><em>b</em></p>" // maybe alert instead, test difference
+            "<p><alert>a</alert></p><p><alert>b</alert></p>"
         );
 
         html = process("\\bf a\n\nb");
         expect(html).toEqual(
             // '<p><b class="textbf">a</b></p><p><b class="textbf">b</b></p>'
-            "<p><em>a</em></p><p><em>b</em></p>"
+            "<p><alert>a</alert></p><p><alert>b</alert></p>"
         );
     });
 
     it("Can replace text-style macros", () => {
         html = process(String.raw`a \textbf{different} word`);
         expect(normalizeHtml(html)).toEqual(
-            // normalizeHtml(`a <b class="textbf">different</b> word`)
+            normalizeHtml(`a <alert>different</alert> word`)
+        );
+
+        html = process(String.raw`a \textsf{different} word`);
+        expect(normalizeHtml(html)).toEqual(
             normalizeHtml(`a <em>different</em> word`)
         );
 
-        html = process(String.raw`a \textsf{different} word`); // no equivalent = em and warn
+        html = process(String.raw`a \textrm{different} word`);
         expect(normalizeHtml(html)).toEqual(
-            normalizeHtml(`a <span class="textsf">different</span> word`)
-        );
-
-        html = process(String.raw`a \textrm{different} word`); // no equivalent = <em>, warn
-        expect(normalizeHtml(html)).toEqual(
-            normalizeHtml(`a <span class="textrm">different</span> word`)
+            normalizeHtml(`a <em>different</em> word`)
         );
 
         html = process(String.raw`a \emph{different} word`);
         expect(normalizeHtml(html)).toEqual(
-            // CORRECT but error if not wrapped around something else like <p>
             normalizeHtml(`a <em>different</em> word`)
         );
     });
-    it("Can replace headings", () => {
+
+    // UNSKIP BACK IN AFTER BREAK ON SECTIONS PR IS MERGED
+    it.skip("Can replace headings", () => {
         html = process(String.raw`\chapter{My Chapter}`);
         expect(normalizeHtml(html)).toEqual(
             // normalizeHtml(`<h2>My Chapter</h2>`)
@@ -107,28 +107,22 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
         expect(normalizeHtml(html)).toEqual(normalizeHtml(`<p>a</p><p>b</p>`));
     });
 
-    it.skip("Wraps URLs", () => {
+    it("Wraps URLs", () => {
         html = process(`a\\url{foo.com}b`);
         expect(normalizeHtml(html)).toEqual(
-            // normalizeHtml(`a<a class="url" href="foo.com">foo.com</a>b`)
             normalizeHtml(`a<url href="foo.com">foo.com</url>b`)
         );
 
         html = process(`a\\href{foo.com}{FOO}b`);
         expect(normalizeHtml(html)).toEqual(
-            // normalizeHtml(`a<a class="href" href="foo.com">FOO</a>b`)
-            normalizeHtml(`a<url href="foo.com"/>Foo</url>b`)
+            normalizeHtml(`a<url href="foo.com">FOO</url>b`)
         );
     });
 
     it.skip("Converts enumerate environments", () => {
         html = process(`\\begin{enumerate}\\item a\\item b\\end{enumerate}`);
         expect(normalizeHtml(html)).toEqual(
-            normalizeHtml(
-                // don't need <p> tag for first two test cases
-                // `<ol class="enumerate"><li><p>a</p></li><li><p>b</p></li></ol>`
-                `<ol><li><p>a</p></li><li><p>b</p></li></ol>`
-            )
+            normalizeHtml(`<ol><li><p>a</p></li><li><p>b</p></li></ol>`)
         );
 
         // Any content before an \item is ignored
@@ -136,16 +130,15 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
             `\\begin{enumerate}before content\\item a\\item b\\end{enumerate}`
         );
         expect(normalizeHtml(html)).toEqual(
-            normalizeHtml(
-                // `<ol class="enumerate"><li><p>a</p></li><li><p>b</p></li></ol>`
-                `<ol><li><p>a</p></li><li><p>b</p></li></ol>`
-            )
+            normalizeHtml(`<ol><li><p>a</p></li><li><p>b</p></li></ol>`)
         );
 
         // Custom labels are handled
         html = process(
             `\\begin{enumerate}before content\\item[x)] a\\item[] b\\end{enumerate}`
         );
+
+        // only this one doesn't work
         expect(normalizeHtml(html)).toEqual(
             // normalizeHtml(`<ol class="enumerate">
             //     <li style="list-style-type: &#x27;x) &#x27;"><p>a</p></li>
@@ -159,6 +152,8 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
             )
         );
     });
+
+    // haven't fixed all test cases yet
     it.skip("Converts itemize environments", () => {
         html = process(`\\begin{itemize}\\item a\\item b\\end{itemize}`);
         expect(normalizeHtml(html)).toEqual(
@@ -195,108 +190,8 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
         );
     });
 
-    // make this more descriptive since adding another test
+    // \n in every tag for some reason
     it.skip("Converts tabular environment", () => {
-        html = process(`\\begin{tabular}{l l}a & b\\\\c & d\\end{tabular}`);
-        expect(normalizeHtml(html)).toEqual(
-            // normalizeHtml(
-            //     `<table class="tabular">
-            //     <tbody>
-            //         <tr>
-            //             <td>a</td>
-            //             <td>b</td>
-            //         </tr>
-            //         <tr>
-            //             <td>c</td>
-            //             <td>d</td>
-            //         </tr>
-            //     </tbody>
-            // </table>`
-            // )
-
-            // centered tho
-            normalizeHtml(
-                `<tabular>
-                    <row>
-                        <cell>a</cell>
-                        <cell>b</cell>
-                    </row>
-                    <row>
-                        <cell>c</cell>
-                        <cell>d</cell>
-                    </row>
-                </tabular>`
-            )
-        );
-    });
-
-    // add another tabular test here from PR
-
-    it("Can wrap in <p>...</p> tags", () => {
-        html = process(`a\\par b`);
-        expect(normalizeHtml(html)).toEqual(normalizeHtml(`<p>a</p><p>b</p>`));
-
-        html = process(`a\n\n b`);
-        expect(normalizeHtml(html)).toEqual(normalizeHtml(`<p>a</p><p>b</p>`));
-
-        html = process(`a\n b\n\nc`);
-        expect(normalizeHtml(html)).toEqual(
-            normalizeHtml(`<p>a b</p><p>c</p>`)
-        );
-        html = process(`a\\section{foo} b\n\nc`);
-        expect(normalizeHtml(html)).toEqual(
-            normalizeHtml(`<p>a</p><title>foo</title><p>b</p><p>c</p>`)
-        );
-        html = process(`a\\section{foo} b\\section{bar}\n\nc`);
-        expect(normalizeHtml(html)).toEqual(
-            normalizeHtml(
-                `<p>a</p><title>foo</title><p>b</p><title>bar</title><p>c</p>`
-            )
-        );
-        html = process(`a\n \\emph{b}\n\nc`);
-        expect(normalizeHtml(html)).toEqual(
-            normalizeHtml(`<p>a <em>b</em></p><p>c</p>`)
-        );
-        html = process(`a\n b\\begin{foo}x\\end{foo}c\n\nd`);
-        expect(normalizeHtml(html)).toEqual(
-            normalizeHtml(`<p>a b</p><div>x</div><p>c</p><p>d</p>`)
-        );
-    });
-
-    // output used <m> inline instead
-    it.skip("Macros aren't replaced with html code in math mode", () => {
-        let ast;
-
-        // Custom labels are handled
-        ast = process(`\\[a\\\\b\\]`);
-        expect(normalizeHtml(ast)).toEqual(
-            // normalizeHtml(`<div class="display-math">a\\\\b</div>`)
-            normalizeHtml(`<me>a\\\\b</me>`) // needs to be wrapped by <p></p>
-        );
-    });
-
-    it("Ligatures that are nested inside of math mode are not replaced", () => {
-        let ast;
-
-        // Custom labels are handled
-        ast = process(`$a\\text{\\#}b$`);
-        expect(normalizeHtml(ast)).toEqual(
-            normalizeHtml(`<m>a\\text{\\#}b</m>`)
-        );
-    });
-
-    it.skip("Pars are broken at display math", () => {
-        let ast;
-
-        ast = process(`x\n\ny\\[a\\\\b\\]z`);
-        expect(normalizeHtml(ast)).toEqual(
-            // normalizeHtml(
-            //     `<p>x</p><p>y</p><div class="display-math">a\\\\b</div><p>z</p>`
-            // )
-            normalizeHtml(`<p>x</p><p>y</p><p><me>a\\\\b</me></p><p>z</p>`)
-        );
-    });
-    it.skip("Converts tabular environment with same column alignments", () => {
         html = process(`\\begin{tabular}{l l}a & b\\\\c & d\\end{tabular}`);
         expect(normalizeHtml(html)).toEqual(
             // normalizeHtml(
@@ -382,7 +277,7 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
         );
     });
 
-    // output used <m> inline instead
+    //  don't know where <m> comes from, ctrl-shift-F search it
     it.skip("Macros aren't replaced with html code in math mode", () => {
         let ast;
 
@@ -415,15 +310,15 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
             normalizeHtml(`<p>x</p><p>y</p><p><me>a\\\\b</me></p><p>z</p>`)
         );
     });
-    it.skip("replaces command inside argument", () => {
+    it("replaces command inside argument", () => {
         let ast;
 
         ast = process(`\\emph{\\bfseries b}`);
         expect(normalizeHtml(ast)).toEqual(
-            normalizeHtml('<em><b class="textbf">b</b></em>')
+            normalizeHtml("<em><alert>b</alert></em>")
         );
     });
-    it.skip("replaces command inside enumerate", () => {
+    it("replaces command inside enumerate", () => {
         let ast;
 
         ast = process(`\\begin{enumerate}\\item\\bfseries b\\end{enumerate}`);
@@ -435,7 +330,7 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
             //                 </ol>`)
             normalizeHtml(`<ol>
                             <li>
-                                <p><em>b</em></p>
+                                <p><alert>b</alert></p>
                             </li>
                         </ol>`)
         );
@@ -447,7 +342,7 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
         expect(normalizeHtml(ast)).toEqual(
             normalizeHtml(`
                 <title>Important.</title> Paragraph
-            `) 
+            `)
         );
     });
     it("custom replacers work", () => {

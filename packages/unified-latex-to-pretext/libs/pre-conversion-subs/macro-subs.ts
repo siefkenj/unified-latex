@@ -54,15 +54,15 @@ export const macroReplacements: Record<
     (node: Ast.Macro, info: VisitInfo) => Ast.Node
 > = {
     emph: factory("em"),
-    textrm: factory("span", { className: "textrm" }),
-    textsf: factory("span", { className: "textsf" }),
-    texttt: factory("span", { className: "texttt" }),
-    textsl: factory("span", { className: "textsl" }),
-    textit: factory("i", { className: "textit" }),
-    textbf: factory("b", { className: "textbf" }),
-    underline: factory("span", { className: "underline" }),
-    mbox: factory("span", { className: "mbox" }),
-    phantom: factory("span", { className: "phantom" }),
+    textrm: factory("em"), // give warning
+    textsf: factory("em"), // give warning
+    texttt: factory("span"),
+    textsl: factory("span"),
+    textit: factory("em"),
+    textbf: factory("alert"),
+    underline: factory("span"),
+    mbox: factory("span"),
+    phantom: factory("span"),
     part: createHeading("title"),
     chapter: createHeading("title"),
     section: createHeading("title"),
@@ -75,9 +75,8 @@ export const macroReplacements: Record<
         const args = getArgsContent(node);
         const url = printRaw(args[0] || "#");
         return htmlLike({
-            tag: "a",
+            tag: "url",
             attributes: {
-                className: "url",
                 href: url,
             },
             content: [{ type: "string", content: url }],
@@ -87,9 +86,8 @@ export const macroReplacements: Record<
         const args = getArgsContent(node);
         const url = printRaw(args[1] || "#");
         return htmlLike({
-            tag: "a",
+            tag: "url",
             attributes: {
-                className: "href",
                 href: url,
             },
             content: args[2] || [],

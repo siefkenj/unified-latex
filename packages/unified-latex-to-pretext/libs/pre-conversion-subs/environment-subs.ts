@@ -84,7 +84,7 @@ function enumerateFactory(parentTag = "ol", className = "enumerate") {
 
         return htmlLike({
             tag: parentTag,
-            attributes: { className },
+            // attributes: { className },
             content,
         });
     };
@@ -136,28 +136,32 @@ function createTableFromTabular(env: Ast.Environment) {
             return htmlLike(
                 Object.keys(styles).length > 0
                     ? {
-                          tag: "td",
+                          tag: "cell", // "td",
                           content: cell,
                           attributes: { style: styles },
                       }
                     : {
-                          tag: "td",
+                          tag: "cell", // "td",
                           content: cell,
                       }
             );
         });
-        return htmlLike({ tag: "tr", content });
+        return htmlLike({ tag: "row", content });
     });
 
+    // return htmlLike({
+    //     tag: "table",
+    //     content: [
+    //         htmlLike({
+    //             tag: "tbody",
+    //             content: tableBody,
+    //         }),
+    //     ],
+    //     attributes: { className: "tabular" },
+    // });
     return htmlLike({
-        tag: "table",
-        content: [
-            htmlLike({
-                tag: "tbody",
-                content: tableBody,
-            }),
-        ],
-        attributes: { className: "tabular" },
+        tag: "tabular",
+        content: tableBody,
     });
 }
 
