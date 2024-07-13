@@ -39,7 +39,7 @@ const isMappedEnviron = match.createEnvironmentMatcher(
 );
 
 /**
- * Breaks up division macros into environments. Returns a list of warning messages
+ * Breaks up division macros into environments. Returns an object of warning messages
  * for any groups that were removed.
  */
 export function breakOnBoundaries(ast: Ast.Ast): { messages: VFileMessage[] } {
@@ -55,26 +55,26 @@ export function breakOnBoundaries(ast: Ast.Ast): { messages: VFileMessage[] } {
                 })
             ) {
                 const message = new VFileMessage(
-                    "Warning: hoisted out of a group, which might break the LaTeX code.",
-                    {
-                        line: node.position?.start.line,
-                        column: node.position?.start.column,
-                        position: {
-                          start: { line: node.position?.start.line, column: node.position?.start.column },
-                          end: { line: node.position?.end.line, column: node.position?.end.column }
-                        },
-                        source: 'LatexConversion'
-                    }
+                    "Warning: hoisted out of a group, which might break the LaTeX code."
                 );
-                // line: null,
-                // column: null,
-                // position: {
-                //   start: { line: null, column: null },
-                //   end: { line: null, column: null }
-                // },
-                // source: null,
-                // ruleId: null
 
+                // add the position of the group if available
+                if (node.position) {
+                    message.line = node.position.start.line;
+                    message.column = node.position.start.column;
+                    message.position = {
+                        start: {
+                            line: node.position.start.line,
+                            column: node.position.start.column,
+                        },
+                        end: {
+                            line: node.position.end.line,
+                            column: node.position.end.column,
+                        },
+                    };
+                }
+
+                message.source = "LatexConversion";
                 messagesLst.messages.push(message);
 
                 return node.content;
@@ -110,8 +110,6 @@ export function breakOnBoundaries(ast: Ast.Ast): { messages: VFileMessage[] } {
             return null;
         }
     });
-
-    console.log(messagesLst.messages);
 
     return messagesLst;
 }
