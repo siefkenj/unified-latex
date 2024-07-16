@@ -136,12 +136,12 @@ function createTableFromTabular(env: Ast.Environment) {
             return htmlLike(
                 Object.keys(styles).length > 0
                     ? {
-                          tag: "cell", // "td",
+                          tag: "cell", // cell -> td,
                           content: cell,
                           attributes: { style: styles },
                       }
                     : {
-                          tag: "cell", // "td",
+                          tag: "cell", // cell -> td,
                           content: cell,
                       }
             );

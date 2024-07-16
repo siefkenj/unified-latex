@@ -59,7 +59,7 @@ export function toPretextWithLoggerFactory(
                 return x("m", printRaw(node.content));
             case "mathenv":
             case "displaymath":
-                return x("m", printRaw(node.content));
+                return x("me", printRaw(node.content)); // CHANGE m -> me
             case "verb":
             case "verbatim":
                 return x("pre", { className: node.env }, node.content);
