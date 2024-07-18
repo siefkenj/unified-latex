@@ -24,26 +24,23 @@ describe("unified-latex-to-pretext:author-info", () => {
     let sample: string;
     const parser = getParser();
 
-    it("converts author name, department, institution, and email information", () => {
+    it("collects author name, department, institution, and email information", () => {
         sample =
             "\\author{First Middle LastName} \n \\address{Department, Address}";
         expect(gatherAuthorInfo(parser.parse(sample))).toEqual(
-            [{"personname": "First Middle LastName"}, {}]
+            [{"personname": "First Middle LastName"}, {"address": "Department, Address"}]
         );
 
         sample = "\\affil{Affiliation}";
         expect(gatherAuthorInfo(parser.parse(sample))).toEqual(
-            normalizeHtml(
-                "<author> <institution>Affiliation</institution> </author>"
-            )
+                [{"address": "Affiliation"}]   
         );
 
         sample =
             "\\author{First Author} \\email{example@example.com} \\author{Second Author}";
         expect(gatherAuthorInfo(parser.parse(sample))).toEqual(
-            normalizeHtml(
-                "<author> <personname>First Author</personname> <email>example@example.com</email> <personname>Second Author</personname> </author>"
-            )
+                [{"personname": "First Author"}, {"email": "example@example.com"}, {"personname": "Second Author"}]
+            
         );
     });
 });
