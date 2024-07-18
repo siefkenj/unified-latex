@@ -20,6 +20,10 @@ export const macros: MacroInfoRecord = {
         signature: "o m",
         renderInfo: { breakAround: true, inParMode: true },
     },
+    title: {
+        signature: "o m",
+        renderInfo: { breakAround: true, inParMode: true },
+    },
     urladdr: {
         signature: "o m",
         renderInfo: { breakAround: true, inParMode: true },
