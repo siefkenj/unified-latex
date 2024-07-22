@@ -39,13 +39,11 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
 
         html = process("\\bfseries a\n\nb");
         expect(html).toEqual(
-            // '<p><b class="textbf">a</b></p><p><b class="textbf">b</b></p>'
             "<p><alert>a</alert></p><p><alert>b</alert></p>"
         );
 
         html = process("\\bf a\n\nb");
         expect(html).toEqual(
-            // '<p><b class="textbf">a</b></p><p><b class="textbf">b</b></p>'
             "<p><alert>a</alert></p><p><alert>b</alert></p>"
         );
     });
@@ -153,12 +151,11 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
         );
     });
 
-    // haven't fixed all test cases yet
     it.skip("Converts itemize environments", () => {
         html = process(`\\begin{itemize}\\item a\\item b\\end{itemize}`);
         expect(normalizeHtml(html)).toEqual(
             normalizeHtml(
-                `<ul class="itemize"><li><p>a</p></li><li><p>b</p></li></ul>`
+                `<ul><li><p>a</p></li><li><p>b</p></li></ul>`
             )
         );
 
@@ -168,7 +165,7 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
         );
         expect(normalizeHtml(html)).toEqual(
             normalizeHtml(
-                `<ul class="itemize"><li><p>a</p></li><li><p>b</p></li></ul>`
+                `<ul><li><p>a</p></li><li><p>b</p></li></ul>`
             )
         );
 
@@ -176,6 +173,7 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
         html = process(
             `\\begin{itemize}before content\\item[x)] a\\item[] b\\end{itemize}`
         );
+        // just this doesn't work
         expect(normalizeHtml(html)).toEqual(
             // normalizeHtml(`<ul class="itemize">
             //     <li style="list-style-type: &#x27;x) &#x27;"><p>a</p></li>
@@ -185,13 +183,14 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
                 `<dl>
                     <li><title>x)</title><p>a</p></li>
                     <li><title></title><p>b</p></li>
-                </dl>` // list is centered though
+                </dl>`
             )
         );
     });
 
-    // \n in every tag for some reason
+    // \n in some tags for some reason, seems to come from normalizeHTML
     it.skip("Converts tabular environment", () => {
+        // the spaces before or after each letter stay
         html = process(`\\begin{tabular}{l l}a & b\\\\c & d\\end{tabular}`);
         expect(normalizeHtml(html)).toEqual(
             // normalizeHtml(
@@ -208,14 +207,13 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
             //     </tbody>
             // </table>`
             // )
-
-            // centered tho
             normalizeHtml(
                 `<tabular>
                     <row>
                         <cell>a</cell>
                         <cell>b</cell>
                     </row>
+
                     <row>
                         <cell>c</cell>
                         <cell>d</cell>
@@ -277,15 +275,13 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
         );
     });
 
-    //  don't know where <m> comes from, ctrl-shift-F search it
-    it.skip("Macros aren't replaced with html code in math mode", () => {
+    it("Macros aren't replaced with html code in math mode", () => {
         let ast;
 
         // Custom labels are handled
         ast = process(`\\[a\\\\b\\]`);
         expect(normalizeHtml(ast)).toEqual(
-            // normalizeHtml(`<div class="display-math">a\\\\b</div>`)
-            normalizeHtml(`<me>a\\\\b</me>`) // needs to be wrapped by <p></p>
+            normalizeHtml(`<me>a\\\\b</me>`)
         );
     });
 
@@ -304,9 +300,8 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
 
         ast = process(`x\n\ny\\[a\\\\b\\]z`);
         expect(normalizeHtml(ast)).toEqual(
-            // normalizeHtml(
-            //     `<p>x</p><p>y</p><div class="display-math">a\\\\b</div><p>z</p>`
-            // )
+             // <me> block not wrapped by <p></> but should be
+             // likely needs to be added as an option in split-for-pars since type = displaymath isn't a macro or env
             normalizeHtml(`<p>x</p><p>y</p><p><me>a\\\\b</me></p><p>z</p>`)
         );
     });
@@ -323,11 +318,6 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
 
         ast = process(`\\begin{enumerate}\\item\\bfseries b\\end{enumerate}`);
         expect(normalizeHtml(ast)).toEqual(
-            // normalizeHtml(`<ol class="enumerate">
-            //                     <li>
-            //                     <p><b class="textbf">b</b></p>
-            //                     </li>
-            //                 </ol>`)
             normalizeHtml(`<ol>
                             <li>
                                 <p><alert>b</alert></p>
