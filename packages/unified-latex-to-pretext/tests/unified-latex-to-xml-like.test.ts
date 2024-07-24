@@ -26,21 +26,15 @@ describe("unified-latex-to-pretext:unified-latex-to-xml-like", () => {
         expect(file.value).toEqual("\\html-tag:p{a}\\html-tag:p{b}");
 
         file = process("\\bfseries a\n\nb");
-        expect(file.value).toEqual(
-            '\\html-tag:p{\\html-tag:b{\\html-attr:className{"textbf"}a}}\\html-tag:p{\\html-tag:b{\\html-attr:className{"textbf"}b}}'
-        );
+        expect(file.value).toEqual("\\html-tag:p{\\html-tag:alert{a}}\\html-tag:p{\\html-tag:alert{b}}")
 
         file = process("\\bf a\n\nb");
-        expect(file.value).toEqual(
-            '\\html-tag:p{\\html-tag:b{\\html-attr:className{"textbf"}a}}\\html-tag:p{\\html-tag:b{\\html-attr:className{"textbf"}b}}'
-        );
+        expect(file.value).toEqual("\\html-tag:p{\\html-tag:alert{a}}\\html-tag:p{\\html-tag:alert{b}}");
 
         file = process(
             "\\begin{enumerate}\\item foo\\item bar\\end{enumerate}"
         );
-        expect(file.value).toEqual(
-            '\\html-tag:ol{\\html-attr:className{"enumerate"}\\html-tag:li{\\html-tag:p{foo}}\\html-tag:li{\\html-tag:p{bar}}}'
-        );
+        expect(file.value).toEqual("\\html-tag:ol{\\html-tag:li{\\html-tag:p{foo}}\\html-tag:li{\\html-tag:p{bar}}}");
     });
 
     it("can accept custom replacers", () => {
