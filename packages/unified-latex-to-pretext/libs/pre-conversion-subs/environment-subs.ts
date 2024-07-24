@@ -1,4 +1,4 @@
-import cssesc from "cssesc";
+// import cssesc from "cssesc";
 import {
     parseTabularSpec,
     TabularColumn,
@@ -14,6 +14,7 @@ import { match } from "@unified-latex/unified-latex-util-match";
 import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 import { wrapPars } from "../wrap-pars";
 import { VisitInfo } from "@unified-latex/unified-latex-util-visit";
+import { trim } from "@unified-latex/unified-latex-util-trim";
 
 const ITEM_ARG_NAMES_REG = ["label"] as const;
 const ITEM_ARG_NAMES_BEAMER = [null, "label", null] as const;
@@ -48,7 +49,7 @@ function getItemArgs(node: Ast.Macro): ItemArgs {
     return ret as ItemArgs;
 }
 
-function enumerateFactory(parentTag = "ol", className = "enumerate") {
+function enumerateFactory(parentTag = "ol") {
     return function enumerateToHtml(env: Ast.Environment) {
         // The body of an enumerate has already been processed and all relevant parts have
         // been attached to \item macros as arguments.
@@ -58,27 +59,45 @@ function enumerateFactory(parentTag = "ol", className = "enumerate") {
                 return [];
             }
 
-            const attributes: Record<string, string | Record<string, string>> =
-                {};
+            // const attributes: Record<string, string | Record<string, string>> =
+            //     {};
+
+            const customMarker: Record<string, string | Ast.Macro> = {};
+
+
             // Figure out if there any manually-specified item labels. If there are,
             // we need to specify a custom list-style-type.
             // We test the open mark to see if an optional argument was actually supplied.
             const namedArgs = getItemArgs(node);
+            
             if (namedArgs.label != null) {
-                const formattedLabel = cssesc(printRaw(namedArgs.label || []));
-                attributes.style = {
-                    // Note the space after `formattedLabel`. That is on purpose!
-                    "list-style-type": formattedLabel
-                        ? `'${formattedLabel} '`
-                        : "none",
-                };
+                // parentTag = "dl" // can't do it here
+                const formattedLabel = printRaw(namedArgs.label || []) // cssesc(printRaw(namedArgs.label || []));
+                // attributes.style = {
+                //     // Note the space after `formattedLabel`. That is on purpose!
+                //     "list-style-type": formattedLabel
+                //         ? `'${formattedLabel} '`
+                //         : "none",
+                // };
+                console.log(formattedLabel)
+                // customMarker.marker = htmlLike({
+                //     tag: "title",
+                //     content: namedArgs.label,
+                //     // attributes,
+                // })
+                // namedArgs.body = htmlLike({
+                //     tag: "title",
+                //     content: namedArgs.label,
+                //     // attributes,
+                // })
             }
 
             const body = namedArgs.body;
+            console.log(namedArgs.body)
             return htmlLike({
                 tag: "li",
                 content: wrapPars(body),
-                attributes,
+                // attributes,
             });
         });
 
@@ -133,15 +152,18 @@ function createTableFromTabular(env: Ast.Environment) {
                     styles["border-right"] = "1px solid";
                 }
             }
+            // trim whitespace off cell
+            trim(cell)
+
             return htmlLike(
                 Object.keys(styles).length > 0
                     ? {
-                          tag: "cell", // cell -> td,
+                          tag: "cell",
                           content: cell,
                           attributes: { style: styles },
                       }
                     : {
-                          tag: "cell", // cell -> td,
+                          tag: "cell",
                           content: cell,
                       }
             );
@@ -177,7 +199,7 @@ export const environmentReplacements: Record<
     ) => Ast.Macro | Ast.String | Ast.Environment
 > = {
     enumerate: enumerateFactory("ol"),
-    itemize: enumerateFactory("ul", "itemize"),
+    itemize: enumerateFactory("ul"),
     center: createCenteredElement,
     tabular: createTableFromTabular,
     quote: (env) => {

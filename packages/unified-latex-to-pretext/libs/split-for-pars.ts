@@ -50,11 +50,11 @@ export function splitForPars(
             continue;
         }
         // Display-math should always break pars
-        if (node.type === "displaymath") {
-            pushBody();
-            ret.push({ content: [node], wrapInPar: false });
-            continue;
-        }
+        // if (node.type === "displaymath") {
+        //     pushBody();
+        //     ret.push({ content: [node], wrapInPar: true });
+        //     continue;
+        // }
         if (match.parbreak(node) || match.macro(node, "par")) {
             pushBody();
             continue;

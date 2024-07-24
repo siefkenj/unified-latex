@@ -117,7 +117,7 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
         );
     });
 
-    it.skip("Converts enumerate environments", () => {
+    it("Converts enumerate environments", () => {
         html = process(`\\begin{enumerate}\\item a\\item b\\end{enumerate}`);
         expect(normalizeHtml(html)).toEqual(
             normalizeHtml(`<ol><li><p>a</p></li><li><p>b</p></li></ol>`)
@@ -183,42 +183,21 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
                 `<dl>
                     <li><title>x)</title><p>a</p></li>
                     <li><title></title><p>b</p></li>
-                </dl>`
+                </dl>` // list is centered though, @margins or @width in tabular could help tho
+                // width for how much space in marker so not helpful
+                // margins doesn't work for lists only tabulars
             )
         );
     });
 
-    // \n in some tags for some reason, seems to come from normalizeHTML
-    it.skip("Converts tabular environment", () => {
-        // the spaces before or after each letter stay
+    it("Converts tabular environment", () => {
         html = process(`\\begin{tabular}{l l}a & b\\\\c & d\\end{tabular}`);
-        expect(normalizeHtml(html)).toEqual(
-            // normalizeHtml(
-            //     `<table class="tabular">
-            //     <tbody>
-            //         <tr>
-            //             <td>a</td>
-            //             <td>b</td>
-            //         </tr>
-            //         <tr>
-            //             <td>c</td>
-            //             <td>d</td>
-            //         </tr>
-            //     </tbody>
-            // </table>`
-            // )
-            normalizeHtml(
-                `<tabular>
-                    <row>
-                        <cell>a</cell>
-                        <cell>b</cell>
-                    </row>
 
-                    <row>
-                        <cell>c</cell>
-                        <cell>d</cell>
-                    </row>
-                </tabular>`
+        expect(normalizeHtml(html)).toEqual(
+            // centered tho
+            // can fix with margins="0%"
+            normalizeHtml(
+                `<tabular><row><cell>a</cell><cell>b</cell></row><row><cell>c</cell><cell>d</cell></row></tabular>`
             )
         );
     });
@@ -227,7 +206,7 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
         html = process(`\\begin{tabular}{r l}a & b\\\\c & d\\end{tabular}`);
         expect(normalizeHtml(html)).toEqual(
             // note: even though only one col is right aligned, need all cols
-            normalizeHtml(
+            // put all in single line once implemented
                 `<tabular>
                     <col halign="right"/>
                     <col/>
@@ -240,7 +219,6 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
                         <cell>d</cell>
                     </row>
                 </tabular>`
-            )
         );
     });
 
@@ -295,14 +273,12 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
         );
     });
 
-    it.skip("Pars are broken at display math", () => {
+    it("Pars are broken at display math", () => {
         let ast;
 
         ast = process(`x\n\ny\\[a\\\\b\\]z`);
         expect(normalizeHtml(ast)).toEqual(
-             // <me> block not wrapped by <p></> but should be
-             // likely needs to be added as an option in split-for-pars since type = displaymath isn't a macro or env
-            normalizeHtml(`<p>x</p><p>y</p><p><me>a\\\\b</me></p><p>z</p>`)
+            normalizeHtml(`<p>x</p><p>y<me>a\\\\b</me>z</p>`)
         );
     });
     it("replaces command inside argument", () => {
@@ -330,6 +306,7 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
 
         ast = process(`\\paragraph{Important.} Paragraph`);
         expect(normalizeHtml(ast)).toEqual(
+            // should there be a <paragraphs> or <p> tag?
             normalizeHtml(`
                 <title>Important.</title> Paragraph
             `)
