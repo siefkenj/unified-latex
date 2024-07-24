@@ -4,11 +4,13 @@ import { match } from "@unified-latex/unified-latex-util-match";
 import { htmlLike } from "@unified-latex/unified-latex-util-html-like";
 import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 
+export type AuthorInfo = Record<string, Ast.Node>;
+
 /**
  *
  * Visits all the matching nodes and gathers author information, then send them to render and output pretext.
  */
-export function gatherAuthorInfo(ast: Ast.Ast): any[] {
+export function gatherAuthorInfo(ast: Ast.Ast): AuthorInfo[] {
     const authorList : any[] = [];
 
     visit(ast, (node) => {
@@ -16,7 +18,6 @@ export function gatherAuthorInfo(ast: Ast.Ast): any[] {
             const authorName = Object.fromEntries(
                 node.args.map((x) => ["personname", printRaw(x.content)])
             );
-            renderAuthorName(node);
             authorList.push(authorName);
         } else if (match.macro(node, "address") && node.args) {
             const authorAdd = Object.fromEntries(
@@ -30,37 +31,24 @@ export function gatherAuthorInfo(ast: Ast.Ast): any[] {
             authorList.push(authorEmail);
         }
     });
-    const authorListNode = htmlLike({
-        tag: "author",
-        content: renderCollectedAuthorInfo(authorList),
-    });
-
     return authorList;
-}
-
-/**
- * This function is called when finished collecting the author name, and it renders the info and returns a htmlLike node.
- */
-
-export function renderAuthorName(authorInfo: Ast.Macro): Ast.Macro {
-    const renderedAuthorName = htmlLike({
-        tag: "personname",
-        content: authorInfo,
-    });
-    return renderedAuthorName;
 }
 
 /**
  * This function is called after the author information is collected, and integrate them into one htmlLike node with "author" tag.
  */
-export function renderCollectedAuthorInfo(authorList: any[]): Ast.Macro[] {
-    const renderedAuthorList = [];
+export function renderCollectedAuthorInfo(authorList: AuthorInfo[]): Ast.Macro {
+    let authorInfo : Ast.Macro[] = [];
     for (const [key, value] of Object.entries(authorList)) {
-        const renderedAuthor = htmlLike({
+        const renderedInfo = htmlLike({
             tag: key,
             content: value,
         });
-        renderedAuthorList.push(renderedAuthor);
+        authorInfo.push(renderedInfo);
     }
+    const renderedAuthorList = htmlLike({
+        tag: "author",
+        content: authorInfo,
+    });
     return renderedAuthorList;
 }
