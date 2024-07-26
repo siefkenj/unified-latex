@@ -59,51 +59,37 @@ function enumerateFactory(parentTag = "ol") {
                 return [];
             }
 
-            // const attributes: Record<string, string | Record<string, string>> =
-            //     {};
-
-            const customMarker: Record<string, string | Ast.Macro> = {};
-
-
             // Figure out if there any manually-specified item labels. If there are,
-            // we need to specify a custom list-style-type.
+            // we need to add a title tag
             // We test the open mark to see if an optional argument was actually supplied.
             const namedArgs = getItemArgs(node);
-            
+
+            // if there are custom markers, don't want title to be wrapped in pars
+            // so we wrap the body first
+            namedArgs.body = wrapPars(namedArgs.body);
+
             if (namedArgs.label != null) {
-                // parentTag = "dl" // can't do it here
-                const formattedLabel = printRaw(namedArgs.label || []) // cssesc(printRaw(namedArgs.label || []));
-                // attributes.style = {
-                //     // Note the space after `formattedLabel`. That is on purpose!
-                //     "list-style-type": formattedLabel
-                //         ? `'${formattedLabel} '`
-                //         : "none",
-                // };
-                console.log(formattedLabel)
-                // customMarker.marker = htmlLike({
-                //     tag: "title",
-                //     content: namedArgs.label,
-                //     // attributes,
-                // })
-                // namedArgs.body = htmlLike({
-                //     tag: "title",
-                //     content: namedArgs.label,
-                //     // attributes,
-                // })
+                parentTag = "dl";
+
+                // add title tag containing custom marker
+                namedArgs.body.unshift(
+                    htmlLike({
+                        tag: "title",
+                        content: namedArgs.label,
+                    })
+                );
             }
 
             const body = namedArgs.body;
-            console.log(namedArgs.body)
+
             return htmlLike({
                 tag: "li",
-                content: wrapPars(body),
-                // attributes,
+                content: body,
             });
         });
 
         return htmlLike({
             tag: parentTag,
-            // attributes: { className },
             content,
         });
     };
@@ -153,7 +139,7 @@ function createTableFromTabular(env: Ast.Environment) {
                 }
             }
             // trim whitespace off cell
-            trim(cell)
+            trim(cell);
 
             return htmlLike(
                 Object.keys(styles).length > 0
@@ -171,16 +157,6 @@ function createTableFromTabular(env: Ast.Environment) {
         return htmlLike({ tag: "row", content });
     });
 
-    // return htmlLike({
-    //     tag: "table",
-    //     content: [
-    //         htmlLike({
-    //             tag: "tbody",
-    //             content: tableBody,
-    //         }),
-    //     ],
-    //     attributes: { className: "tabular" },
-    // });
     return htmlLike({
         tag: "tabular",
         content: tableBody,
