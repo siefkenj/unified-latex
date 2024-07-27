@@ -31,7 +31,7 @@ describe("unified-latex-to-pretext:author-info", () => {
             [{"personname": "First Middle LastName"}, {"address": "Department, Address"}]
         );
 
-        sample = "\\affil{Affiliation}";
+        sample = "\\address{Affiliation}";
         expect(gatherAuthorInfo(parser.parse(sample))).toEqual(
                 [{"address": "Affiliation"}]   
         );
@@ -52,7 +52,7 @@ describe("unified-latex-to-pretext:author-info", () => {
             )
         );
 
-        sample = "\\affil{Affiliation}";
+        sample = "\\address{Affiliation}";
         expect(renderCollectedAuthorInfo(gatherAuthorInfo(parser.parse(sample)))).toEqual(
             normalizeHtml(
                 "<author> <institution>Affiliation</institution> </author>"

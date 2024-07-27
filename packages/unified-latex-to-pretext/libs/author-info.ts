@@ -2,33 +2,54 @@ import * as Ast from "@unified-latex/unified-latex-types";
 import { visit } from "@unified-latex/unified-latex-util-visit";
 import { match } from "@unified-latex/unified-latex-util-match";
 import { htmlLike } from "@unified-latex/unified-latex-util-html-like";
+import { VFileMessage } from "vfile-message";
 import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 
-export type AuthorInfo = Record<string, Ast.Node>;
+export type AuthorInfo = Record<string, Ast.Node[]>;
 
 /**
  *
  * Visits all the matching nodes and gathers author information, then send them to render and output pretext.
  */
 export function gatherAuthorInfo(ast: Ast.Ast): AuthorInfo[] {
-    const authorList : any[] = [];
+    const authorList : AuthorInfo[] = [];
 
     visit(ast, (node) => {
         if (match.macro(node, "author") && node.args) {
             const authorName = Object.fromEntries(
-                node.args.map((x) => ["personname", printRaw(x.content)])
+                node.args.map((x) => ["personname", x.content])
             );
             authorList.push(authorName);
         } else if (match.macro(node, "address") && node.args) {
             const authorAdd = Object.fromEntries(
-                node.args.map((x) => ["address", printRaw(x.content)])
+                node.args.map((x) => ["address", x.content])
             );
             authorList.push(authorAdd);
         } else if (match.macro(node, "email") && node.args) {
             const authorEmail = Object.fromEntries(
-                node.args.map((x) => ["email", printRaw(x.content)])
+                node.args.map((x) => ["email", x.content])
             );
             authorList.push(authorEmail);
+        } else if (match.macro(node, "affil") && node.args) {
+            const message = new VFileMessage(
+                "Warning: \\affil is not supported"
+            );
+            // add the position of the group if available
+            if (node.position) {
+                message.line = node.position.start.line;
+                message.column = node.position.start.column;
+                message.position = {
+                    start: {
+                        line: node.position.start.line,
+                        column: node.position.start.column,
+                    },
+                    end: {
+                        line: node.position.end.line,
+                        column: node.position.end.column,
+                    },
+                };
+            }
+            message.source = "LatexConversion";
         }
     });
     return authorList;
