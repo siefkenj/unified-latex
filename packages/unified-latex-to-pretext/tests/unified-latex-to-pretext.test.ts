@@ -185,23 +185,13 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
         );
     });
 
-    it.skip("Converts tabular environment with different column alignments", () => {
-        html = process(`\\begin{tabular}{r l}a & b\\\\c & d\\end{tabular}`);
+    it("Converts tabular environment with different column alignments and borders", () => {
+        html = process(`\\begin{tabular}{|r|l|}a & b\\\\c & d\\end{tabular}`);
         expect(normalizeHtml(html)).toEqual(
-            // note: even though only one col is right aligned, need all cols
-            // put all in single line once implemented
-            `<tabular>
-                    <col halign="right"/>
-                    <col/>
-                    <row>
-                        <cell>a</cell>
-                        <cell>b</cell>
-                    </row>
-                    <row>
-                        <cell>c</cell>
-                        <cell>d</cell>
-                    </row>
-                </tabular>`
+            normalizeHtml(
+                `<tabular left="minor"><col halign="right" right="minor"></col><col right="minor"></col>` +
+                    `<row><cell>a</cell><cell>b</cell></row><row><cell>c</cell><cell>d</cell></row></tabular>`
+            )
         );
     });
 

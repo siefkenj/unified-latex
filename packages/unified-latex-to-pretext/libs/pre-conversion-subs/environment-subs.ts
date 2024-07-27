@@ -11,7 +11,6 @@ import {
     getNamedArgsContent,
 } from "@unified-latex/unified-latex-util-arguments";
 import { match } from "@unified-latex/unified-latex-util-match";
-import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 import { wrapPars } from "../wrap-pars";
 import { VisitInfo } from "@unified-latex/unified-latex-util-visit";
 import { trim } from "@unified-latex/unified-latex-util-trim";
@@ -111,55 +110,95 @@ function createTableFromTabular(env: Ast.Environment) {
         columnSpecs = parseTabularSpec(args[1] || []);
     } catch (e) {}
 
+    // for the tabular tag
+    const attributes: Record<string, string | Record<string, string>> = {};
+
+    // we only need the col tags if one of the columns aren't left aligned/have a border
+    let notLeftAligned: boolean = false;
+
+    // stores which columns have borders to the right
+    // number is the column's index in columnSpecs
+    const columnRightBorder: Record<number, boolean> = {};
+
     const tableBody = tabularBody.map((row) => {
         const content = row.cells.map((cell, i) => {
             const columnSpec = columnSpecs[i];
-            const styles: Record<string, string> = {};
+
             if (columnSpec) {
                 const { alignment } = columnSpec;
-                if (alignment.alignment === "center") {
-                    styles["text-align"] = "center";
-                }
-                if (alignment.alignment === "right") {
-                    styles["text-align"] = "right";
-                }
+
+                // this will need to be in the tabular tag
                 if (
                     columnSpec.pre_dividers.some(
                         (div) => div.type === "vert_divider"
                     )
                 ) {
-                    styles["border-left"] = "1px solid";
+                    attributes["left"] = "minor";
                 }
+
+                // check if the column has a right border
                 if (
                     columnSpec.post_dividers.some(
                         (div) => div.type === "vert_divider"
                     )
                 ) {
-                    styles["border-right"] = "1px solid";
+                    columnRightBorder[i] = true;
+                }
+
+                // check if the default alignment isn't used
+                if (alignment.alignment !== "left") {
+                    notLeftAligned = true;
                 }
             }
+
             // trim whitespace off cell
             trim(cell);
 
-            return htmlLike(
-                Object.keys(styles).length > 0
-                    ? {
-                          tag: "cell",
-                          content: cell,
-                          attributes: { style: styles },
-                      }
-                    : {
-                          tag: "cell",
-                          content: cell,
-                      }
-            );
+            return htmlLike({
+                tag: "cell",
+                content: cell,
+            });
         });
         return htmlLike({ tag: "row", content });
     });
 
+    // add col tags if needed
+    if (
+        notLeftAligned ||
+        Object.values(columnRightBorder).some((bool) => bool)
+    ) {
+        // go backwards since adding col tags to the front of the tableBody list
+        // otherwise, col tags will be in the reversed order
+        for (let i = columnSpecs.length; i >= 0; i--) {
+            const columnSpec = columnSpecs[i];
+            if (columnSpec) {
+                const colAttributes: Record<
+                    string,
+                    string | Record<string, string>
+                > = {};
+                const { alignment } = columnSpec;
+
+                // add h-align attribute if not default
+                if (alignment.alignment !== "left") {
+                    colAttributes["halign"] = alignment.alignment;
+                }
+
+                // if there is a right border add it
+                if ((columnRightBorder[i] = true)) {
+                    colAttributes["right"] = "minor";
+                }
+
+                tableBody.unshift(
+                    htmlLike({ tag: "col", attributes: colAttributes })
+                );
+            }
+        }
+    }
+
     return htmlLike({
         tag: "tabular",
         content: tableBody,
+        attributes: attributes,
     });
 }
 
