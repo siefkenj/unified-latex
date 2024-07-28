@@ -53,13 +53,16 @@ function enumerateFactory(parentTag = "ol") {
         // The body of an enumerate has already been processed and all relevant parts have
         // been attached to \item macros as arguments.
         const items = env.content.filter((node) => match.macro(node, "item"));
+
+        // Figure out if there any manually-specified item labels. If there are,
+        // we need to add a title tag
+        let isDescriptionList = false;
+
         const content = items.flatMap((node) => {
             if (!match.macro(node) || !node.args) {
                 return [];
             }
 
-            // Figure out if there any manually-specified item labels. If there are,
-            // we need to add a title tag
             // We test the open mark to see if an optional argument was actually supplied.
             const namedArgs = getItemArgs(node);
 
@@ -67,8 +70,9 @@ function enumerateFactory(parentTag = "ol") {
             // so we wrap the body first
             namedArgs.body = wrapPars(namedArgs.body);
 
+            // check if a custom marker is used
             if (namedArgs.label != null) {
-                parentTag = "dl";
+                isDescriptionList = true;
 
                 // add title tag containing custom marker
                 namedArgs.body.unshift(
@@ -88,7 +92,7 @@ function enumerateFactory(parentTag = "ol") {
         });
 
         return htmlLike({
-            tag: parentTag,
+            tag: isDescriptionList ? "dl" : parentTag,
             content,
         });
     };
