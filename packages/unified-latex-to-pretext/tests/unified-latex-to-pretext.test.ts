@@ -258,7 +258,7 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
         );
     });
 
-    it.skip("replaces command inside enumerate", () => {
+    it("replaces command inside enumerate", () => {
         let ast;
 
         ast = process(`\\begin{enumerate}\\item\\bfseries b\\end{enumerate}`);
