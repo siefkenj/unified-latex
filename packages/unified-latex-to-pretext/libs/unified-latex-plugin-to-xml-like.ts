@@ -19,6 +19,9 @@ import {
 import { macroReplacements as _macroReplacements } from "./pre-conversion-subs/macro-subs";
 import { streamingMacroReplacements } from "./pre-conversion-subs/streaming-command-subs";
 import { unifiedLatexWrapPars } from "./unified-latex-wrap-pars";
+import { breakOnBoundaries } from "./pre-conversion-subs/break-on-boundaries";
+import { reportMacrosUnsupportedByKatex } from "./pre-conversion-subs/report-unsupported-macro-katex";
+import { expandUserDefinedMacros } from "./pre-conversion-subs/expand-user-defined-macros";
 
 type EnvironmentReplacements = typeof _environmentReplacements;
 type MacroReplacements = typeof _macroReplacements;
@@ -112,6 +115,13 @@ export const unifiedLatexToXmlLike: Plugin<
                 return environmentReplacements[printRaw(node.env)](node, info);
             }
         });
+
+        // replace division macros with environments
+        const warningMessages = breakOnBoundaries(tree); // returns messages, what should we do with that?
+
+        // expand any user defined macros
+        expandUserDefinedMacros(tree);
+
         replaceNode(tree, (node, info) => {
             // Children of math-mode are rendered by KaTeX/MathJax and so we shouldn't touch them!
             if (info.context.hasMathModeAncestor) {
@@ -122,6 +132,10 @@ export const unifiedLatexToXmlLike: Plugin<
                 return replacement;
             }
         });
+
+        // before replacing math-mode macros, report any macros that can't be replaced
+        const unsupportedByKatex: string[] =
+            reportMacrosUnsupportedByKatex(tree); // what to do with return?
 
         // Replace math-mode macros for appropriate KaTeX rendering
         attachNeededRenderInfo(tree);
