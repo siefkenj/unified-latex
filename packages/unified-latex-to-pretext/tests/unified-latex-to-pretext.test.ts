@@ -131,7 +131,6 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
             `\\begin{enumerate}before content\\item[x)] a\\item[] b\\end{enumerate}`
         );
 
-        // only this one doesn't work
         expect(normalizeHtml(html)).toEqual(
             normalizeHtml(
                 `<dl>
@@ -142,7 +141,7 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
         );
     });
 
-    it.skip("Converts itemize environments", () => {
+    it("Converts itemize environments", () => {
         html = process(`\\begin{itemize}\\item a\\item b\\end{itemize}`);
         expect(normalizeHtml(html)).toEqual(
             normalizeHtml(`<ul><li><p>a</p></li><li><p>b</p></li></ul>`)
@@ -160,15 +159,13 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
         html = process(
             `\\begin{itemize}before content\\item[x)] a\\item[] b\\end{itemize}`
         );
-        // just this doesn't work
+
         expect(normalizeHtml(html)).toEqual(
             normalizeHtml(
                 `<dl>
                     <li><title>x)</title><p>a</p></li>
                     <li><title></title><p>b</p></li>
-                </dl>` // list is centered though, @margins or @width in tabular could help tho
-                // width for how much space in marker so not helpful
-                // margins doesn't work for lists only tabulars
+                </dl>`
             )
         );
     });
@@ -260,7 +257,7 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
             normalizeHtml("<em><alert>b</alert></em>")
         );
     });
-    // first enumerate test dl makes this fail for some reason
+
     it.skip("replaces command inside enumerate", () => {
         let ast;
 

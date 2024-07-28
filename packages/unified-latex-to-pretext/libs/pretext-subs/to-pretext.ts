@@ -59,13 +59,13 @@ export function toPretextWithLoggerFactory(
                 return x("m", printRaw(node.content));
             case "mathenv":
             case "displaymath":
-                return x("me", printRaw(node.content)); // CHANGE m -> me
+                return x("me", printRaw(node.content));
             case "verb":
             case "verbatim":
-                return x("pre", { className: node.env }, node.content);
+                return x("pre", node.content);
             case "whitespace":
                 return { type: "text", value: " ", position: node.position };
-            case "parbreak":
+            case "parbreak": // no equivalent?
                 return x("br");
             case "group":
                 // Groups are just ignored.

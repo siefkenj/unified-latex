@@ -32,10 +32,8 @@ function factory(
 function createHeading(tag: string, attrs = {}) {
     return (macro: Ast.Macro) => {
         const args = getArgsContent(macro);
-        const starred = !!args[0];
-        const attributes: Record<string, string> = starred
-            ? { className: "starred" }
-            : {};
+        // const starred = !!args[0];
+        const attributes: Record<string, string> = {};
 
         if (attrs) {
             Object.assign(attributes, attrs);
@@ -56,21 +54,21 @@ export const macroReplacements: Record<
     emph: factory("em"),
     textrm: factory("em"), // give warning
     textsf: factory("em"), // give warning
-    texttt: factory("span"),
-    textsl: factory("span"),
+    texttt: factory("span"), // cd + cline tags are an option?
+    textsl: factory("span"), // maybe em
     textit: factory("em"),
     textbf: factory("alert"),
-    underline: factory("span"),
-    mbox: factory("span"),
-    phantom: factory("span"),
-    part: createHeading("title"),
+    underline: factory("span"), // > maybe em and warn
+    mbox: factory("span"), // can use \text{} but not an html like tag
+    phantom: factory("span"), // no equivalent?
+    part: createHeading("title"), // maybe divisions shouldn't even be in here
     chapter: createHeading("title"),
     section: createHeading("title"),
     subsection: createHeading("title"),
     subsubsection: createHeading("title"),
     paragraph: createHeading("title"),
     subparagraph: createHeading("title"),
-    appendix: createHeading("title"),
+    appendix: createHeading("appendix"), // title -> appendix
     url: (node) => {
         const args = getArgsContent(node);
         const url = printRaw(args[0] || "#");
@@ -97,20 +95,21 @@ export const macroReplacements: Record<
         const args = getArgsContent(node);
         const url = "#" + printRaw(args[0] || "");
         return htmlLike({
-            tag: "a",
+            tag: "url",
             attributes: {
-                className: "href",
                 href: url,
             },
             content: args[1] || [],
         });
     },
     "\\": () =>
+        // no whitespace in pretext
         htmlLike({
             tag: "br",
             attributes: { className: "linebreak" },
         }),
     vspace: (node) => {
+        // no equivalent?
         const args = getArgsContent(node);
         return htmlLike({
             tag: "div",
@@ -122,6 +121,7 @@ export const macroReplacements: Record<
         });
     },
     hspace: (node) => {
+        // no equivalent?
         const args = getArgsContent(node);
         return htmlLike({
             tag: "span",
@@ -133,6 +133,7 @@ export const macroReplacements: Record<
         });
     },
     textcolor: (node) => {
+        // no colors in pretext
         const args = getArgsContent(node);
         const computedColor = xcolorMacroToHex(node);
         const color = computedColor.hex;
@@ -156,6 +157,7 @@ export const macroReplacements: Record<
         }
     },
     textsize: (node) => {
+        // no equivalent?
         const args = getArgsContent(node);
         const textSize = printRaw(args[0] || []);
         return htmlLike({
@@ -167,6 +169,7 @@ export const macroReplacements: Record<
         });
     },
     makebox: (node) => {
+        // maybe just do the same as mbox, text
         const args = getArgsContent(node);
         return htmlLike({
             tag: "span",
@@ -177,15 +180,14 @@ export const macroReplacements: Record<
             content: args[3] || [],
         });
     },
-    noindent: () => ({ type: "string", content: "" }),
+    noindent: () => ({ type: "string", content: "" }), // no equivalent?
     includegraphics: (node) => {
         const args = getArgsContent(node);
-        const src = printRaw(args[args.length - 1] || []);
+        const source = printRaw(args[args.length - 1] || []);
         return htmlLike({
-            tag: "img",
+            tag: "image", // img -> image
             attributes: {
-                className: "includegraphics",
-                src,
+                source, // src -> source
             },
             content: [],
         });

@@ -94,6 +94,7 @@ function enumerateFactory(parentTag = "ol") {
     };
 }
 
+// seemsw to be no center tag
 function createCenteredElement(env: Ast.Environment) {
     return htmlLike({
         tag: "center",
@@ -215,13 +216,12 @@ export const environmentReplacements: Record<
 > = {
     enumerate: enumerateFactory("ol"),
     itemize: enumerateFactory("ul"),
-    center: createCenteredElement,
+    center: createCenteredElement, // ?
     tabular: createTableFromTabular,
     quote: (env) => {
         return htmlLike({
             tag: "blockquote",
             content: env.content,
-            attributes: { className: "environment quote" },
         });
     },
 };
