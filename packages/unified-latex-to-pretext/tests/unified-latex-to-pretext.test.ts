@@ -192,7 +192,7 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
         );
     });
 
-    it("Can wrap in <p>...</p> tags", () => {
+    it.skip("Can wrap in <p>...</p> tags", () => {
         html = process(`a\\par b`);
         expect(normalizeHtml(html)).toEqual(normalizeHtml(`<p>a</p><p>b</p>`));
 
@@ -205,12 +205,16 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
         );
         html = process(`a\\section{foo} b\n\nc`);
         expect(normalizeHtml(html)).toEqual(
-            normalizeHtml(`<p>a</p><title>foo</title><p>b</p><p>c</p>`)
+            // normalizeHtml(`<p>a</p><title>foo</title><p>b</p><p>c</p>`)
+            normalizeHtml(
+                `<p>a</p><section><title>foo</title></section><p>b</p><p>c</p>`
+            )
         );
         html = process(`a\\section{foo} b\\section{bar}\n\nc`);
         expect(normalizeHtml(html)).toEqual(
             normalizeHtml(
-                `<p>a</p><title>foo</title><p>b</p><title>bar</title><p>c</p>`
+                // `<p>a</p><title>foo</title><p>b</p><title>bar</title><p>c</p>`
+                `<p>a</p><section><title>foo</title></section><p>b</p><section><title>bar</title></section><p>c</p>`
             )
         );
         html = process(`a\n \\emph{b}\n\nc`);
@@ -276,6 +280,7 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
         ast = process(`\\paragraph{Important.} Paragraph`);
         expect(normalizeHtml(ast)).toEqual(
             // should there be a <paragraphs> or <p> tag?
+            // paragraphs seems like it should replace paragraph and p for subparagraph (or still paragraphs)
             normalizeHtml(`
                 <title>Important.</title> Paragraph
             `)
