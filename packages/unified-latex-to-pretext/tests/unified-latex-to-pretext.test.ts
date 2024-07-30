@@ -66,7 +66,7 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
         );
     });
 
-    it.skip("Can replace headings", () => {
+    it("Can replace headings", () => {
         html = process(String.raw`\chapter{My Chapter}`);
         expect(normalizeHtml(html)).toEqual(
             // normalizeHtml(`<h2>My Chapter</h2>`)

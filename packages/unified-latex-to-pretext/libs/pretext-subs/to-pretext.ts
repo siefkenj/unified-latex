@@ -70,7 +70,8 @@ export function toPretextWithLoggerFactory(
             case "group":
                 // Groups are just ignored.
                 return node.content.flatMap(toPretext);
-            case "environment":
+            case "environment": // this is where breakonboundaries has problems likely
+            // could export the divisions object and ismappedenviron to check further here
                 logger(
                     `Unknown environment when converting to HTML \`${formatNodeForError(
                         node.env

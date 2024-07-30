@@ -22,6 +22,7 @@ import { unifiedLatexWrapPars } from "./unified-latex-wrap-pars";
 import { breakOnBoundaries } from "./pre-conversion-subs/break-on-boundaries";
 import { reportMacrosUnsupportedByKatex } from "./pre-conversion-subs/report-unsupported-macro-katex";
 import { expandUserDefinedMacros } from "./pre-conversion-subs/expand-user-defined-macros";
+import { htmlLike } from "@unified-latex/unified-latex-util-html-like";
 
 type EnvironmentReplacements = typeof _environmentReplacements;
 type MacroReplacements = typeof _macroReplacements;
@@ -102,7 +103,7 @@ export const unifiedLatexToXmlLike: Plugin<
             processor = processor.use(unifiedLatexWrapPars);
         }
         tree = processor.runSync(tree);
-
+        
         // Replace text-mode environments and then macros. Environments *must* be processed first, since
         // environments like tabular use `\\` as a newline indicator, but a `\\` macro gets replaced with
         // a `<br />` during macro replacement.
@@ -116,8 +117,7 @@ export const unifiedLatexToXmlLike: Plugin<
             }
         });
 
-        // replace division macros with environments
-        const warningMessages = breakOnBoundaries(tree); // returns messages, what should we do with that?
+        const warningMessages = breakOnBoundaries(tree);  // returns messages, what should we do with that?
 
         // expand any user defined macros
         expandUserDefinedMacros(tree);
@@ -132,6 +132,10 @@ export const unifiedLatexToXmlLike: Plugin<
                 return replacement;
             }
         });
+
+        // the earliest breakonboundaries can be called without div problem if macro subs stuff not commented out (from prev replaceNode)
+        // but heading test case doesn't work, since divisions replaced with titles
+        // could fix in to-pretext (pretext plugin problem)
 
         // before replacing math-mode macros, report any macros that can't be replaced
         const unsupportedByKatex: string[] =
@@ -149,9 +153,16 @@ export const unifiedLatexToXmlLike: Plugin<
                 );
             }
         });
+
         if (!producePretextFragment) {
             // Wrap in enough tags to ensure a valid pretext document
-            // ...
+            // wrap around with pretext tag
+            tree.content = [htmlLike({tag: "pretext", content: tree.content})]
+
+            // need anything else?, like it's either a book or article, which must have certain tags
+            // like right after article must be a title
+
+            // add boilerplate, but it's formatted differently, <? ... ?>, so can't use htmllike directly
         }
 
         // Make sure we are actually mutating the current tree.

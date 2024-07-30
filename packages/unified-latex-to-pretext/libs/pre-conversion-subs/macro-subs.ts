@@ -61,13 +61,13 @@ export const macroReplacements: Record<
     underline: factory("span"), // > maybe em and warn
     mbox: factory("span"), // can use \text{} but not an html like tag
     phantom: factory("span"), // no equivalent?
-    part: createHeading("title"), // maybe divisions shouldn't even be in here
-    chapter: createHeading("title"),
-    section: createHeading("title"),
-    subsection: createHeading("title"),
-    subsubsection: createHeading("title"),
-    paragraph: createHeading("title"),
-    subparagraph: createHeading("title"),
+    // part: createHeading("title"), // maybe divisions shouldn't even be in here, depends on when breakonboundaries is called or these are just useless
+    // chapter: createHeading("title"),
+    // section: createHeading("title"),
+    // subsection: createHeading("title"),
+    // subsubsection: createHeading("title"),
+    // paragraph: createHeading("title"),
+    // subparagraph: createHeading("title"),
     appendix: createHeading("appendix"), // title -> appendix
     url: (node) => {
         const args = getArgsContent(node);
