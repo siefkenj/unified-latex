@@ -1,4 +1,3 @@
-// import cssesc from "cssesc";
 import {
     parseTabularSpec,
     TabularColumn,
