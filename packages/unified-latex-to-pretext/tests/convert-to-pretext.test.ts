@@ -87,6 +87,7 @@ describe("unified-latex-to-pretext:convert-to-pretext", () => {
                             });
                         },
                     },
+                    producePretextFragment: true,
                 })
                 .use(xmlCompilePlugin)
                 .processSync(value).value as string;
