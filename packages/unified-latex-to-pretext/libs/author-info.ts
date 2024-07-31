@@ -3,7 +3,6 @@ import { visit } from "@unified-latex/unified-latex-util-visit";
 import { match } from "@unified-latex/unified-latex-util-match";
 import { htmlLike } from "@unified-latex/unified-latex-util-html-like";
 import { VFileMessage } from "vfile-message";
-import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 
 export type AuthorInfo = Record<string, Ast.Node[]>;
 
@@ -30,7 +29,8 @@ export function gatherAuthorInfo(ast: Ast.Ast): AuthorInfo[] {
                 node.args.map((x) => ["email", x.content])
             );
             authorList.push(authorEmail);
-        } else if (match.macro(node, "affil") && node.args) {
+        } 
+        /*else if (match.macro(node, "affil") && node.args) {
             const message = new VFileMessage(
                 "Warning: \\affil is not supported"
             );
@@ -51,6 +51,7 @@ export function gatherAuthorInfo(ast: Ast.Ast): AuthorInfo[] {
             }
             message.source = "LatexConversion";
         }
+*/
     });
     return authorList;
 }
@@ -60,12 +61,26 @@ export function gatherAuthorInfo(ast: Ast.Ast): AuthorInfo[] {
  */
 export function renderCollectedAuthorInfo(authorList: AuthorInfo[]): Ast.Macro {
     let authorInfo : Ast.Macro[] = [];
-    for (const [key, value] of Object.entries(authorList)) {
-        const renderedInfo = htmlLike({
-            tag: key,
-            content: value,
-        });
-        authorInfo.push(renderedInfo);
+    for (const info of authorList) {
+        if(info.personname){
+            const renderInfo = htmlLike({
+                tag: "personname",
+                content: info.personname,
+            });
+            authorInfo.push(renderInfo);
+        }else if(info.address){
+            const renderInfo = htmlLike({
+                tag: "address",
+                content: info.address,
+            });
+            authorInfo.push(renderInfo);
+        }else if(info.email){
+            const renderInfo = htmlLike({
+                tag: "email",
+                content: info.email,
+            });
+            authorInfo.push(renderInfo);
+        }
     }
     const renderedAuthorList = htmlLike({
         tag: "author",
