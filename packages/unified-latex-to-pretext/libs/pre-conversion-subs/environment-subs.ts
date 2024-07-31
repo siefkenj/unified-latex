@@ -219,7 +219,7 @@ export const environmentReplacements: Record<
 > = {
     enumerate: enumerateFactory("ol"),
     itemize: enumerateFactory("ul"),
-    center: createCenteredElement, // ?
+    center: createCenteredElement, // remove
     tabular: createTableFromTabular,
     quote: (env) => {
         return htmlLike({

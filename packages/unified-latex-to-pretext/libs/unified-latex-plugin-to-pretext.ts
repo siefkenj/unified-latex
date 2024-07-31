@@ -29,7 +29,7 @@ export const unifiedLatexToPretext: Plugin<
     Xast.Root
 > = function unifiedLatexAttachMacroArguments(options) {
     return (tree, file) => {
-        unified().use(unifiedLatexToXmlLike, options).run(tree);
+        unified().use(unifiedLatexToXmlLike, options).run(tree, file);
 
         // This should happen right before converting to HTML because macros like `\&` should
         // be expanded via html rules first (and not turned into their corresponding ligature directly)
