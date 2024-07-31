@@ -62,22 +62,10 @@ export function gatherAuthorInfo(ast: Ast.Ast): AuthorInfo[] {
 export function renderCollectedAuthorInfo(authorList: AuthorInfo[]): Ast.Macro {
     let authorInfo : Ast.Macro[] = [];
     for (const info of authorList) {
-        if(info.personname){
+        for(const key in info){
             const renderInfo = htmlLike({
-                tag: "personname",
-                content: info.personname,
-            });
-            authorInfo.push(renderInfo);
-        }else if(info.address){
-            const renderInfo = htmlLike({
-                tag: "address",
-                content: info.address,
-            });
-            authorInfo.push(renderInfo);
-        }else if(info.email){
-            const renderInfo = htmlLike({
-                tag: "email",
-                content: info.email,
+                tag: key,
+                content: info.key,
             });
             authorInfo.push(renderInfo);
         }
