@@ -57,42 +57,34 @@ describe("unified-latex-to-pretext:author-info", () => {
         ]);
     });
 
-    
-    it("parses author name, address, and email information"),
-        () => {
-            sample =
-                "\\author{First Middle LastName} \n \\address{Department, Address}";
-            expect(
-                renderCollectedAuthorInfo(
-                    gatherAuthorInfo(parser.parse(sample))
-                )
-            ).toEqual(
-                normalizeHtml(
-                    "<author> <personname>First Middle LastName</personname> <department>Department, Address</department> </author>"
-                )
-            );
+    it("parses author name, address, and email information", () => {
+        sample =
+            "\\author{First Middle LastName} \n \\address{Department, Address}";
+        expect(
+            renderCollectedAuthorInfo(gatherAuthorInfo(parser.parse(sample)))
+        ).toEqual(
+            normalizeHtml(
+                "<author> <personname>First Middle LastName</personname> <department>Department, Address</department> </author>"
+            )
+        );
 
-            sample = "\\address{Affiliation}";
-            expect(
-                renderCollectedAuthorInfo(
-                    gatherAuthorInfo(parser.parse(sample))
-                )
-            ).toEqual(
-                normalizeHtml(
-                    "<author> <institution>Affiliation</institution> </author>"
-                )
-            );
+        sample = "\\address{Affiliation}";
+        expect(
+            renderCollectedAuthorInfo(gatherAuthorInfo(parser.parse(sample)))
+        ).toEqual(
+            normalizeHtml(
+                "<author> <institution>Affiliation</institution> </author>"
+            )
+        );
 
-            sample =
-                "\\author{First Author} \\email{example@example.com} \\author{Second Author}";
-            expect(
-                renderCollectedAuthorInfo(
-                    gatherAuthorInfo(parser.parse(sample))
-                )
-            ).toEqual(
-                normalizeHtml(
-                    "<author> <personname>First Author</personname> <email>example@example.com</email> <personname>Second Author</personname> </author>"
-                )
-            );
-        };
+        sample =
+            "\\author{First Author} \\email{example@example.com} \\author{Second Author}";
+        expect(
+            renderCollectedAuthorInfo(gatherAuthorInfo(parser.parse(sample)))
+        ).toEqual(
+            normalizeHtml(
+                "<author> <personname>First Author</personname> <email>example@example.com</email> <personname>Second Author</personname> </author>"
+            )
+        );
+    });
 });

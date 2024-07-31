@@ -65,7 +65,7 @@ export function renderCollectedAuthorInfo(authorList: AuthorInfo[]): Ast.Macro {
         for(const key in info){
             const renderInfo = htmlLike({
                 tag: key,
-                content: info.key,
+                content: info[key],
             });
             authorInfo.push(renderInfo);
         }
