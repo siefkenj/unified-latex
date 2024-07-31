@@ -58,10 +58,10 @@ export const macroReplacements: Record<
     textsl: factory("span"), // maybe em
     textit: factory("em"),
     textbf: factory("alert"),
-    underline: factory("span"), // > maybe em and warn
-    mbox: factory("span"), // can use \text{} but not an html like tag
+    underline: factory("span"), // maybe em and warn
+    mbox: factory("span"), // can use \text{} but not an html like tag, so can't just use htmlLike
     phantom: factory("span"), // no equivalent?
-    part: createHeading("title"), // maybe divisions shouldn't even be in here
+    part: createHeading("title"), // maybe divisions shouldn't be in here due to break on boundaries function
     chapter: createHeading("title"),
     section: createHeading("title"),
     subsection: createHeading("title"),
