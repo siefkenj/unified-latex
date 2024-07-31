@@ -96,15 +96,13 @@ export const macroReplacements: Record<
             content: args[1] || [],
         });
     },
-    "\\": () =>
-        // same as phantom and warn
+    "\\": () => // same as phantom and warn
         // no whitespace in pretext
         htmlLike({
             tag: "br",
             attributes: { className: "linebreak" },
         }),
-    vspace: (node) => {
-        // remove
+    vspace: (node) => {// remove
         // no equivalent?
         const args = getArgsContent(node);
         return htmlLike({
@@ -116,8 +114,7 @@ export const macroReplacements: Record<
             content: [],
         });
     },
-    hspace: (node) => {
-        // remove
+    hspace: (node) => { // remove
         // no equivalent?
         const args = getArgsContent(node);
         return htmlLike({
@@ -129,8 +126,7 @@ export const macroReplacements: Record<
             content: [],
         });
     },
-    textcolor: (node) => {
-        // em
+    textcolor: (node) => { // em
         // no colors in pretext
         const args = getArgsContent(node);
         const computedColor = xcolorMacroToHex(node);
@@ -154,8 +150,7 @@ export const macroReplacements: Record<
             });
         }
     },
-    textsize: (node) => {
-        // remove
+    textsize: (node) => { // remove
         // no equivalent?
         const args = getArgsContent(node);
         const textSize = printRaw(args[0] || []);
@@ -167,8 +162,7 @@ export const macroReplacements: Record<
             content: args[1] || [],
         });
     },
-    makebox: (node) => {
-        // remove for now
+    makebox: (node) => { // remove for now
         // maybe just do the same as mbox, text
         const args = getArgsContent(node);
         return htmlLike({
