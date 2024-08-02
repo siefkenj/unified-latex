@@ -29,6 +29,10 @@ export const unifiedLatexToPretext: Plugin<
     Xast.Root
 > = function unifiedLatexAttachMacroArguments(options) {
     return (tree, file) => {
+        const producePretextFragment = options?.producePretextFragment
+        ? options?.producePretextFragment
+        : false;
+
         unified().use(unifiedLatexToXmlLike, options).run(tree);
 
         // This should happen right before converting to HTML because macros like `\&` should
@@ -61,6 +65,11 @@ export const unifiedLatexToPretext: Plugin<
         // Wrap everything in a Hast.Root node
         let ret = x();
         ret.children = converted;
+
+        // add boilerplate
+        if (!producePretextFragment) {
+            ret.children.unshift({type: "instruction", name: "xml", value: "version='1.0' encoding='utf-8'"})
+        }
         return ret;
     };
 };

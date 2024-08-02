@@ -3,13 +3,17 @@ import { Plugin, unified } from "unified";
 import { unifiedLatexLintNoTexFontShapingCommands } from "@unified-latex/unified-latex-lint/rules/unified-latex-lint-no-tex-font-shaping-commands";
 import * as Ast from "@unified-latex/unified-latex-types";
 import { deleteComments } from "@unified-latex/unified-latex-util-comments";
-import { match } from "@unified-latex/unified-latex-util-match";
+import {
+    anyEnvironment,
+    anyMacro,
+    match,
+} from "@unified-latex/unified-latex-util-match";
 import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 import {
     replaceNode,
     unifiedLatexReplaceStreamingCommands,
 } from "@unified-latex/unified-latex-util-replace";
-import { EXIT, visit } from "@unified-latex/unified-latex-util-visit";
+import { EXIT, SKIP, visit } from "@unified-latex/unified-latex-util-visit";
 import { environmentReplacements as _environmentReplacements } from "./pre-conversion-subs/environment-subs";
 import {
     attachNeededRenderInfo,
@@ -23,6 +27,7 @@ import { breakOnBoundaries } from "./pre-conversion-subs/break-on-boundaries";
 import { reportMacrosUnsupportedByKatex } from "./pre-conversion-subs/report-unsupported-macro-katex";
 import { expandUserDefinedMacros } from "./pre-conversion-subs/expand-user-defined-macros";
 import { htmlLike } from "@unified-latex/unified-latex-util-html-like";
+import { getArgsContent } from "@unified-latex/unified-latex-util-arguments";
 
 type EnvironmentReplacements = typeof _environmentReplacements;
 type MacroReplacements = typeof _macroReplacements;
@@ -101,7 +106,7 @@ export const unifiedLatexToXmlLike: Plugin<
         expandUserDefinedMacros(tree);
 
         // convert division macros into environments
-        const warningMessages = breakOnBoundaries(tree); // returns messages, what should we do with that?
+        const warningMessages = breakOnBoundaries(tree);
 
         // Must be done *after* streaming commands are replaced.
         // We only wrap PARs if we *need* to. That is, if the content contains multiple paragraphs
@@ -138,7 +143,7 @@ export const unifiedLatexToXmlLike: Plugin<
 
         // before replacing math-mode macros, report any macros that can't be replaced
         const unsupportedByKatex: string[] =
-            reportMacrosUnsupportedByKatex(tree); // what to do with return?
+            reportMacrosUnsupportedByKatex(tree);
 
         // Replace math-mode macros for appropriate KaTeX rendering
         attachNeededRenderInfo(tree);
@@ -153,17 +158,15 @@ export const unifiedLatexToXmlLike: Plugin<
             }
         });
 
+        // Wrap in enough tags to ensure a valid pretext document
         if (!producePretextFragment) {
-            // Wrap in enough tags to ensure a valid pretext document
+            // choose a book or articla tag
+            createValidPretextDoc(tree);
+
             // wrap around with pretext tag
             tree.content = [
                 htmlLike({ tag: "pretext", content: tree.content }),
             ];
-
-            // need anything else?, like it's either a book or article, which must have certain tags
-            // like right after article must be a title
-
-            // add boilerplate, but it's formatted differently, <? ... ?>, so can't use htmllike directly
         }
 
         // Make sure we are actually mutating the current tree.
@@ -190,4 +193,66 @@ function shouldBeWrappedInPars(tree: Ast.Root): boolean {
     return content.some(
         (node) => match.parbreak(node) || match.macro(node, "par")
     );
+}
+
+/**
+ * Wrap the tree contents in a book or article tag.
+ */
+function createValidPretextDoc(tree: Ast.Root): void {
+    let isBook: boolean = false;
+
+    // look for a \documentclass
+    const docClassArg = findMacroArg(tree, "documentclass");
+
+    // memoirs will be books too
+    if (docClassArg?.content == "book" || docClassArg?.content == "memoir") {
+        isBook = true;
+    }
+
+    // if it isn't a book, look for chapter division (_chapters environment since breakonboundaries called before)
+    if (!isBook) {
+        visit(tree, (node) => {
+            if (anyEnvironment(node) && node.env == "_chapter") {
+                isBook = true;
+                return EXIT;
+            }
+        });
+    }
+
+    // a book and article tag must have a title tag right after it
+    // extract the title first
+    // const titleArg = findMacroArg(tree, "title")
+    // tree.content.unshift(htmlLike({ tag: "title", content: tree.content }));
+
+    // now create a book or article tag
+    if (isBook) {
+        tree.content = [htmlLike({ tag: "book", content: tree.content })];
+    } else {
+        tree.content = [htmlLike({ tag: "article", content: tree.content })];
+    }
+}
+
+// maybe could use match instead, could be slower tho since likely goes into environments
+function findMacroArg(tree: Ast.Root, content: string): Ast.String | null {
+    let macroArg: Ast.String | null = null;
+
+    // look for the macro
+    visit(tree, (node) => {
+        // skip visiting the children of environments
+        if (anyEnvironment(node)) {
+            return SKIP;
+        }
+        if (anyMacro(node) && node.content === content) {
+            // get the desired argument
+            const arg = getArgsContent(node)[1];
+
+            // extract the string
+            if (arg) {
+                macroArg = arg[0] as Ast.String;
+                return EXIT;
+            }
+        }
+    });
+
+    return macroArg;
 }
