@@ -30,10 +30,10 @@ export const unifiedLatexToPretext: Plugin<
 > = function unifiedLatexAttachMacroArguments(options) {
     return (tree, file) => {
         const producePretextFragment = options?.producePretextFragment
-        ? options?.producePretextFragment
-        : false;
+            ? options?.producePretextFragment
+            : false;
 
-        unified().use(unifiedLatexToXmlLike, options).run(tree);
+        unified().use(unifiedLatexToXmlLike, options).run(tree, file);
 
         // This should happen right before converting to HTML because macros like `\&` should
         // be expanded via html rules first (and not turned into their corresponding ligature directly)
@@ -68,7 +68,11 @@ export const unifiedLatexToPretext: Plugin<
 
         // add boilerplate
         if (!producePretextFragment) {
-            ret.children.unshift({type: "instruction", name: "xml", value: "version='1.0' encoding='utf-8'"})
+            ret.children.unshift({
+                type: "instruction",
+                name: "xml",
+                value: "version='1.0' encoding='utf-8'",
+            });
         }
         return ret;
     };

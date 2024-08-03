@@ -74,7 +74,7 @@ export function breakOnBoundaries(ast: Ast.Ast): { messages: VFileMessage[] } {
                     };
                 }
 
-                message.source = "LatexConversion";
+                message.source = "latex-to-pretext:warning";
                 messagesLst.messages.push(message);
 
                 return node.content;

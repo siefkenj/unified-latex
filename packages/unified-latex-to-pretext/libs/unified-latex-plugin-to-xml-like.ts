@@ -88,7 +88,7 @@ export const unifiedLatexToXmlLike: Plugin<
         katexSpecificEnvironmentReplacements
     );
 
-    return (tree) => {
+    return (tree, file) => {
         const originalTree = tree;
         // NOTE: These operations need to be done in a particular order.
 
@@ -113,7 +113,7 @@ export const unifiedLatexToXmlLike: Plugin<
         if (shouldBeWrappedInPars(tree)) {
             processor = processor.use(unifiedLatexWrapPars);
         }
-        tree = processor.runSync(tree);
+        tree = processor.runSync(tree, file);
 
         // Replace text-mode environments and then macros. Environments *must* be processed first, since
         // environments like tabular use `\\` as a newline indicator, but a `\\` macro gets replaced with

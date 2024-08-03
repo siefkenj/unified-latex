@@ -4,6 +4,7 @@ import * as Ast from "@unified-latex/unified-latex-types";
 import { getArgsContent } from "@unified-latex/unified-latex-util-arguments";
 import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 import { VisitInfo } from "@unified-latex/unified-latex-util-visit";
+import { VFile } from "unified-lint-rule/lib";
 
 /**
  * Factory function that generates html-like macros that wrap their contents.
@@ -49,7 +50,7 @@ function createHeading(tag: string, attrs = {}) {
 
 export const macroReplacements: Record<
     string,
-    (node: Ast.Macro, info: VisitInfo) => Ast.Node
+    (node: Ast.Macro, info: VisitInfo, file?: VFile) => Ast.Node
 > = {
     emph: factory("em"),
     textrm: factory("em"), // give warning
@@ -58,16 +59,9 @@ export const macroReplacements: Record<
     textsl: factory("span"), // maybe em
     textit: factory("em"),
     textbf: factory("alert"),
-    underline: factory("span"), // > maybe em and warn
-    mbox: factory("span"), // can use \text{} but not an html like tag
-    phantom: factory("span"), // no equivalent?
-    // part: createHeading("title"), // maybe divisions shouldn't even be in here, depends on when breakonboundaries is called or these are just useless
-    // chapter: createHeading("title"),
-    // section: createHeading("title"),
-    // subsection: createHeading("title"),
-    // subsubsection: createHeading("title"),
-    // paragraph: createHeading("title"),
-    // subparagraph: createHeading("title"),
+    underline: factory("span"), // maybe em and warn
+    // mbox: factory("span"), // can use \text{} but not an html like tag, so can't just use htmlLike
+    phantom: factory("span"), // remove it, make a function that returna an empty text node (string)
     appendix: createHeading("appendix"), // title -> appendix
     url: (node) => {
         const args = getArgsContent(node);
@@ -103,12 +97,14 @@ export const macroReplacements: Record<
         });
     },
     "\\": () =>
+        // same as phantom and warn
         // no whitespace in pretext
         htmlLike({
             tag: "br",
             attributes: { className: "linebreak" },
         }),
     vspace: (node) => {
+        // remove
         // no equivalent?
         const args = getArgsContent(node);
         return htmlLike({
@@ -121,6 +117,7 @@ export const macroReplacements: Record<
         });
     },
     hspace: (node) => {
+        // remove
         // no equivalent?
         const args = getArgsContent(node);
         return htmlLike({
@@ -133,6 +130,7 @@ export const macroReplacements: Record<
         });
     },
     textcolor: (node) => {
+        // em
         // no colors in pretext
         const args = getArgsContent(node);
         const computedColor = xcolorMacroToHex(node);
@@ -157,6 +155,7 @@ export const macroReplacements: Record<
         }
     },
     textsize: (node) => {
+        // remove
         // no equivalent?
         const args = getArgsContent(node);
         const textSize = printRaw(args[0] || []);
@@ -169,6 +168,7 @@ export const macroReplacements: Record<
         });
     },
     makebox: (node) => {
+        // remove for now
         // maybe just do the same as mbox, text
         const args = getArgsContent(node);
         return htmlLike({
@@ -180,7 +180,7 @@ export const macroReplacements: Record<
             content: args[3] || [],
         });
     },
-    noindent: () => ({ type: "string", content: "" }), // no equivalent?
+    noindent: () => ({ type: "string", content: "" }), // remove
     includegraphics: (node) => {
         const args = getArgsContent(node);
         const source = printRaw(args[args.length - 1] || []);

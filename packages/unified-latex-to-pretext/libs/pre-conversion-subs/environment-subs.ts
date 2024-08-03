@@ -97,7 +97,7 @@ function enumerateFactory(parentTag = "ol") {
     };
 }
 
-// seemsw to be no center tag
+// seems to be no center tag
 function createCenteredElement(env: Ast.Environment) {
     return htmlLike({
         tag: "center",
@@ -188,7 +188,7 @@ function createTableFromTabular(env: Ast.Environment) {
                 }
 
                 // if there is a right border add it
-                if ((columnRightBorder[i] = true)) {
+                if (columnRightBorder[i] === true) {
                     colAttributes["right"] = "minor";
                 }
 
@@ -219,7 +219,7 @@ export const environmentReplacements: Record<
 > = {
     enumerate: enumerateFactory("ol"),
     itemize: enumerateFactory("ul"),
-    center: createCenteredElement, // ?
+    center: createCenteredElement, // remove
     tabular: createTableFromTabular,
     quote: (env) => {
         return htmlLike({
