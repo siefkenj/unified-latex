@@ -1,4 +1,3 @@
-import { xcolorMacroToHex } from "@unified-latex/unified-latex-ctan/package/xcolor";
 import { htmlLike } from "@unified-latex/unified-latex-util-html-like";
 import * as Ast from "@unified-latex/unified-latex-types";
 import { getArgsContent } from "@unified-latex/unified-latex-util-arguments";
@@ -6,6 +5,7 @@ import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 import { VisitInfo } from "@unified-latex/unified-latex-util-visit";
 import { VFile } from "unified-lint-rule/lib";
 import { s } from "@unified-latex/unified-latex-builder";
+import { VFileMessage } from "vfile-message";
 
 /**
  * Factory function that generates html-like macros that wrap their contents.
@@ -14,8 +14,8 @@ function factory(
     tag: string,
     isWarn = false,
     attributes?: Record<string, string>
-): (macro: Ast.Macro) => Ast.Macro {
-    return (macro) => {
+): (macro: Ast.Macro, info: VisitInfo, file?: VFile) => Ast.Macro {
+    return (macro, info, file) => {
         if (!macro.args) {
             throw new Error(
                 `Found macro to replace but couldn't find content ${printRaw(
@@ -23,6 +23,12 @@ function factory(
                 )}`
             );
         }
+
+        // add a warning message to the file if needed
+        if (isWarn && file) {
+            file.message(createMessage(macro, tag));
+        }
+
         // Assume the meaningful argument is the last argument. This
         // ensures that we can convert for default packages as well as
         // packages like beamer, which may add optional arguments.
@@ -30,6 +36,31 @@ function factory(
         const content = args[args.length - 1] || [];
         return htmlLike({ tag, content, attributes });
     };
+}
+
+function createMessage(node: Ast.Macro, replacement: string): VFileMessage {
+    const message = new VFileMessage(
+        `Warning: There is no equivalent tag for \"${node.content}\", \"${replacement}\" was used as a replacement.`
+    );
+
+    // add the position of the macro if available
+    if (node.position) {
+        message.line = node.position.start.line;
+        message.column = node.position.start.column;
+        message.position = {
+            start: {
+                line: node.position.start.line,
+                column: node.position.start.column,
+            },
+            end: {
+                line: node.position.end.line,
+                column: node.position.end.column,
+            },
+        };
+    }
+
+    message.source = "latex-to-pretext:warning";
+    return message;
 }
 
 function createHeading(tag: string, attrs = {}) {
@@ -50,9 +81,19 @@ function createHeading(tag: string, attrs = {}) {
     };
 }
 
-function createEmptyString(): () => Ast.String {
-    // add a warning too (in function)
-    return () => s("");
+function createEmptyString(): (
+    macro: Ast.Macro,
+    info: VisitInfo,
+    file?: VFile
+) => Ast.String {
+    return (macro, info, file) => {
+        // add a warning message
+        if (file) {
+            file.message(createMessage(macro, "an empty Ast.String"));
+        }
+
+        return s("");
+    };
 }
 
 export const macroReplacements: Record<
@@ -60,8 +101,8 @@ export const macroReplacements: Record<
     (node: Ast.Macro, info: VisitInfo, file?: VFile) => Ast.Node
 > = {
     emph: factory("em"),
-    textrm: factory("em", true), // give warning
-    textsf: factory("em", true), // give warning
+    textrm: factory("em", true),
+    textsf: factory("em", true),
     texttt: factory("em", true), // cd + cline tags are an option?
     textsl: factory("em", true),
     textit: factory("em"),

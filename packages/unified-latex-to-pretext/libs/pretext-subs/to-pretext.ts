@@ -70,8 +70,19 @@ export function toPretextWithLoggerFactory(
                 return x("pre", node.content);
             case "whitespace":
                 return { type: "text", value: " ", position: node.position };
-            case "parbreak": // remove
-                return x("br");
+            case "parbreak":
+                // warn first
+                logger(
+                    `There is no equivalent for parbreak, so it was replaced with an empty string.`,
+                    node
+                );
+
+                // return an empty string
+                return {
+                    type: "text",
+                    value: "",
+                    position: node.position,
+                };
             case "group":
                 // Groups are just ignored.
                 return node.content.flatMap(toPretext);
@@ -88,7 +99,7 @@ export function toPretextWithLoggerFactory(
                     // create a title tag containing the division macro's title arg
                     const title = getArgsContent(node)[0];
                     const titleTag = x("title", title?.flatMap(toPretext));
-                    console.log(titleTag);
+                    // console.log(titleTag);
 
                     if (macroName && title) {
                         return x(macroName, titleTag);

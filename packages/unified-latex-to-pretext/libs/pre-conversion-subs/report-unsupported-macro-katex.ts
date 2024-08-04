@@ -29,7 +29,7 @@ export function reportMacrosUnsupportedByKatex(ast: Ast.Ast): {
                     `Warning: \"${node.content}\" is unsupported by Katex.`
                 );
 
-                // add the position of the group if available
+                // add the position of the node if available
                 if (node.position) {
                     message.line = node.position.start.line;
                     message.column = node.position.start.column;

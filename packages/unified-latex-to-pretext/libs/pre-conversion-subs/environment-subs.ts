@@ -13,6 +13,9 @@ import { match } from "@unified-latex/unified-latex-util-match";
 import { wrapPars } from "../wrap-pars";
 import { VisitInfo } from "@unified-latex/unified-latex-util-visit";
 import { trim } from "@unified-latex/unified-latex-util-trim";
+import { VFileMessage } from "vfile-message";
+import { VFile } from "unified-lint-rule/lib";
+import { s } from "@unified-latex/unified-latex-builder";
 
 const ITEM_ARG_NAMES_REG = ["label"] as const;
 const ITEM_ARG_NAMES_BEAMER = [null, "label", null] as const;
@@ -95,15 +98,6 @@ function enumerateFactory(parentTag = "ol") {
             content,
         });
     };
-}
-
-// seems to be no center tag
-function createCenteredElement(env: Ast.Environment) {
-    return htmlLike({
-        tag: "center",
-        attributes: { className: "center" },
-        content: env.content,
-    });
 }
 
 function createTableFromTabular(env: Ast.Environment) {
@@ -206,6 +200,49 @@ function createTableFromTabular(env: Ast.Environment) {
     });
 }
 
+function createMessage(
+    node: Ast.Environment,
+    replacement: string
+): VFileMessage {
+    const message = new VFileMessage(
+        `Warning: There is no equivalent tag for \"${node.env}\", \"${replacement}\" was used as a replacement.`
+    );
+
+    // add the position of the environment if available
+    if (node.position) {
+        message.line = node.position.start.line;
+        message.column = node.position.start.column;
+        message.position = {
+            start: {
+                line: node.position.start.line,
+                column: node.position.start.column,
+            },
+            end: {
+                line: node.position.end.line,
+                column: node.position.end.column,
+            },
+        };
+    }
+
+    message.source = "latex-to-pretext:warning";
+    return message;
+}
+
+function createEmptyString(): (
+    env: Ast.Environment,
+    info: VisitInfo,
+    file?: VFile
+) => Ast.String {
+    return (env, info, file) => {
+        // add a warning message
+        if (file) {
+            file.message(createMessage(env, "an empty Ast.String"));
+        }
+
+        return s("");
+    };
+}
+
 /**
  * Rules for replacing a macro with an html-like macro
  * that will render has html when printed.
@@ -214,12 +251,13 @@ export const environmentReplacements: Record<
     string,
     (
         node: Ast.Environment,
-        info: VisitInfo
+        info: VisitInfo,
+        file?: VFile
     ) => Ast.Macro | Ast.String | Ast.Environment
 > = {
     enumerate: enumerateFactory("ol"),
     itemize: enumerateFactory("ul"),
-    center: createCenteredElement, // remove
+    center: createEmptyString(),
     tabular: createTableFromTabular,
     quote: (env) => {
         return htmlLike({
