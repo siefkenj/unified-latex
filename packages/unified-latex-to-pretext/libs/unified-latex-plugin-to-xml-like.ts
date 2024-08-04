@@ -108,6 +108,12 @@ export const unifiedLatexToXmlLike: Plugin<
         // convert division macros into environments
         const warningMessages = breakOnBoundaries(tree);
 
+        // add warning messages into the file one at a time
+        for (const warningmessage of warningMessages.messages) {
+            file.message(warningmessage);
+        }
+        console.log(file.messages);
+
         // Must be done *after* streaming commands are replaced.
         // We only wrap PARs if we *need* to. That is, if the content contains multiple paragraphs
         if (shouldBeWrappedInPars(tree)) {
@@ -134,16 +140,24 @@ export const unifiedLatexToXmlLike: Plugin<
                 return;
             }
             if (isReplaceableMacro(node)) {
-                const replacement = macroReplacements[node.content](node, info);
+                const replacement = macroReplacements[node.content](
+                    node,
+                    info,
+                    file
+                );
                 return replacement;
             }
         });
 
-        // the earliest breakonboundaries can be called without div problem if macro subs stuff not commented out (from prev replaceNode)
-
         // before replacing math-mode macros, report any macros that can't be replaced
-        const unsupportedByKatex: string[] =
-            reportMacrosUnsupportedByKatex(tree);
+        const unsupportedByKatex = reportMacrosUnsupportedByKatex(tree);
+
+        // add these warning messages into the file one at a time
+        for (const warningmessage of unsupportedByKatex.messages) {
+            file.message(warningmessage);
+        }
+
+        // both function warning messages seem to have null position info tho (doesn't in actual function test file)
 
         // Replace math-mode macros for appropriate KaTeX rendering
         attachNeededRenderInfo(tree);
@@ -160,7 +174,7 @@ export const unifiedLatexToXmlLike: Plugin<
 
         // Wrap in enough tags to ensure a valid pretext document
         if (!producePretextFragment) {
-            // choose a book or articla tag
+            // choose a book or article tag
             createValidPretextDoc(tree);
 
             // wrap around with pretext tag
@@ -244,7 +258,7 @@ function findMacroArg(tree: Ast.Root, content: string): Ast.String | null {
         }
         if (anyMacro(node) && node.content === content) {
             // get the desired argument
-            const arg = getArgsContent(node)[1];
+            const arg = getArgsContent(node)[0]; // maybe not always right spot tho
 
             // extract the string
             if (arg) {
