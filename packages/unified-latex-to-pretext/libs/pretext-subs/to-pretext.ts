@@ -6,6 +6,11 @@ import {
 } from "@unified-latex/unified-latex-util-html-like";
 import * as Ast from "@unified-latex/unified-latex-types";
 import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
+import {
+    divisions,
+    isMappedEnviron,
+} from "../pre-conversion-subs/break-on-boundaries";
+import { getArgsContent } from "@unified-latex/unified-latex-util-arguments";
 
 function formatNodeForError(node: Ast.Node | any): string {
     try {
@@ -65,13 +70,32 @@ export function toPretextWithLoggerFactory(
                 return x("pre", node.content);
             case "whitespace":
                 return { type: "text", value: " ", position: node.position };
-            case "parbreak": // no equivalent?
+            case "parbreak": // remove
                 return x("br");
             case "group":
                 // Groups are just ignored.
                 return node.content.flatMap(toPretext);
             case "environment": // this is where breakonboundaries has problems likely
-            // could export the divisions object and ismappedenviron to check further here
+                // check if it's a new environment made to replace a division node
+                if (isMappedEnviron(node)) {
+                    // all division macro names are in pretext but paragraph and subparagraph
+
+                    // get the division macro associated with this node
+                    const macroName = divisions.find(
+                        (x) => x.mappedEnviron === node.env
+                    )?.division;
+
+                    // create a title tag containing the division macro's title arg
+                    const title = getArgsContent(node)[0];
+                    const titleTag = x("title", title?.flatMap(toPretext));
+                    console.log(titleTag);
+
+                    if (macroName && title) {
+                        return x(macroName, titleTag);
+                    }
+                    // have case when title is undefined? is it possible? ig when not given, null
+                }
+
                 logger(
                     `Unknown environment when converting to HTML \`${formatNodeForError(
                         node.env

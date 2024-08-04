@@ -5,12 +5,14 @@ import { getArgsContent } from "@unified-latex/unified-latex-util-arguments";
 import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 import { VisitInfo } from "@unified-latex/unified-latex-util-visit";
 import { VFile } from "unified-lint-rule/lib";
+import { s } from "@unified-latex/unified-latex-builder";
 
 /**
  * Factory function that generates html-like macros that wrap their contents.
  */
 function factory(
     tag: string,
+    isWarn = false,
     attributes?: Record<string, string>
 ): (macro: Ast.Macro) => Ast.Macro {
     return (macro) => {
@@ -48,21 +50,26 @@ function createHeading(tag: string, attrs = {}) {
     };
 }
 
+function createEmptyString(): () => Ast.String {
+    // add a warning too (in function)
+    return () => s("");
+}
+
 export const macroReplacements: Record<
     string,
     (node: Ast.Macro, info: VisitInfo, file?: VFile) => Ast.Node
 > = {
     emph: factory("em"),
-    textrm: factory("em"), // give warning
-    textsf: factory("em"), // give warning
-    texttt: factory("span"), // cd + cline tags are an option?
-    textsl: factory("span"), // maybe em
+    textrm: factory("em", true), // give warning
+    textsf: factory("em", true), // give warning
+    texttt: factory("em", true), // cd + cline tags are an option?
+    textsl: factory("em", true),
     textit: factory("em"),
     textbf: factory("alert"),
-    underline: factory("span"), // maybe em and warn
-    // mbox: factory("span"), // can use \text{} but not an html like tag, so can't just use htmlLike
-    phantom: factory("span"), // remove it, make a function that returna an empty text node (string)
-    appendix: createHeading("appendix"), // title -> appendix
+    underline: factory("em", true),
+    mbox: createEmptyString(),
+    phantom: createEmptyString(),
+    appendix: createHeading("appendix"),
     url: (node) => {
         const args = getArgsContent(node);
         const url = printRaw(args[0] || "#");
@@ -96,98 +103,20 @@ export const macroReplacements: Record<
             content: args[1] || [],
         });
     },
-    "\\": () =>
-        // same as phantom and warn
-        // no whitespace in pretext
-        htmlLike({
-            tag: "br",
-            attributes: { className: "linebreak" },
-        }),
-    vspace: (node) => {
-        // remove
-        // no equivalent?
-        const args = getArgsContent(node);
-        return htmlLike({
-            tag: "div",
-            attributes: {
-                className: "vspace",
-                "data-amount": printRaw(args[1] || []),
-            },
-            content: [],
-        });
-    },
-    hspace: (node) => {
-        // remove
-        // no equivalent?
-        const args = getArgsContent(node);
-        return htmlLike({
-            tag: "span",
-            attributes: {
-                className: "vspace",
-                "data-amount": printRaw(args[1] || []),
-            },
-            content: [],
-        });
-    },
-    textcolor: (node) => {
-        // em
-        // no colors in pretext
-        const args = getArgsContent(node);
-        const computedColor = xcolorMacroToHex(node);
-        const color = computedColor.hex;
-
-        if (color) {
-            return htmlLike({
-                tag: "span",
-                attributes: { style: `color: ${color};` },
-                content: args[2] || [],
-            });
-        } else {
-            // If we couldn't compute the color, it's probably a named
-            // color that wasn't supplied. In this case, we fall back to a css variable
-            return htmlLike({
-                tag: "span",
-                attributes: {
-                    style: `color: var(${computedColor.cssVarName});`,
-                },
-                content: args[2] || [],
-            });
-        }
-    },
-    textsize: (node) => {
-        // remove
-        // no equivalent?
-        const args = getArgsContent(node);
-        const textSize = printRaw(args[0] || []);
-        return htmlLike({
-            tag: "span",
-            attributes: {
-                className: `textsize-${textSize}`,
-            },
-            content: args[1] || [],
-        });
-    },
-    makebox: (node) => {
-        // remove for now
-        // maybe just do the same as mbox, text
-        const args = getArgsContent(node);
-        return htmlLike({
-            tag: "span",
-            attributes: {
-                className: `latex-box`,
-                style: "display: inline-block;",
-            },
-            content: args[3] || [],
-        });
-    },
-    noindent: () => ({ type: "string", content: "" }), // remove
+    "\\": createEmptyString(),
+    vspace: createEmptyString(),
+    hspace: createEmptyString(),
+    textcolor: factory("em", true),
+    textsize: createEmptyString(),
+    makebox: createEmptyString(), // remove for now
+    noindent: createEmptyString(),
     includegraphics: (node) => {
         const args = getArgsContent(node);
         const source = printRaw(args[args.length - 1] || []);
         return htmlLike({
-            tag: "image", // img -> image
+            tag: "image",
             attributes: {
-                source, // src -> source
+                source,
             },
             content: [],
         });
