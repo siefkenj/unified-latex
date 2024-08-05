@@ -28,6 +28,7 @@ import { reportMacrosUnsupportedByKatex } from "./pre-conversion-subs/report-uns
 import { expandUserDefinedMacros } from "./pre-conversion-subs/expand-user-defined-macros";
 import { htmlLike } from "@unified-latex/unified-latex-util-html-like";
 import { getArgsContent } from "@unified-latex/unified-latex-util-arguments";
+import { s } from "@unified-latex/unified-latex-builder";
 
 type EnvironmentReplacements = typeof _environmentReplacements;
 type MacroReplacements = typeof _macroReplacements;
@@ -122,6 +123,7 @@ export const unifiedLatexToXmlLike: Plugin<
         if (shouldBeWrappedInPars(tree)) {
             processor = processor.use(unifiedLatexWrapPars);
         }
+        // *THIS CAUSES TITLE TO BE WRAPPED IN PARS
         tree = processor.runSync(tree, file);
 
         // Replace text-mode environments and then macros. Environments *must* be processed first, since
@@ -194,7 +196,6 @@ export const unifiedLatexToXmlLike: Plugin<
 
         // Make sure we are actually mutating the current tree.
         originalTree.content = tree.content;
-        console.log(file.messages);
     };
 };
 
@@ -226,11 +227,24 @@ function createValidPretextDoc(tree: Ast.Root): void {
     let isBook: boolean = false;
 
     // look for a \documentclass
-    const docClassArg = findMacroArg(tree, "documentclass");
+    const docClass = findMacro(tree, "documentclass");
 
-    // memoirs will be books too
-    if (docClassArg?.content == "book" || docClassArg?.content == "memoir") {
-        isBook = true;
+    // check if there was a documentclass
+    if (docClass) {
+        const docClassArg = getArgsContent(docClass)[0];
+
+        // get the actual class
+        if (docClassArg) {
+            const docClassTitle = docClassArg[0] as Ast.String;
+
+            // memoirs will be books too
+            if (
+                docClassTitle.content == "book" ||
+                docClassTitle.content == "memoir"
+            ) {
+                isBook = true;
+            }
+        }
     }
 
     // if we still don't know if it's a book, look for _chapters environments (since breakonboundaries was called before)
@@ -245,8 +259,29 @@ function createValidPretextDoc(tree: Ast.Root): void {
 
     // a book and article tag must have a title tag right after it
     // extract the title first
-    // const titleArg = findMacroArg(tree, "title")
-    // tree.content.unshift(htmlLike({ tag: "title", content: tree.content }));
+    const title = findMacro(tree, "title");
+
+    // create the title tag (this part doesn't work, adds a bunch of spans, repeats title name)
+    // this happens before this function is called, likely from wrap pars
+    if (title) {
+        const titleArg = getArgsContent(title)[1];
+
+        // get the actual title
+        if (titleArg) {
+            const titleString = titleArg[0] as Ast.String;
+            tree.content.unshift(
+                htmlLike({ tag: "title", content: titleString })
+            );
+        }
+        // if no title name was given, make an empty tag
+        else {
+            tree.content.unshift(htmlLike({ tag: "title", content: s("") }));
+        }
+    }
+    // if there is no title, add an empty title tag
+    else {
+        tree.content.unshift(htmlLike({ tag: "title", content: s("") }));
+    }
 
     // now create a book or article tag
     if (isBook) {
@@ -257,8 +292,8 @@ function createValidPretextDoc(tree: Ast.Root): void {
 }
 
 // maybe could use match instead, could be slower tho since likely goes into environments
-function findMacroArg(tree: Ast.Root, content: string): Ast.String | null {
-    let macroArg: Ast.String | null = null;
+function findMacro(tree: Ast.Root, content: string): Ast.Macro | null {
+    let macro: Ast.Macro | null = null;
 
     // look for the macro
     visit(tree, (node) => {
@@ -267,16 +302,10 @@ function findMacroArg(tree: Ast.Root, content: string): Ast.String | null {
             return SKIP;
         }
         if (anyMacro(node) && node.content === content) {
-            // get the desired argument
-            const arg = getArgsContent(node)[0]; // maybe not always right spot tho
-
-            // extract the string
-            if (arg) {
-                macroArg = arg[0] as Ast.String;
-                return EXIT;
-            }
+            macro = node;
+            return EXIT;
         }
     });
 
-    return macroArg;
+    return macro;
 }
