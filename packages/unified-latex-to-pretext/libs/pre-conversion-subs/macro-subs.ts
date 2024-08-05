@@ -26,7 +26,12 @@ function factory(
 
         // add a warning message to the file if needed
         if (isWarn && file) {
-            file.message(createMessage(macro, tag));
+            const message = createMessage(macro, tag);
+            file.message(
+                message,
+                message.position,
+                "unified-latex-to-pretext:macro-subs"
+            );
         }
 
         // Assume the meaningful argument is the last argument. This
@@ -89,7 +94,12 @@ function createEmptyString(): (
     return (macro, info, file) => {
         // add a warning message
         if (file) {
-            file.message(createMessage(macro, "an empty Ast.String"));
+            const message = createMessage(macro, "an empty Ast.String");
+            file.message(
+                message,
+                message.position,
+                "unified-latex-to-pretext:macro-subs"
+            );
         }
 
         return s("");

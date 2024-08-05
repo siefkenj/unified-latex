@@ -236,7 +236,12 @@ function createEmptyString(): (
     return (env, info, file) => {
         // add a warning message
         if (file) {
-            file.message(createMessage(env, "an empty Ast.String"));
+            const message = createMessage(env, "an empty Ast.String");
+            file.message(
+                message,
+                message.position,
+                "unified-latex-to-pretext:environment-subs"
+            );
         }
 
         return s("");

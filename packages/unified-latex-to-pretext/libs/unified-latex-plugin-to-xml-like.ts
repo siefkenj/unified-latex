@@ -109,10 +109,13 @@ export const unifiedLatexToXmlLike: Plugin<
         const warningMessages = breakOnBoundaries(tree);
 
         // add warning messages into the file one at a time
-        for (const warningmessage of warningMessages.messages) {
-            file.message(warningmessage);
+        for (const warningMessage of warningMessages.messages) {
+            file.message(
+                warningMessage,
+                warningMessage.position,
+                "unified-latex-to-pretext:break-on-boundaries"
+            );
         }
-        console.log(file.messages);
 
         // Must be done *after* streaming commands are replaced.
         // We only wrap PARs if we *need* to. That is, if the content contains multiple paragraphs
@@ -130,7 +133,11 @@ export const unifiedLatexToXmlLike: Plugin<
                 return;
             }
             if (isReplaceableEnvironment(node)) {
-                return environmentReplacements[printRaw(node.env)](node, info);
+                return environmentReplacements[printRaw(node.env)](
+                    node,
+                    info,
+                    file
+                );
             }
         });
 
@@ -153,11 +160,13 @@ export const unifiedLatexToXmlLike: Plugin<
         const unsupportedByKatex = reportMacrosUnsupportedByKatex(tree);
 
         // add these warning messages into the file one at a time
-        for (const warningmessage of unsupportedByKatex.messages) {
-            file.message(warningmessage);
+        for (const warningMessage of unsupportedByKatex.messages) {
+            file.message(
+                warningMessage,
+                warningMessage.position,
+                "unified-latex-to-pretext:report-unsupported-macro-katex"
+            );
         }
-
-        // both function warning messages seem to have null position info tho (doesn't in actual function test file)
 
         // Replace math-mode macros for appropriate KaTeX rendering
         attachNeededRenderInfo(tree);
@@ -185,6 +194,7 @@ export const unifiedLatexToXmlLike: Plugin<
 
         // Make sure we are actually mutating the current tree.
         originalTree.content = tree.content;
+        console.log(file.messages);
     };
 };
 
@@ -210,7 +220,7 @@ function shouldBeWrappedInPars(tree: Ast.Root): boolean {
 }
 
 /**
- * Wrap the tree contents in a book or article tag.
+ * Wrap the tree content in a book or article tag.
  */
 function createValidPretextDoc(tree: Ast.Root): void {
     let isBook: boolean = false;
@@ -223,7 +233,7 @@ function createValidPretextDoc(tree: Ast.Root): void {
         isBook = true;
     }
 
-    // if it isn't a book, look for chapter division (_chapters environment since breakonboundaries called before)
+    // if we still don't know if it's a book, look for _chapters environments (since breakonboundaries was called before)
     if (!isBook) {
         visit(tree, (node) => {
             if (anyEnvironment(node) && node.env == "_chapter") {
