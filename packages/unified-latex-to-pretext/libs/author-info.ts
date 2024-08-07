@@ -10,8 +10,8 @@ export type AuthorInfo = Record<string, Ast.Node[]>;
  *
  * Visits all the matching nodes and gathers author information, then send them to render and output pretext.
  */
-export function gatherAuthorInfo(ast: Ast.Ast): AuthorInfo[] {
-    const authorList : AuthorInfo[] = [];
+export function gatherAuthorInfo(ast: Ast.Ast): AuthorInfo[] | VFileMessage {
+    const authorList: AuthorInfo[] = [];
 
     visit(ast, (node) => {
         if (match.macro(node, "author") && node.args) {
@@ -29,28 +29,9 @@ export function gatherAuthorInfo(ast: Ast.Ast): AuthorInfo[] {
                 node.args.map((x) => ["email", x.content])
             );
             authorList.push(authorEmail);
-        } 
-        else if (match.macro(node, "affil")) {
-            authorList.push("affil", node);
-            const message = new VFileMessage(
-                "Warning: \\affil is not supported"
-            );
-            // add the position of the group if available
-            if (node.position) {
-                message.line = node.position.start.line;
-                message.column = node.position.start.column;
-                message.position = {
-                    start: {
-                        line: node.position.start.line,
-                        column: node.position.start.column,
-                    },
-                    end: {
-                        line: node.position.end.line,
-                        column: node.position.end.column,
-                    },
-                };
-            }
-            message.source = "LatexConversion";
+        } else if (match.macro(node, "affil")) {
+            MacroReport(node);
+            throw new Error('Macro "${node.content}" is not supported');
         }
     });
     return authorList;
@@ -60,9 +41,9 @@ export function gatherAuthorInfo(ast: Ast.Ast): AuthorInfo[] {
  * This function is called after the author information is collected, and integrate them into one htmlLike node with "author" tag.
  */
 export function renderCollectedAuthorInfo(authorList: AuthorInfo[]): Ast.Macro {
-    let authorInfo : Ast.Macro[] = [];
+    let authorInfo: Ast.Macro[] = [];
     for (const info of authorList) {
-        for(const key in info){
+        for (const key in info) {
             const renderInfo = htmlLike({
                 tag: key,
                 content: info[key],
@@ -75,4 +56,29 @@ export function renderCollectedAuthorInfo(authorList: AuthorInfo[]): Ast.Macro {
         content: authorInfo,
     });
     return renderedAuthorList;
+}
+
+function MacroReport(node: Ast.Macro): VFileMessage {
+    const message = new VFileMessage(
+        `Macro \"${node.content}\" is not supported`
+    );
+
+    // add the position of the macro if available
+    if (node.position) {
+        message.line = node.position.start.line;
+        message.column = node.position.start.column;
+        message.position = {
+            start: {
+                line: node.position.start.line,
+                column: node.position.start.column,
+            },
+            end: {
+                line: node.position.end.line,
+                column: node.position.end.column,
+            },
+        };
+    }
+
+    message.source = "unified-latex-to-pretext:warning";
+    return message;
 }
