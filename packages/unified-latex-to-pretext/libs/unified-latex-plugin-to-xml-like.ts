@@ -184,6 +184,7 @@ export const unifiedLatexToXmlLike: Plugin<
         });
 
         // Wrap in enough tags to ensure a valid pretext document
+        // but if there is a document env, want to only wrap that
         if (!producePretextFragment) {
             // choose a book or article tag
             createValidPretextDoc(tree);
@@ -259,6 +260,8 @@ function createValidPretextDoc(tree: Ast.Root): void {
 
     // a book and article tag must have a title tag right after it
     // extract the title first
+    // wrap the document env since title is before it, dissapears
+    // but this assumes that this is only put as false when a document env is used, but if not then would still have duplicate
     const title = findMacro(tree, "title");
 
     // create the title tag (this part doesn't work, adds a bunch of spans, repeats title name)

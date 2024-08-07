@@ -86,7 +86,7 @@ export function toPretextWithLoggerFactory(
             case "group":
                 // Groups are just ignored.
                 return node.content.flatMap(toPretext);
-            case "environment": // this is where breakonboundaries has problems likely
+            case "environment":
                 // check if it's a new environment made to replace a division node
                 if (isMappedEnviron(node)) {
                     // all division macro names are in pretext but paragraph and subparagraph
@@ -99,12 +99,11 @@ export function toPretextWithLoggerFactory(
                     // create a title tag containing the division macro's title arg
                     const title = getArgsContent(node)[0];
                     const titleTag = x("title", title?.flatMap(toPretext));
-                    // console.log(titleTag);
 
                     if (macroName && title) {
                         return x(macroName, titleTag);
                     }
-                    // have case when title is undefined? is it possible? ig when not given, null
+                    // have case when title is undefined? doesn't happen when title not given, happens when no {}
                 }
 
                 logger(

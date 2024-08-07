@@ -68,7 +68,7 @@ function enumerateFactory(parentTag = "ol") {
             // We test the open mark to see if an optional argument was actually supplied.
             const namedArgs = getItemArgs(node);
 
-            // if there are custom markers, don't want title to be wrapped in pars
+            // if there are custom markers, don't want the title tag to be wrapped in pars
             // so we wrap the body first
             namedArgs.body = wrapPars(namedArgs.body);
 
@@ -169,6 +169,7 @@ function createTableFromTabular(env: Ast.Environment) {
         // otherwise, col tags will be in the reversed order
         for (let i = columnSpecs.length; i >= 0; i--) {
             const columnSpec = columnSpecs[i];
+
             if (columnSpec) {
                 const colAttributes: Record<
                     string,

@@ -113,7 +113,7 @@ export const macroReplacements: Record<
     emph: factory("em"),
     textrm: factory("em", true),
     textsf: factory("em", true),
-    texttt: factory("em", true), // cd + cline tags are an option?
+    texttt: factory("em", true),
     textsl: factory("em", true),
     textit: factory("em"),
     textbf: factory("alert"),

@@ -34,7 +34,7 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
             .processSync({ value }).value as string;
 
     it("wrap pars and streaming commands", () => {
-        html = process("a\n\nb");
+        html = process("\\begin{document}a\n\nb\\end{document}");
         expect(html).toEqual("<p>a</p><p>b</p>");
 
         html = process("\\bfseries a\n\nb");
