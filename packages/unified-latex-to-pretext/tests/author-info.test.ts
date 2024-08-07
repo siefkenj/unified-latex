@@ -2,6 +2,8 @@ import { describe, it, expect } from "vitest";
 import Prettier from "prettier";
 import util from "util";
 import { getParser } from "@unified-latex/unified-latex-util-parse";
+import { toXml } from "xast-util-to-xml";
+import { unified } from "unified";
 import {
     gatherAuthorInfo,
     renderCollectedAuthorInfo,
@@ -42,6 +44,11 @@ describe("unified-latex-to-pretext:author-info", () => {
         input = "         Affiliation";
         expect(gatherAuthorInfo(parser.parse(sample))).toEqual([
             { address: parser.parse(input).content },
+        ]);
+
+        sample = "\\affil{Affiliation}";
+        expect(gatherAuthorInfo(parser.parse(sample))).toEqual([
+            "error"
         ]);
 
         sample =

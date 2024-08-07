@@ -30,7 +30,8 @@ export function gatherAuthorInfo(ast: Ast.Ast): AuthorInfo[] {
             );
             authorList.push(authorEmail);
         } 
-        /*else if (match.macro(node, "affil") && node.args) {
+        else if (match.macro(node, "affil")) {
+            authorList.push("affil", node);
             const message = new VFileMessage(
                 "Warning: \\affil is not supported"
             );
@@ -51,7 +52,6 @@ export function gatherAuthorInfo(ast: Ast.Ast): AuthorInfo[] {
             }
             message.source = "LatexConversion";
         }
-*/
     });
     return authorList;
 }
