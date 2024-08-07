@@ -3,11 +3,14 @@ import Prettier from "prettier";
 import util from "util";
 import { getParser } from "@unified-latex/unified-latex-util-parse";
 import { toXml } from "xast-util-to-xml";
+import { xmlCompilePlugin } from "../libs/convert-to-pretext";
 import { unified } from "unified";
 import {
     gatherAuthorInfo,
     renderCollectedAuthorInfo,
 } from "../libs/author-info";
+import { VFile } from "vfile";
+import { toPretextWithLoggerFactory } from "../libs/pretext-subs/to-pretext";
 
 function normalizeHtml(str: string) {
     try {
@@ -28,28 +31,28 @@ console.log = (...args) => {
 describe("unified-latex-to-pretext:author-info", () => {
     let sample: string;
     const parser = getParser();
+    let file: VFile;
 
     it("collects author name, address, institution, and email information", () => {
+        file = new VFile();
         sample =
             "\\author{First Middle LastName} \n \\address{Department, Address}";
         let input = "        First Middle LastName";
         let input1 =
             "                               \n          Department, Address";
-        expect(gatherAuthorInfo(parser.parse(sample))).toEqual([
+        expect(gatherAuthorInfo(parser.parse(sample), file)).toEqual([
             { personname: parser.parse(input).content },
             { address: parser.parse(input1).content },
         ]);
 
         sample = "\\address{Affiliation}";
         input = "         Affiliation";
-        expect(gatherAuthorInfo(parser.parse(sample))).toEqual([
+        expect(gatherAuthorInfo(parser.parse(sample), file)).toEqual([
             { address: parser.parse(input).content },
         ]);
 
         sample = "\\affil{Affiliation}";
-        expect(gatherAuthorInfo(parser.parse(sample))).toEqual([
-            "error"
-        ]);
+        expect(gatherAuthorInfo(parser.parse(sample), file)).toEqual([]);
 
         sample =
             "\\author{First Author} \\email{example@example.com} \\author{Second Author}";
@@ -57,7 +60,7 @@ describe("unified-latex-to-pretext:author-info", () => {
         input1 = "                             example@example.com";
         let input2 =
             "                                                          Second Author";
-        expect(gatherAuthorInfo(parser.parse(sample))).toEqual([
+        expect(gatherAuthorInfo(parser.parse(sample), file)).toEqual([
             { personname: parser.parse(input).content },
             { email: parser.parse(input1).content },
             { personname: parser.parse(input2).content },
@@ -67,30 +70,41 @@ describe("unified-latex-to-pretext:author-info", () => {
     it("parses author name, address, and email information", () => {
         sample =
             "\\author{First Middle LastName} \n \\address{Department, Address}";
-        expect(
-            renderCollectedAuthorInfo(gatherAuthorInfo(parser.parse(sample)))
-        ).toEqual(
+        let rendered = renderCollectedAuthorInfo(
+            gatherAuthorInfo(parser.parse(sample), file)
+        );
+        const toXast = toPretextWithLoggerFactory(file.message.bind(file));
+        const xxx = unified()
+            .use(xmlCompilePlugin)
+            .runSync({ type: "root", children: [toXast(rendered)].flat() });
+        expect(normalizeHtml(toXml(xxx))).toEqual(
             normalizeHtml(
-                "<author> <personname>First Middle LastName</personname> <department>Department, Address</department> </author>"
+                "<author><personname>First Middle LastName</personname><address>Department, Address</address></author>"
             )
         );
 
         sample = "\\address{Affiliation}";
-        expect(
-            renderCollectedAuthorInfo(gatherAuthorInfo(parser.parse(sample)))
-        ).toEqual(
-            normalizeHtml(
-                "<author> <institution>Affiliation</institution> </author>"
-            )
+        rendered = renderCollectedAuthorInfo(
+            gatherAuthorInfo(parser.parse(sample), file)
+        );
+        const xxx1 = unified()
+            .use(xmlCompilePlugin)
+            .runSync({ type: "root", children: [toXast(rendered)].flat() });
+        expect(normalizeHtml(toXml(xxx1))).toEqual(
+            normalizeHtml("<author><address>Affiliation</address></author>")
         );
 
         sample =
             "\\author{First Author} \\email{example@example.com} \\author{Second Author}";
-        expect(
-            renderCollectedAuthorInfo(gatherAuthorInfo(parser.parse(sample)))
-        ).toEqual(
+        rendered = renderCollectedAuthorInfo(
+            gatherAuthorInfo(parser.parse(sample), file)
+        );
+        const xxx2 = unified()
+            .use(xmlCompilePlugin)
+            .runSync({ type: "root", children: [toXast(rendered)].flat() });
+        expect(normalizeHtml(toXml(xxx2))).toEqual(
             normalizeHtml(
-                "<author> <personname>First Author</personname> <email>example@example.com</email> <personname>Second Author</personname> </author>"
+                "<author><personname>First Author</personname><email>example@example.com</email><personname>Second Author</personname></author>"
             )
         );
     });

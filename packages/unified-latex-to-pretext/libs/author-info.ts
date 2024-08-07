@@ -3,13 +3,14 @@ import { visit } from "@unified-latex/unified-latex-util-visit";
 import { match } from "@unified-latex/unified-latex-util-match";
 import { htmlLike } from "@unified-latex/unified-latex-util-html-like";
 import { VFileMessage } from "vfile-message";
+import { VFile } from "vfile";
 
 export type AuthorInfo = Record<string, Ast.Node[]>;
 
 /**
  * Visits all the matching nodes and gathers author information, then send them to render and output pretext.
  */
-export function gatherAuthorInfo(ast: Ast.Ast): AuthorInfo[] | VFileMessage {
+export function gatherAuthorInfo(ast: Ast.Ast, file: VFile): AuthorInfo[] {
     const authorList: AuthorInfo[] = [];
 
     visit(ast, (node) => {
@@ -29,8 +30,8 @@ export function gatherAuthorInfo(ast: Ast.Ast): AuthorInfo[] | VFileMessage {
             );
             authorList.push(authorEmail);
         } else if (match.macro(node, "affil")) {
-            MacroReport(node);
-            throw new Error('Macro "${node.content}" is not supported');
+            createVFileMessage(node);
+            //file.message
         }
     });
     return authorList;
@@ -57,7 +58,7 @@ export function renderCollectedAuthorInfo(authorList: AuthorInfo[]): Ast.Macro {
     return renderedAuthorList;
 }
 
-function MacroReport(node: Ast.Macro): VFileMessage {
+function createVFileMessage(node: Ast.Macro): VFileMessage {
     const message = new VFileMessage(
         `Macro \"${node.content}\" is not supported`
     );
