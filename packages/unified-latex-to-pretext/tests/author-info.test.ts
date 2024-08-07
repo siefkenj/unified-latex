@@ -42,13 +42,13 @@ describe("unified-latex-to-pretext:author-info", () => {
             "                               \n          Department, Address";
         expect(gatherAuthorInfo(parser.parse(sample), file)).toEqual([
             { personname: parser.parse(input).content },
-            { address: parser.parse(input1).content },
+            { institution: parser.parse(input1).content },
         ]);
 
         sample = "\\address{Affiliation}";
         input = "         Affiliation";
         expect(gatherAuthorInfo(parser.parse(sample), file)).toEqual([
-            { address: parser.parse(input).content },
+            { institution: parser.parse(input).content },
         ]);
 
         sample = "\\affil{Affiliation}";
@@ -79,7 +79,7 @@ describe("unified-latex-to-pretext:author-info", () => {
             .runSync({ type: "root", children: [toXast(rendered)].flat() });
         expect(normalizeHtml(toXml(xxx))).toEqual(
             normalizeHtml(
-                "<author><personname>First Middle LastName</personname><address>Department, Address</address></author>"
+                "<author><personname>First Middle LastName</personname><institution>Department, Address</institution></author>"
             )
         );
 
@@ -91,7 +91,7 @@ describe("unified-latex-to-pretext:author-info", () => {
             .use(xmlCompilePlugin)
             .runSync({ type: "root", children: [toXast(rendered)].flat() });
         expect(normalizeHtml(toXml(xxx1))).toEqual(
-            normalizeHtml("<author><address>Affiliation</address></author>")
+            normalizeHtml("<author><institution>Affiliation</institution></author>")
         );
 
         sample =

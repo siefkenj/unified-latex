@@ -21,7 +21,7 @@ export function gatherAuthorInfo(ast: Ast.Ast, file: VFile): AuthorInfo[] {
             authorList.push(authorName);
         } else if (match.macro(node, "address") && node.args) {
             const authorAdd = Object.fromEntries(
-                node.args.map((x) => ["address", x.content])
+                node.args.map((x) => ["institution", x.content])
             );
             authorList.push(authorAdd);
         } else if (match.macro(node, "email") && node.args) {
@@ -30,8 +30,12 @@ export function gatherAuthorInfo(ast: Ast.Ast, file: VFile): AuthorInfo[] {
             );
             authorList.push(authorEmail);
         } else if (match.macro(node, "affil")) {
-            createVFileMessage(node);
-            //file.message
+            const message = createVFileMessage(node);
+            file.message(
+                message,
+                message.position,
+                "unified-latex-to-pretext:warning"
+            )
         }
     });
     return authorList;
