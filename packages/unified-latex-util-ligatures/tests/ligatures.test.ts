@@ -58,6 +58,9 @@ describe("unified-latex-util-ligatures", () => {
 
         ast = strToNodes("a\\v sb");
         expect(printRaw(parseLigatures(ast))).toEqual("ašb");
+
+        ast = strToNodes("r\\o y");
+        expect(printRaw(parseLigatures(ast))).toEqual("røy");
     });
 
     it("can replace macro ligatures with an argument in a group", () => {

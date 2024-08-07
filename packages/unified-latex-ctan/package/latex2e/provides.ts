@@ -173,7 +173,7 @@ export const macros: MacroInfoRecord = {
         renderInfo: { breakAround: true, pgfkeysArgs: true },
     },
     discretionary: { signature: "m m m" },
-    hyphenation: { signature: "m m m" },
+    hyphenation: { signature: "m" },
     footnote: { signature: "o m", renderInfo: { inParMode: true } },
     footnotemark: { signature: "o" },
     footnotetext: { signature: "o m", renderInfo: { inParMode: true } },
