@@ -34,7 +34,7 @@ export function gatherAuthorInfo(ast: Ast.Ast, file: VFile): AuthorInfo[] {
             file.message(
                 message,
                 message.position,
-                "unified-latex-to-pretext:warning"
+                "latex-to-pretext:warning"
             )
         }
     });
@@ -83,6 +83,6 @@ function createVFileMessage(node: Ast.Macro): VFileMessage {
         };
     }
 
-    message.source = "unified-latex-to-pretext:warning";
+    message.source = "latex-to-pretext:warning";
     return message;
 }
