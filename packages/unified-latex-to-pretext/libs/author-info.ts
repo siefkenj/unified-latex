@@ -7,7 +7,6 @@ import { VFileMessage } from "vfile-message";
 export type AuthorInfo = Record<string, Ast.Node[]>;
 
 /**
- *
  * Visits all the matching nodes and gathers author information, then send them to render and output pretext.
  */
 export function gatherAuthorInfo(ast: Ast.Ast): AuthorInfo[] | VFileMessage {
