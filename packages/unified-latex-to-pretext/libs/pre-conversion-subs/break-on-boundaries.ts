@@ -18,7 +18,7 @@ import { VFileMessage } from "vfile-message";
  * All the divisions, where each item is {division macro, mapped environment}.
  * Note that this is ordered from the "largest" division to the "smallest" division.
  */
-const divisions: { division: string; mappedEnviron: string }[] = [
+export const divisions: { division: string; mappedEnviron: string }[] = [
     { division: "part", mappedEnviron: "_part" },
     { division: "chapter", mappedEnviron: "_chapter" },
     { division: "section", mappedEnviron: "_section" },
@@ -34,7 +34,7 @@ const isDivisionMacro = match.createMacroMatcher(
 );
 
 // check if an environment is a newly created environment
-const isMappedEnviron = match.createEnvironmentMatcher(
+export const isMappedEnviron = match.createEnvironmentMatcher(
     divisions.map((x) => x.mappedEnviron)
 );
 
@@ -74,7 +74,7 @@ export function breakOnBoundaries(ast: Ast.Ast): { messages: VFileMessage[] } {
                     };
                 }
 
-                message.source = "LatexConversion";
+                message.source = "latex-to-pretext:warning";
                 messagesLst.messages.push(message);
 
                 return node.content;

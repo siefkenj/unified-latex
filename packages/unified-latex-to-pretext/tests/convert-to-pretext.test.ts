@@ -61,6 +61,7 @@ describe("unified-latex-to-pretext:convert-to-pretext", () => {
                     yyy: (node) =>
                         htmlLike({ tag: "yyy", content: node.content }),
                 },
+                producePretextFragment: true,
             });
         let ast;
 
@@ -87,6 +88,7 @@ describe("unified-latex-to-pretext:convert-to-pretext", () => {
                             });
                         },
                     },
+                    producePretextFragment: true,
                 })
                 .use(xmlCompilePlugin)
                 .processSync(value).value as string;

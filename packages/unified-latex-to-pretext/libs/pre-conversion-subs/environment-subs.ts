@@ -1,4 +1,3 @@
-import cssesc from "cssesc";
 import {
     parseTabularSpec,
     TabularColumn,
@@ -11,9 +10,12 @@ import {
     getNamedArgsContent,
 } from "@unified-latex/unified-latex-util-arguments";
 import { match } from "@unified-latex/unified-latex-util-match";
-import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 import { wrapPars } from "../wrap-pars";
 import { VisitInfo } from "@unified-latex/unified-latex-util-visit";
+import { trim } from "@unified-latex/unified-latex-util-trim";
+import { VFileMessage } from "vfile-message";
+import { VFile } from "vfile";
+import { s } from "@unified-latex/unified-latex-builder";
 
 const ITEM_ARG_NAMES_REG = ["label"] as const;
 const ITEM_ARG_NAMES_BEAMER = [null, "label", null] as const;
@@ -48,54 +50,54 @@ function getItemArgs(node: Ast.Macro): ItemArgs {
     return ret as ItemArgs;
 }
 
-function enumerateFactory(parentTag = "ol", className = "enumerate") {
+function enumerateFactory(parentTag = "ol") {
     return function enumerateToHtml(env: Ast.Environment) {
         // The body of an enumerate has already been processed and all relevant parts have
         // been attached to \item macros as arguments.
         const items = env.content.filter((node) => match.macro(node, "item"));
+
+        // Figure out if there any manually-specified item labels. If there are,
+        // we need to add a title tag
+        let isDescriptionList = false;
+
         const content = items.flatMap((node) => {
             if (!match.macro(node) || !node.args) {
                 return [];
             }
 
-            const attributes: Record<string, string | Record<string, string>> =
-                {};
-            // Figure out if there any manually-specified item labels. If there are,
-            // we need to specify a custom list-style-type.
             // We test the open mark to see if an optional argument was actually supplied.
             const namedArgs = getItemArgs(node);
+
+            // if there are custom markers, don't want the title tag to be wrapped in pars
+            // so we wrap the body first
+            namedArgs.body = wrapPars(namedArgs.body);
+
+            // check if a custom marker is used
             if (namedArgs.label != null) {
-                const formattedLabel = cssesc(printRaw(namedArgs.label || []));
-                attributes.style = {
-                    // Note the space after `formattedLabel`. That is on purpose!
-                    "list-style-type": formattedLabel
-                        ? `'${formattedLabel} '`
-                        : "none",
-                };
+                isDescriptionList = true;
+
+                // add title tag containing custom marker
+                namedArgs.body.unshift(
+                    htmlLike({
+                        tag: "title",
+                        content: namedArgs.label,
+                    })
+                );
             }
 
             const body = namedArgs.body;
+
             return htmlLike({
                 tag: "li",
-                content: wrapPars(body),
-                attributes,
+                content: body,
             });
         });
 
         return htmlLike({
-            tag: parentTag,
-            attributes: { className },
+            tag: isDescriptionList ? "dl" : parentTag,
             content,
         });
     };
-}
-
-function createCenteredElement(env: Ast.Environment) {
-    return htmlLike({
-        tag: "center",
-        attributes: { className: "center" },
-        content: env.content,
-    });
 }
 
 function createTableFromTabular(env: Ast.Environment) {
@@ -106,59 +108,144 @@ function createTableFromTabular(env: Ast.Environment) {
         columnSpecs = parseTabularSpec(args[1] || []);
     } catch (e) {}
 
+    // for the tabular tag
+    const attributes: Record<string, string | Record<string, string>> = {};
+
+    // we only need the col tags if one of the columns aren't left aligned/have a border
+    let notLeftAligned: boolean = false;
+
+    // stores which columns have borders to the right
+    // number is the column's index in columnSpecs
+    const columnRightBorder: Record<number, boolean> = {};
+
     const tableBody = tabularBody.map((row) => {
         const content = row.cells.map((cell, i) => {
             const columnSpec = columnSpecs[i];
-            const styles: Record<string, string> = {};
+
             if (columnSpec) {
                 const { alignment } = columnSpec;
-                if (alignment.alignment === "center") {
-                    styles["text-align"] = "center";
-                }
-                if (alignment.alignment === "right") {
-                    styles["text-align"] = "right";
-                }
+
+                // this will need to be in the tabular tag
                 if (
                     columnSpec.pre_dividers.some(
                         (div) => div.type === "vert_divider"
                     )
                 ) {
-                    styles["border-left"] = "1px solid";
+                    attributes["left"] = "minor";
                 }
+
+                // check if the column has a right border
                 if (
                     columnSpec.post_dividers.some(
                         (div) => div.type === "vert_divider"
                     )
                 ) {
-                    styles["border-right"] = "1px solid";
+                    columnRightBorder[i] = true;
+                }
+
+                // check if the default alignment isn't used
+                if (alignment.alignment !== "left") {
+                    notLeftAligned = true;
                 }
             }
-            return htmlLike(
-                Object.keys(styles).length > 0
-                    ? {
-                          tag: "td",
-                          content: cell,
-                          attributes: { style: styles },
-                      }
-                    : {
-                          tag: "td",
-                          content: cell,
-                      }
-            );
+
+            // trim whitespace off cell
+            trim(cell);
+
+            return htmlLike({
+                tag: "cell",
+                content: cell,
+            });
         });
-        return htmlLike({ tag: "tr", content });
+        return htmlLike({ tag: "row", content });
     });
 
+    // add col tags if needed
+    if (notLeftAligned || Object.values(columnRightBorder).some((b) => b)) {
+        // go backwards since adding col tags to the front of the tableBody list
+        // otherwise, col tags will be in the reversed order
+        for (let i = columnSpecs.length; i >= 0; i--) {
+            const columnSpec = columnSpecs[i];
+
+            if (!columnSpec) {
+                continue;
+            }
+
+            const colAttributes: Record<
+                string,
+                string | Record<string, string>
+            > = {};
+            const { alignment } = columnSpec;
+
+            // add h-align attribute if not default
+            if (alignment.alignment !== "left") {
+                colAttributes["halign"] = alignment.alignment; // supports all alignments but stuff like p{'width'} (closest is @colspan in cell)
+            }
+
+            // if there is a right border add it
+            if (columnRightBorder[i] === true) {
+                colAttributes["right"] = "minor";
+            }
+
+            tableBody.unshift(
+                htmlLike({ tag: "col", attributes: colAttributes })
+            );
+        }
+    }
+
     return htmlLike({
-        tag: "table",
-        content: [
-            htmlLike({
-                tag: "tbody",
-                content: tableBody,
-            }),
-        ],
-        attributes: { className: "tabular" },
+        tag: "tabular",
+        content: tableBody,
+        attributes: attributes,
     });
+}
+
+function createMessage(
+    node: Ast.Environment,
+    replacement: string
+): VFileMessage {
+    const message = new VFileMessage(
+        `Warning: There is no equivalent tag for \"${node.env}\", \"${replacement}\" was used as a replacement.`
+    );
+
+    // add the position of the environment if available
+    if (node.position) {
+        message.line = node.position.start.line;
+        message.column = node.position.start.column;
+        message.position = {
+            start: {
+                line: node.position.start.line,
+                column: node.position.start.column,
+            },
+            end: {
+                line: node.position.end.line,
+                column: node.position.end.column,
+            },
+        };
+    }
+
+    message.source = "latex-to-pretext:warning";
+    return message;
+}
+
+function createEmptyString(): (
+    env: Ast.Environment,
+    info: VisitInfo,
+    file?: VFile
+) => Ast.String {
+    return (env, info, file) => {
+        // add a warning message
+        if (file) {
+            const message = createMessage(env, "an empty Ast.String");
+            file.message(
+                message,
+                message.position,
+                "unified-latex-to-pretext:environment-subs"
+            );
+        }
+
+        return s("");
+    };
 }
 
 /**
@@ -169,18 +256,18 @@ export const environmentReplacements: Record<
     string,
     (
         node: Ast.Environment,
-        info: VisitInfo
+        info: VisitInfo,
+        file?: VFile
     ) => Ast.Macro | Ast.String | Ast.Environment
 > = {
     enumerate: enumerateFactory("ol"),
-    itemize: enumerateFactory("ul", "itemize"),
-    center: createCenteredElement,
+    itemize: enumerateFactory("ul"),
+    center: createEmptyString(),
     tabular: createTableFromTabular,
     quote: (env) => {
         return htmlLike({
             tag: "blockquote",
             content: env.content,
-            attributes: { className: "environment quote" },
         });
     },
 };

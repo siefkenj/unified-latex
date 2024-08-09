@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { processLatexViaUnified } from "@unified-latex/unified-latex";
-import { VFile } from "unified-lint-rule/lib";
+import { VFile } from "vfile";
 import util from "util";
 import { unifiedLatexToXmlLike } from "../libs/unified-latex-plugin-to-xml-like";
 import { htmlLike } from "@unified-latex/unified-latex-util-html-like";
@@ -18,7 +18,7 @@ describe("unified-latex-to-pretext:unified-latex-to-xml-like", () => {
     let file: VFile;
     const process = (value: string) =>
         processLatexViaUnified()
-            .use(unifiedLatexToXmlLike)
+            .use(unifiedLatexToXmlLike, { producePretextFragment: true })
             .processSync({ value });
 
     it("wrap pars and streaming commands", () => {
@@ -27,19 +27,19 @@ describe("unified-latex-to-pretext:unified-latex-to-xml-like", () => {
 
         file = process("\\bfseries a\n\nb");
         expect(file.value).toEqual(
-            '\\html-tag:p{\\html-tag:b{\\html-attr:className{"textbf"}a}}\\html-tag:p{\\html-tag:b{\\html-attr:className{"textbf"}b}}'
+            "\\html-tag:p{\\html-tag:alert{a}}\\html-tag:p{\\html-tag:alert{b}}"
         );
 
         file = process("\\bf a\n\nb");
         expect(file.value).toEqual(
-            '\\html-tag:p{\\html-tag:b{\\html-attr:className{"textbf"}a}}\\html-tag:p{\\html-tag:b{\\html-attr:className{"textbf"}b}}'
+            "\\html-tag:p{\\html-tag:alert{a}}\\html-tag:p{\\html-tag:alert{b}}"
         );
 
         file = process(
             "\\begin{enumerate}\\item foo\\item bar\\end{enumerate}"
         );
         expect(file.value).toEqual(
-            '\\html-tag:ol{\\html-attr:className{"enumerate"}\\html-tag:li{\\html-tag:p{foo}}\\html-tag:li{\\html-tag:p{bar}}}'
+            "\\html-tag:ol{\\html-tag:li{\\html-tag:p{foo}}\\html-tag:li{\\html-tag:p{bar}}}"
         );
     });
 
@@ -63,6 +63,7 @@ describe("unified-latex-to-pretext:unified-latex-to-xml-like", () => {
                         yyy: (node) =>
                             htmlLike({ tag: "yyy", content: node.content }),
                     },
+                    producePretextFragment: true,
                 })
                 .processSync({ value });
 

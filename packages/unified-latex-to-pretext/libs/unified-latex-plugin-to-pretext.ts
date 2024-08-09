@@ -11,8 +11,15 @@ import {
     unifiedLatexToXmlLike,
     PluginOptions as HtmlLikePluginOptions,
 } from "./unified-latex-plugin-to-xml-like";
+import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 
-export type PluginOptions = HtmlLikePluginOptions & {};
+export type PluginOptions = HtmlLikePluginOptions & {
+    /**
+     * A boolean where if it's true then the output won't be wrapped in the <pretext><article> ... etc. tags.
+     * If it's false (default), a valid and complete PreTeXt document is returned.
+     */
+    producePretextFragment?: boolean;
+};
 
 /**
  * Unified plugin to convert a `unified-latex` AST into a `xast` AST representation of PreTeXt source.
@@ -23,7 +30,14 @@ export const unifiedLatexToPretext: Plugin<
     Xast.Root
 > = function unifiedLatexAttachMacroArguments(options) {
     return (tree, file) => {
-        unified().use(unifiedLatexToXmlLike, options).run(tree);
+        const producePretextFragment = options?.producePretextFragment
+            ? options?.producePretextFragment
+            : false;
+
+        // bring expandmacros in here instead
+        // getting authorinfo would be in here too
+
+        unified().use(unifiedLatexToXmlLike, options).run(tree, file);
 
         // This should happen right before converting to HTML because macros like `\&` should
         // be expanded via html rules first (and not turned into their corresponding ligature directly)
@@ -31,6 +45,8 @@ export const unifiedLatexToPretext: Plugin<
 
         // If there is a \begin{document}...\end{document}, that's the only
         // content we want to convert.
+        // *move this to before xmllike called
+        // after done do tree.content = content (content in document env)
         let content = tree.content;
         visit(
             tree,
@@ -47,6 +63,8 @@ export const unifiedLatexToPretext: Plugin<
             }
         );
 
+        tree.content = content;
+
         const toHast = toPretextWithLoggerFactory(file.message.bind(file));
         let converted = toHast({ type: "root", content });
         if (!Array.isArray(converted)) {
@@ -55,6 +73,15 @@ export const unifiedLatexToPretext: Plugin<
         // Wrap everything in a Hast.Root node
         let ret = x();
         ret.children = converted;
+
+        // add boilerplate
+        if (!producePretextFragment) {
+            ret.children.unshift({
+                type: "instruction",
+                name: "xml",
+                value: "version='1.0' encoding='utf-8'",
+            });
+        }
         return ret;
     };
 };
