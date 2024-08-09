@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { processLatexViaUnified } from "@unified-latex/unified-latex";
-import { VFile } from "unified-lint-rule/lib";
+import { VFile } from "vfile";
 import util from "util";
 import { unifiedLatexToXmlLike } from "../libs/unified-latex-plugin-to-xml-like";
 import { htmlLike } from "@unified-latex/unified-latex-util-html-like";

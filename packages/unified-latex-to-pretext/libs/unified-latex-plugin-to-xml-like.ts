@@ -23,9 +23,8 @@ import {
 import { macroReplacements as _macroReplacements } from "./pre-conversion-subs/macro-subs";
 import { streamingMacroReplacements } from "./pre-conversion-subs/streaming-command-subs";
 import { unifiedLatexWrapPars } from "./unified-latex-wrap-pars";
-import { breakOnBoundaries } from "./pre-conversion-subs/break-on-boundaries";
+import { breakOnBoundaries, isMappedEnviron } from "./pre-conversion-subs/break-on-boundaries";
 import { reportMacrosUnsupportedByKatex } from "./pre-conversion-subs/report-unsupported-macro-katex";
-import { expandUserDefinedMacros } from "./pre-conversion-subs/expand-user-defined-macros";
 import { htmlLike } from "@unified-latex/unified-latex-util-html-like";
 import { getArgsContent } from "@unified-latex/unified-latex-util-arguments";
 import { s } from "@unified-latex/unified-latex-builder";
@@ -103,9 +102,6 @@ export const unifiedLatexToXmlLike: Plugin<
                 replacers: streamingMacroReplacements,
             });
 
-        // expand any user defined macros
-        expandUserDefinedMacros(tree);
-
         // convert division macros into environments
         const warningMessages = breakOnBoundaries(tree);
 
@@ -125,6 +121,7 @@ export const unifiedLatexToXmlLike: Plugin<
         }
         // *THIS CAUSES TITLE TO BE WRAPPED IN PARS
         tree = processor.runSync(tree, file);
+        //console.log(printRaw(tree))
 
         // Replace text-mode environments and then macros. Environments *must* be processed first, since
         // environments like tabular use `\\` as a newline indicator, but a `\\` macro gets replaced with
@@ -157,6 +154,7 @@ export const unifiedLatexToXmlLike: Plugin<
                 return replacement;
             }
         });
+        
 
         // before replacing math-mode macros, report any macros that can't be replaced
         const unsupportedByKatex = reportMacrosUnsupportedByKatex(tree);
@@ -213,7 +211,7 @@ function shouldBeWrappedInPars(tree: Ast.Root): boolean {
                 return EXIT;
             }
         },
-        { test: (node) => match.environment(node, "document") }
+        { test: (node) => match.environment(node, "document") || isMappedEnviron(node) }
     );
 
     return content.some(
@@ -225,6 +223,8 @@ function shouldBeWrappedInPars(tree: Ast.Root): boolean {
  * Wrap the tree content in a book or article tag.
  */
 function createValidPretextDoc(tree: Ast.Root): void {
+    // very early on get the content in the document tag if there is one
+    // this will be incomplete since the author info isn't pushed yet, which obtains documentclass, title, etc.
     let isBook: boolean = false;
 
     // look for a \documentclass

@@ -89,21 +89,35 @@ export function toPretextWithLoggerFactory(
             case "environment":
                 // check if it's a new environment made to replace a division node
                 if (isMappedEnviron(node)) {
-                    // all division macro names are in pretext but paragraph and subparagraph
-
                     // get the division macro associated with this node
-                    const macroName = divisions.find(
+                    let divisionName = divisions.find(
                         (x) => x.mappedEnviron === node.env
                     )?.division;
 
+                    // for subparagraph, give a warning since pretext has no equivalent tag
+                    if (divisionName === "subparagraph") {
+                        logger(
+                            `There is no equivalent tag for "subparagraph", so it was replaced with a "paragraphs." tag`,
+                            node
+                        );
+                    }
+
+                    // paragraph and subparagraph become paragraphs
+                    if (
+                        divisionName === "paragraph" ||
+                        divisionName === "subparagraph"
+                    ) {
+                        divisionName = "paragraphs";
+                    }
+
                     // create a title tag containing the division macro's title arg
                     const title = getArgsContent(node)[0];
+
                     const titleTag = x("title", title?.flatMap(toPretext));
 
-                    if (macroName && title) {
-                        return x(macroName, titleTag);
+                    if (divisionName && title) {
+                        return x(divisionName, [titleTag]);
                     }
-                    // have case when title is undefined? doesn't happen when title not given, happens when no {}
                 }
 
                 logger(

@@ -11,6 +11,7 @@ import {
     unifiedLatexToXmlLike,
     PluginOptions as HtmlLikePluginOptions,
 } from "./unified-latex-plugin-to-xml-like";
+import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 
 export type PluginOptions = HtmlLikePluginOptions & {
     /**
@@ -33,6 +34,9 @@ export const unifiedLatexToPretext: Plugin<
             ? options?.producePretextFragment
             : false;
 
+        // bring expandmacros in here instead
+        // getting authorinfo would be in here too
+
         unified().use(unifiedLatexToXmlLike, options).run(tree, file);
 
         // This should happen right before converting to HTML because macros like `\&` should
@@ -41,6 +45,8 @@ export const unifiedLatexToPretext: Plugin<
 
         // If there is a \begin{document}...\end{document}, that's the only
         // content we want to convert.
+        // *move this to before xmllike called
+        // after done do tree.content = content (content in document env)
         let content = tree.content;
         visit(
             tree,
@@ -56,6 +62,8 @@ export const unifiedLatexToPretext: Plugin<
                     )) as TypeGuard<Ast.Environment>,
             }
         );
+
+        tree.content = content;
 
         const toHast = toPretextWithLoggerFactory(file.message.bind(file));
         let converted = toHast({ type: "root", content });

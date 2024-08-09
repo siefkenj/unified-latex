@@ -69,19 +69,16 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
     it("Can replace headings", () => {
         html = process(String.raw`\chapter{My Chapter}`);
         expect(normalizeHtml(html)).toEqual(
-            // normalizeHtml(`<h2>My Chapter</h2>`)
             normalizeHtml(`<chapter><title>My Chapter</title></chapter>`)
         );
 
         html = process(String.raw`\section{My Section}`);
         expect(normalizeHtml(html)).toEqual(
-            // normalizeHtml(`<title>My Section</title>`)
             normalizeHtml(`<section><title>My Section</title></section>`)
         );
 
         html = process(String.raw`\section*{My Section}`);
         expect(normalizeHtml(html)).toEqual(
-            // normalizeHtml(`<title>My Section</title>`)
             normalizeHtml(`<section><title>My Section</title></section>`)
         );
     });
@@ -183,7 +180,7 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
     });
 
     it("Converts tabular environment with different column alignments and borders", () => {
-        html = process(`\\begin{tabular}{|r|l|}a & b\\\\c & d\\end{tabular}`);
+        html = process(`\\begin{tabular}{|r||l|}a & b\\\\c & d\\end{tabular}`);
         expect(normalizeHtml(html)).toEqual(
             normalizeHtml(
                 `<tabular left="minor"><col halign="right" right="minor"></col><col right="minor"></col>` +
@@ -192,7 +189,7 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
         );
     });
 
-    it.skip("Can wrap in <p>...</p> tags", () => {
+    it("Can wrap in <p>...</p> tags", () => {
         html = process(`a\\par b`);
         expect(normalizeHtml(html)).toEqual(normalizeHtml(`<p>a</p><p>b</p>`));
 
@@ -205,16 +202,14 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
         );
         html = process(`a\\section{foo} b\n\nc`);
         expect(normalizeHtml(html)).toEqual(
-            // normalizeHtml(`<p>a</p><title>foo</title><p>b</p><p>c</p>`)
             normalizeHtml(
-                `<p>a</p><section><title>foo</title></section><p>b</p><p>c</p>`
+                `<p>a</p><section><title>foo</title><p>b</p><p>c</p></section>`
             )
         );
         html = process(`a\\section{foo} b\\section{bar}\n\nc`);
         expect(normalizeHtml(html)).toEqual(
             normalizeHtml(
-                // `<p>a</p><title>foo</title><p>b</p><title>bar</title><p>c</p>`
-                `<p>a</p><section><title>foo</title></section><p>b</p><section><title>bar</title></section><p>c</p>`
+                `<p>a</p><section><title>foo</title><p>b</p></section><section><title>bar</title><p>c</p></section>`
             )
         );
         html = process(`a\n \\emph{b}\n\nc`);
@@ -279,10 +274,8 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
 
         ast = process(`\\paragraph{Important.} Paragraph`);
         expect(normalizeHtml(ast)).toEqual(
-            // should there be a <paragraphs> or <p> tag?
-            // paragraphs seems like it should replace paragraph and p for subparagraph (or still paragraphs)
             normalizeHtml(`
-                <title>Important.</title> Paragraph
+                <pargraphs><title>Important.</title> Paragraph</paragraphs>
             `)
         );
     });

@@ -3,7 +3,7 @@ import * as Ast from "@unified-latex/unified-latex-types";
 import { match } from "@unified-latex/unified-latex-util-match";
 import { EXIT, visit } from "@unified-latex/unified-latex-util-visit";
 import { wrapPars } from "./wrap-pars";
-
+import { isMappedEnviron } from "./pre-conversion-subs/break-on-boundaries";
 type PluginOptions = {
     macrosThatBreakPars?: string[];
     environmentsThatDontBreakPars?: string[];
@@ -20,12 +20,18 @@ export const unifiedLatexWrapPars: Plugin<PluginOptions[], Ast.Root, Ast.Root> =
             options || {};
         return (tree) => {
             // If \begin{document}...\end{document} is present, we only wrap pars inside of it.
+
             let hasDocumentEnv = false;
             visit(
                 tree,
                 (env) => {
-                    if (match.environment(env, "document")) {
-                        hasDocumentEnv = true;
+                    if (
+                        match.environment(env, "document") ||
+                        isMappedEnviron(env)
+                    ) {
+                        if (match.environment(env, "document")) {
+                            hasDocumentEnv = true;
+                        }
 
                         // While we're here, we might as well wrap the pars!
                         env.content = wrapPars(env.content, {

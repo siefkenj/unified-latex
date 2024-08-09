@@ -9,10 +9,12 @@ import { VFileMessage } from "vfile-message";
 
 /**
  * Factory function that generates html-like macros that wrap their contents.
+ * warningMessage is a warning for any latex macros that don't have an equivalent
+ * pretext tag.
  */
 function factory(
     tag: string,
-    isWarn = false,
+    warningMessage: string = "",
     attributes?: Record<string, string>
 ): (macro: Ast.Macro, info: VisitInfo, file?: VFile) => Ast.Macro {
     return (macro, info, file) => {
@@ -25,7 +27,7 @@ function factory(
         }
 
         // add a warning message to the file if needed
-        if (isWarn && file) {
+        if (warningMessage && file) {
             const message = createMessage(macro, tag);
             file.message(
                 message,
@@ -43,6 +45,9 @@ function factory(
     };
 }
 
+/**
+ * Create a warning message if the latex node has no equivalent pretext tag.
+ */
 function createMessage(node: Ast.Macro, replacement: string): VFileMessage {
     const message = new VFileMessage(
         `Warning: There is no equivalent tag for \"${node.content}\", \"${replacement}\" was used as a replacement.`
@@ -86,15 +91,17 @@ function createHeading(tag: string, attrs = {}) {
     };
 }
 
-function createEmptyString(): (
-    macro: Ast.Macro,
-    info: VisitInfo,
-    file?: VFile
-) => Ast.String {
+// put this and createMessage in a utils file
+/**
+ * Create an empty Ast.String node.
+ */
+function createEmptyString(
+    warningMessage: string
+): (macro: Ast.Macro, info: VisitInfo, file?: VFile) => Ast.String {
     return (macro, info, file) => {
         // add a warning message
         if (file) {
-            const message = createMessage(macro, "an empty Ast.String");
+            const message = createMessage(macro, warningMessage);
             file.message(
                 message,
                 message.position,
@@ -111,15 +118,34 @@ export const macroReplacements: Record<
     (node: Ast.Macro, info: VisitInfo, file?: VFile) => Ast.Node
 > = {
     emph: factory("em"),
-    textrm: factory("em", true),
-    textsf: factory("em", true),
-    texttt: factory("em", true),
-    textsl: factory("em", true),
+    textrm: factory(
+        "em",
+        `Warning: There is no equivalent tag for \"textrm\", \"em\" was used as a replacement.`
+    ),
+    textsf: factory(
+        "em",
+        `Warning: There is no equivalent tag for \"textsf\", \"em\" was used as a replacement.`
+    ),
+    texttt: factory(
+        "em",
+        `Warning: There is no equivalent tag for \"textsf\", \"em\" was used as a replacement.`
+    ),
+    textsl: factory(
+        "em",
+        `Warning: There is no equivalent tag for \"textsl\", \"em\" was used as a replacement.`
+    ),
     textit: factory("em"),
     textbf: factory("alert"),
-    underline: factory("em", true),
-    mbox: createEmptyString(),
-    phantom: createEmptyString(),
+    underline: factory(
+        "em",
+        `Warning: There is no equivalent tag for \"underline\", \"em\" was used as a replacement.`
+    ),
+    mbox: createEmptyString(
+        `Warning: There is no equivalent tag for \"mbox\", an empty Ast.String was used as a replacement.`
+    ),
+    phantom: createEmptyString(
+        `Warning: There is no equivalent tag for \"phantom\", an empty Ast.String was used as a replacement.`
+    ),
     appendix: createHeading("appendix"),
     url: (node) => {
         const args = getArgsContent(node);
@@ -154,13 +180,28 @@ export const macroReplacements: Record<
             content: args[1] || [],
         });
     },
-    "\\": createEmptyString(),
-    vspace: createEmptyString(),
-    hspace: createEmptyString(),
-    textcolor: factory("em", true),
-    textsize: createEmptyString(),
-    makebox: createEmptyString(), // remove for now
-    noindent: createEmptyString(),
+    "\\": createEmptyString(
+        `Warning: There is no equivalent tag for \"\\\", an empty Ast.String was used as a replacement.`
+    ),
+    vspace: createEmptyString(
+        `Warning: There is no equivalent tag for \"vspace\", an empty Ast.String was used as a replacement.`
+    ),
+    hspace: createEmptyString(
+        `Warning: There is no equivalent tag for \"hspace\", an empty Ast.String was used as a replacement.`
+    ),
+    textcolor: factory(
+        "em",
+        `Warning: There is no equivalent tag for \"textcolor\", \"em\" was used as a replacement.`
+    ),
+    textsize: createEmptyString(
+        `Warning: There is no equivalent tag for \"textsize\", an empty Ast.String was used as a replacement.`
+    ),
+    makebox: createEmptyString(
+        `Warning: There is no equivalent tag for \"makebox\", an empty Ast.String was used as a replacement.`
+    ), // remove for now
+    noindent: createEmptyString(
+        `Warning: There is no equivalent tag for \"noindent\", an empty Ast.String was used as a replacement.`
+    ),
     includegraphics: (node) => {
         const args = getArgsContent(node);
         const source = printRaw(args[args.length - 1] || []);

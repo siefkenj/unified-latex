@@ -14,7 +14,7 @@ import { wrapPars } from "../wrap-pars";
 import { VisitInfo } from "@unified-latex/unified-latex-util-visit";
 import { trim } from "@unified-latex/unified-latex-util-trim";
 import { VFileMessage } from "vfile-message";
-import { VFile } from "unified-lint-rule/lib";
+import { VFile } from "vfile";
 import { s } from "@unified-latex/unified-latex-builder";
 
 const ITEM_ARG_NAMES_REG = ["label"] as const;
@@ -161,36 +161,35 @@ function createTableFromTabular(env: Ast.Environment) {
     });
 
     // add col tags if needed
-    if (
-        notLeftAligned ||
-        Object.values(columnRightBorder).some((bool) => bool)
-    ) {
+    if (notLeftAligned || Object.values(columnRightBorder).some((b) => b)) {
         // go backwards since adding col tags to the front of the tableBody list
         // otherwise, col tags will be in the reversed order
         for (let i = columnSpecs.length; i >= 0; i--) {
             const columnSpec = columnSpecs[i];
 
-            if (columnSpec) {
-                const colAttributes: Record<
-                    string,
-                    string | Record<string, string>
-                > = {};
-                const { alignment } = columnSpec;
-
-                // add h-align attribute if not default
-                if (alignment.alignment !== "left") {
-                    colAttributes["halign"] = alignment.alignment;
-                }
-
-                // if there is a right border add it
-                if (columnRightBorder[i] === true) {
-                    colAttributes["right"] = "minor";
-                }
-
-                tableBody.unshift(
-                    htmlLike({ tag: "col", attributes: colAttributes })
-                );
+            if (!columnSpec) {
+                continue;
             }
+
+            const colAttributes: Record<
+                string,
+                string | Record<string, string>
+            > = {};
+            const { alignment } = columnSpec;
+
+            // add h-align attribute if not default
+            if (alignment.alignment !== "left") {
+                colAttributes["halign"] = alignment.alignment; // supports all alignments but stuff like p{'width'} (closest is @colspan in cell)
+            }
+
+            // if there is a right border add it
+            if (columnRightBorder[i] === true) {
+                colAttributes["right"] = "minor";
+            }
+
+            tableBody.unshift(
+                htmlLike({ tag: "col", attributes: colAttributes })
+            );
         }
     }
 
