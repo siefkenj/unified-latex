@@ -4,8 +4,7 @@ import { getArgsContent } from "@unified-latex/unified-latex-util-arguments";
 import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 import { VisitInfo } from "@unified-latex/unified-latex-util-visit";
 import { VFile } from "unified-lint-rule/lib";
-import { s } from "@unified-latex/unified-latex-builder";
-import { VFileMessage } from "vfile-message";
+import { createMessage, emptyStringWithWarning } from "./utils";
 
 /**
  * Factory function that generates html-like macros that wrap their contents.
@@ -28,11 +27,15 @@ function factory(
 
         // add a warning message to the file if needed
         if (warningMessage && file) {
-            const message = createMessage(macro, tag);
+            const message = createMessage(
+                macro,
+                `Warning: There is no equivalent tag for \"${macro.content}\", \"${tag}\" was used as a replacement.`,
+                "macro-subs"
+            );
             file.message(
                 message,
                 message.position,
-                "unified-latex-to-pretext:macro-subs"
+                message.source // check if rule id still given
             );
         }
 
@@ -43,34 +46,6 @@ function factory(
         const content = args[args.length - 1] || [];
         return htmlLike({ tag, content, attributes });
     };
-}
-
-/**
- * Create a warning message if the latex node has no equivalent pretext tag.
- */
-function createMessage(node: Ast.Macro, replacement: string): VFileMessage {
-    const message = new VFileMessage(
-        `Warning: There is no equivalent tag for \"${node.content}\", \"${replacement}\" was used as a replacement.`
-    );
-
-    // add the position of the macro if available
-    if (node.position) {
-        message.line = node.position.start.line;
-        message.column = node.position.start.column;
-        message.position = {
-            start: {
-                line: node.position.start.line,
-                column: node.position.start.column,
-            },
-            end: {
-                line: node.position.end.line,
-                column: node.position.end.column,
-            },
-        };
-    }
-
-    message.source = "latex-to-pretext:warning";
-    return message;
 }
 
 function createHeading(tag: string, attrs = {}) {
@@ -92,26 +67,6 @@ function createHeading(tag: string, attrs = {}) {
 }
 
 // put this and createMessage in a utils file
-/**
- * Create an empty Ast.String node.
- */
-function createEmptyString(
-    warningMessage: string
-): (macro: Ast.Macro, info: VisitInfo, file?: VFile) => Ast.String {
-    return (macro, info, file) => {
-        // add a warning message
-        if (file) {
-            const message = createMessage(macro, warningMessage);
-            file.message(
-                message,
-                message.position,
-                "unified-latex-to-pretext:macro-subs"
-            );
-        }
-
-        return s("");
-    };
-}
 
 export const macroReplacements: Record<
     string,
@@ -140,11 +95,13 @@ export const macroReplacements: Record<
         "em",
         `Warning: There is no equivalent tag for \"underline\", \"em\" was used as a replacement.`
     ),
-    mbox: createEmptyString(
-        `Warning: There is no equivalent tag for \"mbox\", an empty Ast.String was used as a replacement.`
+    mbox: emptyStringWithWarning(
+        `Warning: There is no equivalent tag for \"mbox\", an empty Ast.String was used as a replacement.`,
+        "macro-subs"
     ),
-    phantom: createEmptyString(
-        `Warning: There is no equivalent tag for \"phantom\", an empty Ast.String was used as a replacement.`
+    phantom: emptyStringWithWarning(
+        `Warning: There is no equivalent tag for \"phantom\", an empty Ast.String was used as a replacement.`,
+        "macro-subs"
     ),
     appendix: createHeading("appendix"),
     url: (node) => {
@@ -180,27 +137,33 @@ export const macroReplacements: Record<
             content: args[1] || [],
         });
     },
-    "\\": createEmptyString(
-        `Warning: There is no equivalent tag for \"\\\", an empty Ast.String was used as a replacement.`
+    "\\": emptyStringWithWarning(
+        `Warning: There is no equivalent tag for \"\\\", an empty Ast.String was used as a replacement.`,
+        "macro-subs"
     ),
-    vspace: createEmptyString(
-        `Warning: There is no equivalent tag for \"vspace\", an empty Ast.String was used as a replacement.`
+    vspace: emptyStringWithWarning(
+        `Warning: There is no equivalent tag for \"vspace\", an empty Ast.String was used as a replacement.`,
+        "macro-subs"
     ),
-    hspace: createEmptyString(
-        `Warning: There is no equivalent tag for \"hspace\", an empty Ast.String was used as a replacement.`
+    hspace: emptyStringWithWarning(
+        `Warning: There is no equivalent tag for \"hspace\", an empty Ast.String was used as a replacement.`,
+        "macro-subs"
     ),
     textcolor: factory(
         "em",
         `Warning: There is no equivalent tag for \"textcolor\", \"em\" was used as a replacement.`
     ),
-    textsize: createEmptyString(
-        `Warning: There is no equivalent tag for \"textsize\", an empty Ast.String was used as a replacement.`
+    textsize: emptyStringWithWarning(
+        `Warning: There is no equivalent tag for \"textsize\", an empty Ast.String was used as a replacement.`,
+        "macro-subs"
     ),
-    makebox: createEmptyString(
-        `Warning: There is no equivalent tag for \"makebox\", an empty Ast.String was used as a replacement.`
+    makebox: emptyStringWithWarning(
+        `Warning: There is no equivalent tag for \"makebox\", an empty Ast.String was used as a replacement.`,
+        "macro-subs"
     ), // remove for now
-    noindent: createEmptyString(
-        `Warning: There is no equivalent tag for \"noindent\", an empty Ast.String was used as a replacement.`
+    noindent: emptyStringWithWarning(
+        `Warning: There is no equivalent tag for \"noindent\", an empty Ast.String was used as a replacement.`,
+        "macro-subs"
     ),
     includegraphics: (node) => {
         const args = getArgsContent(node);

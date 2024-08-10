@@ -13,9 +13,8 @@ import { match } from "@unified-latex/unified-latex-util-match";
 import { wrapPars } from "../wrap-pars";
 import { VisitInfo } from "@unified-latex/unified-latex-util-visit";
 import { trim } from "@unified-latex/unified-latex-util-trim";
-import { VFileMessage } from "vfile-message";
 import { VFile } from "vfile";
-import { s } from "@unified-latex/unified-latex-builder";
+import { emptyStringWithWarning } from "./utils";
 
 const ITEM_ARG_NAMES_REG = ["label"] as const;
 const ITEM_ARG_NAMES_BEAMER = [null, "label", null] as const;
@@ -200,54 +199,6 @@ function createTableFromTabular(env: Ast.Environment) {
     });
 }
 
-function createMessage(
-    node: Ast.Environment,
-    replacement: string
-): VFileMessage {
-    const message = new VFileMessage(
-        `Warning: There is no equivalent tag for \"${node.env}\", \"${replacement}\" was used as a replacement.`
-    );
-
-    // add the position of the environment if available
-    if (node.position) {
-        message.line = node.position.start.line;
-        message.column = node.position.start.column;
-        message.position = {
-            start: {
-                line: node.position.start.line,
-                column: node.position.start.column,
-            },
-            end: {
-                line: node.position.end.line,
-                column: node.position.end.column,
-            },
-        };
-    }
-
-    message.source = "latex-to-pretext:warning";
-    return message;
-}
-
-function createEmptyString(): (
-    env: Ast.Environment,
-    info: VisitInfo,
-    file?: VFile
-) => Ast.String {
-    return (env, info, file) => {
-        // add a warning message
-        if (file) {
-            const message = createMessage(env, "an empty Ast.String");
-            file.message(
-                message,
-                message.position,
-                "unified-latex-to-pretext:environment-subs"
-            );
-        }
-
-        return s("");
-    };
-}
-
 /**
  * Rules for replacing a macro with an html-like macro
  * that will render has html when printed.
@@ -262,7 +213,10 @@ export const environmentReplacements: Record<
 > = {
     enumerate: enumerateFactory("ol"),
     itemize: enumerateFactory("ul"),
-    center: createEmptyString(),
+    center: emptyStringWithWarning(
+        `Warning: There is no equivalent tag for \"center\", an empty Ast.String was used as a replacement.`,
+        "environment-subs"
+    ),
     tabular: createTableFromTabular,
     quote: (env) => {
         return htmlLike({
