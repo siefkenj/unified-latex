@@ -60,7 +60,7 @@ export const macroReplacements: Record<
     textsl: factory("span", { className: "textsl" }),
     textit: factory("i", { className: "textit" }),
     textbf: factory("b", { className: "textbf" }),
-    underline: factory("span", { className: "underline" }),
+    underline: factory("u", { className: "underline" }),
     mbox: factory("span", { className: "mbox" }),
     phantom: factory("span", { className: "phantom" }),
     part: createHeading("h1"),

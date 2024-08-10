@@ -287,6 +287,7 @@ export const macros: MacroInfoRecord = {
     textsf: { signature: "m", renderInfo: { inParMode: true } },
     textsc: { signature: "m", renderInfo: { inParMode: true } },
     texttt: { signature: "m", renderInfo: { inParMode: true } },
+    underline: { signature: "m", renderInfo: { inParMode: true } },
     emph: { signature: "m", renderInfo: { inParMode: true } },
     textnormal: { signature: "m", renderInfo: { inParMode: true } },
     uppercase: { signature: "m", renderInfo: { inParMode: true } },
