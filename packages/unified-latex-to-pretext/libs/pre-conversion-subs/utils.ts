@@ -5,21 +5,18 @@ import { s } from "@unified-latex/unified-latex-builder";
 import { VFileMessage } from "vfile-message";
 
 /**
- * Create a message about node from the given source file.
+ * Create a warning message about node from the given source file.
  */
-export function createMessage(
+export function makeWarningMessage(
     node: Ast.Node,
     message: string,
     sourceFile: string
 ): VFileMessage {
-    const newMessage = new VFileMessage(
-        message,
-        node,
-        );
+    const newMessage = new VFileMessage(message, node);
 
-    newMessage.source = `latex-to-pretext:${sourceFile}`
+    newMessage.source = `latex-to-pretext:${sourceFile}`;
 
-    return newMessage
+    return newMessage;
 }
 
 /**
@@ -33,11 +30,15 @@ export function emptyStringWithWarning(
     return (node, info, file) => {
         // add a warning message
         if (file) {
-            const message = createMessage(node, warningMessage, sourceFile);
+            const message = makeWarningMessage(
+                node,
+                warningMessage,
+                sourceFile
+            );
             file.message(
                 message,
                 message.position,
-                `unified-latex-to-pretext:${sourceFile}`
+                `unified-latex-to-pretext:${sourceFile}` // might not work like it doesn't in creat warning message
             );
         }
 

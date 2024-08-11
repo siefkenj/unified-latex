@@ -4,7 +4,7 @@ import { getArgsContent } from "@unified-latex/unified-latex-util-arguments";
 import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 import { VisitInfo } from "@unified-latex/unified-latex-util-visit";
 import { VFile } from "unified-lint-rule/lib";
-import { createMessage, emptyStringWithWarning } from "./utils";
+import { makeWarningMessage, emptyStringWithWarning } from "./utils";
 
 /**
  * Factory function that generates html-like macros that wrap their contents.
@@ -27,7 +27,7 @@ function factory(
 
         // add a warning message to the file if needed
         if (warningMessage && file) {
-            const message = createMessage(
+            const message = makeWarningMessage(
                 macro,
                 `Warning: There is no equivalent tag for \"${macro.content}\", \"${tag}\" was used as a replacement.`,
                 "macro-subs"

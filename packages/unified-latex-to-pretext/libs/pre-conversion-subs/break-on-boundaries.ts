@@ -13,6 +13,7 @@ import {
 } from "@unified-latex/unified-latex-util-split";
 import { visit } from "@unified-latex/unified-latex-util-visit";
 import { VFileMessage } from "vfile-message";
+import { makeWarningMessage } from "./utils";
 
 /**
  * All the divisions, where each item is {division macro, mapped environment}.
@@ -54,28 +55,14 @@ export function breakOnBoundaries(ast: Ast.Ast): { messages: VFileMessage[] } {
                     return anyMacro(child) && isDivisionMacro(child);
                 })
             ) {
-                const message = new VFileMessage(
-                    "Warning: hoisted out of a group, which might break the LaTeX code."
+                // add a warning message
+                messagesLst.messages.push(
+                    makeWarningMessage(
+                        node,
+                        "Warning: hoisted out of a group, which might break the LaTeX code.",
+                        "break-on-boundaries"
+                    )
                 );
-
-                // add the position of the group if available
-                if (node.position) {
-                    message.line = node.position.start.line;
-                    message.column = node.position.start.column;
-                    message.position = {
-                        start: {
-                            line: node.position.start.line,
-                            column: node.position.start.column,
-                        },
-                        end: {
-                            line: node.position.end.line,
-                            column: node.position.end.column,
-                        },
-                    };
-                }
-
-                message.source = "latex-to-pretext:warning";
-                messagesLst.messages.push(message);
 
                 return node.content;
             }
