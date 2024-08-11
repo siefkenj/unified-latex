@@ -23,7 +23,10 @@ import {
 import { macroReplacements as _macroReplacements } from "./pre-conversion-subs/macro-subs";
 import { streamingMacroReplacements } from "./pre-conversion-subs/streaming-command-subs";
 import { unifiedLatexWrapPars } from "./unified-latex-wrap-pars";
-import { breakOnBoundaries, isMappedEnviron } from "./pre-conversion-subs/break-on-boundaries";
+import {
+    breakOnBoundaries,
+    isMappedEnviron,
+} from "./pre-conversion-subs/break-on-boundaries";
 import { reportMacrosUnsupportedByKatex } from "./pre-conversion-subs/report-unsupported-macro-katex";
 import { htmlLike } from "@unified-latex/unified-latex-util-html-like";
 import { getArgsContent } from "@unified-latex/unified-latex-util-arguments";
@@ -116,12 +119,11 @@ export const unifiedLatexToXmlLike: Plugin<
 
         // Must be done *after* streaming commands are replaced.
         // We only wrap PARs if we *need* to. That is, if the content contains multiple paragraphs
+        console.log(shouldBeWrappedInPars(tree));
         if (shouldBeWrappedInPars(tree)) {
             processor = processor.use(unifiedLatexWrapPars);
         }
-        // *THIS CAUSES TITLE TO BE WRAPPED IN PARS
         tree = processor.runSync(tree, file);
-        //console.log(printRaw(tree))
 
         // Replace text-mode environments and then macros. Environments *must* be processed first, since
         // environments like tabular use `\\` as a newline indicator, but a `\\` macro gets replaced with
@@ -154,7 +156,6 @@ export const unifiedLatexToXmlLike: Plugin<
                 return replacement;
             }
         });
-        
 
         // before replacing math-mode macros, report any macros that can't be replaced
         const unsupportedByKatex = reportMacrosUnsupportedByKatex(tree);
@@ -211,7 +212,7 @@ function shouldBeWrappedInPars(tree: Ast.Root): boolean {
                 return EXIT;
             }
         },
-        { test: (node) => match.environment(node, "document") || isMappedEnviron(node) }
+        { test: (node) => match.environment(node, "document") }
     );
 
     return content.some(

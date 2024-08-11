@@ -274,9 +274,9 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
 
         ast = process(`\\paragraph{Important.} Paragraph`);
         expect(normalizeHtml(ast)).toEqual(
-            normalizeHtml(`
-                <pargraphs><title>Important.</title> Paragraph</paragraphs>
-            `)
+            normalizeHtml(
+                `<paragraphs><title>Important.</title> Paragraph</paragraphs>`
+            )
         );
     });
     it("custom replacers work", () => {

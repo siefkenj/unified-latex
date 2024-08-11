@@ -116,7 +116,10 @@ export function toPretextWithLoggerFactory(
                     const titleTag = x("title", title?.flatMap(toPretext));
 
                     if (divisionName && title) {
-                        return x(divisionName, [titleTag]);
+                        return x(divisionName, [
+                            titleTag,
+                            ...node.content.flatMap(toPretext),
+                        ]);
                     }
                 }
 
