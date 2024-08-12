@@ -11,7 +11,7 @@ import {
     unifiedLatexToXmlLike,
     PluginOptions as HtmlLikePluginOptions,
 } from "./unified-latex-plugin-to-xml-like";
-import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
+import { expandUserDefinedMacros } from "./pre-conversion-subs/expand-user-defined-macros";
 
 export type PluginOptions = HtmlLikePluginOptions & {
     /**
@@ -34,19 +34,11 @@ export const unifiedLatexToPretext: Plugin<
             ? options?.producePretextFragment
             : false;
 
-        // bring expandmacros in here instead
-        // getting authorinfo would be in here too
-
-        unified().use(unifiedLatexToXmlLike, options).run(tree, file);
-
-        // This should happen right before converting to HTML because macros like `\&` should
-        // be expanded via html rules first (and not turned into their corresponding ligature directly)
-        expandUnicodeLigatures(tree);
+        // expand user defined macros
+        expandUserDefinedMacros(tree);
 
         // If there is a \begin{document}...\end{document}, that's the only
         // content we want to convert.
-        // *move this to before xmllike called
-        // after done do tree.content = content (content in document env)
         let content = tree.content;
         visit(
             tree,
@@ -64,6 +56,15 @@ export const unifiedLatexToPretext: Plugin<
         );
 
         tree.content = content;
+
+        unified().use(unifiedLatexToXmlLike, options).run(tree, file);
+
+        // This should happen right before converting to HTML because macros like `\&` should
+        // be expanded via html rules first (and not turned into their corresponding ligature directly)
+        expandUnicodeLigatures(tree);
+
+        // update content
+        content = tree.content;
 
         const toHast = toPretextWithLoggerFactory(file.message.bind(file));
         let converted = toHast({ type: "root", content });
