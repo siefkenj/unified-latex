@@ -119,7 +119,6 @@ export const unifiedLatexToXmlLike: Plugin<
 
         // Must be done *after* streaming commands are replaced.
         // We only wrap PARs if we *need* to. That is, if the content contains multiple paragraphs
-        console.log(shouldBeWrappedInPars(tree));
         if (shouldBeWrappedInPars(tree)) {
             processor = processor.use(unifiedLatexWrapPars);
         }
@@ -183,7 +182,6 @@ export const unifiedLatexToXmlLike: Plugin<
         });
 
         // Wrap in enough tags to ensure a valid pretext document
-        // but if there is a document env, want to only wrap that
         if (!producePretextFragment) {
             // choose a book or article tag
             createValidPretextDoc(tree);
@@ -215,20 +213,27 @@ function shouldBeWrappedInPars(tree: Ast.Root): boolean {
         { test: (node) => match.environment(node, "document") }
     );
 
-    return content.some(
-        (node) => match.parbreak(node) || match.macro(node, "par")
-    );
+    return containsPar(content);
+}
+
+function containsPar(content: Ast.Node[]): boolean {
+    return content.some((node) => {
+        if (isMappedEnviron(node)) {
+            return containsPar(node.content);
+        }
+
+        return match.parbreak(node) || match.macro(node, "par");
+    });
 }
 
 /**
  * Wrap the tree content in a book or article tag.
  */
 function createValidPretextDoc(tree: Ast.Root): void {
-    // very early on get the content in the document tag if there is one
     // this will be incomplete since the author info isn't pushed yet, which obtains documentclass, title, etc.
     let isBook: boolean = false;
 
-    // look for a \documentclass
+    // look for a \documentclass (this will need to change, as this info will be gotten earlier)
     const docClass = findMacro(tree, "documentclass");
 
     // check if there was a documentclass
@@ -261,12 +266,8 @@ function createValidPretextDoc(tree: Ast.Root): void {
 
     // a book and article tag must have a title tag right after it
     // extract the title first
-    // wrap the document env since title is before it, dissapears
-    // but this assumes that this is only put as false when a document env is used, but if not then would still have duplicate
     const title = findMacro(tree, "title");
 
-    // create the title tag (this part doesn't work, adds a bunch of spans, repeats title name)
-    // this happens before this function is called, likely from wrap pars
     if (title) {
         const titleArg = getArgsContent(title)[1];
 
@@ -295,7 +296,7 @@ function createValidPretextDoc(tree: Ast.Root): void {
     }
 }
 
-// maybe could use match instead, could be slower tho since likely goes into environments
+// this will likely be removed
 function findMacro(tree: Ast.Root, content: string): Ast.Macro | null {
     let macro: Ast.Macro | null = null;
 

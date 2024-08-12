@@ -14,7 +14,7 @@ export function makeWarningMessage(
 ): VFileMessage {
     const newMessage = new VFileMessage(message, node);
 
-    newMessage.source = `latex-to-pretext:${sourceFile}`;
+    newMessage.source = `unified-latex-to-pretext:${sourceFile}`;
 
     return newMessage;
 }

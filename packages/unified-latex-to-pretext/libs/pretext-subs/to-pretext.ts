@@ -28,7 +28,7 @@ export function toPretextWithLoggerFactory(
     logger: (message: string, node: any) => void
 ) {
     /**
-     * Convert Ast.Node to Hast nodes.
+     * Convert Ast.Node to Xast nodes.
      */
     return function toPretext(
         node: Ast.Node | Ast.Argument
@@ -129,7 +129,7 @@ export function toPretextWithLoggerFactory(
                     )}\``,
                     node
                 );
-                return x("div", node.content.flatMap(toPretext));
+                return x("div", node.content.flatMap(toPretext)); // div not in pretext
             case "macro":
                 logger(
                     `Unknown macro when converting to HTML \`${formatNodeForError(
@@ -140,6 +140,7 @@ export function toPretextWithLoggerFactory(
                 return x("span", (node.args || []).map(toPretext).flat());
             case "argument":
                 return x(
+                    // span not in pretext
                     "span",
                     {
                         "data-open-mark": node.openMark,

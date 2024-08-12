@@ -7,7 +7,6 @@ import { VisitInfo } from "@unified-latex/unified-latex-util-visit";
 import { VFile } from "vfile";
 import { emptyStringWithWarning, makeWarningMessage } from "./utils";
 import { createTableFromTabular } from "./create-table-from-tabular";
-import { fileURLToPath } from "url";
 
 const ITEM_ARG_NAMES_REG = ["label"] as const;
 const ITEM_ARG_NAMES_BEAMER = [null, "label", null] as const;
@@ -112,7 +111,7 @@ function removeCenterEnv(
 
 /**
  * Rules for replacing a macro with an html-like macro
- * that will render has html when printed.
+ * that will render has pretext when printed.
  */
 export const environmentReplacements: Record<
     string,

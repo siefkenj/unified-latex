@@ -32,11 +32,7 @@ function factory(
                 `Warning: There is no equivalent tag for \"${macro.content}\", \"${tag}\" was used as a replacement.`,
                 "macro-subs"
             );
-            file.message(
-                message,
-                message.position,
-                message.source // check if rule id still given
-            );
+            file.message(message, message.position, message.source);
         }
 
         // Assume the meaningful argument is the last argument. This
@@ -51,7 +47,6 @@ function factory(
 function createHeading(tag: string, attrs = {}) {
     return (macro: Ast.Macro) => {
         const args = getArgsContent(macro);
-        // const starred = !!args[0];
         const attributes: Record<string, string> = {};
 
         if (attrs) {
@@ -65,8 +60,6 @@ function createHeading(tag: string, attrs = {}) {
         });
     };
 }
-
-// put this and createMessage in a utils file
 
 export const macroReplacements: Record<
     string,
