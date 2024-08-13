@@ -59,7 +59,7 @@ export const unifiedLatexToPretext: Plugin<
 
         unified().use(unifiedLatexToXmlLike, options).run(tree, file);
 
-        // This should happen right before converting to pretext because macros like `\&` should
+        // This should happen right before converting to PreTeXt because macros like `\&` should
         // be expanded via html rules first (and not turned into their corresponding ligature directly)
         expandUnicodeLigatures(tree);
 
@@ -71,7 +71,7 @@ export const unifiedLatexToPretext: Plugin<
         if (!Array.isArray(converted)) {
             converted = [converted];
         }
-        // Wrap everything in a Hast.Root node
+        // Wrap everything in a Xast.Root node
         let ret = x();
         ret.children = converted;
 

@@ -126,7 +126,7 @@ export const unifiedLatexToXmlLike: Plugin<
 
         // Replace text-mode environments and then macros. Environments *must* be processed first, since
         // environments like tabular use `\\` as a newline indicator, but a `\\` macro gets replaced with
-        // a `<br />` during macro replacement.
+        // an empty Ast.String during macro replacement.
         replaceNode(tree, (node, info) => {
             // Children of math-mode are rendered by KaTeX/MathJax and so we shouldn't touch them!
             if (info.context.hasMathModeAncestor) {
@@ -194,6 +194,7 @@ export const unifiedLatexToXmlLike: Plugin<
 
         // Make sure we are actually mutating the current tree.
         originalTree.content = tree.content;
+        console.log(file.messages)
     };
 };
 

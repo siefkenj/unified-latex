@@ -133,7 +133,7 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
                 `<dl>
                     <li><title>x)</title><p>a</p></li>
                     <li><title></title><p>b</p></li>
-                </dl>` // list is centered though
+                </dl>`
             )
         );
     });
@@ -171,8 +171,6 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
         html = process(`\\begin{tabular}{l l}a & b\\\\c & d\\end{tabular}`);
 
         expect(normalizeHtml(html)).toEqual(
-            // centered tho
-            // can fix with margins="0%"
             normalizeHtml(
                 `<tabular><row><cell>a</cell><cell>b</cell></row><row><cell>c</cell><cell>d</cell></row></tabular>`
             )

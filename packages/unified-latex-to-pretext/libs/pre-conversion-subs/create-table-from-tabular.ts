@@ -11,7 +11,7 @@ import { trim } from "@unified-latex/unified-latex-util-trim";
 type Attributes = Record<string, string | Record<string, string>>;
 
 /**
- * Convert env into a tabular in pretext.
+ * Convert env into a tabular in PreTeXt.
  */
 export function createTableFromTabular(env: Ast.Environment) {
     const tabularBody = parseAlignEnvironment(env.content);

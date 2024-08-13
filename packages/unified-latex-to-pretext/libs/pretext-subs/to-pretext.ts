@@ -97,7 +97,7 @@ export function toPretextWithLoggerFactory(
                     // for subparagraph, give a warning since pretext has no equivalent tag
                     if (divisionName === "subparagraph") {
                         logger(
-                            `There is no equivalent tag for "subparagraph", so it was replaced with a "paragraphs." tag`,
+                            `Warning: There is no equivalent tag for "subparagraph", "paragraphs" was used as a replacement.`,
                             node
                         );
                     }
@@ -163,6 +163,6 @@ export function toPretextWithLoggerFactory(
 }
 
 /**
- * Convert Ast.Node to Hast nodes.
+ * Convert Ast.Node to Xast nodes.
  */
 export const toPretext = toPretextWithLoggerFactory(console.warn);

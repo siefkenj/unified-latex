@@ -38,7 +38,7 @@ export function emptyStringWithWarning(
             file.message(
                 message,
                 message.position,
-                `unified-latex-to-pretext:${sourceFile}` // might not work like it doesn't in creat warning message
+                `unified-latex-to-pretext:${sourceFile}`
             );
         }
 

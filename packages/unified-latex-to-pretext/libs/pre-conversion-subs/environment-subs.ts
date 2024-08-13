@@ -105,8 +105,7 @@ function removeCenterEnv(
         )
     );
 
-    // can't return Node[] tho
-    return center.content; // or should it convert the stuff in here? or is that done already in plugin?
+    return center.content;
 }
 
 /**
