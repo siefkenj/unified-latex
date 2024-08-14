@@ -1,7 +1,7 @@
 import { Plugin } from "unified";
 import * as Ast from "@unified-latex/unified-latex-types";
 import { match } from "@unified-latex/unified-latex-util-match";
-import { EXIT, visit } from "@unified-latex/unified-latex-util-visit";
+import { visit } from "@unified-latex/unified-latex-util-visit";
 import { wrapPars } from "./wrap-pars";
 import { isMappedEnviron } from "./pre-conversion-subs/break-on-boundaries";
 type PluginOptions = {
@@ -38,8 +38,6 @@ export const unifiedLatexWrapPars: Plugin<PluginOptions[], Ast.Root, Ast.Root> =
                             macrosThatBreakPars,
                             environmentsThatDontBreakPars,
                         });
-
-                        return EXIT;
                     }
                 },
                 { test: match.anyEnvironment }

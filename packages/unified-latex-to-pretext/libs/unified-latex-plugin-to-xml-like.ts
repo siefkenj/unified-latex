@@ -194,7 +194,7 @@ export const unifiedLatexToXmlLike: Plugin<
 
         // Make sure we are actually mutating the current tree.
         originalTree.content = tree.content;
-        console.log(file.messages)
+        console.log(file.messages);
     };
 };
 

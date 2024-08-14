@@ -55,6 +55,7 @@ export const unifiedLatexToPretext: Plugin<
             }
         );
 
+        // since we don't want to wrap content outside of \begin{document}...\end{document} with <pretext>...</pretext>
         tree.content = content;
 
         unified().use(unifiedLatexToXmlLike, options).run(tree, file);

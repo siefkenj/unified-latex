@@ -5,7 +5,7 @@ import { match } from "@unified-latex/unified-latex-util-match";
 import { wrapPars } from "../wrap-pars";
 import { VisitInfo } from "@unified-latex/unified-latex-util-visit";
 import { VFile } from "vfile";
-import { emptyStringWithWarning, makeWarningMessage } from "./utils";
+import { makeWarningMessage } from "./utils";
 import { createTableFromTabular } from "./create-table-from-tabular";
 
 const ITEM_ARG_NAMES_REG = ["label"] as const;
@@ -91,21 +91,21 @@ function enumerateFactory(parentTag = "ol") {
     };
 }
 
-function removeCenterEnv(
-    center: Ast.Environment,
-    info: VisitInfo,
-    file?: VFile
-) {
+/**
+ *
+ * Remove the env environment by returning the content in env only.
+ */
+function removeEnv(env: Ast.Environment, info: VisitInfo, file?: VFile) {
     // add warning
     file?.message(
         makeWarningMessage(
-            center,
-            `Warning: There is no equivalent tag for \"center\", so the center environment was removed.`,
+            env,
+            `Warning: There is no equivalent tag for \"${env.env}\", so the ${env.env} environment was removed.`,
             "environment-subs"
         )
     );
 
-    return center.content;
+    return env.content;
 }
 
 /**
@@ -118,14 +118,11 @@ export const environmentReplacements: Record<
         node: Ast.Environment,
         info: VisitInfo,
         file?: VFile
-    ) => Ast.Macro | Ast.String | Ast.Environment
+    ) => Ast.Macro | Ast.String | Ast.Environment | Ast.Node[]
 > = {
     enumerate: enumerateFactory("ol"),
     itemize: enumerateFactory("ul"),
-    center: emptyStringWithWarning(
-        `Warning: There is no equivalent tag for \"center\", an empty Ast.String was used as a replacement.`,
-        "environment-subs"
-    ),
+    center: removeEnv,
     tabular: createTableFromTabular,
     quote: (env) => {
         return htmlLike({
