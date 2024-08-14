@@ -216,7 +216,7 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
         );
         html = process(`a\n b\\begin{foo}x\\end{foo}c\n\nd`);
         expect(normalizeHtml(html)).toEqual(
-            normalizeHtml(`<p>a b</p><div>x</div><p>c</p><p>d</p>`) // Need to fix, since foo isn't an env in pretext and no div
+            normalizeHtml(`<p>a b</p>x<p>c</p><p>d</p>`)
         );
     });
 

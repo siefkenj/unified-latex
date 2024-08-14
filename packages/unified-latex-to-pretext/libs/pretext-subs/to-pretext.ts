@@ -124,36 +124,38 @@ export function toPretextWithLoggerFactory(
                 }
 
                 logger(
-                    `Unknown environment when converting to HTML \`${formatNodeForError(
+                    `Unknown environment when converting to XML \`${formatNodeForError(
                         node.env
                     )}\``,
                     node
                 );
-                return x("div", node.content.flatMap(toPretext)); // div not in pretext
+                return node.content.flatMap(toPretext); // just remove the environment
             case "macro":
                 logger(
-                    `Unknown macro when converting to HTML \`${formatNodeForError(
+                    `Unknown macro when converting to XML \`${formatNodeForError(
                         node
                     )}\``,
                     node
                 );
-                return x("span", (node.args || []).map(toPretext).flat());
+                return (node.args || []).map(toPretext).flat();
             case "argument":
-                return x(
-                    // span not in pretext
-                    "span",
-                    {
-                        "data-open-mark": node.openMark,
-                        "data-close-mark": node.closeMark,
-                    },
-                    printRaw(node.content)
+                logger(
+                    `Unknown argument when converting to XML \`${formatNodeForError(
+                        node
+                    )}\``,
+                    node
                 );
+                return {
+                    type: "text",
+                    value: printRaw(node.content),
+                    position: node.position,
+                };
             case "root":
                 return node.content.flatMap(toPretext);
             default: {
                 const _exhaustiveCheck: never = node;
                 throw new Error(
-                    `Unknown node type; cannot convert to HAST ${JSON.stringify(
+                    `Unknown node type; cannot convert to XAST ${JSON.stringify(
                         node
                     )}`
                 );
