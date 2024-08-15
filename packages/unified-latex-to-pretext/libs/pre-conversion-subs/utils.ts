@@ -10,11 +10,11 @@ import { VFileMessage } from "vfile-message";
 export function makeWarningMessage(
     node: Ast.Node,
     message: string,
-    sourceFile: string
+    warningType: string
 ): VFileMessage {
     const newMessage = new VFileMessage(message, node);
 
-    newMessage.source = `unified-latex-to-pretext:${sourceFile}`;
+    newMessage.source = `unified-latex-to-pretext:${warningType}`;
 
     return newMessage;
 }
@@ -23,9 +23,8 @@ export function makeWarningMessage(
  * Create an empty Ast.String node, adding a warning message from
  * the source file into the VFile.
  */
-export function emptyStringWithWarning(
-    warningMessage: string,
-    sourceFile: string
+export function emptyStringWithWarningFactory(
+    warningMessage: string
 ): (node: Ast.Node, info: VisitInfo, file?: VFile) => Ast.String {
     return (node, info, file) => {
         // add a warning message
@@ -33,12 +32,12 @@ export function emptyStringWithWarning(
             const message = makeWarningMessage(
                 node,
                 warningMessage,
-                sourceFile
+                "macro-subs"
             );
             file.message(
                 message,
                 message.position,
-                `unified-latex-to-pretext:${sourceFile}`
+                `unified-latex-to-pretext:macro-subs`
             );
         }
 

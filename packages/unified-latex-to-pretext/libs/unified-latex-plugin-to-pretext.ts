@@ -8,9 +8,9 @@ import { match } from "@unified-latex/unified-latex-util-match";
 import { EXIT, visit } from "@unified-latex/unified-latex-util-visit";
 import { toPretextWithLoggerFactory } from "./pretext-subs/to-pretext";
 import {
-    unifiedLatexToXmlLike,
+    unifiedLatexToPretextLike,
     PluginOptions as HtmlLikePluginOptions,
-} from "./unified-latex-plugin-to-xml-like";
+} from "./unified-latex-plugin-to-pretext-like";
 import { expandUserDefinedMacros } from "./pre-conversion-subs/expand-user-defined-macros";
 
 export type PluginOptions = HtmlLikePluginOptions & {
@@ -58,7 +58,7 @@ export const unifiedLatexToPretext: Plugin<
         // since we don't want to wrap content outside of \begin{document}...\end{document} with <pretext>...</pretext>
         tree.content = content;
 
-        unified().use(unifiedLatexToXmlLike, options).run(tree, file);
+        unified().use(unifiedLatexToPretextLike, options).run(tree, file);
 
         // This should happen right before converting to PreTeXt because macros like `\&` should
         // be expanded via html rules first (and not turned into their corresponding ligature directly)

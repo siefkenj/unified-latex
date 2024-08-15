@@ -92,7 +92,6 @@ function enumerateFactory(parentTag = "ol") {
 }
 
 /**
- *
  * Remove the env environment by returning the content in env only.
  */
 function removeEnv(env: Ast.Environment, info: VisitInfo, file?: VFile) {

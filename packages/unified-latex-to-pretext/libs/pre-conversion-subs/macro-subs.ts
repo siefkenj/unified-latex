@@ -4,7 +4,7 @@ import { getArgsContent } from "@unified-latex/unified-latex-util-arguments";
 import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 import { VisitInfo } from "@unified-latex/unified-latex-util-visit";
 import { VFile } from "unified-lint-rule/lib";
-import { makeWarningMessage, emptyStringWithWarning } from "./utils";
+import { makeWarningMessage, emptyStringWithWarningFactory } from "./utils";
 
 /**
  * Factory function that generates html-like macros that wrap their contents.
@@ -88,13 +88,11 @@ export const macroReplacements: Record<
         "em",
         `Warning: There is no equivalent tag for \"underline\", \"em\" was used as a replacement.`
     ),
-    mbox: emptyStringWithWarning(
-        `Warning: There is no equivalent tag for \"mbox\", an empty Ast.String was used as a replacement.`,
-        "macro-subs"
+    mbox: emptyStringWithWarningFactory(
+        `Warning: There is no equivalent tag for \"mbox\", an empty Ast.String was used as a replacement.`
     ),
-    phantom: emptyStringWithWarning(
-        `Warning: There is no equivalent tag for \"phantom\", an empty Ast.String was used as a replacement.`,
-        "macro-subs"
+    phantom: emptyStringWithWarningFactory(
+        `Warning: There is no equivalent tag for \"phantom\", an empty Ast.String was used as a replacement.`
     ),
     appendix: createHeading("appendix"),
     url: (node) => {
@@ -130,33 +128,27 @@ export const macroReplacements: Record<
             content: args[1] || [],
         });
     },
-    "\\": emptyStringWithWarning(
-        `Warning: There is no equivalent tag for \"\\\", an empty Ast.String was used as a replacement.`,
-        "macro-subs"
+    "\\": emptyStringWithWarningFactory(
+        `Warning: There is no equivalent tag for \"\\\", an empty Ast.String was used as a replacement.`
     ),
-    vspace: emptyStringWithWarning(
-        `Warning: There is no equivalent tag for \"vspace\", an empty Ast.String was used as a replacement.`,
-        "macro-subs"
+    vspace: emptyStringWithWarningFactory(
+        `Warning: There is no equivalent tag for \"vspace\", an empty Ast.String was used as a replacement.`
     ),
-    hspace: emptyStringWithWarning(
-        `Warning: There is no equivalent tag for \"hspace\", an empty Ast.String was used as a replacement.`,
-        "macro-subs"
+    hspace: emptyStringWithWarningFactory(
+        `Warning: There is no equivalent tag for \"hspace\", an empty Ast.String was used as a replacement.`
     ),
     textcolor: factory(
         "em",
         `Warning: There is no equivalent tag for \"textcolor\", \"em\" was used as a replacement.`
     ),
-    textsize: emptyStringWithWarning(
-        `Warning: There is no equivalent tag for \"textsize\", an empty Ast.String was used as a replacement.`,
-        "macro-subs"
+    textsize: emptyStringWithWarningFactory(
+        `Warning: There is no equivalent tag for \"textsize\", an empty Ast.String was used as a replacement.`
     ),
-    makebox: emptyStringWithWarning(
-        `Warning: There is no equivalent tag for \"makebox\", an empty Ast.String was used as a replacement.`,
-        "macro-subs"
-    ), // remove for now
-    noindent: emptyStringWithWarning(
-        `Warning: There is no equivalent tag for \"noindent\", an empty Ast.String was used as a replacement.`,
-        "macro-subs"
+    makebox: emptyStringWithWarningFactory(
+        `Warning: There is no equivalent tag for \"makebox\", an empty Ast.String was used as a replacement.`
+    ),
+    noindent: emptyStringWithWarningFactory(
+        `Warning: There is no equivalent tag for \"noindent\", an empty Ast.String was used as a replacement.`
     ),
     includegraphics: (node) => {
         const args = getArgsContent(node);

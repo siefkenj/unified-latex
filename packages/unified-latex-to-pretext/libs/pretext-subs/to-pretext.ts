@@ -113,9 +113,16 @@ export function toPretextWithLoggerFactory(
                     // create a title tag containing the division macro's title arg
                     const title = getArgsContent(node)[0];
 
+                    if (!title) {
+                        logger(
+                            `Warning: No title was given, so an empty title tag was used.`,
+                            node
+                        );
+                    }
+
                     const titleTag = x("title", title?.flatMap(toPretext));
 
-                    if (divisionName && title) {
+                    if (divisionName) {
                         return x(divisionName, [
                             titleTag,
                             ...node.content.flatMap(toPretext),

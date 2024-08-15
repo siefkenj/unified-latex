@@ -61,7 +61,7 @@ export type PluginOptions = {
  *
  * Note: this plugin only wraps paragraphs in `p` tags if there are multiple paragraphs. Otherwise it omits the <p> tags.
  */
-export const unifiedLatexToXmlLike: Plugin<
+export const unifiedLatexToPretextLike: Plugin<
     PluginOptions[],
     Ast.Root,
     Hast.Root

@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { processLatexViaUnified } from "@unified-latex/unified-latex";
 import { VFile } from "vfile";
 import util from "util";
-import { unifiedLatexToXmlLike } from "../libs/unified-latex-plugin-to-xml-like";
+import { unifiedLatexToPretextLike } from "../libs/unified-latex-plugin-to-pretext-like";
 import { htmlLike } from "@unified-latex/unified-latex-util-html-like";
 import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 
@@ -18,7 +18,7 @@ describe("unified-latex-to-pretext:unified-latex-to-xml-like", () => {
     let file: VFile;
     const process = (value: string) =>
         processLatexViaUnified()
-            .use(unifiedLatexToXmlLike, { producePretextFragment: true })
+            .use(unifiedLatexToPretextLike, { producePretextFragment: true })
             .processSync({ value });
 
     it("wrap pars and streaming commands", () => {
@@ -46,7 +46,7 @@ describe("unified-latex-to-pretext:unified-latex-to-xml-like", () => {
     it("can accept custom replacers", () => {
         const process = (value: string) =>
             processLatexViaUnified({ macros: { xxx: { signature: "m m" } } })
-                .use(unifiedLatexToXmlLike, {
+                .use(unifiedLatexToPretextLike, {
                     macroReplacements: {
                         xxx: (node) =>
                             htmlLike({
