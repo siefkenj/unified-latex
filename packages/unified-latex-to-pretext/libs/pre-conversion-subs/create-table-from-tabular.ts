@@ -89,7 +89,7 @@ export function createTableFromTabular(env: Ast.Environment) {
 
             // add h-align attribute if not default
             if (alignment.alignment !== "left") {
-                colAttributes["halign"] = alignment.alignment; // supports all alignments but stuff like p{'width'} (closest is @colspan in cell)
+                colAttributes["halign"] = alignment.alignment;
             }
 
             // if there is a right border add it
