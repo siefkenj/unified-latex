@@ -13,12 +13,13 @@ import {
 } from "@unified-latex/unified-latex-util-split";
 import { visit } from "@unified-latex/unified-latex-util-visit";
 import { VFileMessage } from "vfile-message";
+import { makeWarningMessage } from "./utils";
 
 /**
  * All the divisions, where each item is {division macro, mapped environment}.
  * Note that this is ordered from the "largest" division to the "smallest" division.
  */
-const divisions: { division: string; mappedEnviron: string }[] = [
+export const divisions: { division: string; mappedEnviron: string }[] = [
     { division: "part", mappedEnviron: "_part" },
     { division: "chapter", mappedEnviron: "_chapter" },
     { division: "section", mappedEnviron: "_section" },
@@ -34,7 +35,7 @@ const isDivisionMacro = match.createMacroMatcher(
 );
 
 // check if an environment is a newly created environment
-const isMappedEnviron = match.createEnvironmentMatcher(
+export const isMappedEnviron = match.createEnvironmentMatcher(
     divisions.map((x) => x.mappedEnviron)
 );
 
@@ -54,28 +55,14 @@ export function breakOnBoundaries(ast: Ast.Ast): { messages: VFileMessage[] } {
                     return anyMacro(child) && isDivisionMacro(child);
                 })
             ) {
-                const message = new VFileMessage(
-                    "Warning: hoisted out of a group, which might break the LaTeX code."
+                // add a warning message
+                messagesLst.messages.push(
+                    makeWarningMessage(
+                        node,
+                        "Warning: hoisted out of a group, which might break the LaTeX code.",
+                        "break-on-boundaries"
+                    )
                 );
-
-                // add the position of the group if available
-                if (node.position) {
-                    message.line = node.position.start.line;
-                    message.column = node.position.start.column;
-                    message.position = {
-                        start: {
-                            line: node.position.start.line,
-                            column: node.position.start.column,
-                        },
-                        end: {
-                            line: node.position.end.line,
-                            column: node.position.end.column,
-                        },
-                    };
-                }
-
-                message.source = "LatexConversion";
-                messagesLst.messages.push(message);
 
                 return node.content;
             }

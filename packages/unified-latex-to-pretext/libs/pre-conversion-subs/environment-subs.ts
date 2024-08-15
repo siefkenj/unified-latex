@@ -1,19 +1,12 @@
-import cssesc from "cssesc";
-import {
-    parseTabularSpec,
-    TabularColumn,
-} from "@unified-latex/unified-latex-ctan/package/tabularx";
 import { htmlLike } from "@unified-latex/unified-latex-util-html-like";
 import * as Ast from "@unified-latex/unified-latex-types";
-import { parseAlignEnvironment } from "@unified-latex/unified-latex-util-align";
-import {
-    getArgsContent,
-    getNamedArgsContent,
-} from "@unified-latex/unified-latex-util-arguments";
+import { getNamedArgsContent } from "@unified-latex/unified-latex-util-arguments";
 import { match } from "@unified-latex/unified-latex-util-match";
-import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 import { wrapPars } from "../wrap-pars";
 import { VisitInfo } from "@unified-latex/unified-latex-util-visit";
+import { VFile } from "vfile";
+import { makeWarningMessage } from "./utils";
+import { createTableFromTabular } from "./create-table-from-tabular";
 
 const ITEM_ARG_NAMES_REG = ["label"] as const;
 const ITEM_ARG_NAMES_BEAMER = [null, "label", null] as const;
@@ -48,139 +41,92 @@ function getItemArgs(node: Ast.Macro): ItemArgs {
     return ret as ItemArgs;
 }
 
-function enumerateFactory(parentTag = "ol", className = "enumerate") {
+function enumerateFactory(parentTag = "ol") {
     return function enumerateToHtml(env: Ast.Environment) {
         // The body of an enumerate has already been processed and all relevant parts have
         // been attached to \item macros as arguments.
         const items = env.content.filter((node) => match.macro(node, "item"));
+
+        // Figure out if there any manually-specified item labels. If there are,
+        // we need to add a title tag
+        let isDescriptionList = false;
+
         const content = items.flatMap((node) => {
             if (!match.macro(node) || !node.args) {
                 return [];
             }
 
-            const attributes: Record<string, string | Record<string, string>> =
-                {};
-            // Figure out if there any manually-specified item labels. If there are,
-            // we need to specify a custom list-style-type.
             // We test the open mark to see if an optional argument was actually supplied.
             const namedArgs = getItemArgs(node);
+
+            // if there are custom markers, don't want the title tag to be wrapped in pars
+            // so we wrap the body first
+            namedArgs.body = wrapPars(namedArgs.body);
+
+            // check if a custom marker is used
             if (namedArgs.label != null) {
-                const formattedLabel = cssesc(printRaw(namedArgs.label || []));
-                attributes.style = {
-                    // Note the space after `formattedLabel`. That is on purpose!
-                    "list-style-type": formattedLabel
-                        ? `'${formattedLabel} '`
-                        : "none",
-                };
+                isDescriptionList = true;
+
+                // add title tag containing custom marker
+                namedArgs.body.unshift(
+                    htmlLike({
+                        tag: "title",
+                        content: namedArgs.label,
+                    })
+                );
             }
 
             const body = namedArgs.body;
+
             return htmlLike({
                 tag: "li",
-                content: wrapPars(body),
-                attributes,
+                content: body,
             });
         });
 
         return htmlLike({
-            tag: parentTag,
-            attributes: { className },
+            tag: isDescriptionList ? "dl" : parentTag,
             content,
         });
     };
 }
 
-function createCenteredElement(env: Ast.Environment) {
-    return htmlLike({
-        tag: "center",
-        attributes: { className: "center" },
-        content: env.content,
-    });
-}
+/**
+ * Remove the env environment by returning the content in env only.
+ */
+function removeEnv(env: Ast.Environment, info: VisitInfo, file?: VFile) {
+    // add warning
+    file?.message(
+        makeWarningMessage(
+            env,
+            `Warning: There is no equivalent tag for \"${env.env}\", so the ${env.env} environment was removed.`,
+            "environment-subs"
+        )
+    );
 
-function createTableFromTabular(env: Ast.Environment) {
-    const tabularBody = parseAlignEnvironment(env.content);
-    const args = getArgsContent(env);
-    let columnSpecs: TabularColumn[] = [];
-    try {
-        columnSpecs = parseTabularSpec(args[1] || []);
-    } catch (e) {}
-
-    const tableBody = tabularBody.map((row) => {
-        const content = row.cells.map((cell, i) => {
-            const columnSpec = columnSpecs[i];
-            const styles: Record<string, string> = {};
-            if (columnSpec) {
-                const { alignment } = columnSpec;
-                if (alignment.alignment === "center") {
-                    styles["text-align"] = "center";
-                }
-                if (alignment.alignment === "right") {
-                    styles["text-align"] = "right";
-                }
-                if (
-                    columnSpec.pre_dividers.some(
-                        (div) => div.type === "vert_divider"
-                    )
-                ) {
-                    styles["border-left"] = "1px solid";
-                }
-                if (
-                    columnSpec.post_dividers.some(
-                        (div) => div.type === "vert_divider"
-                    )
-                ) {
-                    styles["border-right"] = "1px solid";
-                }
-            }
-            return htmlLike(
-                Object.keys(styles).length > 0
-                    ? {
-                          tag: "td",
-                          content: cell,
-                          attributes: { style: styles },
-                      }
-                    : {
-                          tag: "td",
-                          content: cell,
-                      }
-            );
-        });
-        return htmlLike({ tag: "tr", content });
-    });
-
-    return htmlLike({
-        tag: "table",
-        content: [
-            htmlLike({
-                tag: "tbody",
-                content: tableBody,
-            }),
-        ],
-        attributes: { className: "tabular" },
-    });
+    return env.content;
 }
 
 /**
  * Rules for replacing a macro with an html-like macro
- * that will render has html when printed.
+ * that will render has pretext when printed.
  */
 export const environmentReplacements: Record<
     string,
     (
         node: Ast.Environment,
-        info: VisitInfo
-    ) => Ast.Macro | Ast.String | Ast.Environment
+        info: VisitInfo,
+        file?: VFile
+    ) => Ast.Macro | Ast.String | Ast.Environment | Ast.Node[]
 > = {
     enumerate: enumerateFactory("ol"),
-    itemize: enumerateFactory("ul", "itemize"),
-    center: createCenteredElement,
+    itemize: enumerateFactory("ul"),
+    center: removeEnv,
     tabular: createTableFromTabular,
     quote: (env) => {
         return htmlLike({
             tag: "blockquote",
             content: env.content,
-            attributes: { className: "environment quote" },
         });
     },
 };

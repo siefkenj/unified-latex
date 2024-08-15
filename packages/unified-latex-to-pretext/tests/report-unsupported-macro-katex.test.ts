@@ -18,7 +18,7 @@ describe("unified-latex-to-pretext:report-unsupported-macro-katex", () => {
         const parser = getParser();
         const ast = parser.parse(value);
 
-        expect(reportMacrosUnsupportedByKatex(ast)).toEqual(["fakemacro"]);
+        expect(reportMacrosUnsupportedByKatex(ast).messages.length).toEqual(1);
     });
 
     it("can report no unsupported macros in mathmode", () => {
@@ -27,7 +27,7 @@ describe("unified-latex-to-pretext:report-unsupported-macro-katex", () => {
         const parser = getParser();
         const ast = parser.parse(value);
 
-        expect(reportMacrosUnsupportedByKatex(ast)).toEqual([]);
+        expect(reportMacrosUnsupportedByKatex(ast).messages.length).toEqual(0);
     });
 
     it("doesn't report unsupported macros outside of math mode", () => {
@@ -36,7 +36,7 @@ describe("unified-latex-to-pretext:report-unsupported-macro-katex", () => {
         const parser = getParser();
         const ast = parser.parse(value);
 
-        expect(reportMacrosUnsupportedByKatex(ast)).toEqual([]);
+        expect(reportMacrosUnsupportedByKatex(ast).messages.length).toEqual(0);
     });
 
     it("reports unsupported macros in text mode with a math anscestor", () => {
@@ -45,7 +45,7 @@ describe("unified-latex-to-pretext:report-unsupported-macro-katex", () => {
         const parser = getParser();
         const ast = parser.parse(value);
 
-        expect(reportMacrosUnsupportedByKatex(ast)).toEqual(["unsupported"]);
+        expect(reportMacrosUnsupportedByKatex(ast).messages.length).toEqual(1);
     });
 
     it("can report unsupported macros in display mathmode", () => {
@@ -54,7 +54,7 @@ describe("unified-latex-to-pretext:report-unsupported-macro-katex", () => {
         const parser = getParser();
         const ast = parser.parse(value);
 
-        expect(reportMacrosUnsupportedByKatex(ast)).toEqual(["fake", "baz"]);
+        expect(reportMacrosUnsupportedByKatex(ast).messages.length).toEqual(2);
     });
 
     it("can report unsupported macros in equation environment", () => {
@@ -63,9 +63,6 @@ describe("unified-latex-to-pretext:report-unsupported-macro-katex", () => {
         const parser = getParser();
         const ast = parser.parse(value);
 
-        expect(reportMacrosUnsupportedByKatex(ast)).toEqual([
-            "unsupported",
-            "baz",
-        ]);
+        expect(reportMacrosUnsupportedByKatex(ast).messages.length).toEqual(2);
     });
 });
