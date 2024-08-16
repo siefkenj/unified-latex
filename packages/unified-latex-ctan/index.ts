@@ -1,3 +1,4 @@
+import * as amsart from "./package/amsart";
 import * as cleveref from "./package/cleveref";
 import * as exam from "./package/exam";
 import * as geometry from "./package/geometry";
@@ -20,6 +21,7 @@ import * as multicol from "./package/multicol";
  * the standard macros for LaTeX.
  */
 export const macroInfo = {
+    amsart: amsart.macros,
     cleveref: cleveref.macros,
     exam: exam.macros,
     geometry: geometry.macros,
@@ -43,6 +45,7 @@ export const macroInfo = {
  * the standard environments for LaTeX.
  */
 export const environmentInfo = {
+    amsart: amsart.environments,
     cleveref: cleveref.environments,
     exam: exam.environments,
     geometry: geometry.environments,

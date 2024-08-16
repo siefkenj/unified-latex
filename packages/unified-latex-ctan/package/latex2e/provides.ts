@@ -173,7 +173,7 @@ export const macros: MacroInfoRecord = {
         renderInfo: { breakAround: true, pgfkeysArgs: true },
     },
     discretionary: { signature: "m m m" },
-    hyphenation: { signature: "m m m" },
+    hyphenation: { signature: "m" },
     footnote: { signature: "o m", renderInfo: { inParMode: true } },
     footnotemark: { signature: "o" },
     footnotetext: { signature: "o m", renderInfo: { inParMode: true } },
@@ -194,18 +194,9 @@ export const macros: MacroInfoRecord = {
     maketitle: { renderInfo: { breakAround: true } },
     doublespacing: { renderInfo: { breakAround: true } },
     singlespacing: { renderInfo: { breakAround: true } },
-    author: {
-        signature: "m",
-        renderInfo: { breakAround: true, inParMode: true },
-    },
     date: { signature: "o m", renderInfo: { breakAround: true } },
     thanks: {
         signature: "m",
-        renderInfo: { breakAround: true, inParMode: true },
-    },
-    // amsart document class adds an optional argument
-    title: {
-        signature: "o m",
         renderInfo: { breakAround: true, inParMode: true },
     },
     pagenumbering: { signature: "m", renderInfo: { breakAround: true } },
