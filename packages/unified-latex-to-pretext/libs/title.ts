@@ -9,15 +9,15 @@ import { VFile } from "vfile";
  * This function collects titles, even without \maketitle.
  * It takes the last title before the ducument class and warn if there are multiple,
  */
-export function gatherTitle(ast: Ast.Ast, file: VFile): Ast.Node {
+export function gatherTitle(ast: Ast.Ast, file: VFile): Ast.Node[] {
     const ti: Ast.Node[] = [];
 
     visit(ast, (node) => {
         if (match.macro(node, "title") && node.args) {
             const titleContent = Object.fromEntries(
-                node.args.map((x) => [x.content])
+                node.args.map((x) => ["title",x.content])
             );
-            ti.push(titleContent);
+            ti.push(titleContent.title[0]);
         }
     });
     if (ti.length > 1) {
@@ -26,13 +26,13 @@ export function gatherTitle(ast: Ast.Ast, file: VFile): Ast.Node {
         );
         file.message(message, message.position, "latex-to-pretext:warning");
     }
-    return ti[0];
+    return ti;
 }
 
 /**
  * This function wraps around the title collected and returns a htmllike macro.
  */
-export function renderTitle(title: Ast.Node): Ast.Macro {
+export function renderTitle(title: Ast.Node[]): Ast.Macro {
     const renderedAuthorList = htmlLike({
         tag: "title",
         content: title,

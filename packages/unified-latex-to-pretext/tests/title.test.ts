@@ -33,7 +33,7 @@ describe("unified-latex-to-pretext:title", () => {
 
     it("collects title content", () => {
         sample = "\\title{Title}";
-        input = "     Title";
+        input = "       Title";
         expect(gatherTitle(parser.parse(sample), file)).toEqual(
             parser.parse(input).content
         );
