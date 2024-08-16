@@ -6,7 +6,9 @@ import { toXml } from "xast-util-to-xml";
 import { xmlCompilePlugin } from "../libs/convert-to-pretext";
 import { unified } from "unified";
 import { gatherTitle, renderTitle } from "../libs/title";
+import { VFile } from "vfile";
 import { toPretextWithLoggerFactory } from "../libs/pretext-subs/to-pretext";
+import { spawn } from "child_process";
 
 function normalizeHtml(str: string) {
     try {
@@ -26,16 +28,32 @@ console.log = (...args) => {
 describe("unified-latex-to-pretext:title", () => {
     let sample: string;
     let input: string;
+    let file: VFile;
     const parser = getParser();
 
     it("collects title content", () => {
-        sample =
-            "\\title{Title}";
-        expect(gatherTitle(parser.parse(sample))).toEqual([]);
+        sample = "\\title{Title}";
+        input = "     Title";
+        expect(gatherTitle(parser.parse(sample), file)).toEqual(
+            parser.parse(input).content
+        );
 
-        sample = 
-            "\\title{Title} \n \\maketitle";
-        input = "     Title"
-        expect(gatherTitle(parser.parse(sample))).toEqual(parser.parse(input).content);
+        sample = "\\title{Title1} \n \\title{Title2}";
+        input = "\n      Title2";
+        expect(gatherTitle(parser.parse(sample), file)).toEqual(
+            parser.parse(input).content
+        );
+    });
+
+    it("parses title content", () => {
+        sample = "\\title{Title}";
+        let rendered = renderTitle(gatherTitle(parser.parse(sample), file));
+        const toXast = toPretextWithLoggerFactory(file.message.bind(file));
+        const xxx = unified()
+            .use(xmlCompilePlugin)
+            .runSync({ type: "root", children: [toXast(rendered)].flat() });
+        expect(normalizeHtml(toXml(xxx))).toEqual(
+            normalizeHtml("<title>Title</title>")
+        );
     });
 });

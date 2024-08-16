@@ -2,8 +2,14 @@ import * as Ast from "@unified-latex/unified-latex-types";
 import { visit } from "@unified-latex/unified-latex-util-visit";
 import { match } from "@unified-latex/unified-latex-util-match";
 import { htmlLike } from "@unified-latex/unified-latex-util-html-like";
+import { VFileMessage } from "vfile-message";
+import { VFile } from "vfile";
 
-export function gatherTitle(ast: Ast.Ast): Ast.Node[] {
+/**
+ * This function collects titles, even without \maketitle.
+ * It takes the last title before the ducument class and warn if there are multiple,
+ */
+export function gatherTitle(ast: Ast.Ast, file: VFile): Ast.Node {
     const ti: Ast.Node[] = [];
 
     visit(ast, (node) => {
@@ -11,14 +17,22 @@ export function gatherTitle(ast: Ast.Ast): Ast.Node[] {
             const titleContent = Object.fromEntries(
                 node.args.map((x) => [x.content])
             );
-            return titleContent;
+            ti.push(titleContent);
         }
     });
-    return ti;
+    if (ti.length > 1) {
+        const message = new VFileMessage(
+            `There are multiple titles, the last title was displayed.`
+        );
+        file.message(message, message.position, "latex-to-pretext:warning");
+    }
+    return ti[0];
 }
 
-export function renderTitle(ast: Ast.Ast, title: Ast.Node): Ast.Macro {
-
+/**
+ * This function wraps around the title collected and returns a htmllike macro.
+ */
+export function renderTitle(title: Ast.Node): Ast.Macro {
     const renderedAuthorList = htmlLike({
         tag: "title",
         content: title,
