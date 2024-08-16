@@ -15,17 +15,19 @@ export function gatherTitle(ast: Ast.Ast, file: VFile): Ast.Node[] {
     visit(ast, (node) => {
         if (match.macro(node, "title") && node.args) {
             const titleContent = Object.fromEntries(
-                node.args.map((x) => ["title",x.content])
+                node.args.map((x) => ["title", x.content])
             );
             ti.push(titleContent.title[0]);
+            if ((ti.length = 2)) {
+                const message = createVFileMessage(node);
+                file.message(
+                    message,
+                    message.position,
+                    "latex-to-pretext:warning"
+                )
+            }
         }
     });
-    if (ti.length > 1) {
-        const message = new VFileMessage(
-            `There are multiple titles, the last title was displayed.`
-        );
-        file.message(message, message.position, "latex-to-pretext:warning");
-    }
     return ti;
 }
 
@@ -39,4 +41,29 @@ export function renderTitle(title: Ast.Node[]): Ast.Macro {
     });
 
     return renderedAuthorList;
+}
+
+function createVFileMessage(node: Ast.Macro): VFileMessage {
+    const message = new VFileMessage(
+        `There are multiple titles, the last title was displayed.`
+    );
+
+    // add the position of the macro if available
+    if (node.position) {
+        message.line = node.position.start.line;
+        message.column = node.position.start.column;
+        message.position = {
+            start: {
+                line: node.position.start.line,
+                column: node.position.start.column,
+            },
+            end: {
+                line: node.position.end.line,
+                column: node.position.end.column,
+            },
+        };
+    }
+
+    message.source = "latex-to-pretext:warning";
+    return message;
 }

@@ -8,7 +8,6 @@ import { unified } from "unified";
 import { gatherTitle, renderTitle } from "../libs/title";
 import { VFile } from "vfile";
 import { toPretextWithLoggerFactory } from "../libs/pretext-subs/to-pretext";
-import { spawn } from "child_process";
 
 function normalizeHtml(str: string) {
     try {
