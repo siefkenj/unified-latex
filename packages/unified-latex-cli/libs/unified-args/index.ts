@@ -12,7 +12,7 @@ import {
 } from "unified-engine";
 import { unifiedLatexToHast } from "@unified-latex/unified-latex-to-hast";
 import { unifiedLatexToMdast } from "@unified-latex/unified-latex-to-mdast";
-import { unifiedLatexToPretext } from "../../../unified-latex-to-pretext/libs/unified-latex-plugin-to-pretext";
+import { unifiedLatexToPretext } from "@unified-latex/unified-latex-to-pretext";
 import { options, Options } from "./options";
 import { availableLints } from "../lints";
 import { statsJsonPlugin, statsPlugin } from "../stats";
