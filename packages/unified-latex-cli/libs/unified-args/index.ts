@@ -12,6 +12,7 @@ import {
 } from "unified-engine";
 import { unifiedLatexToHast } from "@unified-latex/unified-latex-to-hast";
 import { unifiedLatexToMdast } from "@unified-latex/unified-latex-to-mdast";
+import { unifiedLatexToPretext } from "@unified-latex/unified-latex-to-pretext";
 import { options, Options } from "./options";
 import { availableLints } from "../lints";
 import { statsJsonPlugin, statsPlugin } from "../stats";
@@ -166,6 +167,11 @@ export function unifiedArgs(cliConfig: Options) {
     if (config.markdown) {
         config.plugins.push([unifiedLatexToMdast]);
         config.plugins.push([remarkStringify as any]);
+    }
+
+    if (config.pretext) {
+        config.plugins.push([unifiedLatexToPretext]);
+        config.plugins.push([prettyPrintHtmlPlugin]);
     }
 
     /**
