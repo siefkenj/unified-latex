@@ -43,16 +43,16 @@ option.
 #### options
 
 ```typescript
-{ macros: Ast.MacroInfoRecord; }
+{ macros: MacroInfoRecord; }
 ```
 
 ### Type
 
-`Plugin<{ macros: Ast.MacroInfoRecord; }[], Ast.Root, Ast.Root>`
+`Plugin<{ macros: MacroInfoRecord; }[], Ast.Root, Ast.Root>`
 
 ```typescript
 function unifiedLatexAttachMacroArguments(options: {
-  macros: Ast.MacroInfoRecord;
+  macros: MacroInfoRecord;
 }): (tree: Ast.Root) => void;
 ```
 

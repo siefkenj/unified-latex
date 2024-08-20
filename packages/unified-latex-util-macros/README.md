@@ -47,7 +47,7 @@ function createMacroExpander(
 
 ```typescript
 function createMatchers(): {
-  isHash: (node: Ast.Node) => boolean;
+  isHash: (node: Ast.Node) => node is Ast.String;
   isNumber: (node: Ast.Node) => boolean;
   splitNumber: (
     node: Ast.String

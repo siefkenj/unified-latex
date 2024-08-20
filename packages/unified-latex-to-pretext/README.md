@@ -81,34 +81,17 @@ Unified plugin to convert a `unified-latex` AST into a `xast` AST representation
 #### options
 
 ```typescript
-HtmlLikePluginOptions
+PluginOptions
 ```
 
 ### Type
 
-`Plugin<HtmlLikePluginOptions[], Ast.Root, Xast.Root>`
+`Plugin<PluginOptions[], Ast.Root, Xast.Root>`
 
 ```typescript
 function unifiedLatexToPretext(
-  options: HtmlLikePluginOptions
+  options: PluginOptions
 ): (tree: Ast.Root, file: VFile) => Xast.Root;
-```
-
-where
-
-```typescript
-type HtmlLikePluginOptions = {
-  /**
-   * Functions called to replace environments during processing. Key values should match environment names.
-   *  You probably want to use the function `htmlLike(...)` to return a node that gets converted to specific HTML.
-   */
-  environmentReplacements?: EnvironmentReplacements;
-  /**
-   * Functions called to replace macros during processing. Key values should match macro names.
-   * You probably want to use the function `htmlLike(...)` to return a node that gets converted to specific HTML.
-   */
-  macroReplacements?: MacroReplacements;
-};
 ```
 
 ## `unifiedLatexWrapPars`
@@ -196,23 +179,6 @@ function convertToPretext(
 | tree    | `Ast.Node \| Ast.Node[]` |
 | options | `PluginOptions`          |
 
-where
-
-```typescript
-type PluginOptions = {
-  /**
-   * Functions called to replace environments during processing. Key values should match environment names.
-   *  You probably want to use the function `htmlLike(...)` to return a node that gets converted to specific HTML.
-   */
-  environmentReplacements?: EnvironmentReplacements;
-  /**
-   * Functions called to replace macros during processing. Key values should match macro names.
-   * You probably want to use the function `htmlLike(...)` to return a node that gets converted to specific HTML.
-   */
-  macroReplacements?: MacroReplacements;
-};
-```
-
 ## `wrapPars(nodes, options)`
 
 Wrap paragraphs in `<p>...</p>` tags.
@@ -253,5 +219,11 @@ function wrapPars(
 ## `PluginOptions`
 
 ```typescript
-export type PluginOptions = HtmlLikePluginOptions & {};
+export type PluginOptions = HtmlLikePluginOptions & {
+    /**
+     * A boolean where if it's true then the output won't be wrapped in the <pretext><article> ... etc. tags.
+     * If it's false (default), a valid and complete PreTeXt document is returned.
+     */
+    producePretextFragment?: boolean;
+};
 ```
