@@ -158,6 +158,7 @@ export function options(flags: string[], configuration: Options) {
         ),
         html: config.html,
         markdown: config.markdown,
+        pretext: config.pretext,
     } as EngineOptions & {
         help: boolean;
         helpMessage: string;
@@ -172,6 +173,7 @@ export function options(flags: string[], configuration: Options) {
         macro: { name: string; signature: string }[];
         html: boolean;
         markdown: boolean;
+        pretext: boolean;
     };
 }
 

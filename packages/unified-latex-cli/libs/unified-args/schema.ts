@@ -192,6 +192,13 @@ export const schema: Option[] = [
         default: false,
     },
     {
+        long: "pretext",
+        description:
+            "Convert the output to PreTeXt. Note, you should expand/replace any macros not recognized by the converter",
+        type: "boolean",
+        default: false,
+    },
+    {
         long: "stdout",
         description: "[Don't] write the processed file's contents to stdout",
         type: "boolean",
