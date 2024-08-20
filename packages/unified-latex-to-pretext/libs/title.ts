@@ -18,7 +18,8 @@ export function gatherTitle(ast: Ast.Ast, file: VFile): Ast.Node[] {
                 node.args.map((x) => ["title", x.content])
             );
             ti.push(titleContent.title[0]);
-            if ((ti.length = 2)) {
+            /*
+            *if ((ti.length = 2)) {
                 const message = createVFileMessage(node);
                 file.message(
                     message,
@@ -26,9 +27,10 @@ export function gatherTitle(ast: Ast.Ast, file: VFile): Ast.Node[] {
                     "latex-to-pretext:warning"
                 )
             }
+            */
         }
     });
-    return ti;
+    return ti.slice(-1);
 }
 
 /**

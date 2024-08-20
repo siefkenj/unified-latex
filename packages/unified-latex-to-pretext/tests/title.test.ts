@@ -38,7 +38,7 @@ describe("unified-latex-to-pretext:title", () => {
         );
 
         sample = "\\title{Title1} \n \\title{Title2}";
-        input = "\n      Title2";
+        input = "               \n        Title2";
         expect(gatherTitle(parser.parse(sample), file)).toEqual(
             parser.parse(input).content
         );
