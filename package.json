@@ -28,7 +28,7 @@
         "trailingComma": "es5"
     },
     "devDependencies": {
-        "@types/node": "^20.12.12",
+        "@types/node": "^20.16.1",
         "@types/prettier": "^2.7.3",
         "@types/shelljs": "^0.8.15",
         "esbuild": "^0.21.2",
@@ -44,16 +44,16 @@
         "remark-gfm": "^3.0.1",
         "remark-parse": "^10.0.2",
         "remark-stringify": "^10.0.3",
-        "rimraf": "^5.0.7",
+        "rimraf": "^6.0.1",
         "shx": "^0.3.4",
-        "ts-morph": "^22.0.0",
-        "typedoc": "^0.25.13",
-        "typescript": "^5.4.5",
-        "vite": "^5.2.11",
-        "vite-plugin-dts": "^3.9.1",
-        "vite-plugin-static-copy": "^1.0.4",
-        "vitest": "^1.6.0",
-        "wireit": "^0.14.4"
+        "ts-morph": "^23.0.0",
+        "typedoc": "^0.26.6",
+        "typescript": "^5.5.4",
+        "vite": "^5.4.2",
+        "vite-plugin-dts": "^4.0.3",
+        "vite-plugin-static-copy": "^1.0.6",
+        "vitest": "^2.0.5",
+        "wireit": "^0.14.7"
     },
     "dependencies": {
         "@types/color": "^3.0.6",
@@ -75,7 +75,7 @@
         "unified-engine": "^10.1.0",
         "unified-lint-rule": "^2.1.1",
         "unist-util-position": "^4.0.4",
-        "vfile-reporter-json": "^3.2.0",
+        "vfile-reporter-json": "^3.3.0",
         "vfile-reporter-position": "^0.1.7",
         "vfile-reporter-pretty": "^6.1.1"
     },

@@ -35,16 +35,16 @@ Unified plugin to process environment content and attach arguments.
 #### options
 
 ```typescript
-{ environments: Ast.EnvInfoRecord; }
+{ environments: EnvInfoRecord; }
 ```
 
 ### Type
 
-`Plugin<{ environments: Ast.EnvInfoRecord; }[], Ast.Root, Ast.Root>`
+`Plugin<{ environments: EnvInfoRecord; }[], Ast.Root, Ast.Root>`
 
 ```typescript
 function unifiedLatexProcessEnvironments(options: {
-  environments: Ast.EnvInfoRecord;
+  environments: EnvInfoRecord;
 }): (tree: Ast.Root) => void;
 ```
 

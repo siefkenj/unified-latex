@@ -51,18 +51,18 @@ Parse a string to a LaTeX AST.
 #### options
 
 ```typescript
-{ mode?: "math" | "regular"; macros?: Ast.MacroInfoRecord; environments?: Ast.EnvInfoRecord; flags?: { atLetter?: boolean; expl3?: boolean; autodetectExpl3AndAtLetter?: boolean; }; }
+{ mode?: "math" | "regular"; macros?: MacroInfoRecord; environments?: EnvInfoRecord; flags?: { atLetter?: boolean; expl3?: boolean; autodetectExpl3AndAtLetter?: boolean; }; }
 ```
 
 ### Type
 
-`Plugin<{ mode?: "math" | "regular"; macros?: Ast.MacroInfoRecord; environments?: Ast.EnvInfoRecord; flags?: { atLetter?: boolean; expl3?: boolean; autodetectExpl3AndAtLetter?: boolean; }; }[], string, Ast.Root>`
+`Plugin<{ mode?: "math" | "regular"; macros?: MacroInfoRecord; environments?: EnvInfoRecord; flags?: { atLetter?: boolean; expl3?: boolean; autodetectExpl3AndAtLetter?: boolean; }; }[], string, Ast.Root>`
 
 ```typescript
 function unifiedLatexFromString(options: {
   mode?: "math" | "regular";
-  macros?: Ast.MacroInfoRecord;
-  environments?: Ast.EnvInfoRecord;
+  macros?: MacroInfoRecord;
+  environments?: EnvInfoRecord;
   flags?: {
     atLetter?: boolean;
     expl3?: boolean;
@@ -134,17 +134,17 @@ are reparsed (if needed) in math mode.
 #### options
 
 ```typescript
-{ environments: Ast.EnvInfoRecord; macros: Ast.MacroInfoRecord; }
+{ environments: EnvInfoRecord; macros: MacroInfoRecord; }
 ```
 
 ### Type
 
-`Plugin<{ environments: Ast.EnvInfoRecord; macros: Ast.MacroInfoRecord; }[], Ast.Root, Ast.Root>`
+`Plugin<{ environments: EnvInfoRecord; macros: MacroInfoRecord; }[], Ast.Root, Ast.Root>`
 
 ```typescript
 function unifiedLatexProcessMacrosAndEnvironmentsWithMathReparse(options: {
-  environments: Ast.EnvInfoRecord;
-  macros: Ast.MacroInfoRecord;
+  environments: EnvInfoRecord;
+  macros: MacroInfoRecord;
 }): (tree: Ast.Root) => void;
 ```
 

@@ -176,6 +176,10 @@ export type MacroInfo = {
          * @type {boolean}
          */
         tikzPathCommand?: boolean;
+        /**
+         * If `\sysdelims` is present, this contains the global information about the delimiters.
+         */
+        sysdelims?: (Ast.Node[] | null)[];
     };
     /**
      * The macro signature as an xparse argument specification string.

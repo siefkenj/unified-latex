@@ -30,15 +30,7 @@ import the `.js` file. To explicitly access the commonjs export, import the `.cj
 
 
 ```typescript
-function createMatchers(): {
-  isChar: (node: Ast.Node, char: string) => boolean;
-  isComma: (node: Ast.Node) => boolean;
-  isEquals: (node: Ast.Node) => boolean;
-  isWhitespace: (node: Ast.Node) => boolean;
-  isParbreak: (node: Ast.Node) => boolean;
-  isSameLineComment: (node: Ast.Node) => boolean;
-  isOwnLineComment: (node: Ast.Node) => boolean;
-};
+function createMatchers(): { isChar: (node: Ast.Node, char: string) => node is Ast.String; isComma: (node: Ast.Node) => node is Ast.String; isEquals: (node: Ast.Node) => node is Ast.String; isWhitespace: (node: Ast.Node) => node is Ast.Whitespace; isParbreak: (node: Ast.Node) => node is Ast.Parbreak; isSameLineComment: (node: Ast.Node) => boo...
 ```
 
 ## `parsePgfkeys(ast, options)`

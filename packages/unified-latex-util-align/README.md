@@ -35,7 +35,7 @@ function createMatchers(
 ): {
   isRowSep: Ast.TypeGuard<Ast.Macro & { content: string }>;
   isColSep: (node: Ast.Node) => boolean;
-  isWhitespace: (node: Ast.Node) => boolean;
+  isWhitespace: (node: Ast.Node) => node is Ast.Whitespace;
   isSameLineComment: (node: Ast.Node) => boolean;
   isOwnLineComment: (node: Ast.Node) => boolean;
 };

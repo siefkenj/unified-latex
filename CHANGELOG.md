@@ -1,5 +1,14 @@
 # unified-latex Changelog
 
+### v1.8.0
+
+-   Added initial PreTeXt conversion support
+-   Upgraded deps
+-   Added `amsart` macros
+-   Consume the whitespace after special character macros when expanding ligatures. For example `\o y` produces `øy` instead of `ø y`
+-   Fix signatures of `\hyphenation`
+
+
 ### v1.7.1
 
 -   Types fix for `@unified-latex/unified-latex-types`
