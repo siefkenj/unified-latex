@@ -1,11 +1,11 @@
 {
     "name": "@unified-latex/unified-latex-util-argspec",
-    "version": "1.7.1",
+    "version": "1.8.0",
     "description": "Tools parsing a LaTeX argument specification in the xparse format",
     "main": "dist/index.js",
     "type": "module",
     "dependencies": {
-        "@unified-latex/unified-latex-util-pegjs": "^1.7.1"
+        "@unified-latex/unified-latex-util-pegjs": "^1.8.0"
     },
     "files": [
         "dist/**/*.ts",

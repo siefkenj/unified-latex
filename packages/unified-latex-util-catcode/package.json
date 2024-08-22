@@ -1,13 +1,13 @@
 {
     "name": "@unified-latex/unified-latex-util-catcode",
-    "version": "1.7.1",
+    "version": "1.8.0",
     "description": "Tools for manipulating unified-latex ASTs",
     "main": "dist/index.js",
     "type": "module",
     "dependencies": {
-        "@unified-latex/unified-latex-types": "^1.7.1",
-        "@unified-latex/unified-latex-util-match": "^1.7.1",
-        "@unified-latex/unified-latex-util-visit": "^1.7.1"
+        "@unified-latex/unified-latex-types": "^1.8.0",
+        "@unified-latex/unified-latex-util-match": "^1.8.0",
+        "@unified-latex/unified-latex-util-visit": "^1.8.0"
     },
     "files": [
         "dist/**/*.ts",
