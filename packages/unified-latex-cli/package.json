@@ -12,6 +12,7 @@
         "@unified-latex/unified-latex-lint": "^1.7.1",
         "@unified-latex/unified-latex-to-hast": "^1.7.1",
         "@unified-latex/unified-latex-to-mdast": "^1.7.1",
+        "@unified-latex/unified-latex-to-pretext": "^1.7.1",
         "@unified-latex/unified-latex-types": "^1.7.1",
         "@unified-latex/unified-latex-util-arguments": "^1.7.1",
         "@unified-latex/unified-latex-util-macros": "^1.7.1",

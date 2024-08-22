@@ -7,7 +7,7 @@ import "../../test-common";
 import { exec as _exec } from "node:child_process";
 import * as path from "node:path";
 import spawn from "cross-spawn";
-import glob from "glob";
+import { glob } from "glob";
 
 /* eslint-env jest */
 

@@ -1,6 +1,6 @@
 import { LibraryOptions, defineConfig } from "vite";
 import dts from "vite-plugin-dts";
-import glob from "glob";
+import { glob } from "glob";
 import path from "node:path";
 import { isCjsPackage } from "../../scripts/esbuild-module-check.mjs";
 import { packageReadmeAndPackageJson } from "../../scripts/vite-plugins";

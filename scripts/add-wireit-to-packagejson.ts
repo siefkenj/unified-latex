@@ -1,5 +1,5 @@
 // Loop through all files in ./packages/* via a glob pattern and write to their package.json file
-import glob from "glob";
+import { glob } from "glob";
 import * as fs from "node:fs/promises";
 import path from "path";
 import { promisify } from "util";

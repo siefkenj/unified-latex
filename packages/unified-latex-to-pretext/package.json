@@ -20,9 +20,15 @@
         "@unified-latex/unified-latex-util-replace": "^1.7.1",
         "@unified-latex/unified-latex-util-trim": "^1.7.1",
         "@unified-latex/unified-latex-util-visit": "^1.7.1",
+        "@unified-latex/unified-latex-util-macros": "^1.7.1",
+        "@unified-latex/unified-latex-util-split": "^1.7.1",
+        "vfile-message": "^4.0.2",
+        "vfile": "^6.0.2",
         "cssesc": "^3.0.0",
+        "xast-util-to-xml": "^4.0.0",
         "xastscript": "^4.0.0",
-        "unified": "^10.1.2"
+        "unified": "^10.1.2",
+        "unified-lint-rule": "^3.0.0"
     },
     "devDependencies": {
         "@types/xast": "^2.0.4",

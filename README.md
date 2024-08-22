@@ -82,13 +82,13 @@ The `test:packages-install` runs `npm pack` on each `dist/` directory and then c
 `README.md` files for all workspaces are generated automatically by running
 
 ```sh
-npx esr scripts/build-docs.ts
+npx vite-node scripts/build-docs.ts
 ```
 
 `package.json` files can be checked for naming consistency by running
 
 ```sh
-npx esr scripts/package-consistency.ts
+npx vite-node scripts/package-consistency.ts
 ```
 
 ### Publishing
