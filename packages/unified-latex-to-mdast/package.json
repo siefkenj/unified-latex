@@ -1,13 +1,13 @@
 {
     "name": "@unified-latex/unified-latex-to-mdast",
-    "version": "1.8.0",
+    "version": "1.8.1",
     "description": "Convert a unified-latex AST to a MDAST AST (for Markdown conversion)",
     "main": "dist/index.js",
     "type": "module",
     "dependencies": {
         "@types/mdast": "^4.0.1",
-        "@unified-latex/unified-latex": "^1.8.0",
-        "@unified-latex/unified-latex-to-hast": "^1.8.0",
+        "@unified-latex/unified-latex": "^1.8.1",
+        "@unified-latex/unified-latex-to-hast": "^1.8.1",
         "@unified-latex/unified-latex-types": "^1.8.0",
         "hast": "^1.0.0",
         "hast-util-to-string": "^3.0.0",
