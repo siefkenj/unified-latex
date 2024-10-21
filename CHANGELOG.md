@@ -1,5 +1,8 @@
 # unified-latex Changelog
 
+### v1.8.1
+ - Changed Peggy to implement a caching parser to prevent large slowdown on some files.
+
 ### v1.8.0
 
 -   Added initial PreTeXt conversion support
