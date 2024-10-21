@@ -67,6 +67,8 @@ function pegjsLoader(options = {}): PluginOption {
             };
             if (filename.match(/latex\.(pegjs|peggy)$/)) {
                 defaultOptions.allowedStartRules = ["document", "math"];
+                // Avoid slow parsing as in https://github.com/siefkenj/unified-latex/issues/47
+                defaultOptions.cache = true;
             }
             if (filename.match(/tikz\.(pegjs|peggy)$/)) {
                 defaultOptions.allowedStartRules = [
