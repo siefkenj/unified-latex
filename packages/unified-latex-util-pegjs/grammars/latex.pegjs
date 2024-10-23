@@ -69,7 +69,7 @@ math_token "math token"
     = special_macro
     / macro
     / full_comment
-    / whitespace* x:group whitespace* { return x; }
+    / whitespace* x:math_group whitespace* { return x; }
     / whitespace* x:alignment_tab whitespace* { return x; }
     / macro_parameter
     / whitespace* superscript whitespace* {
