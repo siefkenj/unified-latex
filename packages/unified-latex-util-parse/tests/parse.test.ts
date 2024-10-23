@@ -5,6 +5,8 @@ import { trimRenderInfo } from "@unified-latex/unified-latex-util-render-info";
 import * as Ast from "@unified-latex/unified-latex-types/index";
 import { trim } from "@unified-latex/unified-latex-util-trim";
 import { processLatexToAstViaUnified } from "@unified-latex/unified-latex";
+import { PluginOptions as ParserPluginOptions } from "../libs/plugin-from-string";
+import * as AstBuilder from "@unified-latex/unified-latex-builder";
 
 /* eslint-env jest */
 
@@ -18,9 +20,9 @@ describe("unified-latex-util-parse", () => {
     let value: string | undefined;
     let file: VFile | undefined;
 
-    function strToNodes(str: string) {
+    function strToNodes(str: string, options?: ParserPluginOptions) {
         value = str;
-        file = processLatexToAstViaUnified().processSync({ value });
+        file = processLatexToAstViaUnified(options).processSync({ value });
         const root = trimRenderInfo(file.result as any) as Ast.Root;
         return root.content;
     }
@@ -72,5 +74,45 @@ describe("unified-latex-util-parse", () => {
         ast = strToNodes("{\n\n \n\n}");
         trim(ast);
         expect(ast).toEqual(targetAst);
+    });
+
+    it("nested math subscripts", () => {
+        let ast = strToNodes("{1_2}", {
+            mode: 'math',
+        });
+        expect(ast).toEqual([{
+            type: "group",
+            content: [
+                AstBuilder.s("1"),
+                AstBuilder.m("_", AstBuilder.args([
+                    AstBuilder.arg([AstBuilder.s("2")], {
+                        openMark: '{',
+                        closeMark: '}',
+                    }),
+                ]), { escapeToken: "" }),
+            ],
+        }]);
+    });
+
+    it("nested math single char arguments", () => {
+        const ast = strToNodes("{\\frac12}", {
+            mode: "math",
+        });
+        expect(ast).toEqual([{
+            type: "group",
+            content: [
+                AstBuilder.m('frac', AstBuilder.args([
+                    AstBuilder.arg([AstBuilder.s("1")], {
+                        openMark: '{',
+                        closeMark: '}',
+                    }),
+                    AstBuilder.arg([AstBuilder.s("2")], {
+                        openMark: '{',
+                        closeMark: '}',
+                    }),
+                ])),
+            ],
+        }]);
+
     });
 });
