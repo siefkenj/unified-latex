@@ -357,4 +357,12 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
             normalizeHtml(`<yyy>a</yyy><yyy><yyy-child>b</yyy-child>c</yyy>`)
         );
     });
+    it("converts theorem-like environments that have statements in ptx", () => {
+        html = process(`\\begin{theorem}\na\n\nb\n\\end{theorem}`);
+        expect(normalizeHtml(html)).toEqual(
+            normalizeHtml(
+                `<theorem><statement><p>a</p><p>b</p></statement></theorem>`
+            )
+        );
+    })
 });

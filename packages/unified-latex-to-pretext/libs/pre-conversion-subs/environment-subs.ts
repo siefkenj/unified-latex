@@ -91,6 +91,29 @@ function enumerateFactory(parentTag = "ol") {
     };
 }
 
+function envFactory(
+    tag: string,
+    statement: boolean = false,
+    warningMessage: string = "",
+    attributes?: Record<string, string>
+) {
+    return (env: Ast.Environment) => {
+        let content;
+        if (statement) {
+            content = htmlLike({
+                tag: "statement",
+                content: wrapPars(env.content)
+            });
+        } else {
+            content = wrapPars(env.content);
+        }
+        return htmlLike({
+            tag: tag,
+            content: content,
+        });
+    };
+}
+
 /**
  * Remove the env environment by returning the content in env only.
  */
@@ -119,9 +142,11 @@ export const environmentReplacements: Record<
         file?: VFile
     ) => Ast.Macro | Ast.String | Ast.Environment | Ast.Node[]
 > = {
+    // TODO: add additional envs like theorem, etc.
     enumerate: enumerateFactory("ol"),
     itemize: enumerateFactory("ul"),
     center: removeEnv,
+    theorem: envFactory("theorem", true),
     tabular: createTableFromTabular,
     quote: (env) => {
         return htmlLike({
