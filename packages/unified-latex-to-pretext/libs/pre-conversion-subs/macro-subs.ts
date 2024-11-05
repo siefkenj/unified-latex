@@ -32,7 +32,7 @@ function factory(
                 `Warning: There is no equivalent tag for \"${macro.content}\", \"${tag}\" was used as a replacement.`,
                 "macro-subs"
             );
-            file.message(message, message.position, message.source);
+            file.message(message, message.place, message.source);
         }
 
         // Assume the meaningful argument is the last argument. This

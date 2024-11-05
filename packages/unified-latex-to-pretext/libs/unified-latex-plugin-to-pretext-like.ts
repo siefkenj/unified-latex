@@ -112,7 +112,7 @@ export const unifiedLatexToPretextLike: Plugin<
         for (const warningMessage of warningMessages.messages) {
             file.message(
                 warningMessage,
-                warningMessage.position,
+                warningMessage.place,
                 "unified-latex-to-pretext:break-on-boundaries"
             );
         }
@@ -163,7 +163,7 @@ export const unifiedLatexToPretextLike: Plugin<
         for (const warningMessage of unsupportedByKatex.messages) {
             file.message(
                 warningMessage,
-                warningMessage.position,
+                warningMessage.place,
                 "unified-latex-to-pretext:report-unsupported-macro-katex"
             );
         }
@@ -194,7 +194,6 @@ export const unifiedLatexToPretextLike: Plugin<
 
         // Make sure we are actually mutating the current tree.
         originalTree.content = tree.content;
-        console.log(file.messages);
     };
 };
 

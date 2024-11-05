@@ -33,7 +33,7 @@ export function gatherAuthorInfo(ast: Ast.Ast, file: VFile): AuthorInfo[] {
             const message = createVFileMessage(node);
             file.message(
                 message,
-                message.position,
+                message.place,
                 "latex-to-pretext:warning"
             )
         }
@@ -71,7 +71,7 @@ function createVFileMessage(node: Ast.Macro): VFileMessage {
     if (node.position) {
         message.line = node.position.start.line;
         message.column = node.position.start.column;
-        message.position = {
+        message.place = {
             start: {
                 line: node.position.start.line,
                 column: node.position.start.column,

@@ -36,7 +36,7 @@ export function emptyStringWithWarningFactory(
             );
             file.message(
                 message,
-                message.position,
+                message.place,
                 `unified-latex-to-pretext:macro-subs`
             );
         }
