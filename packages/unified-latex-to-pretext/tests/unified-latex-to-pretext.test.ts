@@ -364,5 +364,13 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
                 `<theorem><statement><p>a</p><p>b</p></statement></theorem>`
             )
         );
-    })
+    });
+    it("converts def to definition block", () => {
+        html = process(`\\begin{dfn}\na\n\nb\n\\end{dfn}`);
+        expect(normalizeHtml(html)).toEqual(
+            normalizeHtml(
+                `<definition><statement><p>a</p><p>b</p></statement></definition>`
+            )
+        );
+    });
 });

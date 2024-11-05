@@ -96,13 +96,19 @@ function envFactory(
     statement: boolean = false,
     warningMessage: string = "",
     attributes?: Record<string, string>
-) {
-    return (env: Ast.Environment) => {
+): (env: Ast.Environment, info: VisitInfo, file?: VFile) => Ast.Macro {
+    return (env, info, file) => {
+        // add a warning message to the file if needed
+        if (warningMessage && file) {
+            const message = makeWarningMessage(env, warningMessage, "env-subs");
+            file.message(message, message.place, message.source);
+        }
+
         let content;
         if (statement) {
             content = htmlLike({
                 tag: "statement",
-                content: wrapPars(env.content)
+                content: wrapPars(env.content),
             });
         } else {
             content = wrapPars(env.content);
@@ -146,7 +152,6 @@ export const environmentReplacements: Record<
     enumerate: enumerateFactory("ol"),
     itemize: enumerateFactory("ul"),
     center: removeEnv,
-    theorem: envFactory("theorem", true),
     tabular: createTableFromTabular,
     quote: (env) => {
         return htmlLike({
@@ -154,4 +159,85 @@ export const environmentReplacements: Record<
             content: env.content,
         });
     },
+    ...genEnvironmentReplacements(),
 };
+
+function genEnvironmentReplacements() {
+    let reps: Record<
+        string,
+        (
+            node: Ast.Environment,
+            info: VisitInfo,
+            file?: VFile
+        ) => Ast.Macro | Ast.String | Ast.Environment | Ast.Node[]
+    > = {};
+    // First, a long list of pretext environments and their aliases.
+    const envAliases: Record<
+        string,
+        { statement: boolean; aliases: string[] }
+    > = {
+        abstract: { statement: false, aliases: ["abs", "abstr"] },
+        acknowledgement: { statement: false, aliases: ["ack"] },
+        algorithm: { statement: true, aliases: ["algo", "alg"] },
+        assumption: { statement: true, aliases: ["assu", "ass"] },
+        axiom: { statement: true, aliases: ["axm"] },
+        claim: { statement: true, aliases: ["cla"] },
+        conjecture: { statement: true, aliases: ["con", "conj", "conjec"] },
+        construction: { statement: false, aliases: [] },
+        convention: { statement: false, aliases: ["conv"] },
+        corollary: {
+            statement: true,
+            aliases: ["cor", "corr", "coro", "corol", "corss"],
+        },
+        definition: {
+            statement: true,
+            aliases: ["def", "defn", "dfn", "defi", "defin", "de"],
+        },
+        example: {
+            statement: true,
+            aliases: ["exam", "exa", "eg", "exmp", "expl", "exm"],
+        },
+        exercise: { statement: true, aliases: ["exer", "exers"] },
+        exploration: { statement: false, aliases: [] },
+        fact: { statement: true, aliases: [] },
+        heuristic: { statement: true, aliases: [] },
+        hypothesis: { statement: true, aliases: ["hyp"] },
+        identity: { statement: true, aliases: ["idnty"] },
+        insight: { statement: false, aliases: [] },
+        investigation: { statement: false, aliases: [] },
+        lemma: { statement: true, aliases: ["lem", "lma", "lemm", "lm"] },
+        notation: {
+            statement: false,
+            aliases: ["no", "nota", "ntn", "nt", "notn", "notat"],
+        },
+        note: { statement: false, aliases: ["notes"] },
+        observation: { statement: false, aliases: ["obs"] },
+        principle: { statement: true, aliases: [] },
+        problem: { statement: true, aliases: ["prob", "prb"] },
+        project: { statement: false, aliases: [] },
+        proof: { statement: false, aliases: ["pf", "prf", "demo"] },
+        proposition: {
+            statement: true,
+            aliases: ["prop", "pro", "prp", "props"],
+        },
+        question: { statement: true, aliases: ["qu", "ques", "quest", "qsn"] },
+        remark: {
+            statement: false,
+            aliases: ["rem", "rmk", "rema", "bem", "subrem"],
+        },
+        task: { statement: true, aliases: [] },
+        theorem: {
+            statement: true,
+            aliases: ["thm", "theo", "theor", "thmss", "thrm"],
+        },
+        warning: { statement: false, aliases: ["warn", "wrn"] },
+    };
+    // For each environment PreTeXt has, we create entries for `environmentReplacements` using all reasonable aliases
+    for (const [env, obj] of Object.entries(envAliases)) {
+        reps[env] = envFactory(env, obj.statement);
+        for (const alias of obj.aliases) {
+            reps[alias] = envFactory(env, obj.statement);
+        }
+    }
+    return reps;
+}
