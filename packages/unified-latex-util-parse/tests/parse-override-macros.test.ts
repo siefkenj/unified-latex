@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { VFile } from "unified-lint-rule/lib";
+import { VFile } from "vfile";
 import util from "util";
 import { trimRenderInfo } from "@unified-latex/unified-latex-util-render-info";
 import * as Ast from "@unified-latex/unified-latex-types";

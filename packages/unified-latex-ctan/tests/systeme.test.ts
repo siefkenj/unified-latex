@@ -1,4 +1,4 @@
-import { VFile } from "unified-lint-rule/lib";
+import { VFile } from "vfile";
 import util from "util";
 import { convertToHtml } from "../../unified-latex-to-hast";
 import { parse, parseMath } from "../../unified-latex-util-parse";

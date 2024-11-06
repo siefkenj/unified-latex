@@ -1,4 +1,4 @@
-import { VFile } from "unified-lint-rule/lib";
+import { VFile } from "vfile";
 import util from "util";
 import { parseTexGlue } from "..";
 

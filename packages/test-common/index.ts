@@ -1,7 +1,7 @@
 import { expect } from "vitest";
 import { processLatexToAstViaUnified } from "@unified-latex/unified-latex";
 import { parseMinimal } from "@unified-latex/unified-latex-util-parse";
-import { VFile } from "unified-lint-rule/lib";
+import { VFile } from "vfile";
 import * as Ast from "../unified-latex-types";
 import { trimRenderInfo as _trimRenderInfo } from "../unified-latex-util-render-info";
 

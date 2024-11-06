@@ -1,5 +1,5 @@
 import { processLatexViaUnified } from "@unified-latex/unified-latex";
-import { VFile } from "unified-lint-rule/lib";
+import { VFile } from "vfile";
 import util from "util";
 import { unifiedLatexLintArgumentColorCommands } from "../rules/unified-latex-lint-argument-color-commands";
 
