@@ -1,12 +1,13 @@
 import { htmlLike } from "@unified-latex/unified-latex-util-html-like";
 import * as Ast from "@unified-latex/unified-latex-types";
-import { getNamedArgsContent } from "@unified-latex/unified-latex-util-arguments";
+import { getArgsContent, getNamedArgsContent } from "@unified-latex/unified-latex-util-arguments";
 import { match } from "@unified-latex/unified-latex-util-match";
 import { wrapPars } from "../wrap-pars";
 import { VisitInfo } from "@unified-latex/unified-latex-util-visit";
 import { VFile } from "vfile";
 import { makeWarningMessage } from "./utils";
 import { createTableFromTabular } from "./create-table-from-tabular";
+import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 
 const ITEM_ARG_NAMES_REG = ["label"] as const;
 const ITEM_ARG_NAMES_BEAMER = [null, "label", null] as const;
@@ -104,15 +105,27 @@ function envFactory(
             file.message(message, message.place, message.source);
         }
 
-        let content;
+        // Wrap content of the environment in paragraph tags
+        let content = wrapPars(env.content);
+
+        // Add a statement around the contents of the environment if requested.
         if (statement) {
-            content = htmlLike({
+            content = [htmlLike({
                 tag: "statement",
-                content: wrapPars(env.content),
-            });
-        } else {
-            content = wrapPars(env.content);
+                content: content,
+            })];
         }
+
+        // Add a title tag if the environment has a title
+        const args = getArgsContent(env);
+        if (args[0]) {
+            content.unshift(htmlLike({
+                    tag: "title",
+                    content: args[0] || []
+                }));
+        }
+
+        // Put it all together
         return htmlLike({
             tag: tag,
             content: content,
