@@ -1,6 +1,6 @@
 import * as Ast from "@unified-latex/unified-latex-types";
 import { VisitInfo } from "@unified-latex/unified-latex-util-visit";
-import { VFile } from "unified-lint-rule/lib";
+import { VFile } from "vfile";
 import { s } from "@unified-latex/unified-latex-builder";
 import { VFileMessage } from "vfile-message";
 

@@ -1,4 +1,4 @@
-import { VFile } from "unified-lint-rule/lib";
+import { VFile } from "vfile";
 import util from "util";
 import { processLatexViaUnified } from "@unified-latex/unified-latex";
 import { unifiedLatexLintConsistentInlineMath } from "../rules/unified-latex-lint-consistent-inline-math";

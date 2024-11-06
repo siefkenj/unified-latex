@@ -3,7 +3,7 @@ import * as Ast from "@unified-latex/unified-latex-types";
 import { getArgsContent } from "@unified-latex/unified-latex-util-arguments";
 import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 import { VisitInfo } from "@unified-latex/unified-latex-util-visit";
-import { VFile } from "unified-lint-rule/lib";
+import { VFile } from "vfile";
 import { makeWarningMessage, emptyStringWithWarningFactory } from "./utils";
 
 /**
