@@ -384,9 +384,7 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
     it("Gives an environment without statement a title", () => {
         html = process(`\\begin{remark}[My remark]\na\n\\end{remark}`);
         expect(normalizeHtml(html)).toEqual(
-            normalizeHtml(
-                `<remark><title>My remark</title><p>a</p></remark>`
-            )
+            normalizeHtml(`<remark><title>My remark</title><p>a</p></remark>`)
         );
     });
 });

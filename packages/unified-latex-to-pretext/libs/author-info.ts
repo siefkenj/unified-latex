@@ -31,11 +31,7 @@ export function gatherAuthorInfo(ast: Ast.Ast, file: VFile): AuthorInfo[] {
             authorList.push(authorEmail);
         } else if (match.macro(node, "affil")) {
             const message = createVFileMessage(node);
-            file.message(
-                message,
-                message.place,
-                "latex-to-pretext:warning"
-            )
+            file.message(message, message.place, "latex-to-pretext:warning");
         }
     });
     return authorList;

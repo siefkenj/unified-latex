@@ -1,6 +1,9 @@
 import { htmlLike } from "@unified-latex/unified-latex-util-html-like";
 import * as Ast from "@unified-latex/unified-latex-types";
-import { getArgsContent, getNamedArgsContent } from "@unified-latex/unified-latex-util-arguments";
+import {
+    getArgsContent,
+    getNamedArgsContent,
+} from "@unified-latex/unified-latex-util-arguments";
 import { match } from "@unified-latex/unified-latex-util-match";
 import { wrapPars } from "../wrap-pars";
 import { VisitInfo } from "@unified-latex/unified-latex-util-visit";
@@ -113,19 +116,23 @@ function envFactory(
 
         // Add a statement around the contents of the environment if requested.
         if (requiresStatementTag) {
-            content = [htmlLike({
-                tag: "statement",
-                content: content,
-            })];
+            content = [
+                htmlLike({
+                    tag: "statement",
+                    content: content,
+                }),
+            ];
         }
 
         // Add a title tag if the environment has a title
         const args = getArgsContent(env);
         if (args[0]) {
-            content.unshift(htmlLike({
+            content.unshift(
+                htmlLike({
                     tag: "title",
-                    content: args[0] || []
-                }));
+                    content: args[0] || [],
+                })
+            );
         }
 
         // Put it all together
@@ -181,11 +188,7 @@ export const environmentReplacements: Record<
 function genEnvironmentReplacements() {
     let reps: Record<
         string,
-        (
-            node: Ast.Environment,
-            info: VisitInfo,
-            file?: VFile
-        ) => Ast.Node
+        (node: Ast.Environment, info: VisitInfo, file?: VFile) => Ast.Node
     > = {};
     // First, a long list of pretext environments and their aliases.
     const envAliases: Record<
@@ -198,7 +201,10 @@ function genEnvironmentReplacements() {
         assumption: { requiresStatment: true, aliases: ["assu", "ass"] },
         axiom: { requiresStatment: true, aliases: ["axm"] },
         claim: { requiresStatment: true, aliases: ["cla"] },
-        conjecture: { requiresStatment: true, aliases: ["con", "conj", "conjec"] },
+        conjecture: {
+            requiresStatment: true,
+            aliases: ["con", "conj", "conjec"],
+        },
         construction: { requiresStatment: false, aliases: [] },
         convention: { requiresStatment: false, aliases: ["conv"] },
         corollary: {
@@ -221,7 +227,10 @@ function genEnvironmentReplacements() {
         identity: { requiresStatment: true, aliases: ["idnty"] },
         insight: { requiresStatment: false, aliases: [] },
         investigation: { requiresStatment: false, aliases: [] },
-        lemma: { requiresStatment: true, aliases: ["lem", "lma", "lemm", "lm"] },
+        lemma: {
+            requiresStatment: true,
+            aliases: ["lem", "lma", "lemm", "lm"],
+        },
         notation: {
             requiresStatment: false,
             aliases: ["no", "nota", "ntn", "nt", "notn", "notat"],
@@ -236,7 +245,10 @@ function genEnvironmentReplacements() {
             requiresStatment: true,
             aliases: ["prop", "pro", "prp", "props"],
         },
-        question: { requiresStatment: true, aliases: ["qu", "ques", "quest", "qsn"] },
+        question: {
+            requiresStatment: true,
+            aliases: ["qu", "ques", "quest", "qsn"],
+        },
         remark: {
             requiresStatment: false,
             aliases: ["rem", "rmk", "rema", "bem", "subrem"],
@@ -249,10 +261,14 @@ function genEnvironmentReplacements() {
         warning: { requiresStatment: false, aliases: ["warn", "wrn"] },
     };
     // For each environment PreTeXt has, we create entries for `environmentReplacements` using all reasonable aliases
-    const exapandedEnvAliases = Object.entries(envAliases).flatMap(([env, spec]) => [
-        [env, envFactory(env, spec.requiresStatment)],
-        ...spec.aliases.map(name => [name, envFactory(env, spec.requiresStatment)]),
-    ]);
+    const exapandedEnvAliases = Object.entries(envAliases).flatMap(
+        ([env, spec]) => [
+            [env, envFactory(env, spec.requiresStatment)],
+            ...spec.aliases.map((name) => [
+                name,
+                envFactory(env, spec.requiresStatment),
+            ]),
+        ]
+    );
     return Object.fromEntries(exapandedEnvAliases);
-
 }
