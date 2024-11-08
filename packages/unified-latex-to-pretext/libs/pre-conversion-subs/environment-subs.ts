@@ -1,6 +1,9 @@
 import { htmlLike } from "@unified-latex/unified-latex-util-html-like";
 import * as Ast from "@unified-latex/unified-latex-types";
-import { getNamedArgsContent } from "@unified-latex/unified-latex-util-arguments";
+import {
+    getArgsContent,
+    getNamedArgsContent,
+} from "@unified-latex/unified-latex-util-arguments";
 import { match } from "@unified-latex/unified-latex-util-match";
 import { wrapPars } from "../wrap-pars";
 import { VisitInfo } from "@unified-latex/unified-latex-util-visit";
@@ -92,6 +95,55 @@ function enumerateFactory(parentTag = "ol") {
 }
 
 /**
+ * Factory function that builds html-like macros wrapping the contents of an environment.
+ * Statement tags are added around the contents of the environment if requested.
+ */
+function envFactory(
+    tag: string,
+    requiresStatementTag: boolean = false,
+    warningMessage: string = "",
+    attributes?: Record<string, string>
+): (env: Ast.Environment, info: VisitInfo, file?: VFile) => Ast.Macro {
+    return (env, info, file) => {
+        // add a warning message to the file if needed
+        if (warningMessage && file) {
+            const message = makeWarningMessage(env, warningMessage, "env-subs");
+            file.message(message, message.place, message.source);
+        }
+
+        // Wrap content of the environment in paragraph tags
+        let content = wrapPars(env.content);
+
+        // Add a statement around the contents of the environment if requested.
+        if (requiresStatementTag) {
+            content = [
+                htmlLike({
+                    tag: "statement",
+                    content: content,
+                }),
+            ];
+        }
+
+        // Add a title tag if the environment has a title
+        const args = getArgsContent(env);
+        if (args[0]) {
+            content.unshift(
+                htmlLike({
+                    tag: "title",
+                    content: args[0] || [],
+                })
+            );
+        }
+
+        // Put it all together
+        return htmlLike({
+            tag: tag,
+            content: content,
+        });
+    };
+}
+
+/**
  * Remove the env environment by returning the content in env only.
  */
 function removeEnv(env: Ast.Environment, info: VisitInfo, file?: VFile) {
@@ -117,8 +169,9 @@ export const environmentReplacements: Record<
         node: Ast.Environment,
         info: VisitInfo,
         file?: VFile
-    ) => Ast.Macro | Ast.String | Ast.Environment | Ast.Node[]
+    ) => Ast.Node | Ast.Node[]
 > = {
+    // TODO: add additional envs like theorem, etc.
     enumerate: enumerateFactory("ol"),
     itemize: enumerateFactory("ul"),
     center: removeEnv,
@@ -129,4 +182,93 @@ export const environmentReplacements: Record<
             content: env.content,
         });
     },
+    ...genEnvironmentReplacements(),
 };
+
+function genEnvironmentReplacements() {
+    let reps: Record<
+        string,
+        (node: Ast.Environment, info: VisitInfo, file?: VFile) => Ast.Node
+    > = {};
+    // First, a long list of pretext environments and their aliases.
+    const envAliases: Record<
+        string,
+        { requiresStatment: boolean; aliases: string[] }
+    > = {
+        abstract: { requiresStatment: false, aliases: ["abs", "abstr"] },
+        acknowledgement: { requiresStatment: false, aliases: ["ack"] },
+        algorithm: { requiresStatment: true, aliases: ["algo", "alg"] },
+        assumption: { requiresStatment: true, aliases: ["assu", "ass"] },
+        axiom: { requiresStatment: true, aliases: ["axm"] },
+        claim: { requiresStatment: true, aliases: ["cla"] },
+        conjecture: {
+            requiresStatment: true,
+            aliases: ["con", "conj", "conjec"],
+        },
+        construction: { requiresStatment: false, aliases: [] },
+        convention: { requiresStatment: false, aliases: ["conv"] },
+        corollary: {
+            requiresStatment: true,
+            aliases: ["cor", "corr", "coro", "corol", "corss"],
+        },
+        definition: {
+            requiresStatment: true,
+            aliases: ["def", "defn", "dfn", "defi", "defin", "de"],
+        },
+        example: {
+            requiresStatment: true,
+            aliases: ["exam", "exa", "eg", "exmp", "expl", "exm"],
+        },
+        exercise: { requiresStatment: true, aliases: ["exer", "exers"] },
+        exploration: { requiresStatment: false, aliases: [] },
+        fact: { requiresStatment: true, aliases: [] },
+        heuristic: { requiresStatment: true, aliases: [] },
+        hypothesis: { requiresStatment: true, aliases: ["hyp"] },
+        identity: { requiresStatment: true, aliases: ["idnty"] },
+        insight: { requiresStatment: false, aliases: [] },
+        investigation: { requiresStatment: false, aliases: [] },
+        lemma: {
+            requiresStatment: true,
+            aliases: ["lem", "lma", "lemm", "lm"],
+        },
+        notation: {
+            requiresStatment: false,
+            aliases: ["no", "nota", "ntn", "nt", "notn", "notat"],
+        },
+        note: { requiresStatment: false, aliases: ["notes"] },
+        observation: { requiresStatment: false, aliases: ["obs"] },
+        principle: { requiresStatment: true, aliases: [] },
+        problem: { requiresStatment: true, aliases: ["prob", "prb"] },
+        project: { requiresStatment: false, aliases: [] },
+        proof: { requiresStatment: false, aliases: ["pf", "prf", "demo"] },
+        proposition: {
+            requiresStatment: true,
+            aliases: ["prop", "pro", "prp", "props"],
+        },
+        question: {
+            requiresStatment: true,
+            aliases: ["qu", "ques", "quest", "qsn"],
+        },
+        remark: {
+            requiresStatment: false,
+            aliases: ["rem", "rmk", "rema", "bem", "subrem"],
+        },
+        task: { requiresStatment: true, aliases: [] },
+        theorem: {
+            requiresStatment: true,
+            aliases: ["thm", "theo", "theor", "thmss", "thrm"],
+        },
+        warning: { requiresStatment: false, aliases: ["warn", "wrn"] },
+    };
+    // For each environment PreTeXt has, we create entries for `environmentReplacements` using all reasonable aliases
+    const exapandedEnvAliases = Object.entries(envAliases).flatMap(
+        ([env, spec]) => [
+            [env, envFactory(env, spec.requiresStatment)],
+            ...spec.aliases.map((name) => [
+                name,
+                envFactory(env, spec.requiresStatment),
+            ]),
+        ]
+    );
+    return Object.fromEntries(exapandedEnvAliases);
+}

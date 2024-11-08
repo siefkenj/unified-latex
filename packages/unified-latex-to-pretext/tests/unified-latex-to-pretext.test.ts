@@ -357,4 +357,34 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
             normalizeHtml(`<yyy>a</yyy><yyy><yyy-child>b</yyy-child>c</yyy>`)
         );
     });
+    it("converts theorem-like environments that have statements in ptx", () => {
+        html = process(`\\begin{lemma}\na\n\nb\n\\end{lemma}`);
+        expect(normalizeHtml(html)).toEqual(
+            normalizeHtml(
+                `<lemma><statement><p>a</p><p>b</p></statement></lemma>`
+            )
+        );
+    });
+    it("converts dfn to definition block", () => {
+        html = process(`\\begin{dfn}\na\n\\end{dfn}`);
+        expect(normalizeHtml(html)).toEqual(
+            normalizeHtml(
+                `<definition><statement><p>a</p></statement></definition>`
+            )
+        );
+    });
+    it("Gives a theorem a title", () => {
+        html = process(`\\begin{theorem}[My Theorem]\na\n\nb\n\\end{theorem}`);
+        expect(normalizeHtml(html)).toEqual(
+            normalizeHtml(
+                `<theorem><title>My Theorem</title><statement><p>a</p><p>b</p></statement></theorem>`
+            )
+        );
+    });
+    it("Gives an environment without statement a title", () => {
+        html = process(`\\begin{remark}[My remark]\na\n\\end{remark}`);
+        expect(normalizeHtml(html)).toEqual(
+            normalizeHtml(`<remark><title>My remark</title><p>a</p></remark>`)
+        );
+    });
 });

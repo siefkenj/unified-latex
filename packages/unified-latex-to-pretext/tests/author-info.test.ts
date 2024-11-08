@@ -91,7 +91,9 @@ describe("unified-latex-to-pretext:author-info", () => {
             .use(xmlCompilePlugin)
             .runSync({ type: "root", children: [toXast(rendered)].flat() });
         expect(normalizeHtml(toXml(xxx1))).toEqual(
-            normalizeHtml("<author><institution>Affiliation</institution></author>")
+            normalizeHtml(
+                "<author><institution>Affiliation</institution></author>"
+            )
         );
 
         sample =
