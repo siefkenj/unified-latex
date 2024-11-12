@@ -27,16 +27,6 @@ describe("unified-latex-util-parse", () => {
         return root.content;
     }
 
-    function textToStringNodes(text: string) {
-        return Array.from(text).map((s) => {
-            if (/\s/.test(s)) {
-                return AstBuilder.SP;
-            } else {
-                return AstBuilder.s(s);
-            }
-        });
-    }
-
     it("trims whitespace/parbreaks in math environments", () => {
         // Display math
         let targetAst = strToNodes("\\[\\]");
@@ -103,57 +93,37 @@ describe("unified-latex-util-parse", () => {
             ],
         }]);
 
-        ast = strToNodes("$x_{y_{\\text{hello there $p_q_r$}}}$");
+        ast = strToNodes("$O_O\\text{T_T$U_U$}$");
         expect(ast).toEqual([{
             type: "inlinemath",
-            content:[
-                AstBuilder.s('x'),
+            content: [
+                AstBuilder.s("O"),
                 AstBuilder.m("_", AstBuilder.args([
-                    AstBuilder.arg([
-                        AstBuilder.s("y"),
-                        AstBuilder.m("_", AstBuilder.args([
-                            AstBuilder.arg([
-                                AstBuilder.m("text", AstBuilder.args([
-                                    AstBuilder.arg([
-                                        ...textToStringNodes("hello there "),
-                                        {
-                                            type: "inlinemath",
-                                            content: [
-                                                AstBuilder.s("p"),
-                                                AstBuilder.m("_", AstBuilder.args([
-                                                    AstBuilder.arg([
-                                                      AstBuilder.s("q"),
-                                                    ], {
-                                                        openMark: '{',
-                                                        closeMark: '}',
-                                                    }),
-                                                ]), { escapeToken: "" }),
-                                                AstBuilder.m("_", AstBuilder.args([
-                                                    AstBuilder.arg([
-                                                        AstBuilder.s("r"),
-                                                    ], {
-                                                        openMark: '{',
-                                                        closeMark: '}',
-                                                    }),
-                                                ]), { escapeToken: "" }),
-                                            ]
-                                        },
-                                    ], {
-                                        openMark: '{',
-                                        closeMark: '}',
-                                    })
-                                ])),
-                            ], {
-                                openMark: '{',
-                                closeMark: '}',
-                            })
-                        ]), { escapeToken: "" }),
-                    ], {
-                        openMark: '{',
-                        closeMark: '}',
-                    })
+                    AstBuilder.s("O"),
                 ]), { escapeToken: "" }),
-            ]
+                AstBuilder.m("text", AstBuilder.args([
+                    AstBuilder.arg([
+                        AstBuilder.s("T_T"),
+                        {
+                            type: "inlinemath",
+                            content: [
+                              AstBuilder.s("U"),
+                              AstBuilder.m("_", AstBuilder.args([
+                                AstBuilder.arg([
+                                  AstBuilder.s("U"),
+                                ], {
+                                    openMark: "{",
+                                    closeMark: "}",
+                                }),
+                              ]), { escapeToken: "" }),
+                            ],
+                        },
+                    ], {
+                        openMark: "{",
+                        closeMark: "}",
+                    }),
+                ])),
+            ],
         }]);
 
     });

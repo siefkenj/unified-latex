@@ -67,6 +67,7 @@ parbreak "parbreak"
 
 math_token "math token"
     = special_macro
+    / whitespace* x:text_macro whitespace* y:group whitespace* { return [x, y].flatMap((x) => x); }
     / macro
     / full_comment
     / whitespace* x:math_group whitespace* { return x; }
@@ -290,6 +291,11 @@ macro "macro"
             return createNode("macro", { content: m });
         }
 
+text_macro "text macro"
+    = m:(escape n:"text" { return n; }) {
+        return createNode("macro", { content: m });
+    }
+
 group "group"
     = begin_group x:(!end_group c:token { return c; })* end_group {
             return createNode("group", { content: x.flatMap((x) => x) });
@@ -345,7 +351,7 @@ math_environment "math environment"
             });
         }
 
-// group that assumes you're in math mode.  If you use "\text{}" this isn't a good idea....
+// group that assumes you're in math mode.
 math_group "math group"
     = begin_group x:(!end_group c:math_token { return c; })* end_group {
             return createNode("group", { content: x.flatMap((x) => x) });
