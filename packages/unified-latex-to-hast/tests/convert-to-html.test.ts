@@ -96,7 +96,7 @@ describe("unified-latex-to-hast:convert-to-html", () => {
 
         ast = convert(`\\includegraphics{myfile.pdf}`);
         expect(normalizeHtml(ast)).toEqual(
-            normalizeHtml(`<img src="myfile.png" />`)
+            normalizeHtml(`<img src="myfile.png">`)
         );
     });
 

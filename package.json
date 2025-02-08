@@ -28,6 +28,7 @@
         "trailingComma": "es5"
     },
     "devDependencies": {
+        "@prettier/plugin-xml": "^3.4.1",
         "@types/node": "^22.13.1",
         "@types/shelljs": "^0.8.15",
         "esbuild": "^0.25.0",

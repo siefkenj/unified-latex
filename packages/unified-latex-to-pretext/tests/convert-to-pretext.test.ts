@@ -15,7 +15,7 @@ import { getArgsContent } from "@unified-latex/unified-latex-util-arguments";
 
 function normalizeHtml(str: string) {
     try {
-        return Prettier.format(str, { parser: "html" });
+        return Prettier.format(str, { parser: "xml", plugins: ["@prettier/plugin-xml"] });
     } catch {
         console.warn("Could not format HTML string", str);
         return str;
