@@ -1,19 +1,19 @@
 {
     "name": "@unified-latex/unified-latex-prettier",
-    "version": "1.8.1",
+    "version": "1.8.2",
     "description": "Prettier plugin for processing LaTeX code via unified-latex",
     "main": "dist/index.js",
     "type": "module",
     "dependencies": {
-        "@unified-latex/unified-latex-ctan": "^1.8.1",
+        "@unified-latex/unified-latex-ctan": "^1.8.2",
         "@unified-latex/unified-latex-types": "^1.8.0",
         "@unified-latex/unified-latex-util-align": "^1.8.1",
         "@unified-latex/unified-latex-util-match": "^1.8.0",
-        "@unified-latex/unified-latex-util-parse": "^1.8.1",
+        "@unified-latex/unified-latex-util-parse": "^1.8.2",
         "@unified-latex/unified-latex-util-pgfkeys": "^1.8.1",
         "@unified-latex/unified-latex-util-print-raw": "^1.8.0",
-        "@unified-latex/unified-latex-util-trim": "^1.8.0",
-        "@unified-latex/unified-latex-util-visit": "^1.8.0",
+        "@unified-latex/unified-latex-util-trim": "^1.8.2",
+        "@unified-latex/unified-latex-util-visit": "^1.8.2",
         "prettier": "^3.0.3"
     },
     "files": [
