@@ -17,6 +17,7 @@
         "@unified-latex/unified-latex-lint": "file:../dist/unified-latex-lint.tgz",
         "@unified-latex/unified-latex-prettier": "file:../dist/unified-latex-prettier.tgz",
         "@unified-latex/unified-latex-to-hast": "file:../dist/unified-latex-to-hast.tgz",
+        "@unified-latex/unified-latex-to-pretext": "file:../dist/unified-latex-to-pretext.tgz",
         "@unified-latex/unified-latex-to-mdast": "file:../dist/unified-latex-to-mdast.tgz",
         "@unified-latex/unified-latex-types": "file:../dist/unified-latex-types.tgz",
         "@unified-latex/unified-latex-util-align": "file:../dist/unified-latex-util-align.tgz",
