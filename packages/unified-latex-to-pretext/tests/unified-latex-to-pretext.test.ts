@@ -10,7 +10,7 @@ import { xmlCompilePlugin } from "../libs/convert-to-pretext";
 
 function normalizeHtml(str: string) {
     try {
-        return Prettier.format(str, { parser: "html" });
+        return Prettier.format(str, { parser: "html", plugins: ["@prettier/plugin-xml"] });
     } catch {
         console.warn("Could not format HTML string", str);
         return str;

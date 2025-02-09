@@ -1,6 +1,6 @@
 {
     "name": "@unified-latex/unified-latex-util-visit",
-    "version": "1.8.0",
+    "version": "1.8.2",
     "description": "Functions for traversing a unified-latex AST",
     "main": "dist/index.js",
     "type": "module",
