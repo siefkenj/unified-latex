@@ -132,7 +132,7 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
             await normalizeHtml(
                 `<dl>
                     <li><title>x)</title><p>a</p></li>
-                    <li><title></title><p>b</p></li>
+                    <li><title/><p>b</p></li>
                 </dl>`
             )
         );
@@ -161,7 +161,7 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
             await normalizeHtml(
                 `<dl>
                     <li><title>x)</title><p>a</p></li>
-                    <li><title></title><p>b</p></li>
+                    <li><title/><p>b</p></li>
                 </dl>`
             )
         );
@@ -181,7 +181,7 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
         html = process(`\\begin{tabular}{|r||l|}a & b\\\\c & d\\end{tabular}`);
         expect(await normalizeHtml(html)).toEqual(
             await normalizeHtml(
-                `<tabular left="minor"><col halign="right" right="minor"></col><col right="minor"></col>` +
+                `<tabular left="minor"><col halign="right" right="minor"/><col right="minor"/>` +
                     `<row><cell>a</cell><cell>b</cell></row><row><cell>c</cell><cell>d</cell></row></tabular>`
             )
         );
@@ -310,7 +310,7 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
 
         ast = process(`\\xxx{a}{b}`);
         expect(await normalizeHtml(ast)).toEqual(
-            await normalizeHtml(`<xxx arg0="a" arg1="b"></xxx>`)
+            await normalizeHtml(`<xxx arg0="a" arg1="b"/>`)
         );
 
         ast = process(`\\begin{yyy}a\\end{yyy}`);
