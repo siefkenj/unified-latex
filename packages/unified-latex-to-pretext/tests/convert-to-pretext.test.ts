@@ -32,7 +32,7 @@ console.log = (...args) => {
 describe("unified-latex-to-pretext:convert-to-pretext", () => {
     let html: string;
 
-    it("custom replacers work", () => {
+    it("custom replacers work", async () => {
         const process = (value: string) =>
             getParser({
                 macros: { xxx: { signature: "m m" } },
@@ -66,12 +66,12 @@ describe("unified-latex-to-pretext:convert-to-pretext", () => {
         let ast;
 
         ast = process(`\\xxx{a}{b}`);
-        expect(normalizeHtml(convert(ast))).toEqual(
-            normalizeHtml(`<xxx arg0="a" arg1="b"></xxx>`)
+        expect(await normalizeHtml(convert(ast))).toEqual(
+            await normalizeHtml(`<xxx arg0="a" arg1="b"></xxx>`)
         );
     });
 
-    it("full unified pipeline with custom processing", () => {
+    it("full unified pipeline with custom processing", async () => {
         const convert = (value: string) =>
             unified()
                 .use(unifiedLatexFromString)
@@ -96,8 +96,8 @@ describe("unified-latex-to-pretext:convert-to-pretext", () => {
         let ast: string;
 
         ast = convert(`\\includegraphics{myfile.pdf}`);
-        expect(normalizeHtml(ast)).toEqual(
-            normalizeHtml(`<img src="myfile.png"></img>`)
+        expect(await normalizeHtml(ast)).toEqual(
+            await normalizeHtml(`<img src="myfile.png"></img>`)
         );
     });
 });
