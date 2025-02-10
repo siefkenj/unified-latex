@@ -128,6 +128,47 @@ export const macroReplacements: Record<
             content: args[1] || [],
         });
     },
+    ref: (node) => {
+        const args = getArgsContent(node);
+        const ref = printRaw(args[1] || "");
+        return htmlLike({
+            tag: "xref",
+            attributes: {
+                ref: ref || "",
+                text: "global",
+            },
+        });
+    },
+    cref: (node) => {
+        const args = getArgsContent(node);
+        const ref = printRaw(args[1] || "");
+        return htmlLike({
+            tag: "xref",
+            attributes: {
+                ref: ref || "",
+            },
+        });
+    },
+    Cref: (node) => {
+        const args = getArgsContent(node);
+        const ref = printRaw(args[1] || "");
+        return htmlLike({
+            tag: "xref",
+            attributes: {
+                ref: ref || "",
+            },
+        });
+    },
+    cite: (node) => {
+        const args = getArgsContent(node);
+        const ref = printRaw(args[1] || "");
+        return htmlLike({
+            tag: "xref",
+            attributes: {
+                ref: ref || "",
+            },
+        });
+    },
     "\\": emptyStringWithWarningFactory(
         `Warning: There is no equivalent tag for \"\\\", an empty Ast.String was used as a replacement.`
     ),
@@ -150,6 +191,19 @@ export const macroReplacements: Record<
     noindent: emptyStringWithWarningFactory(
         `Warning: There is no equivalent tag for \"noindent\", an empty Ast.String was used as a replacement.`
     ),
+    latex: (node) => {
+        return htmlLike({tag: "latex"})
+    },
+    latexe: (node) => {
+        return htmlLike({tag: "latex"})
+    },
+    today: (node) => {
+        return htmlLike({tag: "today"})
+    },
+    tex: (node) => {
+        return htmlLike({tag: "tex"})
+    },
+    //tex: factory("tex"),
     includegraphics: (node) => {
         const args = getArgsContent(node);
         const source = printRaw(args[args.length - 1] || []);
