@@ -6,13 +6,13 @@ import {
     PluginOptions,
 } from "./unified-latex-plugin-to-pretext";
 import { Plugin } from "unified";
-import { Root } from "xast";
+import { Nodes, Root } from "xast";
 
 /**
  * Unified plugin to convert a `XAST` AST to a string.
  */
 export const xmlCompilePlugin: Plugin<void[], Root, string> = function () {
-    this.Compiler = toXml;
+    this.Compiler = (tree: Nodes | Nodes[]) => toXml(tree, { closeEmptyElements: true });
 };
 
 const _processor = processLatexViaUnified()
