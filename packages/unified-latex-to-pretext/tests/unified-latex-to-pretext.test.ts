@@ -387,4 +387,31 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
            await normalizeHtml(`<remark><title>My remark</title><p>a</p></remark>`)
         );
     });
+    it("Replaces \\ref with a xref", async () => {
+        html = process(`Exercise \\ref{foo} is important`);
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(`Exercise <xref ref="foo" text="global"/> is important`)
+        );
+    });
+    it("Replaces \\cref and \\Cref with a bare xref", async () => {
+        html = process(`As we saw in \\cref{foo}, we can do this.`);
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(`As we saw in <xref ref="foo"/>, we can do this.`)
+        );
+
+        html = process(`As we saw in \\Cref{foo}, we can do this.`);
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(`As we saw in <xref ref="foo" />, we can do this.`)
+        );
+    });
+    it("Replaces \\cite with a xref", async () => {
+        html = process(`See \\cite{foo} for more`);
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(`See <xref ref="foo" /> for more`)
+        );
+    });
+    it("Replaces \\latex with <latex/> etc.", async () => {
+        html = process(`We can write in \\latex or \\tex and do so \\today.`);
+        expect(await normalizeHtml(html)).toEqual(await normalizeHtml(`We can write in <latex/> or <tex/> and do so <today/>.`));
+    })
 });
