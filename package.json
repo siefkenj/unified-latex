@@ -16,7 +16,7 @@
         "package": "npm run package -ws",
         "publish": "npm run publish -ws",
         "test": "vitest ./packages",
-        "test:ci": "vitest ./packages --maxWorkers=1",
+        "test:ci": "vitest --run ./packages --maxWorkers=1",
         "test:packages-esm": "cd test/esm && npm install && npm run test",
         "test:packages-cjs": "cd test/cjs && npm install && npm run test",
         "test:packages-install": "cd test && npx vite-node make-packages.ts",
