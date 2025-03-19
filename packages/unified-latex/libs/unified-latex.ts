@@ -28,6 +28,8 @@ export const processLatexViaUnified = (
  * Use `unified()` to a string to an `Ast.Ast` and then return it. This function
  * will not print/pretty-print the `Ast.Ast` back to a string.
  */
-export const processLatexToAstViaUnified = () => {
-    return unified().use(unifiedLatexFromString).use(unifiedLatexAstComplier);
+export const processLatexToAstViaUnified = (
+    options?: ParserPluginOptions
+) => {
+    return unified().use(unifiedLatexFromString, options).use(unifiedLatexAstComplier);
 };
