@@ -69,6 +69,7 @@ export function toHastWithLoggerFactory(
                     printRaw(node.content)
                 );
             case "verb":
+                return h('code', { className: node.env }, printRaw(node.content));
             case "verbatim":
                 return h("pre", { className: node.env }, node.content);
             case "whitespace":
