@@ -60,6 +60,8 @@ export const macroReplacements: Record<
     textsl: factory("span", { className: "textsl" }),
     textit: factory("i", { className: "textit" }),
     textbf: factory("b", { className: "textbf" }),
+    textsuperscript: factory('sup'),
+    textsubscript: factory('sub'),
     underline: factory("u", { className: "underline" }),
     mbox: factory("span", { className: "mbox" }),
     phantom: factory("span", { className: "phantom" }),
