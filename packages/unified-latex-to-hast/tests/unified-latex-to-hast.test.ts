@@ -183,17 +183,19 @@ describe("unified-latex-to-hast:unified-latex-to-hast", () => {
         expect(normalizeHtml(html)).toEqual(
             normalizeHtml(
                 `<table class="tabular">
-                <tbody>
+                  <thead>
                     <tr>
-                        <td>a</td>
-                        <td>b</td>
+                        <th align="left">a</th>
+                        <th align="left">b</th>
                     </tr>
+                  </thead>
+                  <tbody>
                     <tr>
-                        <td>c</td>
-                        <td>d</td>
+                        <td align="left">c</td>
+                        <td align="left">d</td>
                     </tr>
-                </tbody>
-            </table>`
+                  </tbody>
+                </table>`
             )
         );
     });
