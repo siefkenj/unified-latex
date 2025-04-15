@@ -99,66 +99,92 @@ function createCenteredElement(env: Ast.Environment) {
 }
 
 function createTableFromTabular(env: Ast.Environment) {
-    const tabularBody = parseAlignEnvironment(env.content);
     const args = getArgsContent(env);
+
     let columnSpecs: TabularColumn[] = [];
     try {
         columnSpecs = parseTabularSpec(args[1] || []);
     } catch (e) {}
 
-    const tableBody = tabularBody.map((row) => {
-        const content = row.cells.map((cell, i) => {
-            const columnSpec = columnSpecs[i];
-            const styles: Record<string, string> = {};
-            if (columnSpec) {
-                const { alignment } = columnSpec;
-                if (alignment.alignment === "center") {
-                    styles["text-align"] = "center";
-                }
-                if (alignment.alignment === "right") {
-                    styles["text-align"] = "right";
-                }
-                if (
-                    columnSpec.pre_dividers.some(
-                        (div) => div.type === "vert_divider"
-                    )
-                ) {
-                    styles["border-left"] = "1px solid";
-                }
-                if (
-                    columnSpec.post_dividers.some(
-                        (div) => div.type === "vert_divider"
-                    )
-                ) {
-                    styles["border-right"] = "1px solid";
-                }
-            }
-            return htmlLike(
-                Object.keys(styles).length > 0
-                    ? {
-                          tag: "td",
-                          content: cell,
-                          attributes: { style: styles },
-                      }
-                    : {
-                          tag: "td",
-                          content: cell,
-                      }
-            );
-        });
-        return htmlLike({ tag: "tr", content });
-    });
+    const [tableHead, ...tableBody] = parseAlignEnvironment(env.content);
 
     return htmlLike({
         tag: "table",
         content: [
             htmlLike({
+                tag: "thead",
+                content: [
+                    htmlLike({
+                        tag: "tr",
+                        content: tableHead.cells.map((cell, i) => {
+                            return createTableCell(cell, "th", columnSpecs[i]);
+                        }),
+                    }),
+                ],
+            }),
+            htmlLike({
                 tag: "tbody",
-                content: tableBody,
+                content: tableBody.map((row) => {
+                    return htmlLike({
+                        tag: "tr",
+                        content: row.cells.map((cell, i) => {
+                            return createTableCell(cell, "td", columnSpecs[i]);
+                        }),
+                    });
+                }),
             }),
         ],
         attributes: { className: "tabular" },
     });
+}
+
+function createTableCell(
+    content: Ast.Node[],
+    tag: "td" | "th",
+    spec?: TabularColumn
+) {
+    const result: {
+        tag: string;
+        content?: Ast.Node | Ast.Node[];
+        attributes: {
+            align?: string;
+            style?: Record<string, string>;
+        };
+    } = {
+        tag,
+        content,
+        attributes: {},
+    };
+
+    if (spec) {
+        const style: Record<string, string> = {};
+        let align;
+
+        const { alignment } = spec.alignment;
+        if (alignment === "left") {
+            align = "left";
+        }
+        if (alignment === "center") {
+            align = "center";
+        }
+        if (alignment === "right") {
+            align = "right";
+        }
+        result.attributes.align = align;
+
+        if (spec.pre_dividers.some((div) => div.type === "vert_divider")) {
+            style["border-left"] = "1px solid";
+        }
+        if (spec.post_dividers.some((div) => div.type === "vert_divider")) {
+            style["border-right"] = "1px solid";
+        }
+
+        if (Object.keys(style).length) {
+            result.attributes.style = style;
+        }
+    }
+
+    return htmlLike(result);
 }
 
 /**
