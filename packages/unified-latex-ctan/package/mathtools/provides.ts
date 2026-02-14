@@ -110,6 +110,9 @@ export const macros: MacroInfoRecord = {
         signature: "s m m",
         renderInfo: { breakAround: true },
     },
+    eqref: {
+        signature: "m",
+    }
 };
 
 export const environments: EnvInfoRecord = {

@@ -139,6 +139,16 @@ export const macroReplacements: Record<
             },
         });
     },
+    eqref: (node) => {
+        const args = getArgsContent(node);
+        const ref = printRaw(args[0] || "");
+        return htmlLike({
+            tag: "xref",
+            attributes: {
+                ref: ref || "",
+            },
+        });
+    },
     cref: (node) => {
         const args = getArgsContent(node);
         const ref = printRaw(args[1] || "");

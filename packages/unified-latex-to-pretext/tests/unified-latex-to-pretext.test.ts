@@ -414,6 +414,14 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
             )
         );
     });
+    it("Replaces \\eqref with a xref", async () => {
+        html = process(`Exercise \\eqref{foo} is important`);
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `Exercise <xref ref="foo"/> is important`
+            )
+        );
+    });
     it("Replaces \\cref and \\Cref with a bare xref", async () => {
         html = process(`As we saw in \\cref{foo}, we can do this.`);
         expect(await normalizeHtml(html)).toEqual(
