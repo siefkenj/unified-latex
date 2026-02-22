@@ -179,7 +179,7 @@ export const macros: MacroInfoRecord = {
     footnotetext: { signature: "o m", renderInfo: { inParMode: true } },
     caption: {
         signature: "o m",
-        renderInfo: { inParMode: true, breakAround: true },
+        renderInfo: { inParMode: true, breakAround: true, namedArguments: ["short", "captionText"], },
     },
     // Math Commands
     sqrt: { signature: "o m", renderInfo: { inMathMode: true } },
