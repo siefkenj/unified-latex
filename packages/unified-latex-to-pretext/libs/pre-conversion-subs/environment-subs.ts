@@ -98,12 +98,24 @@ function enumerateFactory(parentTag = "ol") {
  * Factory function that builds html-like macros wrapping the contents of an environment.
  * Statement tags are added around the contents of the environment if requested.
  */
+interface EnvFactoryOptions {
+    requiresStatementTag?: boolean;
+    wrapContentInPars?: boolean;
+    extractTitleFromArgs?: boolean;
+    warningMessage?: string;
+}
+
 function envFactory(
     tag: string,
-    requiresStatementTag: boolean = false,
-    warningMessage: string = "",
-    attributes?: Record<string, string>
+    options: EnvFactoryOptions = {}
 ): (env: Ast.Environment, info: VisitInfo, file?: VFile) => Ast.Macro {
+    const {
+        requiresStatementTag = false,
+        wrapContentInPars = true,
+        extractTitleFromArgs = true,
+        warningMessage = "",
+    } = options;
+
     return (env, info, file) => {
         // add a warning message to the file if needed
         if (warningMessage && file) {
@@ -112,7 +124,7 @@ function envFactory(
         }
 
         // Wrap content of the environment in paragraph tags
-        let content = wrapPars(env.content);
+        let content = wrapContentInPars ? wrapPars(env.content) : env.content;
 
         // Add a statement around the contents of the environment if requested.
         if (requiresStatementTag) {
@@ -125,20 +137,27 @@ function envFactory(
         }
 
         // Add a title tag if the environment has a title
-        const args = getArgsContent(env);
-        if (args[0]) {
-            content.unshift(
-                htmlLike({
-                    tag: "title",
-                    content: args[0] || [],
-                })
-            );
+        if (extractTitleFromArgs) {
+            const args = getArgsContent(env);
+            if (args[0]) {
+                content.unshift(
+                    htmlLike({
+                        tag: "title",
+                        content: args[0] || [],
+                    })
+                );
+            }
         }
-
+        // attach any additional attributes from renderInfo to the tag
+        const attributes: Record<string, any> = {};
+        if (env._renderInfo?.additionalAttributes) {
+            Object.assign(attributes, env._renderInfo.additionalAttributes);
+        }
         // Put it all together
         return htmlLike({
             tag: tag,
             content: content,
+            attributes,
         });
     };
 }
@@ -175,30 +194,18 @@ export const environmentReplacements: Record<
     enumerate: enumerateFactory("ol"),
     itemize: enumerateFactory("ul"),
     tabular: createTableFromTabular,
-    center: (env) => {
-        return htmlLike({
-            tag: "blockquote",
-            content: wrapPars(env.content),
-        });
-    },
-    quote: (env) => {
-        return htmlLike({
-            tag: "blockquote",
-            content: wrapPars(env.content),
-        });
-    },
-    figure: (env) => {
-        return htmlLike({
-            tag: "figure",
-            content: env.content,
-        });
-    },
-    table: (env) => {
-        return htmlLike({
-            tag: "table",
-            content: env.content,
-        });
-    },
+    center: envFactory("blockquote"),
+    quote: envFactory("blockquote"),
+    figure: envFactory("figure", {
+        requiresStatementTag: false,
+        wrapContentInPars: false,
+        extractTitleFromArgs: false,
+    }),
+    table: envFactory("table", {
+        requiresStatementTag: false,
+        wrapContentInPars: false,
+        extractTitleFromArgs: false,
+    }),
     ...genEnvironmentReplacements(),
 };
 
@@ -210,83 +217,90 @@ function genEnvironmentReplacements() {
     // First, a long list of pretext environments and their aliases.
     const envAliases: Record<
         string,
-        { requiresStatment: boolean; aliases: string[] }
+        { requiresStatement: boolean; aliases: string[] }
     > = {
-        abstract: { requiresStatment: false, aliases: ["abs", "abstr"] },
-        acknowledgement: { requiresStatment: false, aliases: ["ack"] },
-        algorithm: { requiresStatment: true, aliases: ["algo", "alg"] },
-        answer: { requiresStatment: false, aliases: ["ans"] },
-        assumption: { requiresStatment: true, aliases: ["assu", "ass"] },
-        axiom: { requiresStatment: true, aliases: ["axm"] },
-        claim: { requiresStatment: true, aliases: ["cla"] },
+        abstract: { requiresStatement: false, aliases: ["abs", "abstr"] },
+        acknowledgement: { requiresStatement: false, aliases: ["ack"] },
+        algorithm: { requiresStatement: true, aliases: ["algo", "alg"] },
+        answer: { requiresStatement: false, aliases: ["ans"] },
+        assumption: { requiresStatement: true, aliases: ["assu", "ass"] },
+        axiom: { requiresStatement: true, aliases: ["axm"] },
+        claim: { requiresStatement: true, aliases: ["cla"] },
         conjecture: {
-            requiresStatment: true,
+            requiresStatement: true,
             aliases: ["con", "conj", "conjec"],
         },
-        construction: { requiresStatment: false, aliases: [] },
-        convention: { requiresStatment: false, aliases: ["conv"] },
+        construction: { requiresStatement: false, aliases: [] },
+        convention: { requiresStatement: false, aliases: ["conv"] },
         corollary: {
-            requiresStatment: true,
+            requiresStatement: true,
             aliases: ["cor", "corr", "coro", "corol", "corss"],
         },
         definition: {
-            requiresStatment: true,
+            requiresStatement: true,
             aliases: ["def", "defn", "dfn", "defi", "defin", "de"],
         },
         example: {
-            requiresStatment: true,
+            requiresStatement: true,
             aliases: ["exam", "exa", "eg", "exmp", "expl", "exm"],
         },
-        exercise: { requiresStatment: true, aliases: ["exer", "exers"] },
-        exploration: { requiresStatment: false, aliases: [] },
-        fact: { requiresStatment: true, aliases: [] },
-        heuristic: { requiresStatment: true, aliases: [] },
-        hint: { requiresStatment: false, aliases: [] },
-        hypothesis: { requiresStatment: true, aliases: ["hyp"] },
-        identity: { requiresStatment: true, aliases: ["idnty"] },
-        insight: { requiresStatment: false, aliases: [] },
-        investigation: { requiresStatment: false, aliases: [] },
+        exercise: { requiresStatement: true, aliases: ["exer", "exers"] },
+        exploration: { requiresStatement: false, aliases: [] },
+        fact: { requiresStatement: true, aliases: [] },
+        heuristic: { requiresStatement: true, aliases: [] },
+        hint: { requiresStatement: false, aliases: [] },
+        hypothesis: { requiresStatement: true, aliases: ["hyp"] },
+        identity: { requiresStatement: true, aliases: ["idnty"] },
+        insight: { requiresStatement: false, aliases: [] },
+        investigation: { requiresStatement: false, aliases: [] },
         lemma: {
-            requiresStatment: true,
+            requiresStatement: true,
             aliases: ["lem", "lma", "lemm", "lm"],
         },
         notation: {
-            requiresStatment: false,
+            requiresStatement: false,
             aliases: ["no", "nota", "ntn", "nt", "notn", "notat"],
         },
-        note: { requiresStatment: false, aliases: ["notes"] },
-        observation: { requiresStatment: false, aliases: ["obs"] },
-        principle: { requiresStatment: true, aliases: [] },
-        problem: { requiresStatment: true, aliases: ["prob", "prb"] },
-        project: { requiresStatment: false, aliases: [] },
-        proof: { requiresStatment: false, aliases: ["pf", "prf", "demo"] },
+        note: { requiresStatement: false, aliases: ["notes"] },
+        observation: { requiresStatement: false, aliases: ["obs"] },
+        principle: { requiresStatement: true, aliases: [] },
+        problem: { requiresStatement: true, aliases: ["prob", "prb"] },
+        project: { requiresStatement: false, aliases: [] },
+        proof: { requiresStatement: false, aliases: ["pf", "prf", "demo"] },
         proposition: {
-            requiresStatment: true,
+            requiresStatement: true,
             aliases: ["prop", "pro", "prp", "props"],
         },
         question: {
-            requiresStatment: true,
+            requiresStatement: true,
             aliases: ["qu", "ques", "quest", "qsn"],
         },
         remark: {
-            requiresStatment: false,
+            requiresStatement: false,
             aliases: ["rem", "rmk", "rema", "bem", "subrem"],
         },
-        task: { requiresStatment: true, aliases: [] },
+        task: { requiresStatement: true, aliases: [] },
         theorem: {
-            requiresStatment: true,
+            requiresStatement: true,
             aliases: ["thm", "theo", "theor", "thmss", "thrm"],
         },
-        solution: { requiresStatment: false, aliases: ["sol"] },
-        warning: { requiresStatment: false, aliases: ["warn", "wrn"] },
+        solution: { requiresStatement: false, aliases: ["sol"] },
+        warning: { requiresStatement: false, aliases: ["warn", "wrn"] },
     };
     // For each environment PreTeXt has, we create entries for `environmentReplacements` using all reasonable aliases
     const exapandedEnvAliases = Object.entries(envAliases).flatMap(
         ([env, spec]) => [
-            [env, envFactory(env, spec.requiresStatment)],
+            [
+                env,
+                envFactory(env, {
+                    requiresStatementTag: spec.requiresStatement,
+                }),
+            ],
             ...spec.aliases.map((name) => [
                 name,
-                envFactory(env, spec.requiresStatment),
+                envFactory(env, {
+                    requiresStatementTag: spec.requiresStatement,
+                }),
             ]),
         ]
     );

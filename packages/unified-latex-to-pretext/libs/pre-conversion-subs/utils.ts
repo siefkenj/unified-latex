@@ -44,3 +44,20 @@ export function emptyStringWithWarningFactory(
         return s("");
     };
 }
+
+/**
+ * Sanitize a string for use in xml:id attributes and corresponding refs.
+ */
+export function sanitizeXmlId(str: string) {
+    return str.replace(/["'<>&:\s]/g, (match) => {
+        switch (match) {
+            case "&":
+            case ":":
+                return "-";
+            case " ":
+            case "\t":
+                return "_";
+            default: return "";
+        }
+    });
+}

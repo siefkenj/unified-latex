@@ -520,4 +520,20 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
             )
         );
     });
+
+    it("Turns labels into xml:id attributes and refs into xrefs", async () => {
+        html = process(`\\section{My section}\\label{sec:my section}\n\nSee section \\ref{sec:my section}.`);
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `<section xml:id="sec-my_section"><title>My section</title><p>See section <xref ref="sec-my_section"/>.</p></section>`
+            )
+        );
+
+        html = process(`\\begin{theorem}\\label{thm:important}Important stuff.\\end{theorem}\n\nAs we saw in \\ref{thm:important}, this is important.`);
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `<theorem xml:id="thm-important"><statement><p>Important stuff.</p></statement></theorem><p>As we saw in <xref ref="thm-important"/>, this is important.</p>`
+            )
+        );
+    });
 });

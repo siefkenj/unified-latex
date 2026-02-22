@@ -110,6 +110,11 @@ export function toPretextWithLoggerFactory(
                         divisionName = "paragraphs";
                     }
 
+                    // look for any additional attributes in renderInfo and add them to the attributes of the tag
+                    const attributes: Record<string, any> = {};
+                    if (node._renderInfo?.additionalAttributes) {
+                        Object.assign(attributes, node._renderInfo.additionalAttributes);
+                    }
                     // create a title tag containing the division macro's title arg
                     const title = getArgsContent(node)[0];
 
@@ -123,7 +128,8 @@ export function toPretextWithLoggerFactory(
                     const titleTag = x("title", title?.flatMap(toPretext));
 
                     if (divisionName) {
-                        return x(divisionName, [
+                        return x(divisionName, attributes,
+                            [
                             titleTag,
                             ...node.content.flatMap(toPretext),
                         ]);
