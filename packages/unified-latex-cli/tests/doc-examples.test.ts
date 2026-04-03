@@ -19,6 +19,9 @@ console.log = (...args) => {
 
 describe(
     "unified-latex-doc-examples",
+    {
+        timeout: 60 * 1000,
+    },
     () => {
         const examplesPath = path.resolve(__dirname, "../../../examples");
         const exampleFiles = glob.sync(`${examplesPath}/*.ts`);
@@ -31,9 +34,6 @@ describe(
                 expect(stdout).toMatchSnapshot();
             });
         }
-    },
-    {
-        timeout: 60 * 1000,
     }
 );
 

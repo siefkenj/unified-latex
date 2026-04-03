@@ -33,6 +33,9 @@ async function execCLI(args: string[]) {
 
 describe(
     "unified-latex-cli",
+    {
+        timeout: 60 * 1000,
+    },
     () => {
         it("executable exists", async () => {
             expect(fsLegacy.existsSync(exePath)).toBeTruthy();
@@ -142,9 +145,6 @@ describe(
                 expect(stdout).toMatchSnapshot();
             }
         });
-    },
-    {
-        timeout: 60 * 1000,
     }
 );
 
