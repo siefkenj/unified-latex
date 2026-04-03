@@ -24,7 +24,7 @@ export default defineConfig(({ mode }) => {
     return {
         plugins,
         build: {
-            target: "node16",
+            target: "nodenext",
             emptyOutDir: false,
             minify: false,
             sourcemap: true,
