@@ -15,6 +15,7 @@ import {
 } from "@unified-latex/unified-latex-util-replace";
 import { EXIT, SKIP, visit } from "@unified-latex/unified-latex-util-visit";
 import { environmentReplacements as _environmentReplacements } from "./pre-conversion-subs/environment-subs";
+import { examEnvironmentReplacements } from "./pre-conversion-subs/exam-subs";
 import {
     attachNeededRenderInfo,
     mathjaxSpecificEnvironmentReplacements,
@@ -75,6 +76,7 @@ export const unifiedLatexToPretextLike: Plugin<
     const environmentReplacements = Object.assign(
         {},
         _environmentReplacements,
+        examEnvironmentReplacements,
         options?.environmentReplacements || {}
     );
     const producePretextFragment = options?.producePretextFragment

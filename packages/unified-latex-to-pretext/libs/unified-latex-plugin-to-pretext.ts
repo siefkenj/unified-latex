@@ -38,6 +38,7 @@ import {
     macros as pretextMacros,
     environments as pretextEnvironments,
 } from "./provides";
+import { fixExamMacroArgs } from "./pre-conversion-subs/exam-subs";
 
 export type PluginOptions = HtmlLikePluginOptions & {
     /**
@@ -81,6 +82,11 @@ export const unifiedLatexToPretext: Plugin<
                 node.args = args;
             }
         });
+        // The parser already ran cleanEnumerateBody on exam environments (via the CTAN
+        // exam package's processContent hooks). This re-processes exam item macros to
+        // extract optional [points] from the beginning of their bodies, so that
+        // args[0] = optional points and args[1] = question body.
+        fixExamMacroArgs(tree);
 
         // If there is a \begin{document}...\end{document}, that's the only
         // content we want to convert.
