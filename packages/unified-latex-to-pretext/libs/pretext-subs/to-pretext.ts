@@ -104,14 +104,11 @@ export function toPretextWithLoggerFactory(
                     }
 
                     // Use pretextTag if set, otherwise use the division macro name.
-                    // paragraph and subparagraph both map to "paragraphs".
+                    // subparagraph has no pretext equivalent, so it maps to "paragraphs".
                     let tagName =
                         divEntry?.pretextTag ??
                         divEntry?.division;
-                    if (
-                        tagName === "paragraph" ||
-                        tagName === "subparagraph"
-                    ) {
+                    if (tagName === "subparagraph") {
                         tagName = "paragraphs";
                     }
 

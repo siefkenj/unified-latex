@@ -3,6 +3,7 @@ import util from "util";
 import { getParser } from "@unified-latex/unified-latex-util-parse";
 import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 import { breakOnBoundaries } from "../libs/pre-conversion-subs/break-on-boundaries";
+import { macros as pretextMacros } from "../libs/provides";
 
 // Make console.log pretty-print by default
 const origLog = console.log;
@@ -78,18 +79,18 @@ describe("unified-latex-to-pretext:break-on-boundaries", () => {
     it("can break on divisions in a group", () => {
         value =
             String.raw`\begin{document}\chapter{Chap}` +
-            String.raw`{\paragraph{Intro}Introduction.\begin{center}\subparagraph{Conclusion}Conclusion.\end{center}}` +
+            String.raw`{\paragraphs{Intro}Introduction.\begin{center}\subparagraph{Conclusion}Conclusion.\end{center}}` +
             String.raw`Chapter finished.\end{document}`;
 
-        const parser = getParser();
+        const parser = getParser({ macros: pretextMacros });
         const ast = parser.parse(value);
 
         expect(breakOnBoundaries(ast).messages.length).toEqual(1);
 
         expect(printRaw(ast)).toEqual(
-            String.raw`\begin{document}\begin{_chapter}[Chap]\begin{_paragraph}[Intro]Introduction.` +
+            String.raw`\begin{document}\begin{_chapter}[Chap]\begin{_paragraphs}[Intro]Introduction.` +
                 String.raw`\begin{center}\begin{_subparagraph}[Conclusion]Conclusion.\end{_subparagraph}` +
-                String.raw`\end{center}Chapter finished.\end{_paragraph}\end{_chapter}\end{document}`
+                String.raw`\end{center}Chapter finished.\end{_paragraphs}\end{_chapter}\end{document}`
         );
     });
 
@@ -143,17 +144,46 @@ describe("unified-latex-to-pretext:break-on-boundaries", () => {
     });
 
     it("can break on divisions and trim whitespace around division beginnings and endings", () => {
-        value = String.raw` \subsubsection{first}subsection 1  \paragraph{body}This is paragraph    `;
+        value = String.raw` \subsubsection{first}subsection 1  \paragraphs{body}This is paragraph    `;
 
-        const parser = getParser();
+        const parser = getParser({ macros: pretextMacros });
         const ast = parser.parse(value);
 
         expect(breakOnBoundaries(ast).messages.length).toEqual(0);
 
         expect(printRaw(ast)).toEqual(
             String.raw`\begin{_subsubsection}[first]subsection 1 ` +
-                String.raw`\begin{_paragraph}[body]This is paragraph` +
-                String.raw`\end{_paragraph}\end{_subsubsection}`
+                String.raw`\begin{_paragraphs}[body]This is paragraph` +
+                String.raw`\end{_paragraphs}\end{_subsubsection}`
+        );
+    });
+
+    it("can use the optional argument of a standard sectioning macro to override its division type", () => {
+        value =
+            String.raw`\section{Sec}Hi.` +
+            String.raw`\subsection[worksheet]{Lab 1}Do problems 1-5.`;
+
+        const parser = getParser({ macros: pretextMacros });
+        const ast = parser.parse(value);
+
+        expect(breakOnBoundaries(ast).messages.length).toEqual(0);
+
+        expect(printRaw(ast)).toEqual(
+            String.raw`\begin{_section}[Sec]Hi.` +
+                String.raw`\begin{_worksheet}[Lab 1]Do problems 1-5.\end{_worksheet}\end{_section}`
+        );
+    });
+
+    it("treats an unrecognized optional argument on a standard sectioning macro as an ordinary (ignored) short title", () => {
+        value = String.raw`\subsection[Short title]{Long title}Body.`;
+
+        const parser = getParser({ macros: pretextMacros });
+        const ast = parser.parse(value);
+
+        expect(breakOnBoundaries(ast).messages.length).toEqual(0);
+
+        expect(printRaw(ast)).toEqual(
+            String.raw`\begin{_subsection}[Long title]Body.\end{_subsection}`
         );
     });
 });

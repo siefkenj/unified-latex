@@ -21,6 +21,8 @@ export const macros: MacroInfoRecord = {
     glossary: { signature: "s o m", renderInfo: { breakAround: true, inParMode: true, namedArguments: ["starred", "tocTitle", "title"] } },
     exercises: { signature: "s o m", renderInfo: { breakAround: true, inParMode: true, namedArguments: ["starred", "tocTitle", "title"] } },
     worksheet: { signature: "s o m", renderInfo: { breakAround: true, inParMode: true, namedArguments: ["starred", "tocTitle", "title"] } },
+    handout: { signature: "s o m", renderInfo: { breakAround: true, inParMode: true, namedArguments: ["starred", "tocTitle", "title"] } },
+    paragraphs: { signature: "s o m", renderInfo: { breakAround: true, inParMode: true, namedArguments: ["starred", "tocTitle", "title"] } },
     readingquestions: { signature: "s o m", renderInfo: { breakAround: true, inParMode: true, namedArguments: ["starred", "tocTitle", "title"] } },
     solutions: { signature: "s o m", renderInfo: { breakAround: true, inParMode: true, namedArguments: ["starred", "tocTitle", "title"] } },
     // Inline text macros
@@ -108,6 +110,7 @@ export const environments: EnvInfoRecord = {
     exercisegroup: { signature: "o" },
     subexercises: { signature: "o" },
     worksheet: { signature: "o" },
+    handout: { signature: "o" },
     readingquestions: { signature: "o" },
     "reading-questions": { signature: "o" },
     introduction: { signature: "o" },

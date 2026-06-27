@@ -349,6 +349,7 @@ export const environmentReplacements: Record<
     exercisegroup: envFactory("exercisegroup"),
     subexercises: envFactory("subexercises"),
     worksheet: envFactory("worksheet"),
+    handout: envFactory("handout"),
     "reading-questions": envFactory("reading-questions"),
     readingquestions: envFactory("reading-questions"),
     solutions: envFactory("solutions"),
