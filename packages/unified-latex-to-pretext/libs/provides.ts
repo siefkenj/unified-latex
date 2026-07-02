@@ -2,6 +2,7 @@ import {
     MacroInfoRecord,
     EnvInfoRecord,
 } from "@unified-latex/unified-latex-types";
+import { plusMacros } from "./pre-conversion-subs/plus-subs";
 
 /**
  * Register macro signatures for PreTeXt-specific macros.
@@ -9,6 +10,8 @@ import {
  * but not already defined in the unified-latex-ctan packages.
  */
 export const macros: MacroInfoRecord = {
+    // Modular include macro for PreTeXt Plus: \plus[attrs]{type}{ref}
+    ...plusMacros,
     // PreTeXt-specific macro
     term: { signature: "m" },
     // Verbatim/code inline macros

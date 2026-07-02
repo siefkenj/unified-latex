@@ -22,6 +22,10 @@ import {
     mathjaxSpecificMacroReplacements,
 } from "./pre-conversion-subs/katex-subs";
 import { macroReplacements as _macroReplacements } from "./pre-conversion-subs/macro-subs";
+import {
+    createPlusMacroReplacements,
+    PlusIncludeOptions,
+} from "./pre-conversion-subs/plus-subs";
 import { streamingMacroReplacements } from "./pre-conversion-subs/streaming-command-subs";
 import { unifiedLatexWrapPars } from "./unified-latex-wrap-pars";
 import {
@@ -50,6 +54,13 @@ export type PluginOptions = {
     macroReplacements?: MacroReplacements;
 
     /**
+     * Options controlling how modular includes (`\plus[attrs]{type}{ref}` and
+     * `\include{ref}`) are converted: `<plus:type ref="..."/>` (default) or
+     * `<xi:include href="..."/>`.
+     */
+    plusIncludes?: PlusIncludeOptions;
+
+    /**
      * A boolean where if it's true then the output won't be wrapped in the <pretext><article> ... etc. tags.
      * If it's false (default), a valid and complete PreTeXt document is returned.
      */
@@ -71,6 +82,7 @@ export const unifiedLatexToPretextLike: Plugin<
     const macroReplacements = Object.assign(
         {},
         _macroReplacements,
+        createPlusMacroReplacements(options?.plusIncludes),
         options?.macroReplacements || {}
     );
     const environmentReplacements = Object.assign(
