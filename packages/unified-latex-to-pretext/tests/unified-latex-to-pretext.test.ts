@@ -86,22 +86,30 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
         );
     });
 
-    it("Comments are removed from HTML", async () => {
+    it("Comments are preserved as XML comments", async () => {
+        // A comment absorbs surrounding whitespace; a space is re-emitted
+        // when the LaTeX source would have rendered one.
         html = process(`a % foo\nb`);
-        expect(await normalizeHtml(html)).toEqual(await normalizeHtml(`a b`));
+        expect(html).toEqual(`a <!-- foo-->b`);
 
         html = process(`a% foo\nb`);
-        expect(await normalizeHtml(html)).toEqual(await normalizeHtml(`ab`));
+        expect(html).toEqual(`a<!-- foo-->b`);
+
+        // An own-line comment's line break acts as a space
+        html = process(`a\n% foo\nb`);
+        expect(html).toEqual(`a <!-- foo-->b`);
 
         html = process(`a% foo\n\nb`);
-        expect(await normalizeHtml(html)).toEqual(
-            await normalizeHtml(`<p>a</p><p>b</p>`)
-        );
+        expect(html).toEqual(`<p>a<!-- foo--></p><p>b</p>`);
 
-        html = process(`a % foo\n\nb`);
-        expect(await normalizeHtml(html)).toEqual(
-            await normalizeHtml(`<p>a</p><p>b</p>`)
-        );
+        // A comment alone between paragraphs is not wrapped in a <p>
+        html = process(`a\n\n% foo\n\nb`);
+        expect(html).toEqual(`<p>a</p> <!-- foo--><p>b</p>`);
+    });
+
+    it("Comments inside math are removed", async () => {
+        html = process(`\\[x %comment\n+ y\\]`);
+        expect(html).toEqual(`<md>x+ y</md>`);
     });
 
     it("Wraps URLs", async () => {
@@ -227,7 +235,27 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
         );
         html = process(`a\n b\\begin{foo}x\\end{foo}c\n\nd`);
         expect(await normalizeHtml(html)).toEqual(
-            await normalizeHtml(`<p>a b</p>x<p>c</p><p>d</p>`)
+            await normalizeHtml(
+                `<p>a b</p><TODO type="unknown-environment"><!--todo: unknown environment "foo"--><pre>\\begin{foo}x\\end{foo}</pre></TODO><p>c</p><p>d</p>`
+            )
+        );
+    });
+
+    it("Unknown environments are preserved in a <TODO> placeholder", async () => {
+        html = process(`\\begin{fancybox}Some \\emph{content}\\end{fancybox}`);
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `<TODO type="unknown-environment"><!--todo: unknown environment "fancybox"--><pre>\\begin{fancybox}Some \\emph{content}\\end{fancybox}</pre></TODO>`
+            )
+        );
+    });
+
+    it("Unknown macros are preserved in a <TODO> placeholder", async () => {
+        html = process(`a \\fancymacro b`);
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `a <TODO type="unknown-macro"><!--todo: unknown macro "\\fancymacro"--><c>\\fancymacro</c></TODO> b`
+            )
         );
     });
 

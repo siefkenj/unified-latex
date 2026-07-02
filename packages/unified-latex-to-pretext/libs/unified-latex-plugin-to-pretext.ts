@@ -118,7 +118,10 @@ export const unifiedLatexToPretext: Plugin<
         // update content
         content = tree.content;
 
-        const toXast = toPretextWithLoggerFactory(file.message.bind(file));
+        const toXast = toPretextWithLoggerFactory(
+            file.message.bind(file),
+            typeof file.value === "string" ? file.value : undefined
+        );
         let converted = toXast({ type: "root", content });
         if (!Array.isArray(converted)) {
             converted = [converted];

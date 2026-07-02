@@ -33,7 +33,13 @@ export function splitForPars(
     function pushBody() {
         if (currBody.length > 0) {
             trim(currBody);
-            ret.push({ content: currBody, wrapInPar: true });
+            // A chunk with no real content (only comments/whitespace) should
+            // not produce a `<p>`; emit it bare between paragraphs instead.
+            const wrapInPar = currBody.some(
+                (node) =>
+                    node.type !== "comment" && node.type !== "whitespace"
+            );
+            ret.push({ content: currBody, wrapInPar });
             currBody = [];
         }
     }

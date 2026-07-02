@@ -2,7 +2,6 @@ import * as Hast from "hast";
 import { Plugin, unified } from "unified";
 import { unifiedLatexLintNoTexFontShapingCommands } from "@unified-latex/unified-latex-lint/rules/unified-latex-lint-no-tex-font-shaping-commands";
 import * as Ast from "@unified-latex/unified-latex-types";
-import { deleteComments } from "@unified-latex/unified-latex-util-comments";
 import {
     anyEnvironment,
     anyMacro,
@@ -110,9 +109,11 @@ export const unifiedLatexToPretextLike: Plugin<
         const originalTree = tree;
         // NOTE: These operations need to be done in a particular order.
 
-        // We _could_ keep comments around in html, but that can complicate dealing with whitespace,
-        // so we remove them.
-        deleteComments(tree);
+        // Comments are kept and converted to XML comments (`toPretext` handles
+        // the whitespace a comment absorbs). However, math content is rendered
+        // raw (via `printRaw`), where a literal `%` would corrupt the math, so
+        // comments inside math mode are removed.
+        deleteCommentsInMathMode(tree);
         let processor = unified()
             // Replace `\bf` etc. with `\bfseries`. Only the latter are auto-recognized streaming commands
             .use(unifiedLatexLintNoTexFontShapingCommands, { fix: true })
@@ -315,6 +316,21 @@ function createValidPretextDoc(tree: Ast.Root): void {
     } else {
         tree.content = [htmlLike({ tag: "article", content: tree.content })];
     }
+}
+
+/**
+ * Delete comments that appear inside math mode. Math content is rendered raw,
+ * so a comment would end up as a literal `%...` in the output.
+ */
+function deleteCommentsInMathMode(tree: Ast.Root): void {
+    replaceNode(tree, (node, info) => {
+        if (
+            match.comment(node) &&
+            (info.context.inMathMode || info.context.hasMathModeAncestor)
+        ) {
+            return null;
+        }
+    });
 }
 
 /**
