@@ -1250,3 +1250,60 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
         );
     });
 });
+
+describe("unified-latex-to-pretext:document-root macros", () => {
+    // Unlike `process` above, this produces a full document (no
+    // `producePretextFragment`), so \book/\article/\slideshow can pick the
+    // wrapping tag themselves instead of relying on \documentclass.
+    const processDoc = (value: string) =>
+        (
+            processLatexViaUnified({})
+                .use(unifiedLatexToPretext, {})
+                .use(xmlCompilePlugin)
+                .processSync({ value }).value as string
+        ).replace(/^<\?xml[^?]*\?>/, "");
+
+    it("wraps a document starting with \\article{Title} in <article>", async () => {
+        const html = processDoc(
+            `\\begin{document}\\article{My Title}\\section{Sec}Hi.\\end{document}`
+        );
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `<pretext><article><title>My Title</title><section><title>Sec</title>Hi.</section></article></pretext>`
+            )
+        );
+    });
+
+    it("wraps a document starting with \\book{Title} in <book>", async () => {
+        const html = processDoc(
+            `\\begin{document}\\book{My Book}\\chapter{Chap}Hi.\\end{document}`
+        );
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `<pretext><book><title>My Book</title><chapter><title>Chap</title>Hi.</chapter></book></pretext>`
+            )
+        );
+    });
+
+    it("wraps a document starting with \\slideshow{Title} in <slideshow>", async () => {
+        const html = processDoc(
+            `\\begin{document}\\slideshow{My Slides}Hi.\\end{document}`
+        );
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `<pretext><slideshow><title>My Slides</title>Hi.</slideshow></pretext>`
+            )
+        );
+    });
+
+    it("still falls back to the \\documentclass heuristic when no document-root macro is present", async () => {
+        const html = processDoc(
+            `\\documentclass{book}\\begin{document}\\chapter{Chap}Hi.\\end{document}`
+        );
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `<pretext><book><title/><chapter><title>Chap</title>Hi.</chapter></book></pretext>`
+            )
+        );
+    });
+});

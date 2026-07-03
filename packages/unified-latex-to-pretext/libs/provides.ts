@@ -17,6 +17,11 @@ export const macros: MacroInfoRecord = {
     // Verbatim/code inline macros
     code: { signature: "m" },
     lstinline: { signature: "m" },
+    // Document-root macros — declare the document's outermost PreTeXt tag
+    // and its title in one shot, e.g. `\book{Calculus}`.
+    book: { signature: "m", renderInfo: { breakAround: true, inParMode: true, namedArguments: ["title"] } },
+    article: { signature: "m", renderInfo: { breakAround: true, inParMode: true, namedArguments: ["title"] } },
+    slideshow: { signature: "m", renderInfo: { breakAround: true, inParMode: true, namedArguments: ["title"] } },
     // Division macros — same signature as \section
     preface: { signature: "s o m", renderInfo: { breakAround: true, inParMode: true, namedArguments: ["starred", "tocTitle", "title"] } },
     biography: { signature: "s o m", renderInfo: { breakAround: true, inParMode: true, namedArguments: ["starred", "tocTitle", "title"] } },

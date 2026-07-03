@@ -174,6 +174,34 @@ describe("unified-latex-to-pretext:break-on-boundaries", () => {
         );
     });
 
+    it("can break on a document-root macro, nesting everything that follows inside it", () => {
+        value = String.raw`\article{My Title}\section{Sec}Hi.`;
+
+        const parser = getParser({ macros: pretextMacros });
+        const ast = parser.parse(value);
+
+        expect(breakOnBoundaries(ast)).toEqual({ messages: [] });
+
+        expect(printRaw(ast)).toEqual(
+            String.raw`\begin{_article}[My Title]` +
+                String.raw`\begin{_section}[Sec]Hi.\end{_section}\end{_article}`
+        );
+    });
+
+    it("supports \\book and \\slideshow as document-root macros too", () => {
+        value = String.raw`\book{My Book}\chapter{Chap}Hi.`;
+
+        const parser = getParser({ macros: pretextMacros });
+        const ast = parser.parse(value);
+
+        expect(breakOnBoundaries(ast)).toEqual({ messages: [] });
+
+        expect(printRaw(ast)).toEqual(
+            String.raw`\begin{_book}[My Book]` +
+                String.raw`\begin{_chapter}[Chap]Hi.\end{_chapter}\end{_book}`
+        );
+    });
+
     it("treats an unrecognized optional argument on a standard sectioning macro as an ordinary (ignored) short title", () => {
         value = String.raw`\subsection[Short title]{Long title}Body.`;
 

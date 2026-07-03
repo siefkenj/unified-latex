@@ -30,6 +30,7 @@ import { unifiedLatexWrapPars } from "./unified-latex-wrap-pars";
 import {
     breakOnBoundaries,
     isMappedEnviron,
+    isTopLevelDocEnviron,
 } from "./pre-conversion-subs/break-on-boundaries";
 import { reportMacrosUnsupportedByMathjax } from "./pre-conversion-subs/report-unsupported-macro-mathjax";
 import { htmlLike } from "@unified-latex/unified-latex-util-html-like";
@@ -249,6 +250,20 @@ function containsPar(content: Ast.Node[]): boolean {
  * Wrap the tree content in a book or article tag.
  */
 function createValidPretextDoc(tree: Ast.Root): void {
+    // A document may start with \book{Title}, \article{Title}, or
+    // \slideshow{Title} instead of relying on \documentclass and \title.
+    // breakOnBoundaries treats these as the outermost division, so by now
+    // the whole document is already wrapped in a single `_book`, `_article`,
+    // or `_slideshow` environment carrying its title as an argument — that
+    // environment *is* the document root, so skip the heuristics below.
+    const rootDivision = tree.content.find(
+        (node) => anyEnvironment(node) && isTopLevelDocEnviron(node)
+    );
+    if (rootDivision) {
+        tree.content = [rootDivision];
+        return;
+    }
+
     // this will be incomplete since the author info isn't pushed yet, which obtains documentclass, title, etc.
     let isBook: boolean = false;
 

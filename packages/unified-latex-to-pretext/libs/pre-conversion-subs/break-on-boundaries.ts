@@ -30,7 +30,23 @@ export type DivisionEntry = {
     pretextTag?: string;
 };
 
+/**
+ * The document-root macros. Like divisions, but for the outermost PreTeXt
+ * container itself: `\book{Title}`, `\article{Title}`, or `\slideshow{Title}`
+ * are expected to appear as the very first thing in the document, standing
+ * in for the usual `\documentclass`/`\title` combo. Treating them as the
+ * outermost division group means everything that follows (parts, chapters,
+ * sections, ...) naturally ends up nested inside the resulting `_book`,
+ * `_article`, or `_slideshow` environment.
+ */
+const documentRootGroup: DivisionEntry[] = [
+    { division: "book", mappedEnviron: "_book" },
+    { division: "article", mappedEnviron: "_article" },
+    { division: "slideshow", mappedEnviron: "_slideshow" },
+];
+
 export const divisionGroups: DivisionEntry[][] = [
+    documentRootGroup,
     // Group 0: book-part level
     [{ division: "part", mappedEnviron: "_part" }],
     // Group 1: chapter level
@@ -123,6 +139,16 @@ const isDivisionMacro = match.createMacroMatcher(
 // check if an environment is a newly created environment
 export const isMappedEnviron = match.createEnvironmentMatcher(
     divisions.map((x) => x.mappedEnviron)
+);
+
+/**
+ * Check if an environment is the mapped environment for a document-root
+ * macro (`_book`, `_article`, or `_slideshow`). Used to detect when the
+ * document already declares its own root tag, so the `\documentclass`-based
+ * heuristic can be skipped.
+ */
+export const isTopLevelDocEnviron = match.createEnvironmentMatcher(
+    documentRootGroup.map((x) => x.mappedEnviron)
 );
 
 /**
