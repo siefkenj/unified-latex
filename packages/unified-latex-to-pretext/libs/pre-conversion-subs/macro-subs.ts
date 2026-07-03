@@ -12,6 +12,7 @@ import {
     emptyStringWithWarningFactory,
     sanitizeXmlId,
 } from "./utils";
+import { printLatexAst } from "@unified-latex/unified-latex-prettier";
 
 /**
  * Factory function that generates html-like macros that wrap their contents.
@@ -224,6 +225,12 @@ export const macroReplacements: Record<
     latex: (node) => {
         return htmlLike({ tag: "latex" });
     },
+    Latex: (node) => {
+        return htmlLike({ tag: "latex" });
+    },
+    LaTeX: (node) => {
+        return htmlLike({ tag: "latex" });
+    },
     latexe: (node) => {
         return htmlLike({ tag: "latex" });
     },
@@ -239,13 +246,23 @@ export const macroReplacements: Record<
     etc: () => htmlLike({ tag: "etc" }),
     XeTeX: () => htmlLike({ tag: "xetex" }),
     XeLaTeX: () => htmlLike({ tag: "xelatex" }),
+    xelatex: () => htmlLike({ tag: "xelatex" }),
     LuaTeX: () => htmlLike({ tag: "luatex" }),
+    luatex: () => htmlLike({ tag: "luatex" }),
     PreTeXt: () => htmlLike({ tag: "pretext" }),
+    pretext: () => htmlLike({ tag: "pretext" }),
+    Pretext: () => htmlLike({ tag: "pretext" }),
     PreFigure: () => htmlLike({ tag: "prefigure" }),
+    webwork: () => htmlLike({ tag: "webwork" }),
+    WeBWorK: () => htmlLike({ tag: "webwork" }),
     AD: () => htmlLike({ tag: "ad" }),
+    ad: () => htmlLike({ tag: "ad" }),
     BC: () => htmlLike({ tag: "bc" }),
+    bc: () => htmlLike({ tag: "bc" }),
     AM: () => htmlLike({ tag: "am" }),
+    am: () => htmlLike({ tag: "am" }),
     PM: () => htmlLike({ tag: "pm" }),
+    pm: () => htmlLike({ tag: "pm" }),
     nb: () => htmlLike({ tag: "nb" }),
     ps: () => htmlLike({ tag: "ps" }),
     vs: () => htmlLike({ tag: "vs" }),
