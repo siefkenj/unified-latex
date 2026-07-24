@@ -3,8 +3,12 @@ import { arg, m } from "@unified-latex/unified-latex-builder";
 import { match } from "@unified-latex/unified-latex-util-match";
 import { visit } from "@unified-latex/unified-latex-util-visit";
 
-function isStr(node: Ast.Node, content: string): boolean {
-    return node.type === "string" && (node as Ast.String).content === content;
+function isStr(node: Ast.Node | undefined, content: string): boolean {
+    return (
+        !!node &&
+        node.type === "string" &&
+        (node as Ast.String).content === content
+    );
 }
 
 function isLetter(node: Ast.Node | undefined): boolean {

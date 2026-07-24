@@ -142,6 +142,16 @@ export const isMappedEnviron = match.createEnvironmentMatcher(
 );
 
 /**
+ * Beamer `frame` environments become PreTeXt `<slide>`. A frame is really a
+ * division, so — like divisions — its content should be wrapped in paragraphs by
+ * the early `unifiedLatexWrapPars` pre-pass (while nested environments are still
+ * environments), rather than late by an envFactory. This keeps block-level
+ * children (`<assemblage>`, `<sidebyside>`, ...) out of `<p>` while still letting
+ * lists sit inside a `<p>` as usual.
+ */
+export const isSlideEnviron = match.createEnvironmentMatcher(["frame"]);
+
+/**
  * Check if an environment is the mapped environment for a document-root
  * macro (`_book`, `_article`, or `_slideshow`). Used to detect when the
  * document already declares its own root tag, so the `\documentclass`-based

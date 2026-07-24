@@ -35,6 +35,10 @@ export function wrapPars(
             "plus",
             "include",
             "title",
+            // Beamer frame titles: keep them out of `<p>` so `beamerFrameFactory`
+            // can lift them into `<title>`/`<subtitle>` on the slide.
+            "frametitle",
+            "framesubtitle",
         ],
         environmentsThatDontBreakPars = [
             "index",

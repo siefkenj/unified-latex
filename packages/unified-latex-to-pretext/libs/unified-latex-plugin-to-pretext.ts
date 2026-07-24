@@ -56,7 +56,7 @@ export const unifiedLatexToPretext: Plugin<
     Ast.Root,
     Xast.Root
 > = function unifiedLatexAttachMacroArguments(options) {
-    return (tree, file) => {
+    return (tree: Ast.Root, file: any) => {
         const producePretextFragment = options?.producePretextFragment
             ? options?.producePretextFragment
             : false;

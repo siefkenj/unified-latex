@@ -8,12 +8,42 @@ import {
     getNamedArgsContent,
 } from "@unified-latex/unified-latex-util-arguments";
 import { match } from "@unified-latex/unified-latex-util-match";
+import { trim } from "@unified-latex/unified-latex-util-trim";
 import { wrapPars } from "../wrap-pars";
 import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 import { VisitInfo } from "@unified-latex/unified-latex-util-visit";
 import { VFile } from "vfile";
 import { makeWarningMessage } from "./utils";
 import { createTableFromTabular } from "./create-table-from-tabular";
+
+/**
+ * Extract the raw source corresponding to an environment body.
+ * Falls back to `printRaw(env.content)` when source offsets are unavailable.
+ */
+function getEnvironmentBodySource(env: Ast.Environment, file?: VFile): string {
+    const source = typeof file?.value === "string" ? file.value : undefined;
+    if (!source) {
+        return printRaw(env.content);
+    }
+
+    const start = env.position?.start?.offset;
+    const end = env.position?.end?.offset;
+    if (start == null || end == null) {
+        return printRaw(env.content);
+    }
+
+    const fullEnvSource = source.slice(start, end);
+    const envName = printRaw(env.env);
+    const escapedEnvName = envName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const beginPattern = new RegExp(
+        `^\\\\begin\\s*\\{${escapedEnvName}\\}`
+    );
+    const endPattern = new RegExp(
+        `\\\\end\\s*\\{${escapedEnvName}\\}\\s*$`
+    );
+
+    return fullEnvSource.replace(beginPattern, "").replace(endPattern, "");
+}
 
 const ITEM_ARG_NAMES_REG = ["label"] as const;
 const ITEM_ARG_NAMES_BEAMER = [null, "label", null] as const;
@@ -106,6 +136,12 @@ interface EnvFactoryOptions {
     requiresStatementTag?: boolean;
     wrapContentInPars?: boolean;
     extractTitleFromArgs?: boolean;
+    /**
+     * Which environment argument holds the title. Defaults to 0. Beamer
+     * environments such as `block` put the title at a later index (e.g. after an
+     * `<overlay>` argument), so this lets them reuse the same factory.
+     */
+    titleArgIndex?: number;
     warningMessage?: string;
 }
 
@@ -129,6 +165,7 @@ function envFactory(
         requiresStatementTag = false,
         wrapContentInPars = true,
         extractTitleFromArgs = true,
+        titleArgIndex = 0,
         warningMessage = "",
     } = options;
 
@@ -178,11 +215,11 @@ function envFactory(
         // Add a title tag if the environment has a title
         if (extractTitleFromArgs) {
             const args = getArgsContent(env);
-            if (args[0]) {
+            if (args[titleArgIndex]) {
                 content.unshift(
                     htmlLike({
                         tag: "title",
-                        content: args[0] || [],
+                        content: args[titleArgIndex] || [],
                     })
                 );
             }
@@ -198,6 +235,74 @@ function envFactory(
             content: content,
             attributes,
         });
+    };
+}
+
+/**
+ * Convert a beamer `frame` environment into a PreTeXt `<slide>`.
+ *
+ * A frame's title/subtitle can be supplied two ways, both handled here:
+ *   * as braced arguments on the environment: `\begin{frame}{Title}{Subtitle}`
+ *     (per beamer's signature `!d<> !o !o !d{} !d{}`, these land at args[3]/args[4]);
+ *   * as `\frametitle{...}` / `\framesubtitle{...}` macros inside the body.
+ *
+ * A frame is really a division, so — like `<section>` — its body is wrapped in
+ * paragraphs by the early `unifiedLatexWrapPars` pre-pass (`isSlideEnviron`),
+ * while nested environments are still environments. That keeps block-level
+ * children (`<assemblage>`, `<sidebyside>`, ...) out of `<p>` and lists inside
+ * one, and gives slides the "omit `<p>` for a lone paragraph" behavior divisions
+ * have. So this factory does *not* wrap paragraphs itself; it only lifts the
+ * title/subtitle to the front. `\frametitle`/`\framesubtitle` are par-breaking
+ * (see `wrap-pars.ts`), so they survive the pre-pass as bare macro nodes here.
+ */
+function beamerFrameFactory(): (
+    env: Ast.Environment,
+    info: VisitInfo,
+    file?: VFile
+) => Ast.Macro {
+    return (env) => {
+        // Title/subtitle supplied as braced arguments on the frame environment.
+        const args = getArgsContent(env);
+        let title = args[3] || undefined;
+        let subtitle = args[4] || undefined;
+
+        // Title/subtitle supplied as \frametitle / \framesubtitle macros in the
+        // body. Pull them out of the content so they become the slide's title
+        // rather than body. An explicit macro wins over the braced-argument form.
+        const content: Ast.Node[] = [];
+        for (const node of env.content) {
+            if (match.macro(node, "frametitle")) {
+                const titleArgs = getArgsContent(node);
+                title = titleArgs[titleArgs.length - 1] || [];
+            } else if (match.macro(node, "framesubtitle")) {
+                const subtitleArgs = getArgsContent(node);
+                subtitle = subtitleArgs[subtitleArgs.length - 1] || [];
+            } else {
+                content.push(node);
+            }
+        }
+
+        // Extracting the title macro can leave the whitespace that followed it
+        // stranded at the start of the body; trim it (a division's title is an
+        // argument, so it never has this problem).
+        trim(content);
+
+        // Place the title/subtitle first, as siblings of the (already
+        // pre-pass-wrapped) body content.
+        if (subtitle) {
+            content.unshift(htmlLike({ tag: "subtitle", content: subtitle }));
+        }
+        if (title) {
+            content.unshift(htmlLike({ tag: "title", content: title }));
+        }
+
+        // Attach any additional attributes (e.g. xml:id from a \label) to the tag.
+        const attributes: Record<string, any> = {};
+        if (env._renderInfo?.additionalAttributes) {
+            Object.assign(attributes, env._renderInfo.additionalAttributes);
+        }
+
+        return htmlLike({ tag: "slide", content, attributes });
     };
 }
 
@@ -245,6 +350,21 @@ export const environmentReplacements: Record<
         wrapContentInPars: false,
         extractTitleFromArgs: false,
     }),
+    tikzpicture: (env, _info, file) =>
+        htmlLike({
+            tag: "image",
+            content: [
+                htmlLike({
+                    tag: "latex-image",
+                    content: [
+                        {
+                            type: "string",
+                            content: getEnvironmentBodySource(env, file),
+                        },
+                    ],
+                }),
+            ],
+        }),
     // Verbatim/code block (Group H): emit raw content inside <pre>
     code: (env) =>
         htmlLike({
@@ -372,6 +492,35 @@ export const environmentReplacements: Record<
     // SideBySide sub-structure
     sbsgroup: envFactory("sbsgroup", { requiresStatementTag: false }),
     stack: envFactory("stack", { requiresStatementTag: false }),
+    // Beamer environments for creating slideshows.
+    frame: beamerFrameFactory(),
+    // Beamer `block`/`alertblock`/`exampleblock` are titled, visually-set-off
+    // content. PreTeXt's `<assemblage>` is the closest analogue. Their signature
+    // is `!d<> !d{} !d<>`, so the title lives at arg index 1 (after the overlay).
+    block: envFactory("assemblage", {
+        requiresStatementTag: false,
+        titleArgIndex: 1,
+    }),
+    alertblock: envFactory("assemblage", {
+        requiresStatementTag: false,
+        titleArgIndex: 1,
+    }),
+    exampleblock: envFactory("example", {
+        requiresStatementTag: true,
+        titleArgIndex: 1,
+    }),
+    // Beamer multi-column layout maps onto PreTeXt's side-by-side layout:
+    // `columns` becomes `<sidebyside>` and each `column` becomes a `<stack>` panel.
+    columns: envFactory("sidebyside", {
+        requiresStatementTag: false,
+        wrapContentInPars: false,
+        extractTitleFromArgs: false,
+    }),
+    column: envFactory("stack", {
+        requiresStatementTag: false,
+        extractTitleFromArgs: false,
+    }),
+    // Most block-like environments, done programmatically to avoid having to list them all here:
     ...genEnvironmentReplacements(),
 };
 

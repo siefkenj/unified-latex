@@ -30,6 +30,7 @@ import { unifiedLatexWrapPars } from "./unified-latex-wrap-pars";
 import {
     breakOnBoundaries,
     isMappedEnviron,
+    isSlideEnviron,
     isTopLevelDocEnviron,
 } from "./pre-conversion-subs/break-on-boundaries";
 import { reportMacrosUnsupportedByMathjax } from "./pre-conversion-subs/report-unsupported-macro-mathjax";
@@ -106,7 +107,7 @@ export const unifiedLatexToPretextLike: Plugin<
         mathjaxSpecificEnvironmentReplacements
     );
 
-    return (tree, file) => {
+    return (tree: Ast.Root, file: any) => {
         const originalTree = tree;
         // NOTE: These operations need to be done in a particular order.
 
@@ -238,7 +239,9 @@ function shouldBeWrappedInPars(tree: Ast.Root): boolean {
 
 function containsPar(content: Ast.Node[]): boolean {
     return content.some((node) => {
-        if (isMappedEnviron(node)) {
+        // Recurse into divisions and slides, whose content is wrapped by the
+        // pre-pass, so a parbreak nested inside one still triggers wrapping.
+        if (isMappedEnviron(node) || isSlideEnviron(node)) {
             return containsPar(node.content);
         }
 

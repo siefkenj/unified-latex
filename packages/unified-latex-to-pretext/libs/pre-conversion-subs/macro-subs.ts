@@ -52,6 +52,100 @@ function factory(
     };
 }
 
+function xrefFactory(
+    tag: string,
+    attrName: string = "ref",
+    warningMessage: string = "",
+    attributes?: Record<string, string>
+): (macro: Ast.Macro, info: VisitInfo, file?: VFile) => Ast.Macro {
+    return (macro, info, file) => {
+        if (!macro.args) {
+            throw new Error(
+                `Found macro to replace but couldn't find content ${printRaw(
+                    macro
+                )}`
+            );
+        }
+
+        // add a warning message to the file if needed
+        if (warningMessage && file) {
+            const message = makeWarningMessage(
+                macro,
+                warningMessage,
+                "macro-subs"
+            );
+            file.message(message, message.place, message.source);
+        }
+        // Assume the meaningful argument is the last argument.
+        const args = getArgsContent(macro);
+        const content = args[args.length - 1] || [];
+        return htmlLike({
+            tag,
+            attributes: { [attrName]: sanitizeXmlId(printRaw(content)), ...attributes },
+        });
+    }
+}
+
+function onlyContent(
+    warningMessage: string = ""
+): (macro: Ast.Macro, info: VisitInfo, file?: VFile) => Ast.Node {
+    return (macro, info, file) => {
+        if (!macro.args) {
+            throw new Error(
+                `Found macro to replace but couldn't find content ${printRaw(
+                    macro
+                )}`
+            );
+        }
+
+        // add a warning message to the file if needed
+        if (warningMessage && file) {
+            const message = makeWarningMessage(
+                macro,
+                warningMessage,
+                "macro-subs"
+            );
+            file.message(message, message.place, message.source);
+        }
+
+        // Assume the meaningful argument is the last argument. This
+        // ensures that we can convert for default packages as well as
+        // packages like beamer, which may add optional arguments.
+        const args = getArgsContent(macro);
+        const content = args[args.length - 1] || [];
+        return { type: "string", content: printRaw(content) };
+    }
+}
+
+/**
+ * Factory for beamer overlay/reveal macros (`\only`, `\uncover`, `\onslide`, ...).
+ * PreTeXt slides are static, so there is no equivalent to incremental reveals:
+ * we drop the overlay specification and keep the revealed content, emitting a
+ * warning so the loss of the reveal behavior isn't silent.
+ *
+ * Unlike `onlyContent`, the content nodes are preserved (wrapped in a transparent
+ * `group`) rather than flattened to a raw string, so any nested macros/markup
+ * inside still get converted by the normal pipeline.
+ */
+function unwrapArgWithWarning(
+    argIndex: number,
+    warningMessage: string
+): (macro: Ast.Macro, info: VisitInfo, file?: VFile) => Ast.Node {
+    return (macro, info, file) => {
+        if (warningMessage && file) {
+            const message = makeWarningMessage(
+                macro,
+                warningMessage,
+                "macro-subs"
+            );
+            file.message(message, message.place, message.source);
+        }
+        const args = getArgsContent(macro);
+        const content = args[argIndex] || [];
+        return { type: "group", content };
+    };
+}
+
 function createHeading(tag: string, attrs = {}) {
     return (macro: Ast.Macro) => {
         const args = getArgsContent(macro);
@@ -97,24 +191,17 @@ export const macroReplacements: Record<
         "em",
         `Warning: There is no equivalent tag for \"underline\", \"em\" was used as a replacement.`
     ),
-    mbox: emptyStringWithWarningFactory(
-        `Warning: There is no equivalent tag for \"mbox\", an empty Ast.String was used as a replacement.`
+    mbox: onlyContent(
+        `Warning: There is no equivalent tag for \"mbox\", the content was used as a replacement.`
     ),
     phantom: emptyStringWithWarningFactory(
         `Warning: There is no equivalent tag for \"phantom\", an empty Ast.String was used as a replacement.`
     ),
+    centering: emptyStringWithWarningFactory(
+        `Warning: There is no equivalent tag for \"centering\".  Removing the macro.`
+    ),
     appendix: createHeading("appendix"),
-    url: (node) => {
-        const args = getArgsContent(node);
-        const url = printRaw(args[0] || "#");
-        return htmlLike({
-            tag: "url",
-            attributes: {
-                href: url,
-            },
-            content: [{ type: "string", content: url }],
-        });
-    },
+    url: xrefFactory("url","href"),
     href: (node) => {
         const args = getArgsContent(node);
         const url = printRaw(args[1] || "#");
@@ -137,56 +224,12 @@ export const macroReplacements: Record<
             content: args[1] || [],
         });
     },
-    ref: (node) => {
-        const args = getArgsContent(node);
-        const ref = sanitizeXmlId(printRaw(args[1] || ""));
-        return htmlLike({
-            tag: "xref",
-            attributes: {
-                ref: ref || "",
-            },
-        });
-    },
-    eqref: (node) => {
-        const args = getArgsContent(node);
-        const ref = sanitizeXmlId(printRaw(args[0] || ""));
-        return htmlLike({
-            tag: "xref",
-            attributes: {
-                ref: ref || "",
-            },
-        });
-    },
-    cref: (node) => {
-        const args = getArgsContent(node);
-        const ref = sanitizeXmlId(printRaw(args[1] || ""));
-        return htmlLike({
-            tag: "xref",
-            attributes: {
-                ref: ref || "",
-            },
-        });
-    },
-    Cref: (node) => {
-        const args = getArgsContent(node);
-        const ref = sanitizeXmlId(printRaw(args[1] || ""));
-        return htmlLike({
-            tag: "xref",
-            attributes: {
-                ref: ref || "",
-            },
-        });
-    },
-    cite: (node) => {
-        const args = getArgsContent(node);
-        const ref = sanitizeXmlId(printRaw(args[1] || ""));
-        return htmlLike({
-            tag: "xref",
-            attributes: {
-                ref: ref || "",
-            },
-        });
-    },
+    ref: xrefFactory("xref", "ref"),
+    pageref: xrefFactory("xref", "ref"),
+    eqref: xrefFactory("xref", "ref"),
+    cref: xrefFactory("xref", "ref"),
+    Cref: xrefFactory("xref", "ref"),
+    cite: xrefFactory("xref", "ref"),
     index: (node) => {
         // Todo: we may want to add attributes for things like "see" and "seealso" that can be included in the index macro's arguments
         const args = getArgsContent(node);
@@ -357,4 +400,44 @@ export const macroReplacements: Record<
         });
         return ret;
     },
+    // `\frametitle`/`\framesubtitle` are normally lifted out of their `frame`
+    // environment and turned into `<title>`/`<subtitle>` by `beamerFrameFactory`
+    // (see environment-subs.ts). These entries are a fallback for any stray usage
+    // outside a frame so the argument content is still preserved.
+    frametitle: factory("title"),
+    framesubtitle: factory("subtitle"),
+    // Beamer overlay/reveal commands. PreTeXt slides are static, so incremental
+    // reveals have no equivalent: we keep the content and drop the reveal, warning
+    // each time. `\pause` has no content and is simply removed.
+    pause: emptyStringWithWarningFactory(
+        `Warning: There is no equivalent for beamer's "\\pause"; the overlay/reveal was dropped.`
+    ),
+    only: unwrapArgWithWarning(
+        1,
+        `Warning: There is no equivalent for beamer's "\\only"; the overlay spec was dropped and its content kept.`
+    ),
+    uncover: unwrapArgWithWarning(
+        1,
+        `Warning: There is no equivalent for beamer's "\\uncover"; the overlay spec was dropped and its content kept.`
+    ),
+    visible: unwrapArgWithWarning(
+        1,
+        `Warning: There is no equivalent for beamer's "\\visible"; the overlay spec was dropped and its content kept.`
+    ),
+    invisible: unwrapArgWithWarning(
+        1,
+        `Warning: There is no equivalent for beamer's "\\invisible"; the overlay spec was dropped and its content kept.`
+    ),
+    onslide: unwrapArgWithWarning(
+        3,
+        `Warning: There is no equivalent for beamer's "\\onslide"; the overlay spec was dropped and its content kept.`
+    ),
+    alt: unwrapArgWithWarning(
+        1,
+        `Warning: There is no equivalent for beamer's "\\alt"; only the default (first) alternative was kept.`
+    ),
+    temporal: unwrapArgWithWarning(
+        2,
+        `Warning: There is no equivalent for beamer's "\\temporal"; only the default (middle) alternative was kept.`
+    ),
 };

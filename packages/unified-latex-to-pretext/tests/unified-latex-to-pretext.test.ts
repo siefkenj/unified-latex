@@ -112,10 +112,10 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
         expect(html).toEqual(`<md>x+ y</md>`);
     });
 
-    it("Wraps URLs", async () => {
+    it("Handles URLs", async () => {
         html = process(`a\\url{foo.com}b`);
         expect(await normalizeHtml(html)).toEqual(
-            await normalizeHtml(`a<url href="foo.com">foo.com</url>b`)
+            await normalizeHtml(`a<url href="foo.com"/>b`)
         );
 
         html = process(`a\\href{foo.com}{FOO}b`);
@@ -687,9 +687,9 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
         expect(await normalizeHtml(process(`\\textpilcrow`))).toEqual(await n(`<pilcrow/>`));
     });
     it("converts \\verb to inline <c>", async () => {
-        html = process(`inline \\verb|x^2| code`);
+        html = process(`inline \\verb|x^2 ~: -- a| code`);
         expect(await normalizeHtml(html)).toEqual(
-            await normalizeHtml(`inline <c>x^2</c> code`)
+            await normalizeHtml(`inline <c>x^2 ~: -- a</c> code`)
         );
     });
     it("converts verbatim environment to <pre>", async () => {
@@ -1304,6 +1304,124 @@ describe("unified-latex-to-pretext:document-root macros", () => {
             await normalizeHtml(
                 `<pretext><book><title/><chapter><title>Chap</title>Hi.</chapter></book></pretext>`
             )
+        );
+    });
+});
+
+describe("unified-latex-to-pretext:beamer", () => {
+    const process = (value: string) =>
+        processLatexViaUnified()
+            .use(unifiedLatexToPretext, { producePretextFragment: true })
+            .use(xmlCompilePlugin)
+            .processSync({ value }).value as string;
+
+    it("converts a frame to a slide with the \\frametitle as a sibling <title> (a lone paragraph is not wrapped in <p>, like a division)", async () => {
+        const html = process(
+            `\\begin{frame}\\frametitle{My Title}\nSome content.\n\\end{frame}`
+        );
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `<slide><title>My Title</title>Some content.</slide>`
+            )
+        );
+    });
+
+    it("uses a braced frame title \\begin{frame}{Title}{Subtitle}", async () => {
+        const html = process(
+            `\\begin{frame}{Braced Title}{Braced Sub}\nBody.\n\\end{frame}`
+        );
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `<slide><title>Braced Title</title><subtitle>Braced Sub</subtitle>Body.</slide>`
+            )
+        );
+    });
+
+    it("keeps the title outside multiple paragraphs and converts \\framesubtitle", async () => {
+        const html = process(
+            `\\begin{frame}\\frametitle{T}\\framesubtitle{S}\nOne.\n\nTwo.\n\\end{frame}`
+        );
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `<slide><title>T</title><subtitle>S</subtitle><p>One.</p><p>Two.</p></slide>`
+            )
+        );
+    });
+
+    it("wraps a slide's paragraphs like a division: block-level children stay out of <p>, lists stay in", () => {
+        // NB: raw string compare — `<p><ul>` is valid PreTeXt but not valid HTML,
+        // so prettier's HTML parser (used by normalizeHtml) rejects it.
+        const html = process(
+            `\\begin{frame}\\frametitle{T}\nIntro.\n\n\\begin{itemize}\\item A\\end{itemize}\n\n\\begin{block}{B}Inside.\\end{block}\\end{frame}`
+        );
+        expect(html).toEqual(
+            `<slide><title>T</title><p>Intro.</p><p><ul><li><p>A</p></li></ul></p><assemblage><title>B</title><p>Inside.</p></assemblage></slide>`
+        );
+    });
+
+    it("wraps slide paragraphs by the same rules as a <section>", () => {
+        const body = `Intro.\n\n\\begin{itemize}\\item A\\end{itemize}\n\nOutro.`;
+        const slide = process(`\\begin{frame}\\frametitle{T}\n${body}\\end{frame}`);
+        const section = process(`\\section{T}${body}`);
+        // Same paragraph-wrapping structure, only the outer tag differs.
+        expect(slide).toEqual(
+            section
+                .replace(/^<section>/, "<slide>")
+                .replace(/<\/section>$/, "</slide>")
+        );
+    });
+
+    it("converts block/alertblock/exampleblock to <assemblage> with a <title>", async () => {
+        const html = process(
+            `\\begin{block}{Key Idea}\nText.\n\\end{block}`
+        );
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `<assemblage><title>Key Idea</title><p>Text.</p></assemblage>`
+            )
+        );
+    });
+
+    it("converts columns/column to <sidebyside>/<stack>", async () => {
+        const html = process(
+            `\\begin{columns}\\begin{column}{0.5\\textwidth}Left\\end{column}\\begin{column}{0.5\\textwidth}Right\\end{column}\\end{columns}`
+        );
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `<sidebyside><stack><p>Left</p></stack><stack><p>Right</p></stack></sidebyside>`
+            )
+        );
+    });
+
+    it("drops \\pause and keeps surrounding content", async () => {
+        const html = process(`A\\pause B`);
+        expect(await normalizeHtml(html)).toEqual(await normalizeHtml(`A B`));
+    });
+
+    it("drops \\only overlay spec but keeps (and converts) its content", async () => {
+        const html = process(`\\only<2>{Shown \\textbf{bold}}`);
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(`Shown <alert>bold</alert>`)
+        );
+    });
+
+    it("does not crash on overlay specs attached to \\item", async () => {
+        const html = process(
+            `\\begin{itemize}\\item<1-> One\\item<2-> Two\\end{itemize}`
+        );
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `<ul><li><p>One</p></li><li><p>Two</p></li></ul>`
+            )
+        );
+    });
+
+    it("converts \\begin{tikzpicture} correctly", async () => {
+        const html = process(
+            `\\begin{tikzpicture}\n\\draw (0,0) -- (1,1);\n\\end{tikzpicture}`
+        );
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(`<image><latex-image>\n\\draw (0,0) -- (1,1);\n</latex-image></image>`)
         );
     });
 });
