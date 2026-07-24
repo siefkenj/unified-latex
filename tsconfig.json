@@ -6,8 +6,8 @@
         "types": ["vitest/globals"]
     },
     "include": [
-        "./packages/*/index.ts",
-        "./packages/**/libs/**/*.ts",
+        "./packages/**/*.ts",
+        "./packages/**/libs/**/*.json",
         "packages/support-tables/**/*.json"
     ]
 }
