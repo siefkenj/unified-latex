@@ -15,6 +15,7 @@ import {
 import { EXIT, SKIP, visit } from "@unified-latex/unified-latex-util-visit";
 import { environmentReplacements as _environmentReplacements } from "./pre-conversion-subs/environment-subs";
 import { examEnvironmentReplacements } from "./pre-conversion-subs/exam-subs";
+import { attachVerticalSpaceWorkspace } from "./pre-conversion-subs/vertical-space-subs";
 import {
     attachNeededRenderInfo,
     mathjaxSpecificEnvironmentReplacements,
@@ -34,7 +35,11 @@ import {
     isTopLevelDocEnviron,
 } from "./pre-conversion-subs/break-on-boundaries";
 import { reportMacrosUnsupportedByMathjax } from "./pre-conversion-subs/report-unsupported-macro-mathjax";
-import { htmlLike } from "@unified-latex/unified-latex-util-html-like";
+import {
+    extractFromHtmlLike,
+    htmlLike,
+    isHtmlLikeTag,
+} from "@unified-latex/unified-latex-util-html-like";
 import { getArgsContent } from "@unified-latex/unified-latex-util-arguments";
 import { s } from "@unified-latex/unified-latex-builder";
 import { sanitizeXmlId } from "./pre-conversion-subs/utils";
@@ -138,6 +143,13 @@ export const unifiedLatexToPretextLike: Plugin<
         // Look for label macros and attach their content as an argument to their parent environment.
         attachAdditionalAttributes(tree);
 
+        // Look for vertical-spacing commands (\vspace, \vfil(l), \vskip) that trail the
+        // content of some environment/macro argument, and convert them into a `workspace`
+        // attribute on the container they trail (see vertical-space-subs.ts). Must run
+        // before division macros are wrapped in `<p>` tags and before environment/macro
+        // replacement, since it records the attribute via `_renderInfo` on the raw node.
+        attachVerticalSpaceWorkspace(tree);
+
         // Must be done *after* streaming commands are replaced.
         // We only wrap PARs if we *need* to. That is, if the content contains multiple paragraphs
         if (shouldBeWrappedInPars(tree)) {
@@ -154,11 +166,12 @@ export const unifiedLatexToPretextLike: Plugin<
                 return;
             }
             if (isReplaceableEnvironment(node)) {
-                return environmentReplacements[printRaw(node.env)](
+                const replacement = environmentReplacements[printRaw(node.env)](
                     node,
                     info,
                     file
                 );
+                return applyRenderInfoAttributes(node, replacement);
             }
         });
 
@@ -173,7 +186,7 @@ export const unifiedLatexToPretextLike: Plugin<
                     info,
                     file
                 );
-                return replacement;
+                return applyRenderInfoAttributes(node, replacement);
             }
         });
 
@@ -378,6 +391,51 @@ function attachAdditionalAttributes(tree: Ast.Root): void {
             return null;
         }
     });
+}
+
+/**
+ * If `node` (the environment/macro that was just replaced) carries attributes
+ * recorded via `_renderInfo.additionalAttributes` — e.g. `xml:id` from a
+ * `\label`, or `workspace` from a trailing `\vspace` (see `attachAdditionalAttributes`
+ * and `attachVerticalSpaceWorkspace`) — merge them onto whichever html-like tag it
+ * was replaced with. Individual replacement factories are free to handle
+ * `_renderInfo` themselves (some already do, for tags built up from several pieces),
+ * but this makes it work automatically for every replacement, not just the ones
+ * that remembered to check.
+ */
+function applyRenderInfoAttributes<T extends Ast.Node | Ast.Node[] | null | undefined | void>(
+    node: Ast.Node,
+    replacement: T
+): T {
+    const additionalAttributes = node._renderInfo?.additionalAttributes;
+    if (!additionalAttributes || replacement == null) {
+        return replacement;
+    }
+
+    const mergeInto = (candidate: Ast.Node): Ast.Node => {
+        if (!isHtmlLikeTag(candidate)) {
+            return candidate;
+        }
+        const { tag, attributes, content } = extractFromHtmlLike(candidate);
+        return htmlLike({
+            tag,
+            content,
+            attributes: { ...additionalAttributes, ...attributes },
+        });
+    };
+
+    if (Array.isArray(replacement)) {
+        let merged = false;
+        return replacement.map((n) => {
+            if (!merged && isHtmlLikeTag(n)) {
+                merged = true;
+                return mergeInto(n);
+            }
+            return n;
+        }) as T;
+    }
+
+    return mergeInto(replacement as Ast.Node) as T;
 }
 
 // this will likely be removed

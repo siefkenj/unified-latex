@@ -340,6 +340,7 @@ export const environmentReplacements: Record<
     tabular: createTableFromTabular,
     center: envFactory("blockquote"),
     quote: envFactory("blockquote"),
+    quotation: envFactory("blockquote"),
     figure: envFactory("figure", {
         requiresStatementTag: false,
         wrapContentInPars: false,

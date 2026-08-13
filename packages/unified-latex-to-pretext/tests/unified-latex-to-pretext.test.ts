@@ -418,6 +418,44 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
             )
         );
     });
+    it("silently drops a trailing \\vfill in a block environment outside a worksheet/handout/project-like context", async () => {
+        html = process(`\\begin{dfn}\na\\vfill\n\\end{dfn}`);
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `<definition><statement><p>a</p></statement></definition>`
+            )
+        );
+    });
+    it("silently drops a trailing \\vspace in a block environment outside a worksheet/handout/project-like context", async () => {
+        html = process(`\\begin{dfn}\na\\vspace{2cm}\n\\end{dfn}`);
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `<definition><statement><p>a</p></statement></definition>`
+            )
+        );
+    });
+    it("converts a trailing \\vfill into a workspace attribute inside a worksheet environment", async () => {
+        html = process(`\\begin{worksheet}\na\\vfill\n\\end{worksheet}`);
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(`<worksheet workspace="1in"><p>a</p></worksheet>`)
+        );
+    });
+    it("converts a trailing \\vspace into a workspace attribute inside a block environment nested in a handout", async () => {
+        html = process(
+            `\\begin{handout}\\begin{dfn}\na\\vspace{2cm}\n\\end{dfn}\\end{handout}`
+        );
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `<handout><p><definition workspace="2cm"><statement><p>a</p></statement></definition></p></handout>`
+            )
+        );
+    });
+    it("converts a trailing \\vfill into a workspace attribute inside a project-like environment", async () => {
+        html = process(`\\begin{activity}\na\\vfill\n\\end{activity}`);
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(`<activity workspace="1in"><p>a</p></activity>`)
+        );
+    });
     it("converts solution", async () => {
         html = process(`\\begin{solution}sol\n\\end{solution}`);
         expect(await normalizeHtml(html)).toEqual(
@@ -432,6 +470,25 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
             await normalizeHtml(
                 `<theorem><title>My Theorem</title><statement><p>a</p><p>b</p></statement></theorem>`
             )
+        );
+    });
+    it("ignores the star on starred environments and converts them like the unstarred form", async () => {
+        html = process(`\\begin{theorem*}a\\end{theorem*}`);
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `<theorem><statement><p>a</p></statement></theorem>`
+            )
+        );
+
+        html = process(`\\begin{quote*}a\\end{quote*}`);
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(`<blockquote><p>a</p></blockquote>`)
+        );
+
+        // A starred PreTeXt-specific environment still picks up its optional title.
+        html = process(`\\begin{exercises*}[My Title]a\\end{exercises*}`);
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(`<exercises><title>My Title</title><p>a</p></exercises>`)
         );
     });
     it("places proof as sibling of statement inside theorem", async () => {
@@ -648,6 +705,14 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
             )
         );
     });
+    it("silently drops a trailing \\vspace at the end of a section (not workspace-eligible)", async () => {
+        html = process(`\\section{Sec}\n\nSome text.\\vspace{1in}`);
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `<section><title>Sec</title>Some text.</section>`
+            )
+        );
+    });
     it("converts generator macros", async () => {
         const n = (s: string) => normalizeHtml(s);
         expect(await normalizeHtml(process(`\\eg`))).toEqual(await n(`<eg/>`));
@@ -708,6 +773,24 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
         html = process(`\\begin{code}\nx = 1 + 2\n\\end{code}`);
         expect(await normalizeHtml(html)).toEqual(
             await normalizeHtml(`<pre>x = 1 + 2</pre>`)
+        );
+    });
+    it("silently drops a trailing \\vspace inside a macro argument (not workspace-eligible)", async () => {
+        expect(
+            await normalizeHtml(process(`\\footnote{a note\\vspace{1in}}`))
+        ).toEqual(await normalizeHtml(`<fn>a note</fn>`));
+    });
+    it("converts a trailing \\vspace inside a macro argument into a workspace attribute when nested in a worksheet", async () => {
+        expect(
+            await normalizeHtml(
+                process(
+                    `\\begin{worksheet}\\footnote{a note\\vspace{1in}}\\end{worksheet}`
+                )
+            )
+        ).toEqual(
+            await normalizeHtml(
+                `<worksheet><p><fn workspace="1in">a note</fn></p></worksheet>`
+            )
         );
     });
     it("converts inline text macros", async () => {

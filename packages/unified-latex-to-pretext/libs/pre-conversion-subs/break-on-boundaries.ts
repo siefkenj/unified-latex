@@ -72,6 +72,7 @@ export const divisionGroups: DivisionEntry[][] = [
             mappedEnviron: "_readingquestions",
             pretextTag: "reading-questions",
         },
+        { division: "specialsection", mappedEnviron: "_section" },
     ],
     // Group 3: subsection level
     [{ division: "subsection", mappedEnviron: "_subsection" }],

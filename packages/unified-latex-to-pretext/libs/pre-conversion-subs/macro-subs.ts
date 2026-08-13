@@ -249,6 +249,15 @@ export const macroReplacements: Record<
     vspace: emptyStringWithWarningFactory(
         `Warning: There is no equivalent tag for \"vspace\", an empty Ast.String was used as a replacement.`
     ),
+    // A trailing \vspace/\vfil(l) is converted into a `workspace` attribute on the
+    // element it trails (see vertical-space-subs.ts); this only handles the residual
+    // case of one that isn't trailing anything.
+    vfil: emptyStringWithWarningFactory(
+        `Warning: There is no equivalent tag for \"vfil\", an empty Ast.String was used as a replacement.`
+    ),
+    vfill: emptyStringWithWarningFactory(
+        `Warning: There is no equivalent tag for \"vfill\", an empty Ast.String was used as a replacement.`
+    ),
     hspace: emptyStringWithWarningFactory(
         `Warning: There is no equivalent tag for \"hspace\", an empty Ast.String was used as a replacement.`
     ),

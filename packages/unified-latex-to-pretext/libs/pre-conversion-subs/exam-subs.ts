@@ -15,6 +15,7 @@ import { visit, VisitInfo } from "@unified-latex/unified-latex-util-visit";
 import { environments as examCtnEnvironments } from "@unified-latex/unified-latex-ctan/package/exam";
 import { wrapPars } from "../wrap-pars";
 import { trim } from "@unified-latex/unified-latex-util-trim";
+import { isWhitespaceLike } from "./vertical-space-subs";
 
 type HtmlAttributes = Record<string, string>;
 
@@ -137,104 +138,25 @@ function getItemBody(node: Ast.Macro): Ast.Node[] {
     return node.args[node.args.length - 1].content;
 }
 
-function isWhitespaceLike(node: Ast.Node): boolean {
-    return node.type === "whitespace" || node.type === "comment";
-}
-
-function isVfillMacro(node: Ast.Node): boolean {
-    return match.macro(node, "vfill") || match.macro(node, "vfil");
-}
-
-function isVspaceMacro(node: Ast.Node): boolean {
-    return match.macro(node, "vspace");
-}
-
-function getVspaceWorkspace(node: Ast.Macro): string | undefined {
-    const args = getArgsContent(node);
-    for (let i = args.length - 1; i >= 0; i--) {
-        const argContent = args[i];
-        if (!argContent || argContent.length === 0) {
-            continue;
-        }
-        const value = printRaw(argContent).trim();
-        if (value) {
-            return value;
-        }
-    }
-    return undefined;
-}
-
-function extractTrailingWorkspace(bodyNodes: Ast.Node[]): {
-    bodyNodes: Ast.Node[];
-    workspace?: string;
-} {
-    const remainingBody = [...bodyNodes];
-
-    while (
-        remainingBody.length > 0 &&
-        isWhitespaceLike(remainingBody[remainingBody.length - 1])
-    ) {
-        remainingBody.pop();
-    }
-
-    const lastNode = remainingBody[remainingBody.length - 1];
-    if (!lastNode) {
-        return { bodyNodes: remainingBody };
-    }
-
-    if (isVfillMacro(lastNode)) {
-        remainingBody.pop();
-        trim(remainingBody);
-        return { bodyNodes: remainingBody, workspace: "1in" };
-    }
-
-    if (isVspaceMacro(lastNode)) {
-        const workspace = getVspaceWorkspace(lastNode as Ast.Macro);
-        if (!workspace) {
-            return { bodyNodes: remainingBody };
-        }
-
-        remainingBody.pop();
-        trim(remainingBody);
-        return { bodyNodes: remainingBody, workspace };
-    }
-
-    if (lastNode.type !== "string") {
-        return { bodyNodes: remainingBody };
-    }
-
-    let index = remainingBody.length - 2;
-    while (index >= 0 && isWhitespaceLike(remainingBody[index])) {
-        index--;
-    }
-
-    const macroNode = remainingBody[index];
-    if (!macroNode || !match.macro(macroNode, "vskip")) {
-        return { bodyNodes: remainingBody };
-    }
-
-    const workspace = lastNode.content.trim();
-    if (!workspace) {
-        return { bodyNodes: remainingBody };
-    }
-
-    remainingBody.splice(index);
-    trim(remainingBody);
-    return { bodyNodes: remainingBody, workspace };
-}
-
+/**
+ * Points and workspace attributes for an exam item macro (`\question`/`\part`/etc.).
+ *
+ * The workspace value itself is no longer computed here: a trailing `\vspace`/`\vfil(l)`/
+ * `\vskip` in the item's body was already stripped out and recorded on this macro's
+ * `_renderInfo.additionalAttributes` by the general `attachVerticalSpaceWorkspace` pass,
+ * which runs earlier in the pipeline (before exam environments are converted). See
+ * vertical-space-subs.ts.
+ */
 function getExamItemAttributes(node: Ast.Macro): {
     attributes: HtmlAttributes;
     bodyNodes: Ast.Node[];
 } {
     const pointsAttributes = getPointsAttribute(node);
-    const { bodyNodes, workspace } = extractTrailingWorkspace(getItemBody(node));
+    const additionalAttributes = node._renderInfo?.additionalAttributes ?? {};
 
     return {
-        attributes: workspace
-            ? { ...pointsAttributes, workspace }
-            : pointsAttributes,
-        bodyNodes,
+        attributes: { ...pointsAttributes, ...additionalAttributes },
+        bodyNodes: getItemBody(node),
     };
 }
 

@@ -34,6 +34,7 @@ import {
 } from "./unified-latex-plugin-to-pretext-like";
 import { expandUserDefinedMacros } from "./pre-conversion-subs/expand-user-defined-macros";
 import { replaceQuoteLigatures } from "./pre-conversion-subs/replace-quote-ligatures";
+import { stripStarredEnvironments } from "./pre-conversion-subs/strip-star-subs";
 import {
     macros as pretextMacros,
     environments as pretextEnvironments,
@@ -60,6 +61,12 @@ export const unifiedLatexToPretext: Plugin<
         const producePretextFragment = options?.producePretextFragment
             ? options?.producePretextFragment
             : false;
+
+        // Ignore stars on non-math environments (e.g. `theorem*`, `exercises*`)
+        // so they're treated identically to their unstarred form. Must run
+        // first: it needs to happen before arguments are attached below, and
+        // before any other name-based environment matching.
+        stripStarredEnvironments(tree);
 
         // expand user defined macros
         expandUserDefinedMacros(tree);
