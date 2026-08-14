@@ -671,13 +671,79 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
             await normalizeHtml(`See <xref ref="foo" /> for more`)
         );
     });
-    it("Converts thebibliography to <references> of raw <biblio> entries", async () => {
+    it("Falls back to <biblio type=\"raw\"> for unstructured entries", async () => {
+        // No emphasized title and no \newblock, so there is nothing to
+        // recover; the raw form is still valid and still anchors \cite.
+        // The optional [label] is dropped -- PreTeXt labels entries itself.
         html = process(
-            `\\begin{thebibliography}{99}\n\\bibitem[Smi20]{smith2020} J. Smith, \\textit{A Great Paper}, 2020.\n\\bibitem{jones2019} A. Jones, Another Paper, 2019.\n\\end{thebibliography}`
+            `\\begin{thebibliography}{99}\n\\bibitem[Jon19]{jones2019} A. Jones, Another Paper, 2019.\n\\end{thebibliography}`
         );
         expect(await normalizeHtml(html)).toEqual(
             await normalizeHtml(
-                `<references><biblio xml:id="smith2020" type="raw">J. Smith, <em>A Great Paper</em>, 2020.</biblio><biblio xml:id="jones2019" type="raw">A. Jones, Another Paper, 2019.</biblio></references>`
+                `<references><biblio xml:id="jones2019" type="raw">A. Jones, Another Paper, 2019.</biblio></references>`
+            )
+        );
+    });
+
+    it("Parses AMS-style \\bibitem entries into CSL fields", async () => {
+        html = process(
+            `\\begin{thebibliography}{99}\n\\bibitem{conrey} J.~B. Conrey and D.~W. Farmer, \\emph{Mean values of $L$-functions and symmetry}, Internat. Math. Res. Notices (2000), no.~17, 883--908.\n\\end{thebibliography}`
+        );
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `<references><biblio xml:id="conrey" type="article-journal"><author><name><given>J. B.</given><family>Conrey</family></name><name><given>D. W.</given><family>Farmer</family></name></author><title>Mean values of <m>L</m>-functions and symmetry</title><container-title>Internat. Math. Res. Notices</container-title><number>17</number><issued><date year="2000"/></issued><page>883-908</page></biblio></references>`
+            )
+        );
+    });
+
+    it("Parses \\newblock-style (plain.bst) entries into the same CSL fields", async () => {
+        // plain/abbrv/alpha separate fields with \newblock and italicize the
+        // *journal*, where AMS styles italicize the *title*.
+        html = process(
+            `\\begin{thebibliography}{99}\n\\bibitem{conrey} J.~B. Conrey and D.~W. Farmer. \\newblock Mean values of {$L$}-functions and symmetry. \\newblock {\\em Internat. Math. Res. Notices}, (17):883--908, 2000.\n\\end{thebibliography}`
+        );
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `<references><biblio xml:id="conrey" type="article-journal"><author><name><given>J. B.</given><family>Conrey</family></name><name><given>D. W.</given><family>Farmer</family></name></author><title>Mean values of <m>L</m>-functions and symmetry</title><container-title>Internat. Math. Res. Notices</container-title><number>17</number><issued><date year="2000"/></issued><page>883-908</page></biblio></references>`
+            )
+        );
+    });
+
+    it("Classifies an entry with a publisher as a CSL book", async () => {
+        html = process(
+            `\\begin{thebibliography}{99}\n\\bibitem{lang} S. Lang, \\emph{Algebra}, 3rd ed., Springer-Verlag, New York, 2002.\n\\end{thebibliography}`
+        );
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `<references><biblio xml:id="lang" type="book"><author><name><given>S.</given><family>Lang</family></name></author><title>Algebra</title><edition>3</edition><issued><date year="2002"/></issued><publisher>Springer-Verlag</publisher><publisher-place>New York</publisher-place></biblio></references>`
+            )
+        );
+    });
+
+    it("Keeps a \\url intact in a CSL entry and classifies it as a webpage", async () => {
+        // The URL must not go through ligature expansion: `~` would become a
+        // Unicode nbsp (which `\s` then matches, truncating the link).
+        html = process(
+            `\\begin{thebibliography}{99}\n\\bibitem{web} A. Author, \\emph{Some page}, 2021. \\url{https://example.com/~user/a--b}\n\\end{thebibliography}`
+        );
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `<references><biblio xml:id="web" type="webpage"><author><name><given>A.</given><family>Author</family></name></author><title>Some page</title><issued><date year="2021"/></issued><URL>https://example.com/~user/a--b</URL></biblio></references>`
+            )
+        );
+    });
+
+    it("Handles \\bysame, accents, name particles, and a bold volume", async () => {
+        html = process(
+            `\\begin{thebibliography}{99}\n\\bibitem{a} P. Erd{\\H o}s and B.~L. van der Waerden, \\emph{First paper}, J. Things \\textbf{12} (1998), 1--10.\n\\bibitem{b} \\bysame, \\emph{Second paper}, J. Things \\textbf{13} (1999), 11--20.\n\\end{thebibliography}`
+        );
+        const authors = `<author><name><given>P.</given><family>Erdős</family></name><name><given>B. L.</given><non-dropping-particle>van der</non-dropping-particle><family>Waerden</family></name></author>`;
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `<references>` +
+                    `<biblio xml:id="a" type="article-journal">${authors}<title>First paper</title><container-title>J. Things</container-title><volume>12</volume><issued><date year="1998"/></issued><page>1-10</page></biblio>` +
+                    `<biblio xml:id="b" type="article-journal">${authors}<title>Second paper</title><container-title>J. Things</container-title><volume>13</volume><issued><date year="1999"/></issued><page>11-20</page></biblio>` +
+                    `</references>`
             )
         );
     });

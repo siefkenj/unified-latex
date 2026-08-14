@@ -16,6 +16,11 @@ import { VFile } from "vfile";
 import { makeWarningMessage, sanitizeXmlId } from "./utils";
 import { createTableFromTabular } from "./create-table-from-tabular";
 import { generateDroppedEnvironmentReplacements } from "./dropped-subs";
+import {
+    parseBibitemToCsl,
+    renderCslBiblio,
+    type PersonName,
+} from "./biblio-csl";
 
 /**
  * Extract the raw source corresponding to an environment body.
@@ -445,15 +450,24 @@ export const environmentReplacements: Record<
     //   webwork: wrap content as-is (usually empty or with seed attr)
     webwork: envFactory("webwork", { requiresStatementTag: false }),
     // Bibliography: a standard `thebibliography` environment becomes a
-    // `<references>` division containing one `<biblio type="raw">` per
-    // `\bibitem`. PreTeXt's `<biblio>` supports three entry styles -- raw
-    // text, bibtex-style fields, or structured CSL-JSON-style fields -- and
-    // "raw" is the simplest fit for hand-written bibliography prose. It's
-    // enough to give `\cite{key}` (already mapped to `<xref ref="key"/>` in
-    // macro-subs.ts) a valid target. Any custom `\bibitem[label]{key}` label
-    // is dropped, since PreTeXt numbers/labels entries automatically.
+    // `<references>` division holding one `<biblio>` per `\bibitem`.
+    //
+    // PreTeXt's `<biblio>` offers three mutually exclusive entry styles, gated
+    // by `@type`: free-form `raw` text, flat `bibtex` fields, and structured
+    // CSL fields (`article-journal`, `book`, ...). CSL is the richest -- it
+    // carries structured names and drives citation-style rendering via
+    // citeproc-py -- so each entry is first put through the heuristic parser in
+    // biblio-csl.ts. Entries too unstructured to parse fall back to
+    // `type="raw"`, which is always schema-valid and still gives `\cite{key}`
+    // (mapped to `<xref ref="key"/>` in macro-subs.ts) something to point at.
+    //
+    // Any custom `\bibitem[label]{key}` label is dropped, since PreTeXt
+    // numbers and labels entries itself.
     thebibliography: (env) => {
         const items = env.content.filter((node) => match.macro(node, "bibitem"));
+        // `\bysame` refers back to the preceding entry's authors.
+        let previousAuthors: PersonName[] | undefined;
+
         const entries = items.flatMap((node) => {
             if (!match.macro(node) || !node.args) {
                 return [];
@@ -471,6 +485,14 @@ export const environmentReplacements: Record<
             }
             const body = [...(args[args.length - 1] || [])];
             trim(body);
+
+            const parsed = parseBibitemToCsl(body, previousAuthors);
+            if (parsed) {
+                if (parsed.authors.length > 0) {
+                    previousAuthors = parsed.authors;
+                }
+                return renderCslBiblio(sanitizeXmlId(key), parsed);
+            }
             return htmlLike({
                 tag: "biblio",
                 attributes: { "xml:id": sanitizeXmlId(key), type: "raw" },
