@@ -71,6 +71,13 @@ export type PluginOptions = {
      * If it's false (default), a valid and complete PreTeXt document is returned.
      */
     producePretextFragment?: boolean;
+
+    /**
+     * A pre-built `<frontmatter>` node (see `bibinfo.ts`), computed by
+     * `unifiedLatexToPretext` from preamble macros before this plugin runs.
+     * Not meant to be set directly -- inserted right after `<title>` when present.
+     */
+    frontmatter?: Ast.Macro | null;
 };
 
 /**
@@ -171,7 +178,12 @@ export const unifiedLatexToPretextLike: Plugin<
                     info,
                     file
                 );
-                return applyRenderInfoAttributes(node, replacement);
+                const withAttributes = applyRenderInfoAttributes(
+                    node,
+                    replacement
+                );
+                markAsBlockLevel(withAttributes);
+                return withAttributes;
             }
         });
 
@@ -215,10 +227,20 @@ export const unifiedLatexToPretextLike: Plugin<
             }
         });
 
+        // Pars are split into `<p>` tags early (before macro/environment
+        // replacement runs) so that par-breaking macros like `\section` can
+        // still be recognized as themselves. A macro/environment with no
+        // PreTeXt equivalent (see dropped-subs.ts) is only replaced with an
+        // empty string *after* that split, so a paragraph whose sole content
+        // was one of those dropped macros (e.g. a lone `\centering` on its
+        // own line) is left wrapping nothing — a self-closing `<p/>`. Final
+        // pass: unwrap any `<p>` that has no meaningful content left.
+        removeEmptyPars(tree);
+
         // Wrap in enough tags to ensure a valid pretext document
         if (!producePretextFragment) {
             // choose a book or article tag
-            createValidPretextDoc(tree);
+            createValidPretextDoc(tree, options?.frontmatter);
 
             // wrap around with pretext tag
             tree.content = [
@@ -230,6 +252,44 @@ export const unifiedLatexToPretextLike: Plugin<
         originalTree.content = tree.content;
     };
 };
+
+/**
+ * Unwrap any `<p>` html-like tag whose content has nothing meaningful left
+ * in it (see the call site for why this can happen after macro/environment
+ * replacement runs). The tag is dropped but its (empty/whitespace/comment)
+ * content is kept in place, so a lone comment isn't lost.
+ */
+function removeEmptyPars(tree: Ast.Root): void {
+    replaceNode(tree, (node) => {
+        if (!isHtmlLikeTag(node)) {
+            return;
+        }
+        const { tag, content } = extractFromHtmlLike(node);
+        if (tag === "p" && !hasMeaningfulContent(content)) {
+            return content;
+        }
+    });
+}
+
+/**
+ * Whether `nodes` contains anything that should actually render as content,
+ * as opposed to only whitespace/comments/parbreaks or empty strings/groups
+ * left behind by a dropped macro (see `dropped-subs.ts`).
+ */
+function hasMeaningfulContent(nodes: Ast.Node[]): boolean {
+    return nodes.some((node) => {
+        if (match.comment(node) || match.whitespace(node) || match.parbreak(node)) {
+            return false;
+        }
+        if (node.type === "string") {
+            return node.content.trim() !== "";
+        }
+        if (node.type === "group") {
+            return hasMeaningfulContent(node.content);
+        }
+        return true;
+    });
+}
 
 /**
  * Does the content contain multiple paragraphs? If so, it should be wrapped in `p` tags.
@@ -263,9 +323,10 @@ function containsPar(content: Ast.Node[]): boolean {
 }
 
 /**
- * Wrap the tree content in a book or article tag.
+ * Wrap the tree content in a book or article tag. `frontmatter`, when given,
+ * is inserted right after `<title>` (see `bibinfo.ts`).
  */
-function createValidPretextDoc(tree: Ast.Root): void {
+function createValidPretextDoc(tree: Ast.Root, frontmatter?: Ast.Macro | null): void {
     // A document may start with \book{Title}, \article{Title}, or
     // \slideshow{Title} instead of relying on \documentclass and \title.
     // breakOnBoundaries treats these as the outermost division, so by now
@@ -274,13 +335,19 @@ function createValidPretextDoc(tree: Ast.Root): void {
     // environment *is* the document root, so skip the heuristics below.
     const rootDivision = tree.content.find(
         (node) => anyEnvironment(node) && isTopLevelDocEnviron(node)
-    );
+    ) as Ast.Environment | undefined;
     if (rootDivision) {
+        // The division's title is synthesized from its argument later, in
+        // `to-pretext.ts`'s environment conversion (`[titleTag, ...content]`),
+        // so putting `frontmatter` first in its content puts it right after
+        // that synthesized title in the final output.
+        if (frontmatter) {
+            rootDivision.content.unshift(frontmatter);
+        }
         tree.content = [rootDivision];
         return;
     }
 
-    // this will be incomplete since the author info isn't pushed yet, which obtains documentclass, title, etc.
     let isBook: boolean = false;
 
     // look for a \documentclass (this will need to change, as this info will be gotten earlier)
@@ -341,6 +408,12 @@ function createValidPretextDoc(tree: Ast.Root): void {
         tree.content.unshift(htmlLike({ tag: "title", content: s("") }));
     }
 
+    // <title> was just unshifted to index 0 above (every branch does it);
+    // <frontmatter> goes right after it.
+    if (frontmatter) {
+        tree.content.splice(1, 0, frontmatter);
+    }
+
     // now create a book or article tag
     if (isBook) {
         tree.content = [htmlLike({ tag: "book", content: tree.content })];
@@ -391,6 +464,36 @@ function attachAdditionalAttributes(tree: Ast.Root): void {
             return null;
         }
     });
+}
+
+/**
+ * Tag every html-like node produced by an environment replacement as
+ * block-level, by setting `_renderInfo.isBlockLevel`.
+ *
+ * Environment replacement runs bottom-up (children replaced before their
+ * parent, see `replaceNode`), so by the time an *outer* environment's own
+ * replacement factory wraps its content in `<p>` tags (e.g. `envFactory`'s
+ * `wrapContentInPars`, or a dropped environment via `dropped-subs.ts`), any
+ * nested environment has already been converted into a plain html-like
+ * macro — indistinguishable, to `splitForPars`, from an inline macro like
+ * `<em>`. Without this marker, a `\begin{theorem}...\end{theorem}` nested
+ * inside a `\begin{minipage}` would get wrapped inside a `<p>`, which is
+ * invalid. `splitForPars` treats a marked node as a paragraph boundary, the
+ * same way it already treats a still-unconverted `environment` node.
+ */
+function markAsBlockLevel(
+    replacement: Ast.Node | Ast.Node[] | null | undefined | void
+): void {
+    const nodes = replacement == null
+        ? []
+        : Array.isArray(replacement)
+          ? replacement
+          : [replacement];
+    for (const n of nodes) {
+        if (isHtmlLikeTag(n)) {
+            n._renderInfo = { ...n._renderInfo, isBlockLevel: true };
+        }
+    }
 }
 
 /**

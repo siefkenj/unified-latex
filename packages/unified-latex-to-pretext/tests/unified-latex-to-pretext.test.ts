@@ -107,6 +107,15 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
         expect(html).toEqual(`<p>a</p> <!-- foo--><p>b</p>`);
     });
 
+    it("A dropped macro alone between paragraphs does not leave a self-closing <p>", async () => {
+        // `\centering` has no PreTeXt equivalent and is dropped (see
+        // dropped-subs.ts), but that only happens *after* pars are split
+        // into <p> tags, so a paragraph consisting only of `\centering`
+        // would otherwise be left wrapping nothing.
+        html = process(`a\n\n\\centering\n\nb`);
+        expect(html).toEqual(`<p>a</p><p>b</p>`);
+    });
+
     it("Comments inside math are removed", async () => {
         html = process(`\\[x %comment\n+ y\\]`);
         expect(html).toEqual(`<md>x+ y</md>`);
@@ -446,7 +455,7 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
         );
         expect(await normalizeHtml(html)).toEqual(
             await normalizeHtml(
-                `<handout><p><definition workspace="2cm"><statement><p>a</p></statement></definition></p></handout>`
+                `<handout><definition workspace="2cm"><statement><p>a</p></statement></definition></handout>`
             )
         );
     });
@@ -1386,6 +1395,59 @@ describe("unified-latex-to-pretext:document-root macros", () => {
         expect(await normalizeHtml(html)).toEqual(
             await normalizeHtml(
                 `<pretext><book><title/><chapter><title>Chap</title>Hi.</chapter></book></pretext>`
+            )
+        );
+    });
+
+    it("builds <frontmatter><bibinfo> from preamble \\author/\\address/\\email, after a \\book/\\article root macro", async () => {
+        const html = processDoc(
+            `\\author{Jane Doe}\\address{State University}\\email{jane@example.edu}` +
+                `\\begin{document}\\article{My Title}\\section{Sec}Hi.\\end{document}`
+        );
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `<pretext><article><title>My Title</title>` +
+                    `<frontmatter><bibinfo><author><personname>Jane Doe</personname>` +
+                    `<institution>State University</institution><email>jane@example.edu</email>` +
+                    `</author></bibinfo><titlepage><titlepage-items/></titlepage></frontmatter>` +
+                    `<section><title>Sec</title>Hi.</section></article></pretext>`
+            )
+        );
+    });
+
+    it("builds <frontmatter><bibinfo> with multiple authors, \\date, and \\keywords, after the \\documentclass fallback", async () => {
+        const html = processDoc(
+            `\\documentclass{book}\\begin{document}` +
+                `\\author{A}\\author{B}\\date{2026}\\keywords{graph theory, combinatorics}` +
+                `\\chapter{Chap}Hi.\\end{document}`
+        );
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `<pretext><book><title/>` +
+                    `<frontmatter><bibinfo>` +
+                    `<author><personname>A</personname></author>` +
+                    `<author><personname>B</personname></author>` +
+                    `<date>2026</date>` +
+                    `<keywords><keyword>graph theory</keyword><keyword>combinatorics</keyword></keywords>` +
+                    `</bibinfo><titlepage><titlepage-items/></titlepage></frontmatter>` +
+                    `<chapter><title>Chap</title>Hi.</chapter></book></pretext>`
+            )
+        );
+    });
+
+    it("maps \\subjclass to a <keywords authority=\"msc\"> block", async () => {
+        const html = processDoc(
+            `\\author{Jane}\\subjclass[2020]{05C99, 68W99}` +
+                `\\begin{document}\\article{T}Hi.\\end{document}`
+        );
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `<pretext><article><title>T</title>` +
+                    `<frontmatter><bibinfo>` +
+                    `<author><personname>Jane</personname></author>` +
+                    `<keywords authority="msc" variant="2020"><keyword>05C99</keyword><keyword>68W99</keyword></keywords>` +
+                    `</bibinfo><titlepage><titlepage-items/></titlepage></frontmatter>` +
+                    `Hi.</article></pretext>`
             )
         );
     });

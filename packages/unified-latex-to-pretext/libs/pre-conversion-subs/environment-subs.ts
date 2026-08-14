@@ -15,6 +15,7 @@ import { VisitInfo } from "@unified-latex/unified-latex-util-visit";
 import { VFile } from "vfile";
 import { makeWarningMessage } from "./utils";
 import { createTableFromTabular } from "./create-table-from-tabular";
+import { generateDroppedEnvironmentReplacements } from "./dropped-subs";
 
 /**
  * Extract the raw source corresponding to an environment body.
@@ -307,22 +308,6 @@ function beamerFrameFactory(): (
 }
 
 /**
- * Remove the env environment by returning the content in env only.
- */
-function removeEnv(env: Ast.Environment, info: VisitInfo, file?: VFile) {
-    // add warning
-    file?.message(
-        makeWarningMessage(
-            env,
-            `Warning: There is no equivalent tag for \"${env.env}\", so the ${env.env} environment was removed.`,
-            "environment-subs"
-        )
-    );
-
-    return env.content;
-}
-
-/**
  * Rules for replacing a macro with an html-like macro
  * that will render has pretext when printed.
  */
@@ -337,6 +322,7 @@ export const environmentReplacements: Record<
     // TODO: add additional envs like theorem, etc.
     enumerate: enumerateFactory("ol"),
     itemize: enumerateFactory("ul"),
+    description: enumerateFactory("dl"),
     tabular: createTableFromTabular,
     center: envFactory("blockquote"),
     quote: envFactory("blockquote"),
@@ -523,6 +509,9 @@ export const environmentReplacements: Record<
     }),
     // Most block-like environments, done programmatically to avoid having to list them all here:
     ...genEnvironmentReplacements(),
+    // Environments with no PreTeXt equivalent at all are declared as data in
+    // dropped-subs.ts, not as one-off entries here.
+    ...generateDroppedEnvironmentReplacements(),
 };
 
 function genEnvironmentReplacements() {

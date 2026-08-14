@@ -13,7 +13,12 @@ export const macros: MacroInfoRecord = {
     // Modular include macro for PreTeXt Plus: \plus[attrs]{type}{ref}
     ...plusMacros,
     // PreTeXt-specific macro
+    alert: { signature: "m" },
     term: { signature: "m" },
+    // AMS-style Mathematics Subject Classification, e.g. `\subjclass[2020]{05C99}`.
+    // Not defined by any CTAN package we load, unlike \author/\address/\email
+    // (amsart), \date/\thanks (latex2e), and \keywords (beamer).
+    subjclass: { signature: "o m", renderInfo: { breakAround: true } },
     // Verbatim/code inline macros
     code: { signature: "m" },
     lstinline: { signature: "m" },
@@ -74,6 +79,7 @@ export const macros: MacroInfoRecord = {
     sout: { signature: "m" },
     insert: { signature: "m" },
     stale: { signature: "m" },
+    citep: { signature: "o m" },
 };
 
 /**

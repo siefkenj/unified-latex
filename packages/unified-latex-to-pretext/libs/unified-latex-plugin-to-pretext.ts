@@ -35,6 +35,7 @@ import {
 import { expandUserDefinedMacros } from "./pre-conversion-subs/expand-user-defined-macros";
 import { replaceQuoteLigatures } from "./pre-conversion-subs/replace-quote-ligatures";
 import { stripStarredEnvironments } from "./pre-conversion-subs/strip-star-subs";
+import { gatherAndRemoveBibinfo } from "./bibinfo";
 import {
     macros as pretextMacros,
     environments as pretextEnvironments,
@@ -95,6 +96,13 @@ export const unifiedLatexToPretext: Plugin<
         // args[0] = optional points and args[1] = question body.
         fixExamMacroArgs(tree);
 
+        // Gather \author/\address/\email/\date/\keywords/\subjclass from
+        // anywhere in the tree into a <frontmatter><bibinfo> node, and strip
+        // them from the tree so they don't leak into the converted content.
+        // Must run before the \begin{document} narrowing below, since these
+        // macros are conventionally in the preamble (outside that content).
+        const frontmatter = gatherAndRemoveBibinfo(tree, file);
+
         // If there is a \begin{document}...\end{document}, that's the only
         // content we want to convert.
         let content = tree.content;
@@ -116,7 +124,9 @@ export const unifiedLatexToPretext: Plugin<
         // since we don't want to wrap content outside of \begin{document}...\end{document} with <pretext>...</pretext>
         tree.content = content;
 
-        unified().use(unifiedLatexToPretextLike, options).run(tree, file);
+        unified()
+            .use(unifiedLatexToPretextLike, { ...options, frontmatter })
+            .run(tree, file);
 
         // This should happen right before converting to PreTeXt because macros like `\&` should
         // be expanded via html rules first (and not turned into their corresponding ligature directly)
