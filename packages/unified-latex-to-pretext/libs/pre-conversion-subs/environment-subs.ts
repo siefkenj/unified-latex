@@ -13,7 +13,7 @@ import { wrapPars } from "../wrap-pars";
 import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 import { VisitInfo } from "@unified-latex/unified-latex-util-visit";
 import { VFile } from "vfile";
-import { makeWarningMessage } from "./utils";
+import { makeWarningMessage, sanitizeXmlId } from "./utils";
 import { createTableFromTabular } from "./create-table-from-tabular";
 import { generateDroppedEnvironmentReplacements } from "./dropped-subs";
 
@@ -444,6 +444,41 @@ export const environmentReplacements: Record<
         }),
     //   webwork: wrap content as-is (usually empty or with seed attr)
     webwork: envFactory("webwork", { requiresStatementTag: false }),
+    // Bibliography: a standard `thebibliography` environment becomes a
+    // `<references>` division containing one `<biblio type="raw">` per
+    // `\bibitem`. PreTeXt's `<biblio>` supports three entry styles -- raw
+    // text, bibtex-style fields, or structured CSL-JSON-style fields -- and
+    // "raw" is the simplest fit for hand-written bibliography prose. It's
+    // enough to give `\cite{key}` (already mapped to `<xref ref="key"/>` in
+    // macro-subs.ts) a valid target. Any custom `\bibitem[label]{key}` label
+    // is dropped, since PreTeXt numbers/labels entries automatically.
+    thebibliography: (env) => {
+        const items = env.content.filter((node) => match.macro(node, "bibitem"));
+        const entries = items.flatMap((node) => {
+            if (!match.macro(node) || !node.args) {
+                return [];
+            }
+            // `\bibitem`'s signature is `o m` under plain latex2e, but `s d<> o m`
+            // under beamer (which supports `\bibitem<overlay>[label]{key}` and
+            // takes priority when beamer is loaded). Either way cleanEnumerateBody
+            // appends the body as the final argument and the mandatory key is
+            // always the one right before it, so index from the end rather than
+            // assuming a fixed position.
+            const args = getArgsContent(node);
+            const key = printRaw(args[args.length - 2] || []).trim();
+            if (!key) {
+                return [];
+            }
+            const body = [...(args[args.length - 1] || [])];
+            trim(body);
+            return htmlLike({
+                tag: "biblio",
+                attributes: { "xml:id": sanitizeXmlId(key), type: "raw" },
+                content: body,
+            });
+        });
+        return htmlLike({ tag: "references", content: entries });
+    },
     // Structural/frontmatter environments
     preface: envFactory("preface"),
     biography: envFactory("biography"),

@@ -181,6 +181,36 @@ function cleanupLigatures(nodes: Ast.Node[]): Ast.Node[] {
     return result;
 }
 
+/** Macros whose sole argument is a literal URL rather than prose. */
+const URL_MACROS = new Set(["url", "nolinkurl", "hyperbaseurl"]);
+
+/**
+ * Whether an array sits inside a macro argument holding a literal URL.
+ *
+ * Ligature replacement is a *prose* transformation, so — like math mode — it
+ * has to leave URLs alone: `~`, `--`, and `---` are ordinary characters in a
+ * URL, and rewriting them to `\nbsp`/`\ndash`/`\mdash` corrupts the link
+ * (`.../~user/a--b` would otherwise reach the `<url href>` attribute as
+ * `.../\html-tag:nbsp{}user/a\html-tag:ndash{}b`).
+ */
+function inUrlArgument(parents: readonly (Ast.Node | Ast.Argument)[]): boolean {
+    for (let i = 0; i < parents.length; i++) {
+        const parent = parents[i];
+        if (!match.anyMacro(parent)) {
+            continue;
+        }
+        if (URL_MACROS.has(parent.content)) {
+            return true;
+        }
+        // `\href[opts]{url}{link text}` is only verbatim in its URL argument;
+        // the link text is prose and still wants ligature replacement.
+        if (parent.content === "href" && parent.args) {
+            return parent.args[parent.args.length - 2] === parents[i - 1];
+        }
+    }
+    return false;
+}
+
 /**
  * Replace LaTeX quote ligatures (`` `` ``...``''`` and `` ` ``...``'``) with
  * `\enquote{...}` and `\sq{...}` macros, and convert dash/tilde ligatures to
@@ -194,7 +224,11 @@ export function replaceQuoteLigatures(ast: Ast.Ast): void {
     visit(
         ast,
         (nodes, info) => {
-            if (info.context.inMathMode || info.context.hasMathModeAncestor) {
+            if (
+                info.context.inMathMode ||
+                info.context.hasMathModeAncestor ||
+                inUrlArgument(info.parents)
+            ) {
                 return;
             }
             const replaced = cleanupLigatures(processQuotes(nodes));

@@ -133,6 +133,40 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
         );
     });
 
+    it("Preserves punctuation in URLs", async () => {
+        html = process(`See \\url{https://example.com/a/b?x=1&y=2#frag}.`);
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `See <url href="https://example.com/a/b?x=1&#x26;y=2#frag"/>.`
+            )
+        );
+
+        html = process(`See \\href{https://example.com/page}{here}.`);
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `See <url href="https://example.com/page">here</url>.`
+            )
+        );
+    });
+
+    it("Does not apply ligature replacement inside URLs", async () => {
+        // `~`, `--` and `---` are ordinary URL characters, not prose ligatures.
+        html = process(`\\url{https://example.com/~user/a--b/c---d}`);
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `<url href="https://example.com/~user/a--b/c---d"/>`
+            )
+        );
+
+        // ...but a \href's link text is prose, so it still gets them.
+        html = process(`\\href{https://ex.com/~u/a--b}{Smith--Jones}`);
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `<url href="https://ex.com/~u/a--b">Smith<ndash/>Jones</url>`
+            )
+        );
+    });
+
     it("Converts enumerate environments", async () => {
         html = process(`\\begin{enumerate}\\item a\\item b\\end{enumerate}`);
         expect(await normalizeHtml(html)).toEqual(
@@ -635,6 +669,16 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
         html = process(`See \\cite{foo} for more`);
         expect(await normalizeHtml(html)).toEqual(
             await normalizeHtml(`See <xref ref="foo" /> for more`)
+        );
+    });
+    it("Converts thebibliography to <references> of raw <biblio> entries", async () => {
+        html = process(
+            `\\begin{thebibliography}{99}\n\\bibitem[Smi20]{smith2020} J. Smith, \\textit{A Great Paper}, 2020.\n\\bibitem{jones2019} A. Jones, Another Paper, 2019.\n\\end{thebibliography}`
+        );
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `<references><biblio xml:id="smith2020" type="raw">J. Smith, <em>A Great Paper</em>, 2020.</biblio><biblio xml:id="jones2019" type="raw">A. Jones, Another Paper, 2019.</biblio></references>`
+            )
         );
     });
     it("Replaces \\latex with <latex/> etc.", async () => {

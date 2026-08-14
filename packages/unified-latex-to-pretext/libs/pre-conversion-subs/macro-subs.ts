@@ -130,7 +130,17 @@ export const macroReplacements: Record<
         `Warning: There is no equivalent tag for \"underline\", \"em\" was used as a replacement.`
     ),
     appendix: createHeading("appendix"),
-    url: xrefFactory("url","href"),
+    // `\url` carries a literal URL, not an xml:id reference, so unlike the
+    // `xref`-producing macros below it must not run its argument through
+    // `sanitizeXmlId` -- that would rewrite the scheme separator and any
+    // query/fragment punctuation (`https://x.com/a?b=1` -> `https-//x.com/a?b=1`).
+    url: (node) => {
+        const args = getArgsContent(node);
+        return htmlLike({
+            tag: "url",
+            attributes: { href: printRaw(args[args.length - 1] || []) },
+        });
+    },
     href: (node) => {
         const args = getArgsContent(node);
         const url = printRaw(args[1] || "#");
