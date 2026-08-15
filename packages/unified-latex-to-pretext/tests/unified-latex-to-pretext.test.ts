@@ -121,6 +121,128 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
         expect(html).toEqual(`<md>x+ y</md>`);
     });
 
+    // PreTeXt's `<md>` has two content models: single-line (text content,
+    // rendered as `\begin{equation}`) and multi-line (`<mrow>` children, with
+    // `@alignment` naming the amsmath environment). Emitting the single-line
+    // form for a multi-line environment is silently wrong at conversion time
+    // and a LaTeX/MathJax error at build time.
+    describe("display math", () => {
+        it("Multi-line environments produce <mrow> children", () => {
+            expect(process(String.raw`\begin{align} a &= b \\ c &= d \end{align}`)).toEqual(
+                `<md alignment="align" number="yes"><mrow>a&#x26;= b</mrow><mrow>c&#x26;= d</mrow></md>`
+            );
+            expect(process(String.raw`\begin{gather} a \\ b \end{gather}`)).toEqual(
+                `<md alignment="gather" number="yes"><mrow>a</mrow><mrow>b</mrow></md>`
+            );
+            // PreTeXt has no `multline`; `gather` keeps the author's line breaks.
+            expect(process(String.raw`\begin{multline} a + b \\ + c \end{multline}`)).toEqual(
+                `<md alignment="gather" number="yes"><mrow>a + b</mrow><mrow>+ c</mrow></md>`
+            );
+        });
+
+        it("Starred environments are unnumbered", () => {
+            expect(process(String.raw`\begin{align*} a &= b \end{align*}`)).toEqual(
+                `<md alignment="align"><mrow>a&#x26;= b</mrow></md>`
+            );
+            expect(process(String.raw`\begin{equation*} a = b \end{equation*}`)).toEqual(
+                `<md>a = b</md>`
+            );
+        });
+
+        it("Single-line environments keep the single-line content model", () => {
+            expect(process(String.raw`\begin{equation} a = b \end{equation}`)).toEqual(
+                `<md number="yes">a = b</md>`
+            );
+            expect(process(String.raw`\[ a = b \]`)).toEqual(`<md>a = b</md>`);
+            // A nested `split` is legal inside PreTeXt's `\begin{equation}`, so
+            // it stays verbatim rather than being unwrapped into mrows.
+            expect(
+                process(String.raw`\begin{equation}\begin{split} a &= b \\ &= c \end{split}\end{equation}`)
+            ).toEqual(
+                `<md number="yes">\\begin{split}a&#x26;= b \\\\&#x26;= c\\end{split}</md>`
+            );
+        });
+
+        it("A `\\\\` promotes a single-line environment to mrows", () => {
+            // No @alignment: the author never named one, so PreTeXt sniffs.
+            expect(process(String.raw`\[ a \\ b \]`)).toEqual(
+                `<md><mrow>a</mrow><mrow>b</mrow></md>`
+            );
+        });
+
+        it("`\\label` becomes a cross-reference target on the right node", () => {
+            // Single-line: the label targets the whole display.
+            expect(
+                process(String.raw`\begin{equation}\label{eq:x} a = b \end{equation}`)
+            ).toEqual(`<md xml:id="eq-x" number="yes">a = b</md>`);
+            // Multi-line: the label targets its own row, and `\nonumber`
+            // suppresses the number on its own row only.
+            expect(
+                process(String.raw`\begin{align} a &= b \nonumber \\ c &= d \label{eq:y} \end{align}`)
+            ).toEqual(
+                `<md alignment="align" number="yes">` +
+                    `<mrow number="no">a&#x26;= b</mrow>` +
+                    `<mrow xml:id="eq-y">c&#x26;= d</mrow></md>`
+            );
+        });
+
+        it("`\\eqref` resolves against the label it points at", () => {
+            expect(
+                process(String.raw`\eqref{eq:x} \begin{equation}\label{eq:x} a = b \end{equation}`)
+            ).toEqual(`<xref ref="eq-x" /> <md xml:id="eq-x" number="yes">a = b</md>`);
+        });
+
+        it("`\\intertext` becomes a sibling of the surrounding rows", () => {
+            expect(
+                process(String.raw`\begin{align} a &= b \\ \intertext{and then} c &= d \end{align}`)
+            ).toEqual(
+                `<md alignment="align" number="yes">` +
+                    `<mrow>a&#x26;= b</mrow>` +
+                    `<intertext>and then</intertext>` +
+                    `<mrow>c&#x26;= d</mrow></md>`
+            );
+        });
+
+        it("Rows split only on top-level `\\\\`", () => {
+            // The `\\` inside `cases` belongs to that environment's own content,
+            // so the AST already hides it from the row splitter.
+            expect(
+                process(String.raw`\begin{gather} \begin{cases} x \\ y \end{cases} \\ z \end{gather}`)
+            ).toEqual(
+                `<md alignment="gather" number="yes">` +
+                    `<mrow>\\begin{cases}x \\\\ y\\end{cases}</mrow>` +
+                    `<mrow>z</mrow></md>`
+            );
+            // A trailing `\\` does not mean one more, empty, row; and PreTeXt
+            // has no per-row spacing, so `[10pt]` is dropped.
+            expect(
+                process(String.raw`\begin{align} a &= b \\[10pt] c &= d \\ \end{align}`)
+            ).toEqual(
+                `<md alignment="align" number="yes"><mrow>a&#x26;= b</mrow><mrow>c&#x26;= d</mrow></md>`
+            );
+        });
+
+        // These two are mis-typed as text-mode environments by the parser; see
+        // `normalizeMathEnvironments` in pre-conversion-subs/math-env-subs.ts.
+        it("`alignat` and `eqnarray` are recognized as display math", () => {
+            expect(process(String.raw`\begin{alignat}{2} a &= b & c &= d \end{alignat}`)).toEqual(
+                `<md alignment="alignat" alignat-columns="2" number="yes">` +
+                    `<mrow>a &#x26;= b &#x26; c &#x26;= d</mrow></md>`
+            );
+            expect(process(String.raw`\begin{alignat*}{3} a &= b \end{alignat*}`)).toEqual(
+                `<md alignment="alignat" alignat-columns="3"><mrow>a &#x26;= b</mrow></md>`
+            );
+            expect(process(String.raw`\begin{eqnarray} a &=& b \end{eqnarray}`)).toEqual(
+                `<md alignment="align" number="yes"><mrow>a &#x26;=&#x26; b</mrow></md>`
+            );
+            // The star must survive: `eqnarray` has no renderInfo marking it as
+            // math, so `stripStarredEnvironments` would otherwise eat it.
+            expect(process(String.raw`\begin{eqnarray*} a &=& b \end{eqnarray*}`)).toEqual(
+                `<md alignment="align"><mrow>a &#x26;=&#x26; b</mrow></md>`
+            );
+        });
+    });
+
     it("Handles URLs", async () => {
         html = process(`a\\url{foo.com}b`);
         expect(await normalizeHtml(html)).toEqual(
@@ -305,10 +427,11 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
     it("Macros aren't replaced with html code in math mode", async () => {
         let ast;
 
-        // Custom labels are handled
+        // Custom labels are handled. The `\\` splits the display into two
+        // `<mrow>`s (see display-math.ts) but its content is left verbatim.
         ast = process(`\\[a\\\\b\\]`);
         expect(await normalizeHtml(ast)).toEqual(
-            await normalizeHtml(`<md>a\\\\b</md>`)
+            await normalizeHtml(`<md><mrow>a</mrow><mrow>b</mrow></md>`)
         );
     });
 
@@ -327,7 +450,9 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
 
         ast = process(`x\n\ny\\[a\\\\b\\]z`);
         expect(await normalizeHtml(ast)).toEqual(
-            await normalizeHtml(`<p>x</p><p>y<md>a\\\\b</md>z</p>`)
+            await normalizeHtml(
+                `<p>x</p><p>y<md><mrow>a</mrow><mrow>b</mrow></md>z</p>`
+            )
         );
     });
     it("replaces command inside argument", async () => {

@@ -11,6 +11,7 @@ import {
     isMappedEnviron,
 } from "../pre-conversion-subs/break-on-boundaries";
 import { getArgsContent } from "@unified-latex/unified-latex-util-arguments";
+import { displayMathToXast } from "./display-math";
 
 function formatNodeForError(node: Ast.Node | any): string {
     try {
@@ -118,7 +119,7 @@ export function toPretextWithLoggerFactory(
                 return x("m", printRaw(node.content));
             case "mathenv":
             case "displaymath":
-                return x("md", printRaw(node.content));
+                return displayMathToXast(node);
             case "verb":
                 return x("c", node.content);
             case "verbatim":

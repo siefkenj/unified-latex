@@ -444,6 +444,13 @@ function deleteCommentsInMathMode(tree: Ast.Root): void {
  */
 function attachAdditionalAttributes(tree: Ast.Root): void {
     replaceNode(tree, (node, info) => {
+        // A `\label` inside display math belongs to a single *row* of that
+        // display, which `info.parents[0]` cannot express -- it is the whole
+        // math environment. `displayMathToXast` knows the row structure, so it
+        // owns math labels; leave them in place for it to find.
+        if (info.context.hasMathModeAncestor) {
+            return;
+        }
         if (match.macro(node, "label")) {
             const args = getArgsContent(node);
             const labelContent = args[args.length - 1];

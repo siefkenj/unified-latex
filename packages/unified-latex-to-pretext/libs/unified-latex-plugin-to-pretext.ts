@@ -35,6 +35,7 @@ import {
 import { expandUserDefinedMacros } from "./pre-conversion-subs/expand-user-defined-macros";
 import { replaceQuoteLigatures } from "./pre-conversion-subs/replace-quote-ligatures";
 import { stripStarredEnvironments } from "./pre-conversion-subs/strip-star-subs";
+import { normalizeMathEnvironments } from "./pre-conversion-subs/math-env-subs";
 import { gatherAndRemoveBibinfo } from "./bibinfo";
 import {
     macros as pretextMacros,
@@ -62,6 +63,12 @@ export const unifiedLatexToPretext: Plugin<
         const producePretextFragment = options?.producePretextFragment
             ? options?.producePretextFragment
             : false;
+
+        // Retag display-math environments the parser mis-typed as text-mode
+        // environments (`alignat`, `eqnarray`). Must run before
+        // `stripStarredEnvironments`, which would otherwise strip the star from
+        // `eqnarray*` and turn an unnumbered display into a numbered one.
+        normalizeMathEnvironments(tree);
 
         // Ignore stars on non-math environments (e.g. `theorem*`, `exercises*`)
         // so they're treated identically to their unstarred form. Must run
