@@ -49,10 +49,12 @@ export function emptyStringWithWarningFactory(
  * Sanitize a string for use in xml:id attributes and corresponding refs.
  */
 export function sanitizeXmlId(str: string) {
-    return str.replace(/["'<>&:\s]/g, (match) => {
+    return str.replace(/[^a-zA-Z0-9_-]/g, (match) => {
         switch (match) {
             case "&":
             case ":":
+            case "/":
+            case "\\":
                 return "-";
             case " ":
             case "\t":
