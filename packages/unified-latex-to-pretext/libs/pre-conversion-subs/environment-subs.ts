@@ -312,6 +312,131 @@ function beamerFrameFactory(): (
     };
 }
 
+// A long list of pretext theorem/remark-like environments and their aliases.
+// Hoisted to module scope (rather than living inside genEnvironmentReplacements)
+// so that `envAliasNames` below can be derived from it and exported: `provides.ts`
+// needs these same names to register an "o" (optional title) signature with the
+// parser, and deriving them from this single list keeps the two in sync -- see
+// the `envAliasNames` doc comment for the bug this avoids.
+const envAliases: Record<
+    string,
+    { requiresStatement: boolean; aliases: string[] }
+> = {
+    abstract: { requiresStatement: false, aliases: ["abs", "abstr"] },
+    acknowledgement: { requiresStatement: false, aliases: ["ack"] },
+    algorithm: { requiresStatement: true, aliases: ["algo", "alg"] },
+    answer: { requiresStatement: false, aliases: ["ans"] },
+    assumption: { requiresStatement: true, aliases: ["assu", "ass"] },
+    axiom: { requiresStatement: true, aliases: ["axm"] },
+    claim: { requiresStatement: true, aliases: ["cla"] },
+    conjecture: {
+        requiresStatement: true,
+        aliases: ["con", "conj", "conjec"],
+    },
+    activity: { requiresStatement: false, aliases: [] },
+    aside: { requiresStatement: false, aliases: [] },
+    assemblage: { requiresStatement: false, aliases: [] },
+    biographical: { requiresStatement: false, aliases: [] },
+    case: { requiresStatement: false, aliases: [] },
+    computation: { requiresStatement: false, aliases: ["comp"] },
+    construction: { requiresStatement: false, aliases: [] },
+    convention: { requiresStatement: false, aliases: ["conv"] },
+    corollary: {
+        requiresStatement: true,
+        aliases: ["cor", "corr", "coro", "corol", "corss"],
+    },
+    definition: {
+        requiresStatement: true,
+        aliases: ["def", "defn", "dfn", "defi", "defin", "de"],
+    },
+    example: {
+        requiresStatement: true,
+        aliases: ["exam", "exa", "eg", "exmp", "expl", "exm"],
+    },
+    exercise: { requiresStatement: true, aliases: ["exer", "exers"] },
+    data: { requiresStatement: false, aliases: [] },
+    exploration: { requiresStatement: false, aliases: [] },
+    fact: { requiresStatement: true, aliases: [] },
+    heuristic: { requiresStatement: true, aliases: [] },
+    hint: { requiresStatement: false, aliases: [] },
+    historical: { requiresStatement: false, aliases: [] },
+    hypothesis: { requiresStatement: true, aliases: ["hyp"] },
+    identity: { requiresStatement: true, aliases: ["idnty"] },
+    insight: { requiresStatement: false, aliases: [] },
+    investigation: { requiresStatement: false, aliases: [] },
+    lemma: {
+        requiresStatement: true,
+        aliases: ["lem", "lma", "lemm", "lm"],
+    },
+    notation: {
+        requiresStatement: false,
+        aliases: ["no", "nota", "ntn", "nt", "notn", "notat"],
+    },
+    note: { requiresStatement: false, aliases: ["notes"] },
+    observation: { requiresStatement: false, aliases: ["obs"] },
+    principle: { requiresStatement: true, aliases: [] },
+    problem: { requiresStatement: true, aliases: ["prob", "prb"] },
+    project: { requiresStatement: false, aliases: [] },
+    proof: { requiresStatement: false, aliases: ["pf", "prf", "demo"] },
+    proposition: {
+        requiresStatement: true,
+        aliases: ["prop", "pro", "prp", "props"],
+    },
+    question: {
+        requiresStatement: true,
+        aliases: ["qu", "ques", "quest", "qsn"],
+    },
+    remark: {
+        requiresStatement: false,
+        aliases: ["rem", "rmk", "rema", "bem", "subrem"],
+    },
+    task: { requiresStatement: true, aliases: [] },
+    technology: { requiresStatement: false, aliases: ["tech"] },
+    theorem: {
+        requiresStatement: true,
+        aliases: ["thm", "theo", "theor", "thmss", "thrm"],
+    },
+    solution: { requiresStatement: false, aliases: ["sol"] },
+    warning: { requiresStatement: false, aliases: ["warn", "wrn"] },
+};
+
+/**
+ * Every canonical name and alias declared in `envAliases`, flattened.
+ *
+ * `provides.ts` uses this to register an "o" (optional-argument) signature
+ * for each of these names, so the parser knows to consume a `[title]`
+ * following `\begin{...}` as an argument rather than leaving it as literal
+ * body text. Without a registered signature, `getArgsContent(env)` in
+ * `envFactory` above finds nothing and the title is silently dropped -- this
+ * is what previously happened to every alias (`thm`, `lem`, `def`, ...)
+ * since only the canonical amsthm names happen to get a signature from the
+ * `mathtools` CTAN package.
+ */
+export const envAliasNames: string[] = Object.entries(envAliases).flatMap(
+    ([env, spec]) => [env, ...spec.aliases]
+);
+
+function genEnvironmentReplacements() {
+    // For each environment PreTeXt has, we create entries for `environmentReplacements` using all reasonable aliases
+    const exapandedEnvAliases = Object.entries(envAliases).flatMap(
+        ([env, spec]) => [
+            [
+                env,
+                envFactory(env, {
+                    requiresStatementTag: spec.requiresStatement,
+                }),
+            ],
+            ...spec.aliases.map((name) => [
+                name,
+                envFactory(env, {
+                    requiresStatementTag: spec.requiresStatement,
+                }),
+            ]),
+        ]
+    );
+    return Object.fromEntries(exapandedEnvAliases);
+}
+
 /**
  * Rules for replacing a macro with an html-like macro
  * that will render has pretext when printed.
@@ -538,6 +663,7 @@ export const environmentReplacements: Record<
     stack: envFactory("stack", { requiresStatementTag: false }),
     // Beamer environments for creating slideshows.
     frame: beamerFrameFactory(),
+    slide: beamerFrameFactory(),
     // Beamer `block`/`alertblock`/`exampleblock` are titled, visually-set-off
     // content. PreTeXt's `<assemblage>` is the closest analogue. Their signature
     // is `!d<> !d{} !d<>`, so the title lives at arg index 1 (after the overlay).
@@ -571,109 +697,3 @@ export const environmentReplacements: Record<
     ...generateDroppedEnvironmentReplacements(),
 };
 
-function genEnvironmentReplacements() {
-    let reps: Record<
-        string,
-        (node: Ast.Environment, info: VisitInfo, file?: VFile) => Ast.Node
-    > = {};
-    // First, a long list of pretext environments and their aliases.
-    const envAliases: Record<
-        string,
-        { requiresStatement: boolean; aliases: string[] }
-    > = {
-        abstract: { requiresStatement: false, aliases: ["abs", "abstr"] },
-        acknowledgement: { requiresStatement: false, aliases: ["ack"] },
-        algorithm: { requiresStatement: true, aliases: ["algo", "alg"] },
-        answer: { requiresStatement: false, aliases: ["ans"] },
-        assumption: { requiresStatement: true, aliases: ["assu", "ass"] },
-        axiom: { requiresStatement: true, aliases: ["axm"] },
-        claim: { requiresStatement: true, aliases: ["cla"] },
-        conjecture: {
-            requiresStatement: true,
-            aliases: ["con", "conj", "conjec"],
-        },
-        activity: { requiresStatement: false, aliases: [] },
-        aside: { requiresStatement: false, aliases: [] },
-        assemblage: { requiresStatement: false, aliases: [] },
-        biographical: { requiresStatement: false, aliases: [] },
-        case: { requiresStatement: false, aliases: [] },
-        computation: { requiresStatement: false, aliases: ["comp"] },
-        construction: { requiresStatement: false, aliases: [] },
-        convention: { requiresStatement: false, aliases: ["conv"] },
-        corollary: {
-            requiresStatement: true,
-            aliases: ["cor", "corr", "coro", "corol", "corss"],
-        },
-        definition: {
-            requiresStatement: true,
-            aliases: ["def", "defn", "dfn", "defi", "defin", "de"],
-        },
-        example: {
-            requiresStatement: true,
-            aliases: ["exam", "exa", "eg", "exmp", "expl", "exm"],
-        },
-        exercise: { requiresStatement: true, aliases: ["exer", "exers"] },
-        data: { requiresStatement: false, aliases: [] },
-        exploration: { requiresStatement: false, aliases: [] },
-        fact: { requiresStatement: true, aliases: [] },
-        heuristic: { requiresStatement: true, aliases: [] },
-        hint: { requiresStatement: false, aliases: [] },
-        historical: { requiresStatement: false, aliases: [] },
-        hypothesis: { requiresStatement: true, aliases: ["hyp"] },
-        identity: { requiresStatement: true, aliases: ["idnty"] },
-        insight: { requiresStatement: false, aliases: [] },
-        investigation: { requiresStatement: false, aliases: [] },
-        lemma: {
-            requiresStatement: true,
-            aliases: ["lem", "lma", "lemm", "lm"],
-        },
-        notation: {
-            requiresStatement: false,
-            aliases: ["no", "nota", "ntn", "nt", "notn", "notat"],
-        },
-        note: { requiresStatement: false, aliases: ["notes"] },
-        observation: { requiresStatement: false, aliases: ["obs"] },
-        principle: { requiresStatement: true, aliases: [] },
-        problem: { requiresStatement: true, aliases: ["prob", "prb"] },
-        project: { requiresStatement: false, aliases: [] },
-        proof: { requiresStatement: false, aliases: ["pf", "prf", "demo"] },
-        proposition: {
-            requiresStatement: true,
-            aliases: ["prop", "pro", "prp", "props"],
-        },
-        question: {
-            requiresStatement: true,
-            aliases: ["qu", "ques", "quest", "qsn"],
-        },
-        remark: {
-            requiresStatement: false,
-            aliases: ["rem", "rmk", "rema", "bem", "subrem"],
-        },
-        task: { requiresStatement: true, aliases: [] },
-        technology: { requiresStatement: false, aliases: ["tech"] },
-        theorem: {
-            requiresStatement: true,
-            aliases: ["thm", "theo", "theor", "thmss", "thrm"],
-        },
-        solution: { requiresStatement: false, aliases: ["sol"] },
-        warning: { requiresStatement: false, aliases: ["warn", "wrn"] },
-    };
-    // For each environment PreTeXt has, we create entries for `environmentReplacements` using all reasonable aliases
-    const exapandedEnvAliases = Object.entries(envAliases).flatMap(
-        ([env, spec]) => [
-            [
-                env,
-                envFactory(env, {
-                    requiresStatementTag: spec.requiresStatement,
-                }),
-            ],
-            ...spec.aliases.map((name) => [
-                name,
-                envFactory(env, {
-                    requiresStatementTag: spec.requiresStatement,
-                }),
-            ]),
-        ]
-    );
-    return Object.fromEntries(exapandedEnvAliases);
-}

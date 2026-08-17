@@ -1751,6 +1751,18 @@ describe("unified-latex-to-pretext:beamer", () => {
         );
     });
 
+    it("treats the `slide` environment as a synonym for `frame`", () => {
+        // `slide` shares beamerFrameFactory with `frame`, but the pre-pass that
+        // wraps a slide's body in <p> (isSlideEnviron) has to know about the
+        // synonym separately, since it runs before environmentReplacements.
+        const html = process(
+            `\\begin{slide}\\frametitle{T}\nIntro.\n\n\\begin{itemize}\\item A\\end{itemize}\n\nOutro.\\end{slide}`
+        );
+        expect(html).toEqual(
+            `<slide><title>T</title><p>Intro.</p><p><ul><li><p>A</p></li></ul></p><p>Outro.</p></slide>`
+        );
+    });
+
     it("converts block/alertblock/exampleblock to <assemblage> with a <title>", async () => {
         const html = process(
             `\\begin{block}{Key Idea}\nText.\n\\end{block}`

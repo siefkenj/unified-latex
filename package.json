@@ -81,5 +81,9 @@
         "vfile-reporter-position": "^0.1.7",
         "vfile-reporter-pretty": "^7.0.0"
     },
-    "name": "unified-latex"
+    "name": "unified-latex",
+    "allowScripts": {
+        "esbuild@0.27.7": true,
+        "nx@22.6.4": true
+    }
 }

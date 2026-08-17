@@ -2,11 +2,14 @@
 
 ### Unreleased
 
+### v1.8.5
+
 - PreTeXt conversion improvements:
     - Support the `exam` document class (questions, parts, choices, solutions, etc.).
     - Support top-level `divisions` (`article`/`book`/`slideshow`) and better handling of specialized divisions.
     - Support `plus`-prefixed inclusion macros.
     - Support Beamer and `tikzpicture` conversion.
+    - Support `slide` and `frame` environments as synonyms.
     - Support math environments (`align`, `equation`, `gather`, `multline`, `alignat`, etc.).
     - Basic bibliography support (`thebibliography`/`\bibitem`), with better BibTeX/CSL-based formatting.
     - Add `<bibinfo>` support and improve detection of macros/environments that don't apply to PreTeXt.
@@ -14,6 +17,7 @@
     - Handle vertical space (`\vspace`, `\bigskip`, etc.) and starred environments.
     - Add capitalization variants for some macros.
     - Escape slashes when generating `xml:id`s.
+    - Fix issue with synonyms of environments not getting titles.
 - Fix TypeScript build configuration issues.
 - Add many additional tests for PreTeXt conversion.
 

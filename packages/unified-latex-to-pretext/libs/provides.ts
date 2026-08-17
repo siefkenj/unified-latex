@@ -3,6 +3,7 @@ import {
     EnvInfoRecord,
 } from "@unified-latex/unified-latex-types";
 import { plusMacros } from "./pre-conversion-subs/plus-subs";
+import { envAliasNames } from "./pre-conversion-subs/environment-subs";
 
 /**
  * Register macro signatures for PreTeXt-specific macros.
@@ -90,6 +91,13 @@ export const macros: MacroInfoRecord = {
  * but not already defined in the unified-latex-ctan packages.
  */
 export const environments: EnvInfoRecord = {
+    // Theorem/remark-like environments and all their aliases (thm, lem, def,
+    // cor, ...) declared in environment-subs.ts. Generated here rather than
+    // listed by hand so a new alias only needs to be added in one place --
+    // see the doc comment on `envAliasNames` for the bug this prevents.
+    ...Object.fromEntries(
+        envAliasNames.map((name) => [name, { signature: "o" }])
+    ),
     // AsideLike
     aside: { signature: "o" },
     biographical: { signature: "o" },
@@ -139,4 +147,6 @@ export const environments: EnvInfoRecord = {
     stack: { signature: "o" },
     list: { signature: "o" },
     listing: { signature: "o" },
+    // Slideshow environments
+    slide: { signature: "!d<> !o !o !d{} !d{}" },
 };
