@@ -6,6 +6,7 @@ import {
     anyMacro,
     match,
 } from "@unified-latex/unified-latex-util-match";
+import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 import { replaceNode } from "@unified-latex/unified-latex-util-replace";
 import {
     splitOnMacro,
@@ -29,7 +30,23 @@ export type DivisionEntry = {
     pretextTag?: string;
 };
 
+/**
+ * The document-root macros. Like divisions, but for the outermost PreTeXt
+ * container itself: `\book{Title}`, `\article{Title}`, or `\slideshow{Title}`
+ * are expected to appear as the very first thing in the document, standing
+ * in for the usual `\documentclass`/`\title` combo. Treating them as the
+ * outermost division group means everything that follows (parts, chapters,
+ * sections, ...) naturally ends up nested inside the resulting `_book`,
+ * `_article`, or `_slideshow` environment.
+ */
+const documentRootGroup: DivisionEntry[] = [
+    { division: "book", mappedEnviron: "_book" },
+    { division: "article", mappedEnviron: "_article" },
+    { division: "slideshow", mappedEnviron: "_slideshow" },
+];
+
 export const divisionGroups: DivisionEntry[][] = [
+    documentRootGroup,
     // Group 0: book-part level
     [{ division: "part", mappedEnviron: "_part" }],
     // Group 1: chapter level
@@ -39,6 +56,9 @@ export const divisionGroups: DivisionEntry[][] = [
         { division: "biography", mappedEnviron: "_biography" },
         { division: "dedication", mappedEnviron: "_dedication" },
         { division: "glossary", mappedEnviron: "_glossary" },
+        { division: "appendix", mappedEnviron: "_appendix" },
+        { division: "bibliography", mappedEnviron: "_bibliography" },
+        { division: "references", mappedEnviron: "_references" },
     ],
     // Group 2: section level
     [
@@ -46,26 +66,71 @@ export const divisionGroups: DivisionEntry[][] = [
         { division: "exercises", mappedEnviron: "_exercises" },
         { division: "solutions", mappedEnviron: "_solutions" },
         { division: "worksheet", mappedEnviron: "_worksheet" },
+        { division: "handout", mappedEnviron: "_handout" },
         {
             division: "readingquestions",
             mappedEnviron: "_readingquestions",
             pretextTag: "reading-questions",
         },
+        { division: "specialsection", mappedEnviron: "_section" },
     ],
     // Group 3: subsection level
     [{ division: "subsection", mappedEnviron: "_subsection" }],
     // Group 4: subsubsection level
     [{ division: "subsubsection", mappedEnviron: "_subsubsection" }],
     // Group 5: paragraph level
-    [{ division: "paragraph", mappedEnviron: "_paragraph" }],
+    [{ division: "paragraphs", mappedEnviron: "_paragraphs" }],
     // Group 6: subparagraph level
     [{ division: "subparagraph", mappedEnviron: "_subparagraph" }],
 ];
 
 /**
+ * Environments from the exam documentclass that use macros (`\part`, `\subpart`, etc.)
+ * that conflict with division macros. These environments must be skipped by
+ * `breakOnBoundaries` so their item macros are preserved.
+ */
+const EXAM_LIST_ENVIRONMENTS = ["parts", "subparts", "subsubparts"];
+
+export const isExamListEnviron = match.createEnvironmentMatcher(
+    EXAM_LIST_ENVIRONMENTS
+);
+
+
+/**
  * Flat view of all division entries — useful for lookups.
  */
-export const divisions: DivisionEntry[] = divisionGroups.flat();
+export const divisions: DivisionEntry[] = divisionGroups.reduce<
+    DivisionEntry[]
+>((acc, group) => acc.concat(group), []);
+
+/**
+ * The standard LaTeX sectioning macros. Unlike the specialized division
+ * macros (`worksheet`, `exercises`, etc.), these may take an optional
+ * argument that names a division type to become instead of their usual
+ * tag — e.g. `\subsection[worksheet]{Title}` produces a `<worksheet>` that
+ * is nested exactly where the `\subsection` appears, rather than a
+ * `<subsection>`. With no recognized type name, the optional argument is
+ * ignored (as it always has been).
+ */
+const STANDARD_SECTIONING_MACROS = new Set([
+    "chapter",
+    "section",
+    "subsection",
+    "subsubsection",
+]);
+
+/**
+ * Looks up a division entry by its macro name or its PreTeXt tag name
+ * (case-insensitively), for resolving the type-override optional argument
+ * on standard sectioning macros.
+ */
+const divisionByTypeName = new Map<string, DivisionEntry>();
+for (const entry of divisions) {
+    divisionByTypeName.set(entry.division.toLowerCase(), entry);
+    if (entry.pretextTag) {
+        divisionByTypeName.set(entry.pretextTag.toLowerCase(), entry);
+    }
+}
 
 // check if a macro is a division macro
 const isDivisionMacro = match.createMacroMatcher(
@@ -75,6 +140,27 @@ const isDivisionMacro = match.createMacroMatcher(
 // check if an environment is a newly created environment
 export const isMappedEnviron = match.createEnvironmentMatcher(
     divisions.map((x) => x.mappedEnviron)
+);
+
+/**
+ * Beamer `frame` environments (and their `slide` synonym) become PreTeXt
+ * `<slide>`. A frame is really a division, so — like divisions — its content
+ * should be wrapped in paragraphs by the early `unifiedLatexWrapPars`
+ * pre-pass (while nested environments are still environments), rather than
+ * late by an envFactory. This keeps block-level children (`<assemblage>`,
+ * `<sidebyside>`, ...) out of `<p>` while still letting lists sit inside a
+ * `<p>` as usual.
+ */
+export const isSlideEnviron = match.createEnvironmentMatcher(["frame", "slide"]);
+
+/**
+ * Check if an environment is the mapped environment for a document-root
+ * macro (`_book`, `_article`, or `_slideshow`). Used to detect when the
+ * document already declares its own root tag, so the `\documentclass`-based
+ * heuristic can be skipped.
+ */
+export const isTopLevelDocEnviron = match.createEnvironmentMatcher(
+    documentRootGroup.map((x) => x.mappedEnviron)
 );
 
 /**
@@ -124,14 +210,26 @@ export function breakOnBoundaries(ast: Ast.Ast): { messages: VFileMessage[] } {
         else if (anyEnvironment(node) && isMappedEnviron(node)) {
             return;
         }
+        // skip exam list environments — their \part/\subpart macros are not division macros
+        else if (anyEnvironment(node) && isExamListEnviron(node)) {
+            return;
+        }
 
         // now break up the divisions, starting at part
         node.content = breakUp(node.content, 0);
     });
 
-    replaceNode(ast, (node) => {
-        // remove all old division nodes
+    replaceNode(ast, (node, info) => {
+        // remove all old division nodes, but preserve exam-class macros (like \part)
+        // that live inside exam list environments (parts, subparts, subsubparts)
         if (anyMacro(node) && isDivisionMacro(node)) {
+            if (
+                info.parents.some(
+                    (p) => anyEnvironment(p) && isExamListEnviron(p)
+                )
+            ) {
+                return;
+            }
             return null;
         }
     });
@@ -177,10 +275,22 @@ function createEnvironments(
     // loop through segments (skipping first segment)
     for (let i = 1; i < splits.segments.length; i++) {
         const macro = splits.macros[i - 1];
-        const mappedEnv = macroToEnv.get(macro.content) ?? "_unknown";
+        let mappedEnv = macroToEnv.get(macro.content) ?? "_unknown";
+
+        const namedArgs = getNamedArgsContent(macro);
+
+        // standard sectioning macros may use their optional argument to
+        // request a different division type, e.g. \subsection[worksheet]{Title}
+        if (STANDARD_SECTIONING_MACROS.has(macro.content) && namedArgs["tocTitle"]) {
+            const typeName = printRaw(namedArgs["tocTitle"]).trim().toLowerCase();
+            const overrideEntry = divisionByTypeName.get(typeName);
+            if (overrideEntry) {
+                mappedEnv = overrideEntry.mappedEnviron;
+            }
+        }
 
         // get the title
-        const title = getNamedArgsContent(macro)["title"];
+        const title = namedArgs["title"];
         const titleArg: Ast.Argument[] = [];
 
         // create title argument

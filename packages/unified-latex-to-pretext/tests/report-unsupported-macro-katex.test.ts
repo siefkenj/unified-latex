@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import util from "util";
 import { getParser } from "@unified-latex/unified-latex-util-parse";
-import { reportMacrosUnsupportedByMathjax } from "@unified-latex/unified-latex-to-pretext/libs/pre-conversion-subs/report-unsupported-macro-mathjax";
+import { reportMacrosUnsupportedByMathjax } from "../libs/pre-conversion-subs/report-unsupported-macro-mathjax";
 
 // Make console.log pretty-print by default
 const origLog = console.log;

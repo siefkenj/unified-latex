@@ -3,6 +3,7 @@ export * from "./libs/unified-latex-wrap-pars";
 export * from "./libs/pre-conversion-subs/katex-subs";
 export * from "./libs/wrap-pars";
 export * from "./libs/convert-to-pretext";
+export * from "./libs/pre-conversion-subs/plus-subs";
 export * from "./libs/provides";
 export * from "./libs/types";
 

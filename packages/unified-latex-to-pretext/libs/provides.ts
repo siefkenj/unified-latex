@@ -2,6 +2,8 @@ import {
     MacroInfoRecord,
     EnvInfoRecord,
 } from "@unified-latex/unified-latex-types";
+import { plusMacros } from "./pre-conversion-subs/plus-subs";
+import { envAliasNames } from "./pre-conversion-subs/environment-subs";
 
 /**
  * Register macro signatures for PreTeXt-specific macros.
@@ -9,11 +11,23 @@ import {
  * but not already defined in the unified-latex-ctan packages.
  */
 export const macros: MacroInfoRecord = {
+    // Modular include macro for PreTeXt Plus: \plus[attrs]{type}{ref}
+    ...plusMacros,
     // PreTeXt-specific macro
+    alert: { signature: "m" },
     term: { signature: "m" },
+    // AMS-style Mathematics Subject Classification, e.g. `\subjclass[2020]{05C99}`.
+    // Not defined by any CTAN package we load, unlike \author/\address/\email
+    // (amsart), \date/\thanks (latex2e), and \keywords (beamer).
+    subjclass: { signature: "o m", renderInfo: { breakAround: true } },
     // Verbatim/code inline macros
     code: { signature: "m" },
     lstinline: { signature: "m" },
+    // Document-root macros — declare the document's outermost PreTeXt tag
+    // and its title in one shot, e.g. `\book{Calculus}`.
+    book: { signature: "m", renderInfo: { breakAround: true, inParMode: true, namedArguments: ["title"] } },
+    article: { signature: "m", renderInfo: { breakAround: true, inParMode: true, namedArguments: ["title"] } },
+    slideshow: { signature: "m", renderInfo: { breakAround: true, inParMode: true, namedArguments: ["title"] } },
     // Division macros — same signature as \section
     preface: { signature: "s o m", renderInfo: { breakAround: true, inParMode: true, namedArguments: ["starred", "tocTitle", "title"] } },
     biography: { signature: "s o m", renderInfo: { breakAround: true, inParMode: true, namedArguments: ["starred", "tocTitle", "title"] } },
@@ -21,6 +35,8 @@ export const macros: MacroInfoRecord = {
     glossary: { signature: "s o m", renderInfo: { breakAround: true, inParMode: true, namedArguments: ["starred", "tocTitle", "title"] } },
     exercises: { signature: "s o m", renderInfo: { breakAround: true, inParMode: true, namedArguments: ["starred", "tocTitle", "title"] } },
     worksheet: { signature: "s o m", renderInfo: { breakAround: true, inParMode: true, namedArguments: ["starred", "tocTitle", "title"] } },
+    handout: { signature: "s o m", renderInfo: { breakAround: true, inParMode: true, namedArguments: ["starred", "tocTitle", "title"] } },
+    paragraphs: { signature: "s o m", renderInfo: { breakAround: true, inParMode: true, namedArguments: ["starred", "tocTitle", "title"] } },
     readingquestions: { signature: "s o m", renderInfo: { breakAround: true, inParMode: true, namedArguments: ["starred", "tocTitle", "title"] } },
     solutions: { signature: "s o m", renderInfo: { breakAround: true, inParMode: true, namedArguments: ["starred", "tocTitle", "title"] } },
     // Inline text macros
@@ -64,6 +80,7 @@ export const macros: MacroInfoRecord = {
     sout: { signature: "m" },
     insert: { signature: "m" },
     stale: { signature: "m" },
+    citep: { signature: "o m" },
 };
 
 /**
@@ -74,6 +91,13 @@ export const macros: MacroInfoRecord = {
  * but not already defined in the unified-latex-ctan packages.
  */
 export const environments: EnvInfoRecord = {
+    // Theorem/remark-like environments and all their aliases (thm, lem, def,
+    // cor, ...) declared in environment-subs.ts. Generated here rather than
+    // listed by hand so a new alias only needs to be added in one place --
+    // see the doc comment on `envAliasNames` for the bug this prevents.
+    ...Object.fromEntries(
+        envAliasNames.map((name) => [name, { signature: "o" }])
+    ),
     // AsideLike
     aside: { signature: "o" },
     biographical: { signature: "o" },
@@ -108,6 +132,7 @@ export const environments: EnvInfoRecord = {
     exercisegroup: { signature: "o" },
     subexercises: { signature: "o" },
     worksheet: { signature: "o" },
+    handout: { signature: "o" },
     readingquestions: { signature: "o" },
     "reading-questions": { signature: "o" },
     introduction: { signature: "o" },
@@ -122,4 +147,6 @@ export const environments: EnvInfoRecord = {
     stack: { signature: "o" },
     list: { signature: "o" },
     listing: { signature: "o" },
+    // Slideshow environments
+    slide: { signature: "!d<> !o !o !d{} !d{}" },
 };

@@ -31,6 +31,7 @@
         "xastscript": "^4.0.0"
     },
     "devDependencies": {
+        "@pretextbook/format": "^0.3.0",
         "@types/xast": "^2.0.4",
         "hast-util-to-html": "^8.0.4",
         "hast-util-to-string": "^3.0.1",
@@ -63,6 +64,7 @@
         "compile": "wireit",
         "compile:cjs": "wireit",
         "compile:esm": "wireit",
+        "demo": "vite --config demo/vite.config.ts",
         "package": "node ../../scripts/make-package.mjs",
         "publish": "cd dist && npm publish",
         "test": "vitest"

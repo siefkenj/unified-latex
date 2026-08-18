@@ -8,12 +8,48 @@ import {
     getNamedArgsContent,
 } from "@unified-latex/unified-latex-util-arguments";
 import { match } from "@unified-latex/unified-latex-util-match";
+import { trim } from "@unified-latex/unified-latex-util-trim";
 import { wrapPars } from "../wrap-pars";
 import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 import { VisitInfo } from "@unified-latex/unified-latex-util-visit";
 import { VFile } from "vfile";
-import { makeWarningMessage } from "./utils";
+import { makeWarningMessage, sanitizeXmlId } from "./utils";
 import { createTableFromTabular } from "./create-table-from-tabular";
+import { generateDroppedEnvironmentReplacements } from "./dropped-subs";
+import {
+    parseBibitemToCsl,
+    renderCslBiblio,
+    type PersonName,
+} from "./biblio-csl";
+
+/**
+ * Extract the raw source corresponding to an environment body.
+ * Falls back to `printRaw(env.content)` when source offsets are unavailable.
+ */
+function getEnvironmentBodySource(env: Ast.Environment, file?: VFile): string {
+    const source = typeof file?.value === "string" ? file.value : undefined;
+    if (!source) {
+        return printRaw(env.content);
+    }
+
+    const start = env.position?.start?.offset;
+    const end = env.position?.end?.offset;
+    if (start == null || end == null) {
+        return printRaw(env.content);
+    }
+
+    const fullEnvSource = source.slice(start, end);
+    const envName = printRaw(env.env);
+    const escapedEnvName = envName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const beginPattern = new RegExp(
+        `^\\\\begin\\s*\\{${escapedEnvName}\\}`
+    );
+    const endPattern = new RegExp(
+        `\\\\end\\s*\\{${escapedEnvName}\\}\\s*$`
+    );
+
+    return fullEnvSource.replace(beginPattern, "").replace(endPattern, "");
+}
 
 const ITEM_ARG_NAMES_REG = ["label"] as const;
 const ITEM_ARG_NAMES_BEAMER = [null, "label", null] as const;
@@ -106,6 +142,12 @@ interface EnvFactoryOptions {
     requiresStatementTag?: boolean;
     wrapContentInPars?: boolean;
     extractTitleFromArgs?: boolean;
+    /**
+     * Which environment argument holds the title. Defaults to 0. Beamer
+     * environments such as `block` put the title at a later index (e.g. after an
+     * `<overlay>` argument), so this lets them reuse the same factory.
+     */
+    titleArgIndex?: number;
     warningMessage?: string;
 }
 
@@ -129,6 +171,7 @@ function envFactory(
         requiresStatementTag = false,
         wrapContentInPars = true,
         extractTitleFromArgs = true,
+        titleArgIndex = 0,
         warningMessage = "",
     } = options;
 
@@ -178,11 +221,11 @@ function envFactory(
         // Add a title tag if the environment has a title
         if (extractTitleFromArgs) {
             const args = getArgsContent(env);
-            if (args[0]) {
+            if (args[titleArgIndex]) {
                 content.unshift(
                     htmlLike({
                         tag: "title",
-                        content: args[0] || [],
+                        content: args[titleArgIndex] || [],
                     })
                 );
             }
@@ -202,19 +245,196 @@ function envFactory(
 }
 
 /**
- * Remove the env environment by returning the content in env only.
+ * Convert a beamer `frame` environment into a PreTeXt `<slide>`.
+ *
+ * A frame's title/subtitle can be supplied two ways, both handled here:
+ *   * as braced arguments on the environment: `\begin{frame}{Title}{Subtitle}`
+ *     (per beamer's signature `!d<> !o !o !d{} !d{}`, these land at args[3]/args[4]);
+ *   * as `\frametitle{...}` / `\framesubtitle{...}` macros inside the body.
+ *
+ * A frame is really a division, so — like `<section>` — its body is wrapped in
+ * paragraphs by the early `unifiedLatexWrapPars` pre-pass (`isSlideEnviron`),
+ * while nested environments are still environments. That keeps block-level
+ * children (`<assemblage>`, `<sidebyside>`, ...) out of `<p>` and lists inside
+ * one, and gives slides the "omit `<p>` for a lone paragraph" behavior divisions
+ * have. So this factory does *not* wrap paragraphs itself; it only lifts the
+ * title/subtitle to the front. `\frametitle`/`\framesubtitle` are par-breaking
+ * (see `wrap-pars.ts`), so they survive the pre-pass as bare macro nodes here.
  */
-function removeEnv(env: Ast.Environment, info: VisitInfo, file?: VFile) {
-    // add warning
-    file?.message(
-        makeWarningMessage(
-            env,
-            `Warning: There is no equivalent tag for \"${env.env}\", so the ${env.env} environment was removed.`,
-            "environment-subs"
-        )
-    );
+function beamerFrameFactory(): (
+    env: Ast.Environment,
+    info: VisitInfo,
+    file?: VFile
+) => Ast.Macro {
+    return (env) => {
+        // Title/subtitle supplied as braced arguments on the frame environment.
+        const args = getArgsContent(env);
+        let title = args[3] || undefined;
+        let subtitle = args[4] || undefined;
 
-    return env.content;
+        // Title/subtitle supplied as \frametitle / \framesubtitle macros in the
+        // body. Pull them out of the content so they become the slide's title
+        // rather than body. An explicit macro wins over the braced-argument form.
+        const content: Ast.Node[] = [];
+        for (const node of env.content) {
+            if (match.macro(node, "frametitle")) {
+                const titleArgs = getArgsContent(node);
+                title = titleArgs[titleArgs.length - 1] || [];
+            } else if (match.macro(node, "framesubtitle")) {
+                const subtitleArgs = getArgsContent(node);
+                subtitle = subtitleArgs[subtitleArgs.length - 1] || [];
+            } else {
+                content.push(node);
+            }
+        }
+
+        // Extracting the title macro can leave the whitespace that followed it
+        // stranded at the start of the body; trim it (a division's title is an
+        // argument, so it never has this problem).
+        trim(content);
+
+        // Place the title/subtitle first, as siblings of the (already
+        // pre-pass-wrapped) body content.
+        if (subtitle) {
+            content.unshift(htmlLike({ tag: "subtitle", content: subtitle }));
+        }
+        if (title) {
+            content.unshift(htmlLike({ tag: "title", content: title }));
+        }
+
+        // Attach any additional attributes (e.g. xml:id from a \label) to the tag.
+        const attributes: Record<string, any> = {};
+        if (env._renderInfo?.additionalAttributes) {
+            Object.assign(attributes, env._renderInfo.additionalAttributes);
+        }
+
+        return htmlLike({ tag: "slide", content, attributes });
+    };
+}
+
+// A long list of pretext theorem/remark-like environments and their aliases.
+// Hoisted to module scope (rather than living inside genEnvironmentReplacements)
+// so that `envAliasNames` below can be derived from it and exported: `provides.ts`
+// needs these same names to register an "o" (optional title) signature with the
+// parser, and deriving them from this single list keeps the two in sync -- see
+// the `envAliasNames` doc comment for the bug this avoids.
+const envAliases: Record<
+    string,
+    { requiresStatement: boolean; aliases: string[] }
+> = {
+    abstract: { requiresStatement: false, aliases: ["abs", "abstr"] },
+    acknowledgement: { requiresStatement: false, aliases: ["ack"] },
+    algorithm: { requiresStatement: true, aliases: ["algo", "alg"] },
+    answer: { requiresStatement: false, aliases: ["ans"] },
+    assumption: { requiresStatement: true, aliases: ["assu", "ass"] },
+    axiom: { requiresStatement: true, aliases: ["axm"] },
+    claim: { requiresStatement: true, aliases: ["cla"] },
+    conjecture: {
+        requiresStatement: true,
+        aliases: ["con", "conj", "conjec"],
+    },
+    activity: { requiresStatement: false, aliases: [] },
+    aside: { requiresStatement: false, aliases: [] },
+    assemblage: { requiresStatement: false, aliases: [] },
+    biographical: { requiresStatement: false, aliases: [] },
+    case: { requiresStatement: false, aliases: [] },
+    computation: { requiresStatement: false, aliases: ["comp"] },
+    construction: { requiresStatement: false, aliases: [] },
+    convention: { requiresStatement: false, aliases: ["conv"] },
+    corollary: {
+        requiresStatement: true,
+        aliases: ["cor", "corr", "coro", "corol", "corss"],
+    },
+    definition: {
+        requiresStatement: true,
+        aliases: ["def", "defn", "dfn", "defi", "defin", "de"],
+    },
+    example: {
+        requiresStatement: true,
+        aliases: ["exam", "exa", "eg", "exmp", "expl", "exm"],
+    },
+    exercise: { requiresStatement: true, aliases: ["exer", "exers"] },
+    data: { requiresStatement: false, aliases: [] },
+    exploration: { requiresStatement: false, aliases: [] },
+    fact: { requiresStatement: true, aliases: [] },
+    heuristic: { requiresStatement: true, aliases: [] },
+    hint: { requiresStatement: false, aliases: [] },
+    historical: { requiresStatement: false, aliases: [] },
+    hypothesis: { requiresStatement: true, aliases: ["hyp"] },
+    identity: { requiresStatement: true, aliases: ["idnty"] },
+    insight: { requiresStatement: false, aliases: [] },
+    investigation: { requiresStatement: false, aliases: [] },
+    lemma: {
+        requiresStatement: true,
+        aliases: ["lem", "lma", "lemm", "lm"],
+    },
+    notation: {
+        requiresStatement: false,
+        aliases: ["no", "nota", "ntn", "nt", "notn", "notat"],
+    },
+    note: { requiresStatement: false, aliases: ["notes"] },
+    observation: { requiresStatement: false, aliases: ["obs"] },
+    principle: { requiresStatement: true, aliases: [] },
+    problem: { requiresStatement: true, aliases: ["prob", "prb"] },
+    project: { requiresStatement: false, aliases: [] },
+    proof: { requiresStatement: false, aliases: ["pf", "prf", "demo"] },
+    proposition: {
+        requiresStatement: true,
+        aliases: ["prop", "pro", "prp", "props"],
+    },
+    question: {
+        requiresStatement: true,
+        aliases: ["qu", "ques", "quest", "qsn"],
+    },
+    remark: {
+        requiresStatement: false,
+        aliases: ["rem", "rmk", "rema", "bem", "subrem"],
+    },
+    task: { requiresStatement: true, aliases: [] },
+    technology: { requiresStatement: false, aliases: ["tech"] },
+    theorem: {
+        requiresStatement: true,
+        aliases: ["thm", "theo", "theor", "thmss", "thrm"],
+    },
+    solution: { requiresStatement: false, aliases: ["sol"] },
+    warning: { requiresStatement: false, aliases: ["warn", "wrn"] },
+};
+
+/**
+ * Every canonical name and alias declared in `envAliases`, flattened.
+ *
+ * `provides.ts` uses this to register an "o" (optional-argument) signature
+ * for each of these names, so the parser knows to consume a `[title]`
+ * following `\begin{...}` as an argument rather than leaving it as literal
+ * body text. Without a registered signature, `getArgsContent(env)` in
+ * `envFactory` above finds nothing and the title is silently dropped -- this
+ * is what previously happened to every alias (`thm`, `lem`, `def`, ...)
+ * since only the canonical amsthm names happen to get a signature from the
+ * `mathtools` CTAN package.
+ */
+export const envAliasNames: string[] = Object.entries(envAliases).flatMap(
+    ([env, spec]) => [env, ...spec.aliases]
+);
+
+function genEnvironmentReplacements() {
+    // For each environment PreTeXt has, we create entries for `environmentReplacements` using all reasonable aliases
+    const exapandedEnvAliases = Object.entries(envAliases).flatMap(
+        ([env, spec]) => [
+            [
+                env,
+                envFactory(env, {
+                    requiresStatementTag: spec.requiresStatement,
+                }),
+            ],
+            ...spec.aliases.map((name) => [
+                name,
+                envFactory(env, {
+                    requiresStatementTag: spec.requiresStatement,
+                }),
+            ]),
+        ]
+    );
+    return Object.fromEntries(exapandedEnvAliases);
 }
 
 /**
@@ -232,9 +452,11 @@ export const environmentReplacements: Record<
     // TODO: add additional envs like theorem, etc.
     enumerate: enumerateFactory("ol"),
     itemize: enumerateFactory("ul"),
+    description: enumerateFactory("dl"),
     tabular: createTableFromTabular,
     center: envFactory("blockquote"),
     quote: envFactory("blockquote"),
+    quotation: envFactory("blockquote"),
     figure: envFactory("figure", {
         requiresStatementTag: false,
         wrapContentInPars: false,
@@ -245,6 +467,21 @@ export const environmentReplacements: Record<
         wrapContentInPars: false,
         extractTitleFromArgs: false,
     }),
+    tikzpicture: (env, _info, file) =>
+        htmlLike({
+            tag: "image",
+            content: [
+                htmlLike({
+                    tag: "latex-image",
+                    content: [
+                        {
+                            type: "string",
+                            content: getEnvironmentBodySource(env, file),
+                        },
+                    ],
+                }),
+            ],
+        }),
     // Verbatim/code block (Group H): emit raw content inside <pre>
     code: (env) =>
         htmlLike({
@@ -337,6 +574,58 @@ export const environmentReplacements: Record<
         }),
     //   webwork: wrap content as-is (usually empty or with seed attr)
     webwork: envFactory("webwork", { requiresStatementTag: false }),
+    // Bibliography: a standard `thebibliography` environment becomes a
+    // `<references>` division holding one `<biblio>` per `\bibitem`.
+    //
+    // PreTeXt's `<biblio>` offers three mutually exclusive entry styles, gated
+    // by `@type`: free-form `raw` text, flat `bibtex` fields, and structured
+    // CSL fields (`article-journal`, `book`, ...). CSL is the richest -- it
+    // carries structured names and drives citation-style rendering via
+    // citeproc-py -- so each entry is first put through the heuristic parser in
+    // biblio-csl.ts. Entries too unstructured to parse fall back to
+    // `type="raw"`, which is always schema-valid and still gives `\cite{key}`
+    // (mapped to `<xref ref="key"/>` in macro-subs.ts) something to point at.
+    //
+    // Any custom `\bibitem[label]{key}` label is dropped, since PreTeXt
+    // numbers and labels entries itself.
+    thebibliography: (env) => {
+        const items = env.content.filter((node) => match.macro(node, "bibitem"));
+        // `\bysame` refers back to the preceding entry's authors.
+        let previousAuthors: PersonName[] | undefined;
+
+        const entries = items.flatMap((node) => {
+            if (!match.macro(node) || !node.args) {
+                return [];
+            }
+            // `\bibitem`'s signature is `o m` under plain latex2e, but `s d<> o m`
+            // under beamer (which supports `\bibitem<overlay>[label]{key}` and
+            // takes priority when beamer is loaded). Either way cleanEnumerateBody
+            // appends the body as the final argument and the mandatory key is
+            // always the one right before it, so index from the end rather than
+            // assuming a fixed position.
+            const args = getArgsContent(node);
+            const key = printRaw(args[args.length - 2] || []).trim();
+            if (!key) {
+                return [];
+            }
+            const body = [...(args[args.length - 1] || [])];
+            trim(body);
+
+            const parsed = parseBibitemToCsl(body, previousAuthors);
+            if (parsed) {
+                if (parsed.authors.length > 0) {
+                    previousAuthors = parsed.authors;
+                }
+                return renderCslBiblio(sanitizeXmlId(key), parsed);
+            }
+            return htmlLike({
+                tag: "biblio",
+                attributes: { "xml:id": sanitizeXmlId(key), type: "raw" },
+                content: body,
+            });
+        });
+        return htmlLike({ tag: "references", content: entries });
+    },
     // Structural/frontmatter environments
     preface: envFactory("preface"),
     biography: envFactory("biography"),
@@ -349,6 +638,7 @@ export const environmentReplacements: Record<
     exercisegroup: envFactory("exercisegroup"),
     subexercises: envFactory("subexercises"),
     worksheet: envFactory("worksheet"),
+    handout: envFactory("handout"),
     "reading-questions": envFactory("reading-questions"),
     readingquestions: envFactory("reading-questions"),
     solutions: envFactory("solutions"),
@@ -371,112 +661,39 @@ export const environmentReplacements: Record<
     // SideBySide sub-structure
     sbsgroup: envFactory("sbsgroup", { requiresStatementTag: false }),
     stack: envFactory("stack", { requiresStatementTag: false }),
+    // Beamer environments for creating slideshows.
+    frame: beamerFrameFactory(),
+    slide: beamerFrameFactory(),
+    // Beamer `block`/`alertblock`/`exampleblock` are titled, visually-set-off
+    // content. PreTeXt's `<assemblage>` is the closest analogue. Their signature
+    // is `!d<> !d{} !d<>`, so the title lives at arg index 1 (after the overlay).
+    block: envFactory("assemblage", {
+        requiresStatementTag: false,
+        titleArgIndex: 1,
+    }),
+    alertblock: envFactory("assemblage", {
+        requiresStatementTag: false,
+        titleArgIndex: 1,
+    }),
+    exampleblock: envFactory("example", {
+        requiresStatementTag: true,
+        titleArgIndex: 1,
+    }),
+    // Beamer multi-column layout maps onto PreTeXt's side-by-side layout:
+    // `columns` becomes `<sidebyside>` and each `column` becomes a `<stack>` panel.
+    columns: envFactory("sidebyside", {
+        requiresStatementTag: false,
+        wrapContentInPars: false,
+        extractTitleFromArgs: false,
+    }),
+    column: envFactory("stack", {
+        requiresStatementTag: false,
+        extractTitleFromArgs: false,
+    }),
+    // Most block-like environments, done programmatically to avoid having to list them all here:
     ...genEnvironmentReplacements(),
+    // Environments with no PreTeXt equivalent at all are declared as data in
+    // dropped-subs.ts, not as one-off entries here.
+    ...generateDroppedEnvironmentReplacements(),
 };
 
-function genEnvironmentReplacements() {
-    let reps: Record<
-        string,
-        (node: Ast.Environment, info: VisitInfo, file?: VFile) => Ast.Node
-    > = {};
-    // First, a long list of pretext environments and their aliases.
-    const envAliases: Record<
-        string,
-        { requiresStatement: boolean; aliases: string[] }
-    > = {
-        abstract: { requiresStatement: false, aliases: ["abs", "abstr"] },
-        acknowledgement: { requiresStatement: false, aliases: ["ack"] },
-        algorithm: { requiresStatement: true, aliases: ["algo", "alg"] },
-        answer: { requiresStatement: false, aliases: ["ans"] },
-        assumption: { requiresStatement: true, aliases: ["assu", "ass"] },
-        axiom: { requiresStatement: true, aliases: ["axm"] },
-        claim: { requiresStatement: true, aliases: ["cla"] },
-        conjecture: {
-            requiresStatement: true,
-            aliases: ["con", "conj", "conjec"],
-        },
-        activity: { requiresStatement: false, aliases: [] },
-        aside: { requiresStatement: false, aliases: [] },
-        assemblage: { requiresStatement: false, aliases: [] },
-        biographical: { requiresStatement: false, aliases: [] },
-        case: { requiresStatement: false, aliases: [] },
-        computation: { requiresStatement: false, aliases: ["comp"] },
-        construction: { requiresStatement: false, aliases: [] },
-        convention: { requiresStatement: false, aliases: ["conv"] },
-        corollary: {
-            requiresStatement: true,
-            aliases: ["cor", "corr", "coro", "corol", "corss"],
-        },
-        definition: {
-            requiresStatement: true,
-            aliases: ["def", "defn", "dfn", "defi", "defin", "de"],
-        },
-        example: {
-            requiresStatement: true,
-            aliases: ["exam", "exa", "eg", "exmp", "expl", "exm"],
-        },
-        exercise: { requiresStatement: true, aliases: ["exer", "exers"] },
-        data: { requiresStatement: false, aliases: [] },
-        exploration: { requiresStatement: false, aliases: [] },
-        fact: { requiresStatement: true, aliases: [] },
-        heuristic: { requiresStatement: true, aliases: [] },
-        hint: { requiresStatement: false, aliases: [] },
-        historical: { requiresStatement: false, aliases: [] },
-        hypothesis: { requiresStatement: true, aliases: ["hyp"] },
-        identity: { requiresStatement: true, aliases: ["idnty"] },
-        insight: { requiresStatement: false, aliases: [] },
-        investigation: { requiresStatement: false, aliases: [] },
-        lemma: {
-            requiresStatement: true,
-            aliases: ["lem", "lma", "lemm", "lm"],
-        },
-        notation: {
-            requiresStatement: false,
-            aliases: ["no", "nota", "ntn", "nt", "notn", "notat"],
-        },
-        note: { requiresStatement: false, aliases: ["notes"] },
-        observation: { requiresStatement: false, aliases: ["obs"] },
-        principle: { requiresStatement: true, aliases: [] },
-        problem: { requiresStatement: true, aliases: ["prob", "prb"] },
-        project: { requiresStatement: false, aliases: [] },
-        proof: { requiresStatement: false, aliases: ["pf", "prf", "demo"] },
-        proposition: {
-            requiresStatement: true,
-            aliases: ["prop", "pro", "prp", "props"],
-        },
-        question: {
-            requiresStatement: true,
-            aliases: ["qu", "ques", "quest", "qsn"],
-        },
-        remark: {
-            requiresStatement: false,
-            aliases: ["rem", "rmk", "rema", "bem", "subrem"],
-        },
-        task: { requiresStatement: true, aliases: [] },
-        technology: { requiresStatement: false, aliases: ["tech"] },
-        theorem: {
-            requiresStatement: true,
-            aliases: ["thm", "theo", "theor", "thmss", "thrm"],
-        },
-        solution: { requiresStatement: false, aliases: ["sol"] },
-        warning: { requiresStatement: false, aliases: ["warn", "wrn"] },
-    };
-    // For each environment PreTeXt has, we create entries for `environmentReplacements` using all reasonable aliases
-    const exapandedEnvAliases = Object.entries(envAliases).flatMap(
-        ([env, spec]) => [
-            [
-                env,
-                envFactory(env, {
-                    requiresStatementTag: spec.requiresStatement,
-                }),
-            ],
-            ...spec.aliases.map((name) => [
-                name,
-                envFactory(env, {
-                    requiresStatementTag: spec.requiresStatement,
-                }),
-            ]),
-        ]
-    );
-    return Object.fromEntries(exapandedEnvAliases);
-}

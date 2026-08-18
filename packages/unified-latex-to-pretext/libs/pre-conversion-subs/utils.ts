@@ -2,6 +2,7 @@ import * as Ast from "@unified-latex/unified-latex-types";
 import { VisitInfo } from "@unified-latex/unified-latex-util-visit";
 import { VFile } from "vfile";
 import { s } from "@unified-latex/unified-latex-builder";
+import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 import { VFileMessage } from "vfile-message";
 
 /**
@@ -46,13 +47,27 @@ export function emptyStringWithWarningFactory(
 }
 
 /**
+ * Get an environment's name as a plain string.
+ *
+ * `Ast.Environment["env"]` is typed as a `string`, but the parser only honors
+ * that for text-mode environments; a `mathenv` carries an `Ast.String` node
+ * instead. `printRaw` handles the node form but throws on a bare string, so
+ * this normalizes both.
+ */
+export function getEnvName(env: Ast.Environment["env"]): string {
+    return typeof env === "string" ? env : printRaw(env);
+}
+
+/**
  * Sanitize a string for use in xml:id attributes and corresponding refs.
  */
 export function sanitizeXmlId(str: string) {
-    return str.replace(/["'<>&:\s]/g, (match) => {
+    return str.replace(/[^a-zA-Z0-9_-]/g, (match) => {
         switch (match) {
             case "&":
             case ":":
+            case "/":
+            case "\\":
                 return "-";
             case " ":
             case "\t":

@@ -3,7 +3,10 @@ import * as Ast from "@unified-latex/unified-latex-types";
 import { match } from "@unified-latex/unified-latex-util-match";
 import { visit } from "@unified-latex/unified-latex-util-visit";
 import { wrapPars } from "./wrap-pars";
-import { isMappedEnviron } from "./pre-conversion-subs/break-on-boundaries";
+import {
+    isMappedEnviron,
+    isSlideEnviron,
+} from "./pre-conversion-subs/break-on-boundaries";
 type PluginOptions = {
     macrosThatBreakPars?: string[];
     environmentsThatDontBreakPars?: string[];
@@ -27,7 +30,8 @@ export const unifiedLatexWrapPars: Plugin<PluginOptions[], Ast.Root, Ast.Root> =
                 (env) => {
                     if (
                         match.environment(env, "document") ||
-                        isMappedEnviron(env)
+                        isMappedEnviron(env) ||
+                        isSlideEnviron(env)
                     ) {
                         if (match.environment(env, "document")) {
                             hasDocumentEnv = true;

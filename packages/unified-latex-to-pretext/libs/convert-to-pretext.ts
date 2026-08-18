@@ -51,5 +51,5 @@ export function convertToPretext(
     }
 
     const hast = processor.runSync(tree);
-    return processor.stringify(hast);
+    return processor.stringify(hast) as unknown as string;
 }

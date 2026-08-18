@@ -11,6 +11,7 @@ import {
     isMappedEnviron,
 } from "../pre-conversion-subs/break-on-boundaries";
 import { getArgsContent } from "@unified-latex/unified-latex-util-arguments";
+import { displayMathToXast } from "./display-math";
 
 function formatNodeForError(node: Ast.Node | any): string {
     try {
@@ -21,11 +22,59 @@ function formatNodeForError(node: Ast.Node | any): string {
 
 type XastNode = Xast.Element | Xast.Text | Xast.Comment;
 
+/** XML comments cannot contain `--` or end with `-`; adjust to keep the output well-formed. */
+function makeComment(value: string): Xast.Comment {
+    value = value.replace(/--/g, "- -");
+    if (value.endsWith("-")) {
+        value += " ";
+    }
+    return { type: "comment", value };
+}
+
+/**
+ * Extract the original LaTeX source for a node using its position offsets.
+ * Falls back to `printRaw`, which may be inaccurate if the node's children
+ * were already transformed (e.g. into html-like macros).
+ */
+function nodeSource(node: Ast.Node | Ast.Argument, source?: string): string {
+    const start = node.position?.start?.offset;
+    const end = node.position?.end?.offset;
+    if (source && start != null && end != null) {
+        return source.slice(start, end);
+    }
+    return formatNodeForError(node);
+}
+
+/**
+ * Build a `<TODO>` placeholder for unconvertible content.
+ * Structure: `<TODO type="..."><!-- todo: ... --><pre>raw source</pre></TODO>`
+ * (inline placeholders use `<c>` instead of `<pre>`).
+ * The XML comment is compatible with PreTeXt's author.tools="yes" mechanism.
+ * The schema-invalid `<TODO>` element surfaces as a validation error.
+ */
+function todoBlock(type: string, label: string, rawSource: string): Xast.Element {
+    return x("TODO", { type }, [
+        makeComment(`todo: ${label}`),
+        x("pre", rawSource),
+    ]);
+}
+
+/** Build a `<TODO>` placeholder for unconvertible inline content, using `<c>` instead of `<pre>`. */
+function todoInline(type: string, label: string, rawSource: string): Xast.Element {
+    return x("TODO", { type }, [
+        makeComment(`todo: ${label}`),
+        x("c", rawSource),
+    ]);
+}
+
 /**
  * Create a `toPretext` function that will log by making a call to `logger`.
+ * When `source` (the original LaTeX string) is provided, unknown macros and
+ * environments are preserved verbatim inside `<TODO>` placeholders.
  */
 export function toPretextWithLoggerFactory(
-    logger: (message: string, node: any) => void
+    logger: (message: string, node: any) => void,
+    source?: string
 ) {
     /**
      * Convert Ast.Node to Xast nodes.
@@ -54,17 +103,23 @@ export function toPretextWithLoggerFactory(
                     value: node.content,
                     position: node.position,
                 };
-            case "comment":
-                return {
-                    type: "comment",
-                    value: node.content,
-                    position: node.position,
-                };
+            case "comment": {
+                const comment = makeComment(node.content);
+                comment.position = node.position;
+                // A comment absorbs the whitespace/newline around it. When
+                // whitespace preceded it, or when the comment sat on its own
+                // line (the line break acts as a space in LaTeX), re-emit a
+                // space so surrounding text doesn't get glued together.
+                if (node.leadingWhitespace || !node.sameline) {
+                    return [{ type: "text", value: " " }, comment];
+                }
+                return comment;
+            }
             case "inlinemath":
                 return x("m", printRaw(node.content));
             case "mathenv":
             case "displaymath":
-                return x("md", printRaw(node.content));
+                return displayMathToXast(node);
             case "verb":
                 return x("c", node.content);
             case "verbatim":
@@ -104,14 +159,11 @@ export function toPretextWithLoggerFactory(
                     }
 
                     // Use pretextTag if set, otherwise use the division macro name.
-                    // paragraph and subparagraph both map to "paragraphs".
+                    // subparagraph has no pretext equivalent, so it maps to "paragraphs".
                     let tagName =
                         divEntry?.pretextTag ??
                         divEntry?.division;
-                    if (
-                        tagName === "paragraph" ||
-                        tagName === "subparagraph"
-                    ) {
+                    if (tagName === "subparagraph") {
                         tagName = "paragraphs";
                     }
 
@@ -147,7 +199,11 @@ export function toPretextWithLoggerFactory(
                     )}\``,
                     node
                 );
-                return node.content.flatMap(toPretext); // just remove the environment
+                return todoBlock(
+                    "unknown-environment",
+                    `unknown environment "${printRaw(node.env)}"`,
+                    nodeSource(node, source)
+                );
             case "macro":
                 logger(
                     `Unknown macro when converting to XML \`${formatNodeForError(
@@ -155,7 +211,11 @@ export function toPretextWithLoggerFactory(
                     )}\``,
                     node
                 );
-                return (node.args || []).map(toPretext).flat();
+                return todoInline(
+                    "unknown-macro",
+                    `unknown macro "\\${node.content}"`,
+                    nodeSource(node, source)
+                );
             case "argument":
                 logger(
                     `Unknown argument when converting to XML \`${formatNodeForError(

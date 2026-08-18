@@ -33,20 +33,24 @@ describe("unified-latex-to-pretext:author-info", () => {
     const parser = getParser();
     let file: VFile;
 
-    it("collects author name, address, institution, and email information", () => {
+    it("groups author name, address, institution, and email by \\author boundary", () => {
         file = new VFile();
         sample =
             "\\author{First Middle LastName} \n \\address{Department, Address}";
         let input = "        First Middle LastName";
         let input1 =
             "                               \n          Department, Address";
+        // \address with no intervening \author folds into the preceding author's group.
         expect(gatherAuthorInfo(parser.parse(sample), file)).toEqual([
-            { personname: parser.parse(input).content },
-            { institution: parser.parse(input1).content },
+            {
+                personname: parser.parse(input).content,
+                institution: parser.parse(input1).content,
+            },
         ]);
 
         sample = "\\address{Affiliation}";
         input = "         Affiliation";
+        // No \author precedes this one, so it becomes its own standalone group.
         expect(gatherAuthorInfo(parser.parse(sample), file)).toEqual([
             { institution: parser.parse(input).content },
         ]);
@@ -60,14 +64,17 @@ describe("unified-latex-to-pretext:author-info", () => {
         input1 = "                             example@example.com";
         let input2 =
             "                                                          Second Author";
+        // Each \author starts a new group; \email attaches to the one before it.
         expect(gatherAuthorInfo(parser.parse(sample), file)).toEqual([
-            { personname: parser.parse(input).content },
-            { email: parser.parse(input1).content },
+            {
+                personname: parser.parse(input).content,
+                email: parser.parse(input1).content,
+            },
             { personname: parser.parse(input2).content },
         ]);
     });
 
-    it("parses author name, address, and email information", () => {
+    it("renders each author group as its own <author> tag", () => {
         sample =
             "\\author{First Middle LastName} \n \\address{Department, Address}";
         let rendered = renderCollectedAuthorInfo(
@@ -76,7 +83,7 @@ describe("unified-latex-to-pretext:author-info", () => {
         const toXast = toPretextWithLoggerFactory(file.message.bind(file));
         const xxx = unified()
             .use(xmlCompilePlugin)
-            .runSync({ type: "root", children: [toXast(rendered)].flat() });
+            .runSync({ type: "root", children: rendered.flatMap(toXast) });
         expect(normalizeHtml(toXml(xxx))).toEqual(
             normalizeHtml(
                 "<author><personname>First Middle LastName</personname><institution>Department, Address</institution></author>"
@@ -89,7 +96,7 @@ describe("unified-latex-to-pretext:author-info", () => {
         );
         const xxx1 = unified()
             .use(xmlCompilePlugin)
-            .runSync({ type: "root", children: [toXast(rendered)].flat() });
+            .runSync({ type: "root", children: rendered.flatMap(toXast) });
         expect(normalizeHtml(toXml(xxx1))).toEqual(
             normalizeHtml(
                 "<author><institution>Affiliation</institution></author>"
@@ -103,10 +110,11 @@ describe("unified-latex-to-pretext:author-info", () => {
         );
         const xxx2 = unified()
             .use(xmlCompilePlugin)
-            .runSync({ type: "root", children: [toXast(rendered)].flat() });
+            .runSync({ type: "root", children: rendered.flatMap(toXast) });
         expect(normalizeHtml(toXml(xxx2))).toEqual(
             normalizeHtml(
-                "<author><personname>First Author</personname><email>example@example.com</email><personname>Second Author</personname></author>"
+                "<author><personname>First Author</personname><email>example@example.com</email></author>" +
+                    "<author><personname>Second Author</personname></author>"
             )
         );
     });

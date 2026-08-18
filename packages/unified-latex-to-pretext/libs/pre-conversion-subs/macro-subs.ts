@@ -7,11 +7,9 @@ import {
 import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 import { VisitInfo } from "@unified-latex/unified-latex-util-visit";
 import { VFile } from "vfile";
-import {
-    makeWarningMessage,
-    emptyStringWithWarningFactory,
-    sanitizeXmlId,
-} from "./utils";
+import { makeWarningMessage, sanitizeXmlId } from "./utils";
+import { printLatexAst } from "@unified-latex/unified-latex-prettier";
+import { generateDroppedMacroReplacements } from "./dropped-subs";
 
 /**
  * Factory function that generates html-like macros that wrap their contents.
@@ -51,6 +49,40 @@ function factory(
     };
 }
 
+function xrefFactory(
+    tag: string,
+    attrName: string = "ref",
+    warningMessage: string = "",
+    attributes?: Record<string, string>
+): (macro: Ast.Macro, info: VisitInfo, file?: VFile) => Ast.Macro {
+    return (macro, info, file) => {
+        if (!macro.args) {
+            throw new Error(
+                `Found macro to replace but couldn't find content ${printRaw(
+                    macro
+                )}`
+            );
+        }
+
+        // add a warning message to the file if needed
+        if (warningMessage && file) {
+            const message = makeWarningMessage(
+                macro,
+                warningMessage,
+                "macro-subs"
+            );
+            file.message(message, message.place, message.source);
+        }
+        // Assume the meaningful argument is the last argument.
+        const args = getArgsContent(macro);
+        const content = args[args.length - 1] || [];
+        return htmlLike({
+            tag,
+            attributes: { [attrName]: sanitizeXmlId(printRaw(content)), ...attributes },
+        });
+    }
+}
+
 function createHeading(tag: string, attrs = {}) {
     return (macro: Ast.Macro) => {
         const args = getArgsContent(macro);
@@ -73,6 +105,7 @@ export const macroReplacements: Record<
     (node: Ast.Macro, info: VisitInfo, file?: VFile) => Ast.Node
 > = {
     emph: factory("em"),
+    alert: factory("alert"),
     textrm: factory(
         "em",
         `Warning: There is no equivalent tag for \"textrm\", \"em\" was used as a replacement.`
@@ -96,22 +129,16 @@ export const macroReplacements: Record<
         "em",
         `Warning: There is no equivalent tag for \"underline\", \"em\" was used as a replacement.`
     ),
-    mbox: emptyStringWithWarningFactory(
-        `Warning: There is no equivalent tag for \"mbox\", an empty Ast.String was used as a replacement.`
-    ),
-    phantom: emptyStringWithWarningFactory(
-        `Warning: There is no equivalent tag for \"phantom\", an empty Ast.String was used as a replacement.`
-    ),
     appendix: createHeading("appendix"),
+    // `\url` carries a literal URL, not an xml:id reference, so unlike the
+    // `xref`-producing macros below it must not run its argument through
+    // `sanitizeXmlId` -- that would rewrite the scheme separator and any
+    // query/fragment punctuation (`https://x.com/a?b=1` -> `https-//x.com/a?b=1`).
     url: (node) => {
         const args = getArgsContent(node);
-        const url = printRaw(args[0] || "#");
         return htmlLike({
             tag: "url",
-            attributes: {
-                href: url,
-            },
-            content: [{ type: "string", content: url }],
+            attributes: { href: printRaw(args[args.length - 1] || []) },
         });
     },
     href: (node) => {
@@ -136,56 +163,13 @@ export const macroReplacements: Record<
             content: args[1] || [],
         });
     },
-    ref: (node) => {
-        const args = getArgsContent(node);
-        const ref = sanitizeXmlId(printRaw(args[1] || ""));
-        return htmlLike({
-            tag: "xref",
-            attributes: {
-                ref: ref || "",
-            },
-        });
-    },
-    eqref: (node) => {
-        const args = getArgsContent(node);
-        const ref = sanitizeXmlId(printRaw(args[0] || ""));
-        return htmlLike({
-            tag: "xref",
-            attributes: {
-                ref: ref || "",
-            },
-        });
-    },
-    cref: (node) => {
-        const args = getArgsContent(node);
-        const ref = sanitizeXmlId(printRaw(args[1] || ""));
-        return htmlLike({
-            tag: "xref",
-            attributes: {
-                ref: ref || "",
-            },
-        });
-    },
-    Cref: (node) => {
-        const args = getArgsContent(node);
-        const ref = sanitizeXmlId(printRaw(args[1] || ""));
-        return htmlLike({
-            tag: "xref",
-            attributes: {
-                ref: ref || "",
-            },
-        });
-    },
-    cite: (node) => {
-        const args = getArgsContent(node);
-        const ref = sanitizeXmlId(printRaw(args[1] || ""));
-        return htmlLike({
-            tag: "xref",
-            attributes: {
-                ref: ref || "",
-            },
-        });
-    },
+    ref: xrefFactory("xref", "ref"),
+    pageref: xrefFactory("xref", "ref"),
+    eqref: xrefFactory("xref", "ref"),
+    cref: xrefFactory("xref", "ref"),
+    Cref: xrefFactory("xref", "ref"),
+    cite: xrefFactory("xref", "ref"),
+    citep: xrefFactory("xref", "ref"),
     index: (node) => {
         // Todo: we may want to add attributes for things like "see" and "seealso" that can be included in the index macro's arguments
         const args = getArgsContent(node);
@@ -198,30 +182,21 @@ export const macroReplacements: Record<
             }),
         });
     },
-
-    "\\": emptyStringWithWarningFactory(
-        `Warning: There is no equivalent tag for \"\\\", an empty Ast.String was used as a replacement.`
-    ),
-    vspace: emptyStringWithWarningFactory(
-        `Warning: There is no equivalent tag for \"vspace\", an empty Ast.String was used as a replacement.`
-    ),
-    hspace: emptyStringWithWarningFactory(
-        `Warning: There is no equivalent tag for \"hspace\", an empty Ast.String was used as a replacement.`
-    ),
     textcolor: factory(
         "em",
         `Warning: There is no equivalent tag for \"textcolor\", \"em\" was used as a replacement.`
     ),
-    textsize: emptyStringWithWarningFactory(
-        `Warning: There is no equivalent tag for \"textsize\", an empty Ast.String was used as a replacement.`
-    ),
-    makebox: emptyStringWithWarningFactory(
-        `Warning: There is no equivalent tag for \"makebox\", an empty Ast.String was used as a replacement.`
-    ),
-    noindent: emptyStringWithWarningFactory(
-        `Warning: There is no equivalent tag for \"noindent\", an empty Ast.String was used as a replacement.`
+    colorbox: factory(
+        "alert",
+        `Warning: There is no equivalent tag for \"colorbox\", \"alert\" was used as a replacement.`
     ),
     latex: (node) => {
+        return htmlLike({ tag: "latex" });
+    },
+    Latex: (node) => {
+        return htmlLike({ tag: "latex" });
+    },
+    LaTeX: (node) => {
         return htmlLike({ tag: "latex" });
     },
     latexe: (node) => {
@@ -239,13 +214,23 @@ export const macroReplacements: Record<
     etc: () => htmlLike({ tag: "etc" }),
     XeTeX: () => htmlLike({ tag: "xetex" }),
     XeLaTeX: () => htmlLike({ tag: "xelatex" }),
+    xelatex: () => htmlLike({ tag: "xelatex" }),
     LuaTeX: () => htmlLike({ tag: "luatex" }),
+    luatex: () => htmlLike({ tag: "luatex" }),
     PreTeXt: () => htmlLike({ tag: "pretext" }),
+    pretext: () => htmlLike({ tag: "pretext" }),
+    Pretext: () => htmlLike({ tag: "pretext" }),
     PreFigure: () => htmlLike({ tag: "prefigure" }),
+    webwork: () => htmlLike({ tag: "webwork" }),
+    WeBWorK: () => htmlLike({ tag: "webwork" }),
     AD: () => htmlLike({ tag: "ad" }),
+    ad: () => htmlLike({ tag: "ad" }),
     BC: () => htmlLike({ tag: "bc" }),
+    bc: () => htmlLike({ tag: "bc" }),
     AM: () => htmlLike({ tag: "am" }),
+    am: () => htmlLike({ tag: "am" }),
     PM: () => htmlLike({ tag: "pm" }),
+    pm: () => htmlLike({ tag: "pm" }),
     nb: () => htmlLike({ tag: "nb" }),
     ps: () => htmlLike({ tag: "ps" }),
     vs: () => htmlLike({ tag: "vs" }),
@@ -340,4 +325,14 @@ export const macroReplacements: Record<
         });
         return ret;
     },
+    // `\frametitle`/`\framesubtitle` are normally lifted out of their `frame`
+    // environment and turned into `<title>`/`<subtitle>` by `beamerFrameFactory`
+    // (see environment-subs.ts). These entries are a fallback for any stray usage
+    // outside a frame so the argument content is still preserved.
+    frametitle: factory("title"),
+    framesubtitle: factory("subtitle"),
+    // Macros with no PreTeXt equivalent at all (as opposed to an approximated
+    // mapping like `textcolor` -> `em` above) are declared as data in
+    // dropped-subs.ts, not as one-off entries here.
+    ...generateDroppedMacroReplacements(),
 };
