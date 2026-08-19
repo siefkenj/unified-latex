@@ -97,6 +97,11 @@ export const macros: MacroInfoRecord = {
     },
     // amsmath
     text: { signature: "m", renderInfo: { inMathMode: false } },
+    dddot: { signature: "m" },
+    ddddot: { signature: "m" },
+    // amsbsy
+    boldsymbol: { signature: "m" },
+    pmb: { signature: "m" },
     // amsfonts
     mathbb: { signature: "m" },
     mathscr: { signature: "m" },

@@ -19,7 +19,7 @@ describe("unified-latex-util-replace:unified-latex-replace-streaming-command", (
     it("can replace streaming commands", () => {
         const replacer = (nodes: Ast.Node[], macro: Ast.Macro) =>
             m(macro.content.toUpperCase(), arg(nodes));
-        const replacers = { foo: replacer, bar: replacer };
+        const replacers = { foo: replacer, qux: replacer };
 
         const process = (value: string) =>
             processLatexViaUnified()
@@ -34,7 +34,7 @@ describe("unified-latex-util-replace:unified-latex-replace-streaming-command", (
         file = process("x \\foo y\n\nz");
         expect(file.value).toEqual("x \\FOO{y}\n\n\\FOO{z}");
 
-        file = process("x \\foo y \\bar yy\n\nz");
-        expect(file.value).toEqual("x \\FOO{y \\BAR{yy}}\n\n\\FOO{\\BAR{z}}");
+        file = process("x \\foo y \\qux yy\n\nz");
+        expect(file.value).toEqual("x \\FOO{y \\QUX{yy}}\n\n\\FOO{\\QUX{z}}");
     });
 });

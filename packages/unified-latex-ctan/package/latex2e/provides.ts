@@ -298,6 +298,39 @@ export const macros: MacroInfoRecord = {
     mathnormal: { signature: "m" },
     mathcal: { signature: "m" },
     mathrm: { signature: "m" },
+    // Math accents (\DeclareMathAccent in fontdef.dtx -> fontmath.ltx):
+    // each takes a single math field, i.e. one token or one group. The
+    // field is the whole next token, so if `\xxx` is defined as
+    // `\mathcal{C}`, then `\dot\xxx` expands to `\dot{\mathcal{C}}` and
+    // not `\dot{\mathcal}{C}`.
+    dot: { signature: "m" },
+    ddot: { signature: "m" },
+    hat: { signature: "m" },
+    tilde: { signature: "m" },
+    bar: { signature: "m" },
+    vec: { signature: "m" },
+    check: { signature: "m" },
+    breve: { signature: "m" },
+    acute: { signature: "m" },
+    grave: { signature: "m" },
+    mathring: { signature: "m" },
+    widehat: { signature: "m" },
+    widetilde: { signature: "m" },
+    // \overline is a TeX primitive rather than a \DeclareMathAccent, but
+    // takes the same single math field.
+    overline: { signature: "m" },
+    // Kernel higher-order helpers that take control sequences or branch
+    // texts as arguments (latex.ltx).
+    mathpalette: { signature: "m m" },
+    "@ifstar": { signature: "m m" },
+    "@ifnextchar": { signature: "m m m" },
+    "@ifundefined": { signature: "m m m" },
+    "@firstoftwo": { signature: "m m" },
+    "@secondoftwo": { signature: "m m" },
+    DeclareMathAlphabet: {
+        signature: "m m m m m",
+        renderInfo: { breakAround: true },
+    },
     // Other
     setlength: { signature: "m m", renderInfo: { breakAround: true } },
     ref: { signature: "s m" },

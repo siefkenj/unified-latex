@@ -50,7 +50,7 @@ describe("unified-latex-util-replace:replace-streaming-command", () => {
     it("can replace streaming commands in arrays", () => {
         const replacer = (nodes: Ast.Node[], macro: Ast.Macro) =>
             m(macro.content.toUpperCase(), arg(nodes));
-        const isReplaceable = match.createMacroMatcher(["foo", "bar"]);
+        const isReplaceable = match.createMacroMatcher(["foo", "qux"]);
         let nodes: Ast.Node[];
 
         nodes = strToNodesRaw("\\foo y");
@@ -61,23 +61,23 @@ describe("unified-latex-util-replace:replace-streaming-command", () => {
         replaceStreamingCommandInArray(nodes, isReplaceable, replacer);
         expect(printRaw(nodes)).toEqual("x \\FOO{y}");
 
-        nodes = strToNodesRaw("x \\bar\\foo y");
+        nodes = strToNodesRaw("x \\qux\\foo y");
         replaceStreamingCommandInArray(nodes, isReplaceable, replacer);
-        expect(printRaw(nodes)).toEqual("x \\BAR{\\FOO{y}}");
+        expect(printRaw(nodes)).toEqual("x \\QUX{\\FOO{y}}");
 
         nodes = strToNodesRaw("x \\foo%com\n y");
         replaceStreamingCommandInArray(nodes, isReplaceable, replacer);
         expect(printRaw(nodes)).toEqual("x %com\n\\FOO{y}");
 
-        nodes = strToNodesRaw("x \\foo%com\n\\bar y");
+        nodes = strToNodesRaw("x \\foo%com\n\\qux y");
         replaceStreamingCommandInArray(nodes, isReplaceable, replacer);
-        expect(printRaw(nodes)).toEqual("x %com\n\\FOO{\\BAR{y}}");
+        expect(printRaw(nodes)).toEqual("x %com\n\\FOO{\\QUX{y}}");
     });
 
     it("can replace streaming commands in groups", () => {
         const replacer = (nodes: Ast.Node[], macro: Ast.Macro) =>
             m(macro.content.toUpperCase(), arg(nodes));
-        const isReplaceable = match.createMacroMatcher(["foo", "bar"]);
+        const isReplaceable = match.createMacroMatcher(["foo", "qux"]);
         let group: Ast.Group;
         let nodes: Ast.Node[];
 
@@ -97,9 +97,9 @@ describe("unified-latex-util-replace:replace-streaming-command", () => {
         nodes = replaceStreamingCommandInGroup(group, isReplaceable, replacer);
         expect(printRaw(nodes)).toEqual("{x \\FOO{y}}");
 
-        group = strToNodesRaw("{\\bar x \\foo y}")[0] as Ast.Group;
+        group = strToNodesRaw("{\\qux x \\foo y}")[0] as Ast.Group;
         nodes = replaceStreamingCommandInGroup(group, isReplaceable, replacer);
-        expect(printRaw(nodes)).toEqual("\\BAR{x \\FOO{y}}");
+        expect(printRaw(nodes)).toEqual("\\QUX{x \\FOO{y}}");
 
         group = strToNodesRaw("{%c\n \\foo y}")[0] as Ast.Group;
         nodes = replaceStreamingCommandInGroup(group, isReplaceable, replacer);
@@ -109,7 +109,7 @@ describe("unified-latex-util-replace:replace-streaming-command", () => {
         nodes = replaceStreamingCommandInGroup(group, isReplaceable, replacer);
         expect(printRaw(nodes)).toEqual("{x }");
 
-        group = strToNodesRaw("{x\\bar \\foo}")[0] as Ast.Group;
+        group = strToNodesRaw("{x\\qux \\foo}")[0] as Ast.Group;
         nodes = replaceStreamingCommandInGroup(group, isReplaceable, replacer);
         expect(printRaw(nodes)).toEqual("{x}");
     });
@@ -117,7 +117,7 @@ describe("unified-latex-util-replace:replace-streaming-command", () => {
     it("preserves whitespace when replacing streaming commands in groups", () => {
         const replacer = (nodes: Ast.Node[], macro: Ast.Macro) =>
             m(macro.content.toUpperCase(), arg(nodes));
-        const isReplaceable = match.createMacroMatcher(["foo", "bar"]);
+        const isReplaceable = match.createMacroMatcher(["foo", "qux"]);
         let group: Ast.Group;
         let nodes: Ast.Node[];
 
@@ -129,7 +129,7 @@ describe("unified-latex-util-replace:replace-streaming-command", () => {
     it("can replace streaming commands", () => {
         const replacer = (nodes: Ast.Node[], macro: Ast.Macro) =>
             m(macro.content.toUpperCase(), arg(nodes));
-        const isReplaceable = match.createMacroMatcher(["foo", "bar"]);
+        const isReplaceable = match.createMacroMatcher(["foo", "qux"]);
         let nodes: Ast.Node[];
         let group: Ast.Group;
 
@@ -145,7 +145,7 @@ describe("unified-latex-util-replace:replace-streaming-command", () => {
     it("avoids special macros (like \\section) when replacing", () => {
         const replacer = (nodes: Ast.Node[], macro: Ast.Macro) =>
             m(macro.content.toUpperCase(), arg(nodes));
-        const isReplaceable = match.createMacroMatcher(["foo", "bar"]);
+        const isReplaceable = match.createMacroMatcher(["foo", "qux"]);
         let nodes: Ast.Node[];
 
         nodes = strToNodesRaw("\\foo y\\section{xx}z");
@@ -160,7 +160,7 @@ describe("unified-latex-util-replace:replace-streaming-command", () => {
     it("avoids environments when replacing", () => {
         const replacer = (nodes: Ast.Node[], macro: Ast.Macro) =>
             m(macro.content.toUpperCase(), arg(nodes));
-        const isReplaceable = match.createMacroMatcher(["foo", "bar"]);
+        const isReplaceable = match.createMacroMatcher(["foo", "qux"]);
         let nodes: Ast.Node[];
 
         nodes = strToNodesRaw("\\foo y\\[x\\]z");
