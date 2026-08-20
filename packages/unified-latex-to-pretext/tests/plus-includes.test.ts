@@ -8,9 +8,14 @@ import {
 } from "../libs/unified-latex-plugin-to-pretext";
 import { xmlCompilePlugin } from "../libs/convert-to-pretext";
 
-function normalizeHtml(str: string) {
+async function normalizeHtml(str: string) {
     try {
-        return Prettier.format(str, {
+        // `Prettier.format` is async, so it has to be awaited *inside* the try
+        // for the catch to see a parse failure. Valid PreTeXt is not always
+        // valid HTML -- `<p><ul>...</ul></p>` is legal here but Prettier's HTML
+        // parser rejects it -- and without the await those cases blow up with a
+        // SyntaxError instead of falling back to an exact string comparison.
+        return await Prettier.format(str, {
             parser: "html",
             plugins: ["@prettier/plugin-xml"],
         });

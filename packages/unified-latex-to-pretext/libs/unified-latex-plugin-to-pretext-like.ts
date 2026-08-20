@@ -28,6 +28,7 @@ import {
 } from "./pre-conversion-subs/plus-subs";
 import { streamingMacroReplacements } from "./pre-conversion-subs/streaming-command-subs";
 import { unifiedLatexWrapPars } from "./unified-latex-wrap-pars";
+import { removeWorkspaceMarkers } from "./workspace-marker";
 import {
     breakOnBoundaries,
     isMappedEnviron,
@@ -150,9 +151,9 @@ export const unifiedLatexToPretextLike: Plugin<
         // Look for label macros and attach their content as an argument to their parent environment.
         attachAdditionalAttributes(tree);
 
-        // Look for vertical-spacing commands (\vspace, \vfil(l), \vskip) that trail the
-        // content of some environment/macro argument, and convert them into a `workspace`
-        // attribute on the container they trail (see vertical-space-subs.ts). Must run
+        // Look for vertical-spacing commands (\vspace, \vfil(l), \vskip) inside a
+        // worksheet/handout/project-like environment and move each one onto the block
+        // it follows, as a `workspace` attribute (see vertical-space-subs.ts). Must run
         // before division macros are wrapped in `<p>` tags and before environment/macro
         // replacement, since it records the attribute via `_renderInfo` on the raw node.
         attachVerticalSpaceWorkspace(tree);
@@ -236,6 +237,10 @@ export const unifiedLatexToPretextLike: Plugin<
         // own line) is left wrapping nothing — a self-closing `<p/>`. Final
         // pass: unwrap any `<p>` that has no meaningful content left.
         removeEmptyPars(tree);
+
+        // Drop any `workspace-marker` no `wrapPars` call consumed -- see
+        // workspace-marker.ts. Must run after every `<p>`-producing pass.
+        removeWorkspaceMarkers(tree);
 
         // Wrap in enough tags to ensure a valid pretext document
         if (!producePretextFragment) {
@@ -497,10 +502,25 @@ function markAsBlockLevel(
           ? replacement
           : [replacement];
     for (const n of nodes) {
-        if (isHtmlLikeTag(n)) {
+        if (isHtmlLikeTag(n) && !isParagraphLevelTag(n)) {
             n._renderInfo = { ...n._renderInfo, isBlockLevel: true };
         }
     }
+}
+
+/**
+ * PreTeXt tags that belong *inside* a `<p>` rather than beside one: `List`
+ * (`<ol>`/`<ul>`/`<dl>`) and `MathDisplay` (`<md>`) are `TextParagraphItem`s in
+ * the RelaxNG schema, not `BlockText`. Marking one block-level would make
+ * `splitForPars` push it out of the paragraph it belongs to and emit it bare,
+ * which is invalid. Kept in sync with `environmentsThatDontBreakPars` in
+ * wrap-pars.ts, which is the same decision made one step earlier, before
+ * environment replacement has run.
+ */
+const PARAGRAPH_LEVEL_TAGS = new Set(["ol", "ul", "dl", "md"]);
+
+function isParagraphLevelTag(node: Ast.Node): boolean {
+    return PARAGRAPH_LEVEL_TAGS.has(extractFromHtmlLike(node as Ast.Macro).tag);
 }
 
 /**

@@ -416,6 +416,31 @@ export const envAliasNames: string[] = Object.entries(envAliases).flatMap(
     ([env, spec]) => [env, ...spec.aliases]
 );
 
+/**
+ * Every name and alias in `envAliases`, mapped to the PreTeXt tag it converts to
+ * (`dfn` -> `definition`, `thm` -> `theorem`, `theorem` -> `theorem`, ...).
+ */
+const envNameToPretextTag: Record<string, string> = Object.fromEntries(
+    Object.entries(envAliases).flatMap(([tag, spec]) => [
+        [tag, tag],
+        ...spec.aliases.map((alias) => [alias, tag]),
+    ])
+);
+
+/**
+ * The PreTeXt tag `envName` will be converted to, for the block environments
+ * declared in `envAliases` -- every theorem-like, definition-like, exercise,
+ * task, and project-like environment, under any of their aliases.
+ *
+ * Returns `undefined` for anything else (`itemize`, `figure`, `worksheet`, an
+ * unrecognized environment, ...). Callers that need to know whether a block can
+ * carry a particular PreTeXt attribute use this to resolve an alias to its
+ * canonical tag first -- see `vertical-space-subs.ts`.
+ */
+export function pretextTagForEnvironment(envName: string): string | undefined {
+    return envNameToPretextTag[envName];
+}
+
 function genEnvironmentReplacements() {
     // For each environment PreTeXt has, we create entries for `environmentReplacements` using all reasonable aliases
     const exapandedEnvAliases = Object.entries(envAliases).flatMap(

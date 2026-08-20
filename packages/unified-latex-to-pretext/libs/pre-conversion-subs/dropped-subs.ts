@@ -119,9 +119,10 @@ export const droppedMacros: Record<string, DroppedMacroSpec> = {
         behavior: { type: "keep-content" },
         warning: `Warning: There is no equivalent tag for "Huge", the content was used as a replacement.`,
     },
-    // A trailing \vspace/\vfil(l) is converted into a `workspace` attribute on the
-    // element it trails (see vertical-space-subs.ts); these only handle the residual
-    // case of one that isn't trailing anything.
+    // Inside a worksheet/handout/project-like environment, \vspace/\vfil(l)/\vskip
+    // is moved onto the block it follows as a `workspace` attribute, and removed
+    // (see vertical-space-subs.ts). These only handle what that pass leaves behind:
+    // a `\vskip` whose argument isn't parseable glue.
     vspace: {
         behavior: { type: "discard" },
         warning: `Warning: There is no equivalent tag for "vspace", an empty Ast.String was used as a replacement.`,

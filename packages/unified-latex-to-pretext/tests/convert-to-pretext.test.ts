@@ -13,9 +13,13 @@ import {
 import { unified } from "unified";
 import { getArgsContent } from "@unified-latex/unified-latex-util-arguments";
 
-function normalizeHtml(str: string) {
+async function normalizeHtml(str: string) {
     try {
-        return Prettier.format(str, {
+        // `Prettier.format` is async, so it has to be awaited *inside* the try
+        // for the catch to see a parse failure -- otherwise the rejection
+        // escapes and the test dies with a SyntaxError instead of falling back
+        // to an exact string comparison.
+        return await Prettier.format(str, {
             parser: "xml",
             plugins: ["@prettier/plugin-xml"],
         });

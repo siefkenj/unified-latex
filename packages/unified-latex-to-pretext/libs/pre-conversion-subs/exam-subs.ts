@@ -141,11 +141,12 @@ function getItemBody(node: Ast.Macro): Ast.Node[] {
 /**
  * Points and workspace attributes for an exam item macro (`\question`/`\part`/etc.).
  *
- * The workspace value itself is no longer computed here: a trailing `\vspace`/`\vfil(l)`/
- * `\vskip` in the item's body was already stripped out and recorded on this macro's
+ * The workspace value itself is not computed here. A `\vspace`/`\vfil(l)`/`\vskip`
+ * trailing the item's whole body was already stripped out and recorded on this macro's
  * `_renderInfo.additionalAttributes` by the general `attachVerticalSpaceWorkspace` pass,
- * which runs earlier in the pipeline (before exam environments are converted). See
- * vertical-space-subs.ts.
+ * which runs earlier in the pipeline (before exam environments are converted). One
+ * *within* the body instead lands on the paragraph it follows, and never reaches here.
+ * See vertical-space-subs.ts.
  */
 function getExamItemAttributes(node: Ast.Macro): {
     attributes: HtmlAttributes;

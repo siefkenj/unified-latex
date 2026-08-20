@@ -40,10 +40,16 @@ export function wrapPars(
             "frametitle",
             "framesubtitle",
         ],
+        // These become PreTeXt `TextParagraphItem`s -- `<ol>`/`<ul>`/`<dl>` --
+        // which live inside a `<p>`, so they must not split the paragraph they
+        // are part of. See `PARAGRAPH_LEVEL_TAGS` in
+        // unified-latex-plugin-to-pretext-like.ts, which makes the same call for
+        // the already-converted form of these environments.
         environmentsThatDontBreakPars = [
             "index",
             "itemize",
             "enumerate",
+            "description",
         ],
     } = options || {};
 
@@ -54,7 +60,17 @@ export function wrapPars(
 
     return parSplits.flatMap((part) => {
         if (part.wrapInPar) {
-            return htmlLike({ tag: "p", content: part.content });
+            // `workspace` comes from a `\vspace`/`\vfill`/`\vskip` that followed
+            // this paragraph inside a worksheet/handout/project-like environment
+            // (see vertical-space-subs.ts). `<p>` is one of the elements PreTeXt
+            // lets carry one.
+            return htmlLike({
+                tag: "p",
+                content: part.content,
+                attributes: part.workspace
+                    ? { workspace: part.workspace }
+                    : undefined,
+            });
         } else {
             return part.content;
         }

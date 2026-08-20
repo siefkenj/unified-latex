@@ -5,9 +5,14 @@ import { processLatexViaUnified } from "@unified-latex/unified-latex";
 import { unifiedLatexToPretext } from "../libs/unified-latex-plugin-to-pretext";
 import { xmlCompilePlugin } from "../libs/convert-to-pretext";
 
-function normalizeHtml(str: string) {
+async function normalizeHtml(str: string) {
     try {
-        return Prettier.format(str, {
+        // `Prettier.format` is async, so it has to be awaited *inside* the try
+        // for the catch to see a parse failure. Valid PreTeXt is not always
+        // valid HTML -- `<p><ul>...</ul></p>` is legal here but Prettier's HTML
+        // parser rejects it -- and without the await those cases blow up with a
+        // SyntaxError instead of falling back to an exact string comparison.
+        return await Prettier.format(str, {
             parser: "html",
             plugins: ["@prettier/plugin-xml"],
         });
@@ -237,6 +242,54 @@ Second paragraph.\end{questions}`
                     `<task workspace="1in"><statement><p>First part</p></statement></task>` +
                     `<task workspace="2in"><statement><p>Second part</p></statement></task>` +
                     `</exercise>` +
+                    `</worksheet>`
+            )
+        );
+    });
+
+    it("keeps a mid-question spacer on the paragraph it follows, not on the exercise", async () => {
+        // The exercise/task only wins when the spacer trails its whole body.
+        html = process(
+            String.raw`\begin{questions}\question First\vspace{1in}` +
+                "\n\n" +
+                String.raw`Second\end{questions}`
+        );
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `<worksheet>` +
+                    `<exercise><statement>` +
+                    `<p workspace="1in">First</p><p>Second</p>` +
+                    `</statement></exercise>` +
+                    `</worksheet>`
+            )
+        );
+    });
+
+    it("keeps a spacer trailing a multi-paragraph question on the exercise", async () => {
+        html = process(
+            String.raw`\begin{questions}\question First` +
+                "\n\n" +
+                String.raw`Second\vspace{1in}\end{questions}`
+        );
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `<worksheet>` +
+                    `<exercise workspace="1in"><statement>` +
+                    `<p>First</p><p>Second</p>` +
+                    `</statement></exercise>` +
+                    `</worksheet>`
+            )
+        );
+    });
+
+    it("converts a fractional \\vskip into exercise workspace", async () => {
+        html = process(
+            String.raw`\begin{questions}\question First question\vskip 1.5in\end{questions}`
+        );
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `<worksheet>` +
+                    `<exercise workspace="1.5in"><statement><p>First question</p></statement></exercise>` +
                     `</worksheet>`
             )
         );
