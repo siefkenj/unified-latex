@@ -13,7 +13,11 @@ import { wrapPars } from "../wrap-pars";
 import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 import { VisitInfo } from "@unified-latex/unified-latex-util-visit";
 import { VFile } from "vfile";
-import { makeWarningMessage, sanitizeXmlId } from "./utils";
+import {
+    makeWarningMessage,
+    parseKeyValueAttributes,
+    sanitizeXmlId,
+} from "./utils";
 import { createTableFromTabular } from "./create-table-from-tabular";
 import { generateDroppedEnvironmentReplacements } from "./dropped-subs";
 import {
@@ -239,6 +243,30 @@ function envFactory(
         return htmlLike({
             tag: tag,
             content: content,
+            attributes,
+        });
+    };
+}
+
+/**
+ * Create a converter for `sidebyside`/`sbsgroup`. Real PreTeXt's
+ * `<sidebyside>` and `<sbsgroup>` share a `SidebySideAttributes` group
+ * (`widths`, `valign`/`valigns`, `margins`, `landscape`, `pause`) and neither
+ * takes a `<title>`, so — unlike most `envFactory` environments — the
+ * `[...]` optional argument is a `key=value` attribute list, not a title.
+ */
+function sideBySideFactory(
+    tag: string
+): (env: Ast.Environment, info: VisitInfo, file?: VFile) => Ast.Macro {
+    return (env) => {
+        const args = getArgsContent(env);
+        const attributes = parseKeyValueAttributes(args[0]);
+        if (env._renderInfo?.additionalAttributes) {
+            Object.assign(attributes, env._renderInfo.additionalAttributes);
+        }
+        return htmlLike({
+            tag,
+            content: wrapPars(env.content),
             attributes,
         });
     };
@@ -558,11 +586,9 @@ export const environmentReplacements: Record<
         children.push(...stanzas);
         return htmlLike({ tag: "poem", content: children });
     },
-    //   sidebyside: wrap content panels as-is
-    sidebyside: envFactory("sidebyside", {
-        requiresStatementTag: false,
-        extractTitleFromArgs: false,
-    }),
+    //   sidebyside: wrap content panels as-is; `[key=value,...]` optional
+    //   arg carries PreTeXt's `widths`/`valign(s)`/`margins`/etc.
+    sidebyside: sideBySideFactory("sidebyside"),
     //   program: emit raw content inside <program><input>; language from optional arg
     program: (env) => {
         const args = getArgsContent(env);
@@ -684,7 +710,8 @@ export const environmentReplacements: Record<
         extractTitleFromArgs: false,
     }),
     // SideBySide sub-structure
-    sbsgroup: envFactory("sbsgroup", { requiresStatementTag: false }),
+    sbsgroup: sideBySideFactory("sbsgroup"),
+    // <stack> has no attributes in the PreTeXt schema.
     stack: envFactory("stack", { requiresStatementTag: false }),
     // Beamer environments for creating slideshows.
     frame: beamerFrameFactory(),

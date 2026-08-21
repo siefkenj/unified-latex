@@ -7,7 +7,11 @@ import {
 import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 import { VisitInfo } from "@unified-latex/unified-latex-util-visit";
 import { VFile } from "vfile";
-import { makeWarningMessage, sanitizeXmlId } from "./utils";
+import {
+    makeWarningMessage,
+    parseKeyValueAttributes,
+    sanitizeXmlId,
+} from "./utils";
 import { printLatexAst } from "@unified-latex/unified-latex-prettier";
 import { generateDroppedMacroReplacements } from "./dropped-subs";
 
@@ -341,14 +345,20 @@ export const macroReplacements: Record<
     textperiodcentered: () => htmlLike({ tag: "midpoint" }),
     texttildelow: () => htmlLike({ tag: "swungdash" }),
     textperthousand: () => htmlLike({ tag: "permille" }),
+    // `\includegraphics[bb][key=value,...]{file}` (graphicx signature `s o o m`):
+    // both bracket groups carry key=value options (`width`, `margins`, etc, per
+    // PreTeXt's `<image>`); a lone `[...]` normally fills the first one.
     includegraphics: (node) => {
         const args = getArgsContent(node);
         const source = printRaw(args[args.length - 1] || []);
+        const attributes = {
+            ...parseKeyValueAttributes(args[1]),
+            ...parseKeyValueAttributes(args[2]),
+            source,
+        };
         return htmlLike({
             tag: "image",
-            attributes: {
-                source,
-            },
+            attributes,
             content: [],
         });
     },

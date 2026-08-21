@@ -1159,6 +1159,12 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
                 `<figure><caption>My figure</caption><image source="example.png"/></figure>`
             )
         );
+        html = process(`\\includegraphics[width=50\\%, margins=10\\%]{example.png}`);
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `<image width="50%" margins="10%" source="example.png"/>`
+            )
+        );
     });
 
     it("Turns labels into xml:id attributes and refs into xrefs", async () => {
@@ -1486,6 +1492,24 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
         html = process(`\\begin{sidebyside}\n\nLeft content.\n\nRight content.\n\\end{sidebyside}`);
         expect(await normalizeHtml(html)).toEqual(
             await normalizeHtml(`<sidebyside><p>Left content.</p><p>Right content.</p></sidebyside>`)
+        );
+    });
+    it("converts \\begin{sidebyside}[key=value,...] attributes", async () => {
+        html = process(`\\begin{sidebyside}[widths=30\\% 70\\%, valign=top]\n\nLeft.\n\nRight.\n\\end{sidebyside}`);
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `<sidebyside widths="30% 70%" valign="top"><p>Left.</p><p>Right.</p></sidebyside>`
+            )
+        );
+    });
+    it("converts \\begin{sbsgroup}[key=value,...] attributes", async () => {
+        html = process(
+            `\\begin{sbsgroup}[margins=10\\%]\n\\begin{sidebyside}\n\nA.\n\nB.\n\\end{sidebyside}\n\\end{sbsgroup}`
+        );
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `<sbsgroup margins="10%"><sidebyside><p>A.</p><p>B.</p></sidebyside></sbsgroup>`
+            )
         );
     });
     it("converts \\begin{program} to <program><input>", async () => {

@@ -101,3 +101,51 @@ export function sanitizeXmlId(str: string) {
         }
     });
 }
+
+/**
+ * Attributes whose bare-number values are percentages. `width=50` is
+ * normalized to `width="50%"` since a literal `%` starts a comment in LaTeX.
+ */
+const PERCENT_ATTRIBUTES = new Set(["width", "widths", "margin", "margins"]);
+
+/**
+ * Parse an optional argument as a comma-separated `key=value` list, e.g.
+ * `[widths=30\% 70\%, valign=top]`. Values may be quoted; `\%` is unescaped
+ * to `%`; bare-number values of percentage attributes get a `%` appended; a
+ * bare key becomes `key="yes"`.
+ */
+export function parseKeyValueAttributes(
+    nodes: Ast.Node[] | null
+): Record<string, string> {
+    const attributes: Record<string, string> = {};
+    if (!nodes) {
+        return attributes;
+    }
+    for (const entry of printRaw(nodes).split(",")) {
+        const keyValue = entry.trim();
+        if (!keyValue) {
+            continue;
+        }
+        const eqIndex = keyValue.indexOf("=");
+        if (eqIndex === -1) {
+            attributes[keyValue] = "yes";
+            continue;
+        }
+        const key = keyValue.slice(0, eqIndex).trim();
+        let value = keyValue.slice(eqIndex + 1).trim();
+        if (
+            (value.startsWith('"') && value.endsWith('"')) ||
+            (value.startsWith("'") && value.endsWith("'"))
+        ) {
+            value = value.slice(1, -1);
+        }
+        value = value.replace(/\\%/g, "%");
+        if (PERCENT_ATTRIBUTES.has(key) && /^\d+(\.\d+)?$/.test(value)) {
+            value += "%";
+        }
+        if (key) {
+            attributes[key] = value;
+        }
+    }
+    return attributes;
+}

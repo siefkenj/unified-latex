@@ -6,7 +6,11 @@ import { getArgsContent } from "@unified-latex/unified-latex-util-arguments";
 import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 import { VisitInfo } from "@unified-latex/unified-latex-util-visit";
 import { VFile } from "vfile";
-import { makeWarningMessage, sanitizeXmlId } from "./utils";
+import {
+    makeWarningMessage,
+    parseKeyValueAttributes,
+    sanitizeXmlId,
+} from "./utils";
 
 const XINCLUDE_NAMESPACE = "http://www.w3.org/2001/XInclude";
 
@@ -90,53 +94,6 @@ export const defaultPlusTypes = [
 ];
 
 /**
- * Attributes whose bare-number values are percentages. `width=50` is
- * normalized to `width="50%"` since a literal `%` starts a comment in LaTeX.
- */
-const PERCENT_ATTRIBUTES = new Set(["width", "margin"]);
-
-/**
- * Parse the optional argument of `\plus` as a comma-separated key=value list.
- * Values may be quoted; `\%` is unescaped to `%`; bare-number values of
- * percentage attributes get a `%` appended; a bare key becomes `key="yes"`.
- */
-export function parsePlusAttributes(
-    nodes: Ast.Node[] | null
-): Record<string, string> {
-    const attributes: Record<string, string> = {};
-    if (!nodes) {
-        return attributes;
-    }
-    for (const entry of printRaw(nodes).split(",")) {
-        const keyValue = entry.trim();
-        if (!keyValue) {
-            continue;
-        }
-        const eqIndex = keyValue.indexOf("=");
-        if (eqIndex === -1) {
-            attributes[keyValue] = "yes";
-            continue;
-        }
-        const key = keyValue.slice(0, eqIndex).trim();
-        let value = keyValue.slice(eqIndex + 1).trim();
-        if (
-            (value.startsWith('"') && value.endsWith('"')) ||
-            (value.startsWith("'") && value.endsWith("'"))
-        ) {
-            value = value.slice(1, -1);
-        }
-        value = value.replace(/\\%/g, "%");
-        if (PERCENT_ATTRIBUTES.has(key) && /^\d+(\.\d+)?$/.test(value)) {
-            value += "%";
-        }
-        if (key) {
-            attributes[key] = value;
-        }
-    }
-    return attributes;
-}
-
-/**
  * Create `macroReplacements`-style functions for `\plus[attrs]{type}{ref}`
  * and its type-free sugar `\include{ref}`.
  */
@@ -214,7 +171,7 @@ export function createPlusMacroReplacements(
                     `Warning: "${type}" is not a recognized type in \\plus{${type}}{${ref}}. It was used anyway; pass it in "extraTypes" to suppress this warning.`
                 );
             }
-            return makeInclude(node, file, type, ref, parsePlusAttributes(args[0]));
+            return makeInclude(node, file, type, ref, parseKeyValueAttributes(args[0]));
         },
         include: (node, info, file) => {
             const args = getArgsContent(node);
