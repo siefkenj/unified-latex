@@ -15,7 +15,8 @@ import { visit, VisitInfo } from "@unified-latex/unified-latex-util-visit";
 import { environments as examCtnEnvironments } from "@unified-latex/unified-latex-ctan/package/exam";
 import { wrapPars } from "../wrap-pars";
 import { trim } from "@unified-latex/unified-latex-util-trim";
-import { isWhitespaceLike } from "./vertical-space-subs";
+import { isPageBreakMarker } from "../page-break-marker";
+import { enclosingPrintoutDivision } from "./page-subs";
 
 type HtmlAttributes = Record<string, string>;
 
@@ -200,10 +201,6 @@ function isTaskNode(node: Ast.Node): boolean {
     return match.macro(node, "html-tag:task");
 }
 
-function isPageBreakNode(node: Ast.Node): boolean {
-    return match.macro(node, "newpage") || match.macro(node, "clearpage");
-}
-
 /**
  * Build a `<task>` element from an item macro (`\part` or `\subpart`).
  * If the body contains converted sub-task nodes, the content before them
@@ -309,18 +306,22 @@ function partsToTasks(env: Ast.Environment): Ast.Node[] {
 }
 
 /**
- * Convert a `questions` environment to an `<exercises>` html-like node
+ * Convert a `questions` environment to a `<worksheet>` html-like node
  * containing `<exercise>` elements.
  *
  * Each `\question` becomes an `<exercise>`. If the question body contains
  * converted `<task>` nodes (from a nested `parts` environment), the content
  * before them becomes an `<introduction>` and the tasks are placed directly
  * inside the `<exercise>`. Otherwise the body is wrapped in a `<statement>`.
+ *
+ * Page-break markers left in `env.content` by `hoistPageBreaks` are passed
+ * through in order, for `splitWorksheetPages` to turn into `<page>` elements
+ * (see page-subs.ts).
  */
 function questionsToExercises(
     env: Ast.Environment,
-    _info: VisitInfo
-): Ast.Node {
+    info: VisitInfo
+): Ast.Node | Ast.Node[] {
     // Extract an optional \title{...} that appears before the first \question.
     // cleanEnumerateBody keeps pre-item content in env.content, so \title{...}
     // will appear with its {arg} already attached by the parser.
@@ -333,35 +334,8 @@ function questionsToExercises(
             ? htmlLike({ tag: "title", content: titleArg.content })
             : undefined;
 
-    function extractTrailingPageBreak(bodyNodes: Ast.Node[]): {
-        bodyNodes: Ast.Node[];
-        breakAfter: boolean;
-    } {
-        const remainingBody = [...bodyNodes];
-
-        while (
-            remainingBody.length > 0 &&
-            isWhitespaceLike(remainingBody[remainingBody.length - 1])
-        ) {
-            remainingBody.pop();
-        }
-
-        const lastNode = remainingBody[remainingBody.length - 1];
-        if (!lastNode || !isPageBreakNode(lastNode)) {
-            return { bodyNodes: remainingBody, breakAfter: false };
-        }
-
-        remainingBody.pop();
-        trim(remainingBody);
-        return { bodyNodes: remainingBody, breakAfter: true };
-    }
-
-    function questionToExercise(node: Ast.Macro): {
-        exercise: Ast.Node;
-        breakAfter: boolean;
-    } {
-        const { attributes, bodyNodes: rawBodyNodes } = getExamItemAttributes(node);
-        const { bodyNodes, breakAfter } = extractTrailingPageBreak(rawBodyNodes);
+    function questionToExercise(node: Ast.Macro): Ast.Node {
+        const { attributes, bodyNodes } = getExamItemAttributes(node);
         const firstTaskIndex = bodyNodes.findIndex(isTaskNode);
 
         let exerciseContent: Ast.Node[];
@@ -395,61 +369,39 @@ function questionsToExercises(
             exerciseContent.push(...taskNodes);
         }
 
-        return {
-            exercise: htmlLike({
-                tag: "exercise",
-                attributes,
-                content: exerciseContent,
-            }),
-            breakAfter,
-        };
-    }
-
-    const convertedQuestions = env.content.reduce<
-        { exercise: Ast.Node; breakAfter: boolean }[]
-    >((items, node) => {
-        if (!match.macro(node, "question") || !node.args) {
-            return items;
-        }
-
-        items.push(questionToExercise(node));
-        return items;
-    }, []);
-
-    if (!convertedQuestions.some((question) => question.breakAfter)) {
-        const exercises = convertedQuestions.map((question) => question.exercise);
         return htmlLike({
-            tag: "worksheet",
-            content: titleElement ? [titleElement, ...exercises] : exercises,
+            tag: "exercise",
+            attributes,
+            content: exerciseContent,
         });
     }
 
-    const pages: Ast.Node[] = [];
-    let currentPageContent: Ast.Node[] = [];
-
-    const closePage = () => {
-        pages.push(
-            htmlLike({
-                tag: "page",
-                content: currentPageContent,
-            })
-        );
-        currentPageContent = [];
-    };
-
-    for (const question of convertedQuestions) {
-        currentPageContent.push(question.exercise);
-        if (question.breakAfter) {
-            closePage();
+    const content = env.content.reduce<Ast.Node[]>((items, node) => {
+        if (match.macro(node, "question") && node.args) {
+            items.push(questionToExercise(node));
+        } else if (isPageBreakMarker(node)) {
+            items.push(node);
         }
+        return items;
+    }, []);
+
+    // A `questions` environment nested in a `\worksheet{...}`/`\handout{...}`
+    // division (or their environment forms) is a very natural way to write an
+    // exam-class worksheet, but a `<worksheet>` of our own here would nest one
+    // printout inside another, which the schema forbids. Contribute the
+    // exercises to the enclosing printout instead -- and let its own title
+    // stand, rather than emitting a second one.
+    const printoutParent = enclosingPrintoutDivision(info.parents);
+    if (printoutParent) {
+        const parentTitle = getArgsContent(printoutParent)[0];
+        return titleElement && !parentTitle?.length
+            ? [titleElement, ...content]
+            : content;
     }
 
-    closePage();
-
-    // Wrap all pages in a <worksheet> when explicit page breaks are present.
     return htmlLike({
         tag: "worksheet",
-        content: titleElement ? [titleElement, ...pages] : pages,
+        content: titleElement ? [titleElement, ...content] : content,
     });
 }
 

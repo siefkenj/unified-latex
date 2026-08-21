@@ -1,6 +1,7 @@
 import { htmlLike } from "@unified-latex/unified-latex-util-html-like";
 import * as Ast from "@unified-latex/unified-latex-types";
 import { splitForPars } from "./split-for-pars";
+import { PAGE_BREAK_MARKER } from "./page-break-marker";
 
 /**
  * Wrap paragraphs in `<p>...</p>` tags.
@@ -39,6 +40,11 @@ export function wrapPars(
             // can lift them into `<title>`/`<subtitle>` on the slide.
             "frametitle",
             "framesubtitle",
+            // A `\newpage` inside a worksheet divides it into `<page>`s, which
+            // sit beside paragraphs rather than inside one. Breaking the par
+            // here keeps the marker `splitWorksheetPages` looks for out of the
+            // `<p>` it would otherwise be swallowed by (see page-subs.ts).
+            PAGE_BREAK_MARKER,
         ],
         // These become PreTeXt `TextParagraphItem`s -- `<ol>`/`<ul>`/`<dl>` --
         // which live inside a `<p>`, so they must not split the paragraph they

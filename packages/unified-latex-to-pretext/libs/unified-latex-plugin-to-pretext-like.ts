@@ -17,6 +17,10 @@ import { environmentReplacements as _environmentReplacements } from "./pre-conve
 import { examEnvironmentReplacements } from "./pre-conversion-subs/exam-subs";
 import { attachVerticalSpaceWorkspace } from "./pre-conversion-subs/vertical-space-subs";
 import {
+    hoistPageBreaks,
+    splitWorksheetPages,
+} from "./pre-conversion-subs/page-subs";
+import {
     attachNeededRenderInfo,
     mathjaxSpecificEnvironmentReplacements,
     mathjaxSpecificMacroReplacements,
@@ -29,6 +33,7 @@ import {
 import { streamingMacroReplacements } from "./pre-conversion-subs/streaming-command-subs";
 import { unifiedLatexWrapPars } from "./unified-latex-wrap-pars";
 import { removeWorkspaceMarkers } from "./workspace-marker";
+import { removePageBreakMarkers } from "./page-break-marker";
 import {
     breakOnBoundaries,
     isMappedEnviron,
@@ -43,7 +48,10 @@ import {
 } from "@unified-latex/unified-latex-util-html-like";
 import { getArgsContent } from "@unified-latex/unified-latex-util-arguments";
 import { s } from "@unified-latex/unified-latex-builder";
-import { sanitizeXmlId } from "./pre-conversion-subs/utils";
+import {
+    hasMeaningfulContent,
+    sanitizeXmlId,
+} from "./pre-conversion-subs/utils";
 
 type EnvironmentReplacements = typeof _environmentReplacements;
 type MacroReplacements = typeof _macroReplacements;
@@ -151,6 +159,14 @@ export const unifiedLatexToPretextLike: Plugin<
         // Look for label macros and attach their content as an argument to their parent environment.
         attachAdditionalAttributes(tree);
 
+        // Turn `\newpage` and friends inside a worksheet/handout into the page-break
+        // markers that `splitWorksheetPages` (below) divides into `<page>` elements
+        // (see page-subs.ts). Must run before the vertical-space pass, so that a
+        // `\vfill` followed by a `\newpage` still reads as trailing the block it
+        // reserves workspace on, and before macro replacement would discard the
+        // page-break macros as having no PreTeXt equivalent.
+        hoistPageBreaks(tree);
+
         // Look for vertical-spacing commands (\vspace, \vfil(l), \vskip) inside a
         // worksheet/handout/project-like environment and move each one onto the block
         // it follows, as a `workspace` attribute (see vertical-space-subs.ts). Must run
@@ -238,9 +254,17 @@ export const unifiedLatexToPretextLike: Plugin<
         // pass: unwrap any `<p>` that has no meaningful content left.
         removeEmptyPars(tree);
 
+        // Group worksheet/handout content into `<page>` elements at the markers
+        // `hoistPageBreaks` left behind. Runs after every `wrapPars` call, so a
+        // `<page>` never ends up inside a `<p>`.
+        splitWorksheetPages(tree);
+
         // Drop any `workspace-marker` no `wrapPars` call consumed -- see
         // workspace-marker.ts. Must run after every `<p>`-producing pass.
         removeWorkspaceMarkers(tree);
+
+        // Likewise for any page-break marker that didn't turn into a `<page>`.
+        removePageBreakMarkers(tree);
 
         // Wrap in enough tags to ensure a valid pretext document
         if (!producePretextFragment) {
@@ -273,26 +297,6 @@ function removeEmptyPars(tree: Ast.Root): void {
         if (tag === "p" && !hasMeaningfulContent(content)) {
             return content;
         }
-    });
-}
-
-/**
- * Whether `nodes` contains anything that should actually render as content,
- * as opposed to only whitespace/comments/parbreaks or empty strings/groups
- * left behind by a dropped macro (see `dropped-subs.ts`).
- */
-function hasMeaningfulContent(nodes: Ast.Node[]): boolean {
-    return nodes.some((node) => {
-        if (match.comment(node) || match.whitespace(node) || match.parbreak(node)) {
-            return false;
-        }
-        if (node.type === "string") {
-            return node.content.trim() !== "";
-        }
-        if (node.type === "group") {
-            return hasMeaningfulContent(node.content);
-        }
-        return true;
     });
 }
 

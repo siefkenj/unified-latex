@@ -385,4 +385,111 @@ Second paragraph.\end{questions}`
             )
         );
     });
+
+    it("splits on \\pagebreak, but not on a mere \\pagebreak[n] hint", async () => {
+        const paged = `<worksheet>` +
+            `<page><exercise><statement><p>First</p></statement></exercise></page>` +
+            `<page><exercise><statement><p>Second</p></statement></exercise></page>` +
+            `</worksheet>`;
+        const unpaged = `<worksheet>` +
+            `<exercise><statement><p>First</p></statement></exercise>` +
+            `<exercise><statement><p>Second</p></statement></exercise>` +
+            `</worksheet>`;
+
+        for (const macro of [String.raw`\pagebreak`, String.raw`\pagebreak[4]`]) {
+            html = process(
+                String.raw`\begin{questions}\question First${macro}\question Second\end{questions}`
+            );
+            expect(await normalizeHtml(html)).toEqual(await normalizeHtml(paged));
+        }
+
+        // `\pagebreak[0]`..`\pagebreak[3]` only nudge TeX's page-breaking
+        // penalties; they don't say where the author wants a page to end.
+        for (const macro of [String.raw`\pagebreak[0]`, String.raw`\pagebreak[3]`]) {
+            html = process(
+                String.raw`\begin{questions}\question First${macro}\question Second\end{questions}`
+            );
+            expect(await normalizeHtml(html)).toEqual(await normalizeHtml(unpaged));
+        }
+    });
+
+    it("hoists a page break out of a question body to the exercise boundary", async () => {
+        // PreTeXt can divide a worksheet between blocks but not inside one, so
+        // a break buried in a question (here, inside a `parts` list) becomes a
+        // boundary after the exercise containing it.
+        html = process(
+            String.raw`\begin{questions}\question Intro\begin{parts}\part One\newpage\part Two\end{parts}\question Second\end{questions}`
+        );
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `<worksheet>` +
+                    `<page>` +
+                    `<exercise>` +
+                    `<introduction><p>Intro</p></introduction>` +
+                    `<task><statement><p>One</p></statement></task>` +
+                    `<task><statement><p>Two</p></statement></task>` +
+                    `</exercise>` +
+                    `</page>` +
+                    `<page><exercise><statement><p>Second</p></statement></exercise></page>` +
+                    `</worksheet>`
+            )
+        );
+    });
+
+    it("does not emit an empty page for repeated or trailing page breaks", async () => {
+        html = process(
+            String.raw`\begin{questions}\question First\newpage\newpage\question Second\newpage\end{questions}`
+        );
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `<worksheet>` +
+                    `<page><exercise><statement><p>First</p></statement></exercise></page>` +
+                    `<page><exercise><statement><p>Second</p></statement></exercise></page>` +
+                    `</worksheet>`
+            )
+        );
+    });
+
+    it("ignores a page break that would leave a single page", async () => {
+        html = process(
+            String.raw`\begin{questions}\newpage\question First\question Second\end{questions}`
+        );
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `<worksheet>` +
+                    `<exercise><statement><p>First</p></statement></exercise>` +
+                    `<exercise><statement><p>Second</p></statement></exercise>` +
+                    `</worksheet>`
+            )
+        );
+    });
+
+    it("keeps \\vfill before a page break as workspace on the exercise", async () => {
+        html = process(
+            String.raw`\begin{questions}\question First\vfill\newpage\question Second\end{questions}`
+        );
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `<worksheet>` +
+                    `<page><exercise workspace="1in"><statement><p>First</p></statement></exercise></page>` +
+                    `<page><exercise><statement><p>Second</p></statement></exercise></page>` +
+                    `</worksheet>`
+            )
+        );
+    });
+
+    it("contributes to an enclosing worksheet division instead of nesting one", async () => {
+        html = process(
+            String.raw`\worksheet{Week 1}\begin{questions}\question First\newpage\question Second\end{questions}`
+        );
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `<worksheet>` +
+                    `<title>Week 1</title>` +
+                    `<page><exercise><statement><p>First</p></statement></exercise></page>` +
+                    `<page><exercise><statement><p>Second</p></statement></exercise></page>` +
+                    `</worksheet>`
+            )
+        );
+    });
 });

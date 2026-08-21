@@ -187,9 +187,17 @@ export const droppedMacros: Record<string, DroppedMacroSpec> = {
         behavior: { type: "discard" },
         warning: `Warning: There is no equivalent tag for "cleardoublepage", an empty Ast.String was used as a replacement.`,
     },
+    nopagebreak: {
+        behavior: { type: "discard" },
+        warning: `Warning: There is no equivalent tag for "nopagebreak", an empty Ast.String was used as a replacement.`,
+    },
     linebreak: {
         behavior: { type: "discard" },
         warning: `Warning: There is no equivalent tag for "linebreak", an empty Ast.String was used as a replacement.`,
+    },
+    nolinebreak: {
+        behavior: { type: "discard" },
+        warning: `Warning: There is no equivalent tag for "nolinebreak", an empty Ast.String was used as a replacement.`,
     },
     newline: {
         behavior: { type: "discard" },

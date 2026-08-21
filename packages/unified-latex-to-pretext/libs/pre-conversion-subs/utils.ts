@@ -2,6 +2,7 @@ import * as Ast from "@unified-latex/unified-latex-types";
 import { VisitInfo } from "@unified-latex/unified-latex-util-visit";
 import { VFile } from "vfile";
 import { s } from "@unified-latex/unified-latex-builder";
+import { match } from "@unified-latex/unified-latex-util-match";
 import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 import { VFileMessage } from "vfile-message";
 
@@ -56,6 +57,30 @@ export function emptyStringWithWarningFactory(
  */
 export function getEnvName(env: Ast.Environment["env"]): string {
     return typeof env === "string" ? env : printRaw(env);
+}
+
+/**
+ * Whether `nodes` contains anything that should actually render as content, as
+ * opposed to only whitespace/comments/parbreaks or empty strings/groups left
+ * behind by a dropped macro (see `dropped-subs.ts`).
+ */
+export function hasMeaningfulContent(nodes: Ast.Node[]): boolean {
+    return nodes.some((node) => {
+        if (
+            match.comment(node) ||
+            match.whitespace(node) ||
+            match.parbreak(node)
+        ) {
+            return false;
+        }
+        if (node.type === "string") {
+            return node.content.trim() !== "";
+        }
+        if (node.type === "group") {
+            return hasMeaningfulContent(node.content);
+        }
+        return true;
+    });
 }
 
 /**
