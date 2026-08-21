@@ -399,6 +399,62 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
         );
     });
 
+    it("Converts \\hline after a row into bottom=\"minor\" on that row", async () => {
+        html = process(
+            `\\begin{tabular}{l l}a & b\\\\\\hline c & d\\end{tabular}`
+        );
+
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `<tabular><row bottom="minor"><cell>a</cell><cell>b</cell></row><row><cell>c</cell><cell>d</cell></row></tabular>`
+            )
+        );
+    });
+
+    it("Converts \\hline after a row into bottom=\"minor\" even with whitespace/newlines around it", async () => {
+        html = process(
+            `\\begin{tabular}{l l}\na & b \\\\\n\\hline\nc & d\n\\end{tabular}`
+        );
+
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `<tabular><row bottom="minor"><cell>a</cell><cell>b</cell></row><row><cell>c</cell><cell>d</cell></row></tabular>`
+            )
+        );
+    });
+
+    it("Converts \\hline directly ending a row into bottom=\"minor\"", async () => {
+        html = process(`\\begin{tabular}{l l}a & b\\hline\\\\c & d\\end{tabular}`);
+
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `<tabular><row bottom="minor"><cell>a</cell><cell>b</cell></row><row><cell>c</cell><cell>d</cell></row></tabular>`
+            )
+        );
+    });
+
+    it("Converts a leading \\hline into top=\"minor\" on the tabular", async () => {
+        html = process(`\\begin{tabular}{l l}\\hline a & b\\\\c & d\\end{tabular}`);
+
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `<tabular top="minor"><row><cell>a</cell><cell>b</cell></row><row><cell>c</cell><cell>d</cell></row></tabular>`
+            )
+        );
+    });
+
+    it("Converts \\hline at the top and bottom of a tabular", async () => {
+        html = process(
+            `\\begin{tabular}{l l}\\hline a & b\\\\c & d\\\\\\hline\\end{tabular}`
+        );
+
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `<tabular top="minor"><row><cell>a</cell><cell>b</cell></row><row bottom="minor"><cell>c</cell><cell>d</cell></row></tabular>`
+            )
+        );
+    });
+
     it("Can wrap in <p>...</p> tags", async () => {
         html = process(`a\\par b`);
         expect(await normalizeHtml(html)).toEqual(
