@@ -28,34 +28,34 @@ function extractRegions(
 
 describe("unified-latex-utils-catcode", () => {
     it("Can find regions", () => {
-        let parsed = strToNodes("a b \\foo c d \\bar e f");
+        let parsed = strToNodes("a b \\foo c d \\qux e f");
         let regions = findRegionInArray(
             parsed,
             match.createMacroMatcher(["foo"]),
-            match.createMacroMatcher(["bar"])
+            match.createMacroMatcher(["qux"])
         );
         let sliced = extractRegions(parsed, regions);
-        expect(printRaw(sliced)).toEqual("\\foo c d \\bar");
+        expect(printRaw(sliced)).toEqual("\\foo c d \\qux");
 
         // No end marker
         parsed = strToNodes("a b \\foo c d e f");
         regions = findRegionInArray(
             parsed,
             match.createMacroMatcher(["foo"]),
-            match.createMacroMatcher(["bar"])
+            match.createMacroMatcher(["qux"])
         );
         sliced = extractRegions(parsed, regions);
         expect(printRaw(sliced)).toEqual("\\foo c d e f");
 
         // Multiple regions
-        parsed = strToNodes("\\foo c d\\bar e \\foo!f");
+        parsed = strToNodes("\\foo c d\\qux e \\foo!f");
         regions = findRegionInArray(
             parsed,
             match.createMacroMatcher(["foo"]),
-            match.createMacroMatcher(["bar"])
+            match.createMacroMatcher(["qux"])
         );
         sliced = extractRegions(parsed, regions);
 
-        expect(printRaw(sliced)).toEqual("\\foo c d\\bar\\foo!f");
+        expect(printRaw(sliced)).toEqual("\\foo c d\\qux\\foo!f");
     });
 });

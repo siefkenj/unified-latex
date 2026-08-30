@@ -201,8 +201,9 @@ export const conditionalMacros: MacroInfoRecord = {
     pgfpointanchor: { signature: "m m" },
     pgfpointshapeborder: { signature: "m m" },
     pgfdeclareshape: { signature: "m m" },
+    savedanchor: { signature: "m m" },
     saveddimen: { signature: "m m" },
-    savedmacro: { signature: " m" },
+    savedmacro: { signature: "m m" },
     anchor: { signature: "m m" },
     deferredanchor: { signature: "m m" },
     anchorborder: { signature: "m" },
@@ -229,7 +230,7 @@ export const conditionalMacros: MacroInfoRecord = {
     pgfarrowsaddtowidthscalelist: { signature: "m" },
     pgfarrowsthreeparameters: { signature: "m" },
     pgfarrowslinewidthdependent: { signature: "m m m" },
-    pgfarrowslengthdependent: { signature: "m" },
+    pgfarrowslengthdependent: { signature: "m m m m" },
     // Path
     pgfusepath: { signature: "m" },
     pgfsetlinewidth: { signature: "m" },
@@ -253,7 +254,7 @@ export const conditionalMacros: MacroInfoRecord = {
     pgfdecoration: { signature: "m" },
     pgfdecoratecurrentpath: { signature: "m" },
     pgfsetdecorationsegmenttransformation: { signature: "m" },
-    pgfdeclaremetadecorate: { signature: "m m m" },
+    pgfdeclaremetadecoration: { signature: "m m m" },
     pgfmetadecoration: { signature: "m" },
     startpgfmetadecoration: { signature: "m" },
     // Constructing paths
