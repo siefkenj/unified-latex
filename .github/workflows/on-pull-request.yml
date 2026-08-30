@@ -5,6 +5,9 @@ on:
         branches: ["main", "pretext"]
     pull_request:
         branches: ["main", "pretext"]
+    # Allows the CI to be started by hand from the Actions tab, which is useful
+    # when a pull request did not trigger a run on its own.
+    workflow_dispatch:
 
 jobs:
     build:
