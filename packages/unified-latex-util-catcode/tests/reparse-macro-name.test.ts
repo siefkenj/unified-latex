@@ -44,6 +44,30 @@ describe("unified-latex-utils-macros", () => {
             "latex_command_with:Nn"
         );
     });
+    it("Can reparse macro names split across single-character strings (math mode)", () => {
+        // In math mode every letter is parsed as its own string node, so
+        // `\my@glyph` arrives as `\my`, "@", "g", "l", "y", "p", "h".
+        const parsed = strToNodesMinimal("$\\my@glyph$");
+        reparseMacroNames(parsed, "@");
+        const math = parsed[0] as Ast.InlineMath;
+        expect((math.content[0] as Ast.Macro).content).toEqual("my@glyph");
+        expect(math.content).toHaveLength(1);
+
+        // A number still terminates the name.
+        const parsed2 = strToNodesMinimal("$\\my@x2$");
+        reparseMacroNames(parsed2, "@");
+        const math2 = parsed2[0] as Ast.InlineMath;
+        expect((math2.content[0] as Ast.Macro).content).toEqual("my@x");
+        expect((math2.content[1] as Ast.String).content).toEqual("2");
+
+        // So does any other character that cannot be part of a name.
+        const parsed3 = strToNodesMinimal("$\\my@x+y$");
+        reparseMacroNames(parsed3, "@");
+        const math3 = parsed3[0] as Ast.InlineMath;
+        expect((math3.content[0] as Ast.Macro).content).toEqual("my@x");
+        expect((math3.content[1] as Ast.String).content).toEqual("+");
+        expect((math3.content[2] as Ast.String).content).toEqual("y");
+    });
     it("Can reparse macro names", () => {
         let parsed = strToNodesMinimal("\\foo@bar baz");
 
