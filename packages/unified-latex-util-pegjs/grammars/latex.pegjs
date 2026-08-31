@@ -69,8 +69,11 @@ math_token "math token"
     = special_macro
     / macro
     / full_comment
-    / whitespace* x:group whitespace* { return x; }
+    / whitespace* x:math_group whitespace* { return x; }
     / whitespace* x:alignment_tab whitespace* { return x; }
+    / math_shift eq:(!math_shift t:math_token { return t; })+ math_shift {
+            return createNode("inlinemath", { content: eq.flatMap((x) => x) });
+        }
     / macro_parameter
     / whitespace* superscript whitespace* {
             return createNode("macro", { content: "^", escapeToken: "" });
@@ -78,6 +81,7 @@ math_token "math token"
     / whitespace* subscript whitespace* {
             return createNode("macro", { content: "_", escapeToken: "" });
         }
+    / math_shift
     / ignore
     / whitespace
     / s:. { return createNode("string", { content: s }); }
