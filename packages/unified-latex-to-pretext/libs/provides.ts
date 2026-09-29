@@ -13,9 +13,15 @@ import { envAliasNames } from "./pre-conversion-subs/environment-subs";
 export const macros: MacroInfoRecord = {
     // Modular include macro for PreTeXt Plus: \plus[attrs]{type}{ref}
     ...plusMacros,
-    // PreTeXt-specific macro
-    alert: { signature: "m" },
+    // PreTeXt-specific macro. Beamer's `\alert<2>{...}` takes an overlay spec.
+    alert: { signature: "d<> m" },
     term: { signature: "m" },
+    // Beamer title-page macros. The CTAN beamer package defines only
+    // `\titlegraphic`, and only when the parser sees `\documentclass{beamer}`.
+    subtitle: { signature: "o m", renderInfo: { breakAround: true } },
+    institute: { signature: "o m", renderInfo: { breakAround: true } },
+    inst: { signature: "m" },
+    titlegraphic: { signature: "m", renderInfo: { breakAround: true } },
     // AMS-style Mathematics Subject Classification, e.g. `\subjclass[2020]{05C99}`.
     // Not defined by any CTAN package we load, unlike \author/\address/\email
     // (amsart), \date/\thanks (latex2e), and \keywords (beamer).

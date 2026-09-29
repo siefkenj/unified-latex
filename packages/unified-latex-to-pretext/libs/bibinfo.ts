@@ -10,7 +10,15 @@ import { VFile } from "vfile";
 import { gatherAuthorInfo, renderCollectedAuthorInfo } from "./author-info";
 
 /** Macros gathered into `<frontmatter>` and stripped from the document body. */
-const BIBINFO_MACROS = ["author", "address", "email", "date", "keywords", "subjclass"];
+const BIBINFO_MACROS = [
+    "author",
+    "address",
+    "email",
+    "institute",
+    "date",
+    "keywords",
+    "subjclass",
+];
 
 /** The last (mandatory) argument's content; all of these macros have signature `o m`. */
 function lastArgContent(macro: Ast.Macro): Ast.Node[] {
@@ -33,7 +41,7 @@ function splitKeywords(content: Ast.Node[]): Ast.Macro[] {
 }
 
 /**
- * Gather `\author`/`\address`/`\email`/`\date`/`\keywords`/`\subjclass` from
+ * Gather `\author`/`\address`/`\email`/`\institute`/`\date`/`\keywords`/`\subjclass` from
  * anywhere in the tree (preamble or body), remove them so they don't leak
  * into the converted content, and return a
  * `<frontmatter><bibinfo>...</bibinfo><titlepage><titlepage-items/></titlepage></frontmatter>`
@@ -95,6 +103,16 @@ export function gatherAndRemoveBibinfo(
     }
     bibinfoContent.push(...subjclassBlocks);
 
+    return buildFrontmatter(bibinfoContent);
+}
+
+/**
+ * `<frontmatter><bibinfo>...</bibinfo><titlepage><titlepage-items/></titlepage></frontmatter>`.
+ * With no `bibinfoContent` this is still a valid frontmatter, which a
+ * slideshow needs whenever the source had a title frame: PreTeXt builds the
+ * title slide from `<frontmatter>`.
+ */
+export function buildFrontmatter(bibinfoContent: Ast.Node[] = []): Ast.Macro {
     return htmlLike({
         tag: "frontmatter",
         content: [

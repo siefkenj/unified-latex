@@ -36,6 +36,13 @@ import { expandUserDefinedMacros } from "./pre-conversion-subs/expand-user-defin
 import { replaceQuoteLigatures } from "./pre-conversion-subs/replace-quote-ligatures";
 import { stripStarredEnvironments } from "./pre-conversion-subs/strip-star-subs";
 import { gatherAndRemoveBibinfo } from "./bibinfo";
+import { gatherDocumentMetadata } from "./document-metadata";
+import {
+    frameMacrosToEnvironments,
+    isSlideshowSource,
+    notesToComments,
+    reattachOverlayArgs,
+} from "./pre-conversion-subs/beamer-subs";
 import {
     macros as pretextMacros,
     environments as pretextEnvironments,
@@ -72,9 +79,23 @@ export const unifiedLatexToPretext: Plugin<
         // expand user defined macros
         expandUserDefinedMacros(tree);
 
+        // Beamer speaker notes become XML comments, before any substitution
+        // below can rewrite their text.
+        notesToComments(tree, file);
+
         // Replace LaTeX quote ligatures (``...'' and `...') with \enquote{}/\sq{}
         // macros BEFORE macro-argument attachment so they flow through the normal pipeline.
         replaceQuoteLigatures(tree);
+
+        // `\textbf<2>{...}` and friends: undo the plain signature that swallowed
+        // the overlay spec. Must precede `attachMacroArgs` below.
+        reattachOverlayArgs(tree);
+
+        // A slideshow's `\frame{...}` is a frame; anywhere else it draws a box.
+        const slideshow = isSlideshowSource(tree);
+        if (slideshow) {
+            frameMacrosToEnvironments(tree);
+        }
 
         // Attach PreTeXt-specific macro arguments
         attachMacroArgs(tree, pretextMacros);
@@ -103,6 +124,9 @@ export const unifiedLatexToPretext: Plugin<
         // macros are conventionally in the preamble (outside that content).
         const frontmatter = gatherAndRemoveBibinfo(tree, file);
 
+        // Likewise the class, title, and subtitle the root element is built from.
+        const metadata = gatherDocumentMetadata(tree);
+
         // If there is a \begin{document}...\end{document}, that's the only
         // content we want to convert.
         let content = tree.content;
@@ -125,7 +149,12 @@ export const unifiedLatexToPretext: Plugin<
         tree.content = content;
 
         unified()
-            .use(unifiedLatexToPretextLike, { ...options, frontmatter })
+            .use(unifiedLatexToPretextLike, {
+                ...options,
+                frontmatter,
+                metadata,
+                slideshow,
+            })
             .run(tree, file);
 
         // This should happen right before converting to PreTeXt because macros like `\&` should

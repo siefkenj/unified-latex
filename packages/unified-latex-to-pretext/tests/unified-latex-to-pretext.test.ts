@@ -2010,13 +2010,13 @@ describe("unified-latex-to-pretext:beamer", () => {
             .use(xmlCompilePlugin)
             .processSync({ value }).value as string;
 
-    it("converts a frame to a slide with the \\frametitle as a sibling <title> (a lone paragraph is not wrapped in <p>, like a division)", async () => {
+    it("converts a frame to a slide with the \\frametitle as a sibling <title> (a lone paragraph is still wrapped in <p>, since a slide holds only blocks)", async () => {
         const html = process(
             `\\begin{frame}\\frametitle{My Title}\nSome content.\n\\end{frame}`
         );
         expect(await normalizeHtml(html)).toEqual(
             await normalizeHtml(
-                `<slide><title>My Title</title>Some content.</slide>`
+                `<slide><title>My Title</title><p>Some content.</p></slide>`
             )
         );
     });
@@ -2027,7 +2027,7 @@ describe("unified-latex-to-pretext:beamer", () => {
         );
         expect(await normalizeHtml(html)).toEqual(
             await normalizeHtml(
-                `<slide><title>Braced Title</title><subtitle>Braced Sub</subtitle>Body.</slide>`
+                `<slide><title>Braced Title</title><subtitle>Braced Sub</subtitle><p>Body.</p></slide>`
             )
         );
     });
@@ -2112,13 +2112,13 @@ describe("unified-latex-to-pretext:beamer", () => {
         );
     });
 
-    it("does not crash on overlay specs attached to \\item", async () => {
+    it("reveals a list item by item when its \\item overlays start on successive slides", async () => {
         const html = process(
             `\\begin{itemize}\\item<1-> One\\item<2-> Two\\end{itemize}`
         );
         expect(await normalizeHtml(html)).toEqual(
             await normalizeHtml(
-                `<ul><li><p>One</p></li><li><p>Two</p></li></ul>`
+                `<ul pause="yes"><li><p>One</p></li><li><p>Two</p></li></ul>`
             )
         );
     });

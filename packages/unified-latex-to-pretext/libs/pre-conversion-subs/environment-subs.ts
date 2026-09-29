@@ -21,6 +21,14 @@ import {
 import { createTableFromTabular } from "./create-table-from-tabular";
 import { generateDroppedEnvironmentReplacements } from "./dropped-subs";
 import {
+    applyPauses,
+    isIncrementalOverlay,
+    isNavigationOnlyFrame,
+    overlayStart,
+    pauseAllLists,
+    removePauses,
+} from "./beamer-subs";
+import {
     parseBibitemToCsl,
     renderCslBiblio,
     type PersonName,
@@ -88,8 +96,21 @@ function getItemArgs(node: Ast.Macro): ItemArgs {
     return ret as ItemArgs;
 }
 
+/**
+ * Convert a list environment. Beamer's ways of revealing a list one item at a
+ * time all become PreTeXt's `pause="yes"` on the list:
+ *   * an incremental default overlay, `\begin{itemize}[<+->]`;
+ *   * incremental item overlays, `\item<+->`, or explicit ones whose first
+ *     slide increases from item to item (`\item<1->`, `\item<2->`, ...);
+ *   * `\pause` between items.
+ * Any other item overlay is dropped with a warning.
+ */
 function enumerateFactory(parentTag = "ol") {
-    return function enumerateToHtml(env: Ast.Environment) {
+    return function enumerateToHtml(
+        env: Ast.Environment,
+        _info?: VisitInfo,
+        file?: VFile
+    ) {
         // The body of an enumerate has already been processed and all relevant parts have
         // been attached to \item macros as arguments.
         const items = env.content.filter((node) => match.macro(node, "item"));
@@ -97,6 +118,12 @@ function enumerateFactory(parentTag = "ol") {
         // Figure out if there any manually-specified item labels. If there are,
         // we need to add a title tag
         let isDescriptionList = false;
+
+        let revealItemByItem = getArgsContent(env).some((arg) =>
+            isIncrementalOverlay(arg, { inBrackets: true })
+        );
+        let hasItemOverlay = false;
+        const overlayStarts: number[] = [];
 
         const content = items.flatMap((node) => {
             if (!match.macro(node) || !node.args) {
@@ -106,9 +133,27 @@ function enumerateFactory(parentTag = "ol") {
             // We test the open mark to see if an optional argument was actually supplied.
             const namedArgs = getItemArgs(node);
 
+            // Beamer's `\item<overlay>[label]<overlay>`.
+            if (node.args.length - 1 === ITEM_ARG_NAMES_BEAMER.length) {
+                const overlays = [node.args[0], node.args[2]]
+                    .map((a) => a.content)
+                    .filter((c) => c.length > 0);
+                hasItemOverlay ||= overlays.length > 0;
+                revealItemByItem ||= overlays.some((overlay) =>
+                    isIncrementalOverlay(overlay)
+                );
+                const start = overlayStart(overlays[0]);
+                if (start !== undefined) {
+                    overlayStarts.push(start);
+                }
+            }
+
+            const { content: body, hadPause } = removePauses(namedArgs.body);
+            revealItemByItem ||= hadPause;
+
             // if there are custom markers, don't want the title tag to be wrapped in pars
             // so we wrap the body first
-            namedArgs.body = wrapPars(namedArgs.body);
+            namedArgs.body = wrapPars(body);
 
             // check if a custom marker is used
             if (namedArgs.label != null) {
@@ -123,17 +168,28 @@ function enumerateFactory(parentTag = "ol") {
                 );
             }
 
-            const body = namedArgs.body;
-
             return htmlLike({
                 tag: "li",
-                content: body,
+                content: namedArgs.body,
             });
         });
+
+        revealItemByItem ||=
+            overlayStarts.length > 1 &&
+            overlayStarts.every((n, i) => i === 0 || n > overlayStarts[i - 1]);
+        if (hasItemOverlay && !revealItemByItem && file) {
+            const message = makeWarningMessage(
+                env,
+                `Warning: PreTeXt can only reveal a list one item at a time; the list's other beamer overlay specifications were dropped.`,
+                "env-subs"
+            );
+            file.message(message, message.place, message.source);
+        }
 
         return htmlLike({
             tag: isDescriptionList ? "dl" : parentTag,
             content,
+            attributes: revealItemByItem ? { pause: "yes" } : undefined,
         });
     };
 }
@@ -288,17 +344,28 @@ function sideBySideFactory(
  * have. So this factory does *not* wrap paragraphs itself; it only lifts the
  * title/subtitle to the front. `\frametitle`/`\framesubtitle` are par-breaking
  * (see `wrap-pars.ts`), so they survive the pre-pass as bare macro nodes here.
+ *
+ * It also carries over beamer's reveals: `\pause` between blocks (see
+ * `applyPauses`) and an incremental default overlay, `\begin{frame}[<+->]`,
+ * which reveals every list on the frame item by item. A frame holding nothing
+ * but navigation (`\tableofcontents`, `\sectionpage`) is dropped: PreTeXt
+ * generates no outline slide, and a `<slide>` must have content.
  */
 function beamerFrameFactory(): (
     env: Ast.Environment,
     info: VisitInfo,
     file?: VFile
-) => Ast.Macro {
-    return (env) => {
+) => Ast.Macro | Ast.Node[] {
+    return (env, _info, file) => {
         // Title/subtitle supplied as braced arguments on the frame environment.
         const args = getArgsContent(env);
         let title = args[3] || undefined;
         let subtitle = args[4] || undefined;
+        // The two optional arguments hold the default overlay and the frame
+        // options, in either order in practice.
+        const revealListsByItem = [args[1], args[2]].some((arg) =>
+            isIncrementalOverlay(arg, { inBrackets: true })
+        );
 
         // Title/subtitle supplied as \frametitle / \framesubtitle macros in the
         // body. Pull them out of the content so they become the slide's title
@@ -321,14 +388,30 @@ function beamerFrameFactory(): (
         // argument, so it never has this problem).
         trim(content);
 
+        if (isNavigationOnlyFrame(content)) {
+            if (file) {
+                const message = makeWarningMessage(
+                    env,
+                    `Warning: A frame holding only an outline or section page has no PreTeXt equivalent; it was dropped.`,
+                    "env-subs"
+                );
+                file.message(message, message.place, message.source);
+            }
+            return [];
+        }
+
+        let body = applyPauses(content);
+        if (revealListsByItem) {
+            body = pauseAllLists(body);
+        }
+
         // Place the title/subtitle first, as siblings of the (already
-        // pre-pass-wrapped) body content.
+        // pre-pass-wrapped) body content. The schema requires a slide title,
+        // so an untitled frame gets an empty one, as an untitled division does.
         if (subtitle) {
-            content.unshift(htmlLike({ tag: "subtitle", content: subtitle }));
+            body.unshift(htmlLike({ tag: "subtitle", content: subtitle }));
         }
-        if (title) {
-            content.unshift(htmlLike({ tag: "title", content: title }));
-        }
+        body.unshift(htmlLike({ tag: "title", content: title ?? [] }));
 
         // Attach any additional attributes (e.g. xml:id from a \label) to the tag.
         const attributes: Record<string, any> = {};
@@ -336,7 +419,7 @@ function beamerFrameFactory(): (
             Object.assign(attributes, env._renderInfo.additionalAttributes);
         }
 
-        return htmlLike({ tag: "slide", content, attributes });
+        return htmlLike({ tag: "slide", content: body, attributes });
     };
 }
 

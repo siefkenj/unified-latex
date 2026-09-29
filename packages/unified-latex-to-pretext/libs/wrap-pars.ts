@@ -40,6 +40,10 @@ export function wrapPars(
             // can lift them into `<title>`/`<subtitle>` on the slide.
             "frametitle",
             "framesubtitle",
+            // Beamer `\pause`: a paragraph continued after a pause is revealed
+            // separately, so it ends one `<p>`; `applyPauses` then finds the
+            // pause between blocks at the top of the slide.
+            "pause",
             // A `\newpage` inside a worksheet divides it into `<page>`s, which
             // sit beside paragraphs rather than inside one. Breaking the par
             // here keeps the marker `splitWorksheetPages` looks for out of the

@@ -203,9 +203,11 @@ export const droppedMacros: Record<string, DroppedMacroSpec> = {
         behavior: { type: "discard" },
         warning: `Warning: There is no equivalent tag for "newline", an empty Ast.String was used as a replacement.`,
     },
+    // `\Huge text` reaches here as `\textsize{Huge}{text}` (see
+    // streaming-command-subs.ts): the size is dropped, the text kept.
     textsize: {
-        behavior: { type: "discard" },
-        warning: `Warning: There is no equivalent tag for "textsize", an empty Ast.String was used as a replacement.`,
+        behavior: { type: "keep-content" },
+        warning: `Warning: There is no equivalent tag for "textsize", the content was used as a replacement.`,
     },
     makebox: {
         behavior: { type: "discard" },
@@ -214,6 +216,12 @@ export const droppedMacros: Record<string, DroppedMacroSpec> = {
     maketitle: {
         behavior: { type: "discard" },
         warning: `Warning: There is no equivalent tag for "maketitle", an empty Ast.String was used as a replacement.`,
+    },
+    // Beamer's title page. On a frame it is handled by `convertTitleFrames`
+    // (beamer-subs.ts); this catches any other use.
+    titlepage: {
+        behavior: { type: "discard" },
+        warning: `Warning: The title page is generated from the document's frontmatter; "\\titlepage" was removed.`,
     },
     tableofcontents: {
         behavior: { type: "discard" },
@@ -235,12 +243,14 @@ export const droppedMacros: Record<string, DroppedMacroSpec> = {
         behavior: { type: "discard" },
         warning: `Warning: There is no equivalent tag for "noindent", an empty Ast.String was used as a replacement.`,
     },
-    // Beamer overlay/reveal commands. PreTeXt slides are static, so incremental
-    // reveals have no equivalent: we keep the content and drop the reveal, warning
-    // each time. `\pause` has no content and is simply removed.
+    // Beamer overlay/reveal commands. PreTeXt reveals a slide's blocks or a
+    // list's items one at a time (`pause="yes"`, `<subslide>`), so a `\pause`
+    // between those becomes one (see `applyPauses` and `enumerateFactory`).
+    // Any other overlay has no equivalent: we keep the content and drop the
+    // reveal, warning each time.
     pause: {
         behavior: { type: "discard" },
-        warning: `Warning: There is no equivalent for beamer's "\\pause"; the overlay/reveal was dropped.`,
+        warning: `Warning: A beamer "\\pause" here has no PreTeXt equivalent (only pauses between a slide's blocks or a list's items do); it was dropped.`,
     },
     only: {
         behavior: { type: "keep-content", argIndex: 1 },
