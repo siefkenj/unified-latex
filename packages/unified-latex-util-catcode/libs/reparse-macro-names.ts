@@ -99,58 +99,61 @@ export function reparseMacroNamesInArray(
     allowedTokens: Set<string>
 ) {
     const regex = buildWordRegex(allowedTokens);
-    let i = 0;
-    while (i < tree.length) {
+    for (let i = 0; i < tree.length; i++) {
         const macro = tree[i];
         const string = tree[i + 1];
         if (
-            match.anyMacro(macro) &&
+            !match.anyMacro(macro) ||
             // The _^ macros in math mode should not be extended no-matter what;
             // So we check to make sure that the macro we're dealing with has the default escape token.
-            (macro.escapeToken == null || macro.escapeToken === "\\") &&
-            match.anyString(string) &&
+            !(macro.escapeToken == null || macro.escapeToken === "\\") ||
+            !match.anyString(string) ||
             // There are two options. Either the macro ends with the special character,
             // e.g. `\@foo` or the special character starts the next string, e.g. `\foo@`.
-            (allowedTokens.has(
+            !(allowedTokens.has(
                 macro.content.charAt(macro.content.length - 1)
             ) ||
                 allowedTokens.has(string.content.charAt(0)))
         ) {
+            continue;
+        }
+        // The name may span several string nodes: in math mode every letter is
+        // its own node, so `$\my@glyph$` arrives as `\my`, "@", "g", "l", ...
+        let next: Ast.Node = string;
+        do {
             // There might be a number somewhere in the string. If so, we should
             // break the string apart at that number
-            const match = string.content.match(regex);
+            const match = next.content.match(regex);
             const takeable = match ? match[0] : "";
-            if (takeable.length > 0) {
-                if (takeable.length === string.content.length) {
-                    // The whole string can be appended to the macro name
-                    macro.content += string.content;
-                    tree.splice(i + 1, 1);
-
-                    // Preserve the source location if available
-                    if (macro.position && string.position?.end) {
-                        macro.position.end = string.position.end;
-                    }
-                } else {
-                    // Only part of the string can be appended to the macro name
-                    macro.content += takeable;
-                    string.content = string.content.slice(takeable.length);
-
-                    // Preserve the source location if available
-                    if (macro.position?.end) {
-                        macro.position.end.offset += takeable.length;
-                        macro.position.end.column += takeable.length;
-                    }
-                    if (string.position?.start) {
-                        string.position.start.offset += takeable.length;
-                        string.position.start.column += takeable.length;
-                    }
-                }
-            } else {
-                i++;
+            if (takeable.length === 0) {
+                break;
             }
-        } else {
-            ++i;
-        }
+            if (takeable.length < next.content.length) {
+                // Only part of the string can be appended to the macro name
+                macro.content += takeable;
+                next.content = next.content.slice(takeable.length);
+
+                // Preserve the source location if available
+                if (macro.position?.end) {
+                    macro.position.end.offset += takeable.length;
+                    macro.position.end.column += takeable.length;
+                }
+                if (next.position?.start) {
+                    next.position.start.offset += takeable.length;
+                    next.position.start.column += takeable.length;
+                }
+                break;
+            }
+            // The whole string can be appended to the macro name
+            macro.content += next.content;
+            tree.splice(i + 1, 1);
+
+            // Preserve the source location if available
+            if (macro.position && next.position?.end) {
+                macro.position.end = next.position.end;
+            }
+            next = tree[i + 1];
+        } while (match.anyString(next));
     }
 }
 
