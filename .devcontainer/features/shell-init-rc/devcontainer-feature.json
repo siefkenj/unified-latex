@@ -1,0 +1,7 @@
+{
+    "id": "shell-init-rc",
+    "version": "1.0.0",
+    "name": "Shell RC File Initialization",
+    "description": "Automatically configure shell rc files (.bashrc, .zshrc, .profile) to unset stale environment variables like NODE_OPTIONS and VSCODE_INSPECTOR_OPTIONS",
+    "installsAfter": ["ghcr.io/devcontainers/features/common-utils"]
+}
