@@ -65,6 +65,13 @@ const OPERATOR_NAMES = [
 // `$` should never be a string in math mode.
 const prefixTree = Trie(OPERATOR_NAMES);
 
+// Macro that has only text content
+const TEXT_CONTENT_MACRO = [
+    "operatorname",
+];
+
+const textContentMacroTree = Trie(TEXT_CONTENT_MACRO);
+
 /**
  * If the sequence starting at `pos` is a sequence of single character strings
  * matching one of the `OPERATOR_NAMES`, then the matching operator name is returned.
@@ -113,6 +120,10 @@ Avoid writing operators in plaintext. For example, instead of \`$sin(2)$\` write
 ChkTeX Warning 35
 `;
 
+function nodeIsTextMacro(node: Ast.Node | Ast.Argument): boolean {
+    return node.type === "macro" && textContentMacroTree.hasWord(node.content);
+}
+
 export const unifiedLatexLintNoPlaintextOperators = lintRule<
     Ast.Root,
     PluginOptions
@@ -122,7 +133,7 @@ export const unifiedLatexLintNoPlaintextOperators = lintRule<
         visit(
             tree,
             (nodes, info) => {
-                if (!info.context.inMathMode) {
+                if (!info.context.inMathMode || info.parents.some(nodeIsTextMacro)) {
                     return;
                 }
 
