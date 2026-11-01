@@ -1,0 +1,39 @@
+{
+    "name": "unified-latex",
+    "image": "mcr.microsoft.com/devcontainers/base:ubuntu-24.04",
+    "remoteEnv": {
+        "DISPLAY": ""
+    },
+    "features": {
+        // CI (.github/workflows/on-pull-request.yml) runs in this container on Node 22.x and 24.x,
+        // choosing the version by setting DEVCONTAINER_NODE_VERSION. Defaults to the newest of
+        // those rather than "lts", which has moved past what CI covers.
+        "ghcr.io/devcontainers/features/node:1": {
+            "version": "${localEnv:DEVCONTAINER_NODE_VERSION:24}"
+        },
+        // Install vim from apt using an existing community feature.
+        "ghcr.io/devcontainers-extra/features/apt-packages:1": {
+            "packages": "vim"
+        },
+        // Avoid erroneous connections to the host's debug environment.
+        "./features/shell-init-rc": {}
+    },
+    "containerEnv": {
+        "NODE_OPTIONS": " --max-old-space-size=6144 "
+    },
+    "postCreateCommand": "bash .devcontainer/postCreateCommand.sh",
+    "hostRequirements": {
+        "cpus": 4,
+        "memory": "16gb"
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "esbenp.prettier-vscode",
+                "dbaeumer.vscode-eslint",
+                "vitest.explorer",
+                "peggyjs.peggy-language"
+            ]
+        }
+    }
+}

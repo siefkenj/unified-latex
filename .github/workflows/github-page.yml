@@ -30,28 +30,26 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
-      - name: Set up node
-        uses: actions/setup-node@v6
-
-      - name: Install NPM packages
-        run: npm ci
-
-      - name: Build all workspaces
-        run: npm run build -ws
-
-      - name: Generate documentation
-        run: npm run docs
+      # Starting the dev container runs .devcontainer/postCreateCommand.sh, which does `npm ci`
+      # and builds all workspaces. The checkout is mounted into the container, so the generated
+      # ./docs is available to the upload step below.
+      - name: Generate documentation in the dev container
+        uses: devcontainers/ci@v0.3
+        with:
+          env: |
+            CI
+          runCmd: npm run docs
 
       - name: Setup Pages
         uses: actions/configure-pages@v6
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: './docs'
 
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v6
+        uses: actions/deploy-pages@v5

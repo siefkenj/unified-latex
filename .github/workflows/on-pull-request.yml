@@ -15,31 +15,29 @@ jobs:
 
         strategy:
             matrix:
-                node-version: [22.x, 24.x]
+                # Passed to the dev container's node feature, which takes a major version.
+                node-version: ["22", "24"]
                 # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
         steps:
-            - uses: actions/checkout@v6
-            - name: Use Node.js ${{ matrix.node-version }}
-              uses: actions/setup-node@v6
+            - uses: actions/checkout@v7
+
+            # Builds and starts the dev container in .devcontainer/, then runs the tests inside it.
+            # Starting the container runs .devcontainer/postCreateCommand.sh, which does `npm ci`
+            # and the build (`unified-latex-cli` first, so that if it errors, the build will fail).
+            - name: Build and test in the dev container
+              uses: devcontainers/ci@v0.3
+              env:
+                  # Read by devcontainer.json through `${localEnv:...}` to select the Node version.
+                  DEVCONTAINER_NODE_VERSION: ${{ matrix.node-version }}
               with:
-                  node-version: ${{ matrix.node-version }}
-                  cache: "npm"
-            - run: npm ci
-
-            - name: Build
-              # `unified-latex-cli` depends on almost all `unified-latex` packages. We build it first
-              # so that if it errors, the build will fail.
-              run: |
-                  npm run build -w packages/unified-latex-cli
-                  npm run build -ws --if-present
-
-            - name: Test
-              run: npm test
-
-            # This test tests the actual packages that will be distributed
-            - name: Test Packages run on ESM and CJS
-              run: |
-                  npm run test:packages-install
-                  npm run test:packages-esm
-                  npm run test:packages-cjs
+                  env: |
+                      CI
+                  # The last three commands test the actual packages that will be distributed.
+                  runCmd: |
+                      set -e
+                      node --version
+                      npm test -- --run
+                      npm run test:packages-install
+                      npm run test:packages-esm
+                      npm run test:packages-cjs
