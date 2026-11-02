@@ -1,6 +1,7 @@
 import type * as Hast from "hast";
 import type * as Mdast from "mdast";
 import { Plugin, unified } from "unified";
+import type { VFile } from "vfile";
 import type * as Ast from "@unified-latex/unified-latex-types";
 import { unifiedLatexToHast } from "@unified-latex/unified-latex-to-hast";
 import { PluginOptions as HtmlLikePluginOptions } from "@unified-latex/unified-latex-to-hast";
@@ -21,7 +22,7 @@ export const unifiedLatexToMdast: Plugin<
     const handlers = Object.assign({}, defaultHandlers, options?.handlers);
     options = Object.assign({}, options, { handlers });
 
-    return (tree: Ast.Root, file) => {
+    return (tree: Ast.Root, file: VFile) => {
         const mdast = unified()
             .use(unifiedLatexToHast, options)
             .use(rehypeRemark, options)

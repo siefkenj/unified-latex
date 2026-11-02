@@ -22,6 +22,7 @@
         "module": "ES2022",
         "target": "es6",
         "lib": ["es2019"],
+        "types": ["node"],
         "jsx": "react",
         "allowJs": true,
         "allowSyntheticDefaultImports": true,
