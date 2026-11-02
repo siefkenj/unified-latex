@@ -35,6 +35,8 @@ export const unifiedLatexStringCompiler: Plugin<
         // We have already processed the AST. All we want prettier to do is the final
         // text formatting. We create a dummy parser and directly return the ast.
         // Note: if prettier is asked to format the empty string, it will not call the parsers, so we pass in "_"
+        // This package uses prettier 2, whose `format` is synchronous. Prettier 2 ships without types,
+        // so TypeScript picks up the (asynchronous) prettier 3 types hoisted to the root `node_modules`.
         let formatted = Prettier.format("_", {
             useTabs,
             printWidth,
@@ -64,7 +66,7 @@ export const unifiedLatexStringCompiler: Plugin<
                 },
             ],
             ...(options || {}),
-        });
+        }) as unknown as string;
 
         if (forceNewlineEnding && !formatted.endsWith("\n")) {
             formatted += "\n";
