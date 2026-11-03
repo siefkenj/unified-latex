@@ -2,6 +2,45 @@
 
 ### Unreleased
 
+- Math parsing (fixes #53, #114, #132, #133):
+    - Groups and environment bodies inside math are parsed in math mode, so, e.g., `$\frac{\frac12}{a}$` is no longer
+      formatted as `$\frac{\frac{12}}{a}$` and `_` in `${a_b}$` is a subscript.
+    - Macro arguments and environment bodies whose mode differs from their surroundings (e.g. `\text{...}` in math or
+      `\ensuremath{...}` in text) are reparsed in the right mode, with positions that point into the original source.
+      This replaces the previous heuristic.
+    - **Possibly breaking:** in math, the contents of groups and macro arguments are split into single-character strings
+      (e.g. `$\foo{ab}$` has the strings `a` and `b` instead of `ab`), like the rest of math content.
+    - **Breaking:** `parseMinimal`, `parseMathMinimal` and `unifiedLatexFromStringMinimal` keep all whitespace in math,
+      marking what would be removed with `_renderInfo.droppableInMath`. Use `processMacrosAndEnvironments` (or
+      `unifiedLatexFromString`) to remove it.
+    - New `processMacrosAndEnvironments` function, which attaches arguments and reparses content in the right mode in
+      any part of a tree.
+- `unifiedLatexReparseMath`:
+    - Reparses the given math macros/environments whenever they were parsed in text mode, from the original source when
+      available (use `processSync(str)` rather than `runSync(tree)`). Macro arguments in the reparsed content are
+      attached, and the reparsed content is marked `inMathMode: true`.
+    - New `macros` and `environments` options.
+    - **Breaking:** `unifiedLatexReparseMathConstructPlugin` has been removed. Use `unifiedLatexReparseMath` instead.
+- Macro and environment info:
+    - Macros whose arguments are text are marked `inMathMode: false` (e.g. the `\text...` font macros, boxes,
+      references, citations, `\label`, `\hspace`, `\color`, `\url`, `\includegraphics`, `\index` and `\tikz`), as are
+      the tikz environments.
+    - New `renderInfo.argumentsInMathMode` sets the mode of individual arguments (e.g. the color of `\textcolor` is
+      text, while its body is in the mode of its surroundings).
+    - Add the `natbib` and `biblatex` packages, and `\boxed`, `\tag`, `\intertext`, `\shortintertext`, `\mathop`,
+      `\nameref`, `\textsuperscript`, `\textsubscript`, `\hbox`, `\vbox` and `\vtop`.
+    - `alignat` and `eqnarray` (and their starred forms) are parsed as math environments. The column count of
+      `alignat` is attached as an argument.
+- Arguments written with braces or brackets have a `position` that includes them.
+- `visit` reports the mode of each argument in `info.context.inMathMode`, reports the body of any `mathenv` as math, and
+  reports the arguments of environments (e.g. the column specification of `array`) as text.
+- HTML conversion: `eqnarray` is converted to a KaTeX `darray`, and `\hbox`, `\vbox` and `\vtop` to `<span>`s.
+- PreTeXt conversion: `natbib` and `biblatex` citations are converted to `<xref>`s, `\nameref` to
+  `<xref text="title">`, and the content of `\textsuperscript`, `\textsubscript`, `\hbox`, `\vbox`, `\vtop` and
+  `\citetext` is kept.
+- The `no-plaintext-operators` lint rule detects operators in groups in math (e.g. `${sin x}$` or `$x^{sin y}$`), in
+  `\mathnormal{...}`, and in font macros and switches whose content isn't a single word (e.g. `\mathrm{a + sin b}`).
+
 ### v1.8.5
 
 - PreTeXt conversion improvements:

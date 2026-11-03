@@ -23,6 +23,15 @@
     function createNode(type, extra = {}) {
         return { type, ...extra, position: location() };
     }
+
+    // In math mode, whitespace next to groups, `&`, `^` and `_` is not significant. It is kept
+    // (so that it isn't lost if the content turns out to be in text mode, e.g. the argument
+    // of an unknown macro) but marked so that it can be removed once the content is known
+    // to be in math mode.
+    function markDroppableInMath(before, x, after) {
+        const mark = (ws) => ({ ...ws, _renderInfo: { droppableInMath: true } });
+        return [...before.map(mark), x, ...after.map(mark)];
+    }
 }
 
 document "document"
@@ -31,7 +40,7 @@ document "document"
         }
 
 // This rule is used as the entry rule to parse when you know that the string only contains math
-math "math" = math_token*
+math "math" = x:math_token* { return x.flatMap((x) => x); }
 
 token "token"
     = special_macro
@@ -69,15 +78,30 @@ math_token "math token"
     = special_macro
     / macro
     / full_comment
-    / whitespace* x:group whitespace* { return x; }
-    / whitespace* x:alignment_tab whitespace* { return x; }
+    // Groups inherit math mode. Macros whose arguments are in text mode (e.g. `\text{...}`)
+    // have their arguments reparsed after their arguments are attached.
+    / l:whitespace* x:math_group r:whitespace* {
+            return markDroppableInMath(l, x, r);
+        }
+    / l:whitespace* x:alignment_tab r:whitespace* {
+            return markDroppableInMath(l, x, r);
+        }
     / macro_parameter
-    / whitespace* superscript whitespace* {
-            return createNode("macro", { content: "^", escapeToken: "" });
-        }
-    / whitespace* subscript whitespace* {
-            return createNode("macro", { content: "_", escapeToken: "" });
-        }
+    // The position of `^` and `_` doesn't include the whitespace around them
+    / l:whitespace*
+        x:(
+            superscript {
+                return createNode("macro", { content: "^", escapeToken: "" });
+            }
+        )
+        r:whitespace* { return markDroppableInMath(l, x, r); }
+    / l:whitespace*
+        x:(
+            subscript {
+                return createNode("macro", { content: "_", escapeToken: "" });
+            }
+        )
+        r:whitespace* { return markDroppableInMath(l, x, r); }
     / ignore
     / whitespace
     / s:. { return createNode("string", { content: s }); }
@@ -375,11 +399,22 @@ math_environment "math environment"
             });
         }
 
-// group that assumes you're in math mode.  If you use "\text{}" this isn't a good idea....
+// group that assumes you're in math mode.
 math_group "math group"
-    = begin_group x:(!end_group c:math_token { return c; })* end_group {
+    = begin_group x:(!end_group c:math_group_token { return c; })* end_group {
             return createNode("group", { content: x.flatMap((x) => x) });
         }
+
+// A `$` inside a group can only start inline math if the group is actually in text mode
+// (e.g. the argument of `\hbox{...}`), so treat it as inline math. The inline math must
+// close inside the group; otherwise the `$` is just a string. Similarly, a parbreak
+// is kept so that it isn't lost if the group is reparsed in text mode.
+math_group_token "math group token"
+    = math_shift eq:(!math_shift !end_group t:math_token { return t; })+ math_shift {
+            return createNode("inlinemath", { content: eq.flatMap((x) => x) });
+        }
+    / parbreak
+    / math_token
 
 begin_display_math = escape "["
 
@@ -397,10 +432,11 @@ math_env_name
     = e:(
         "equation*"
         / "equation"
-        / "align*"
-        / "align"
+        // `alignat` must come before `align`, since `align` is a prefix of `alignat`
         / "alignat*"
         / "alignat"
+        / "align*"
+        / "align"
         / "gather*"
         / "gather"
         / "multline*"
@@ -410,6 +446,8 @@ math_env_name
         / "split"
         / "math"
         / "displaymath"
+        / "eqnarray*"
+        / "eqnarray"
     ) { return createNode("string", { content: e }); }
 
 // FOR THE FOLLOWING ITEMS:

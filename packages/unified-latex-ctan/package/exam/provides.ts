@@ -11,7 +11,7 @@ export const macros: MacroInfoRecord = {
     fillwidthlines: { signature: "m" },
     fillwidthdottedlines: { signature: "m" },
     fillwidthgrid: { signature: "m" },
-    makeemptybox: { signature: "m" },
+    makeemptybox: { signature: "m", renderInfo: { inMathMode: false } },
     CorrectChoiceEmphasis: {
         signature: "m",
         renderInfo: { breakAround: true },

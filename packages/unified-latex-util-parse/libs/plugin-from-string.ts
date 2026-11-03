@@ -1,5 +1,4 @@
 import { Plugin, Parser, unified } from "unified";
-import { environmentInfo, macroInfo } from "@unified-latex/unified-latex-ctan";
 import * as Ast from "@unified-latex/unified-latex-types";
 import {
     EnvInfoRecord,
@@ -10,6 +9,7 @@ import {
     unifiedLatexTrimRoot,
 } from "@unified-latex/unified-latex-util-trim";
 import { unifiedLatexAstComplier } from "./compiler-ast";
+import { withCtanInfo } from "./ctan-info";
 import { unifiedLatexFromStringMinimal } from "./plugin-from-string-minimal";
 import { unifiedLatexProcessMacrosAndEnvironmentsWithMathReparse } from "./process-macros-and-environments";
 import { unifiedLatexProcessAtLetterAndExplMacros } from "./process-at-letter-and-expl-macros";
@@ -54,14 +54,8 @@ export const unifiedLatexFromString: Plugin<PluginOptions[], string, Ast.Root> =
         } = options || {};
 
         // Build up a parsing plugin with only unified components
-        const allMacroInfo: MacroInfoRecord = Object.assign(
-            {},
-            ...Object.values(macroInfo),
-            macros
-        );
-        const allEnvInfo: EnvInfoRecord = Object.assign(
-            {},
-            ...Object.values(environmentInfo),
+        const { macros: allMacroInfo, environments: allEnvInfo } = withCtanInfo(
+            macros,
             environments
         );
 
@@ -73,8 +67,8 @@ export const unifiedLatexFromString: Plugin<PluginOptions[], string, Ast.Root> =
                 expl3,
                 autodetectExpl3AndAtLetter,
             })
-            // Math environments that aren't hardcoded into the PEG grammar need to be re-parsed,
-            // so do a minimal pass first with just those environments.
+            // Attach arguments and reparse macro arguments and environment bodies (e.g. `\text{...}`
+            // in math or math environments that aren't hardcoded into the PEG grammar) in their own mode.
             .use(unifiedLatexProcessMacrosAndEnvironmentsWithMathReparse, {
                 macros: allMacroInfo,
                 environments: allEnvInfo,

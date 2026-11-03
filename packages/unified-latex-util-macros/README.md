@@ -84,19 +84,25 @@ function expandMacros(
 Expands macros in `ast` as specified by `macros`, but do not expand any macros
 that appear in the context of a macro definition. For example, expanding `\foo` to `X` in
 
-    \newcommand{\foo}{Y}
-    \foo
+```
+\newcommand{\foo}{Y}
+\foo
+```
 
 would result in
 
-    \newcommand{\foo}{Y}
-    X
+```
+\newcommand{\foo}{Y}
+X
+```
 
 If `expandMacros(...)` were used, macros would be expanded in all contexts and the result
 would be
 
-    \newcommand{X}{Y}
-    X
+```
+\newcommand{X}{Y}
+X
+```
 
 Each macro in `macros` should provide the substitution AST (i.e., the AST with the #1, etc.
 in it). This function assumes that the appropriate arguments have already been attached
@@ -202,3 +208,14 @@ function parseMacroSubstitutions(ast: Ast.Node[]): (Ast.Node | HashNumber)[];
 | `LATEX_NEWCOMMAND`  | `Set<string>`                                  |
 | `newcommandMatcher` | `Ast.TypeGuard<Ast.Macro & { content: any; }>` |
 | `XPARSE_NEWCOMMAND` | `Set<string>`                                  |
+
+# Types
+
+## `HashNumber`
+
+```typescript
+export interface HashNumber {
+    type: "hash_number";
+    number: number;
+}
+```

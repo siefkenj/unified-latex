@@ -67,7 +67,12 @@ export const tikzCommandArgumentParser: ArgumentParser = (nodes, startPos) => {
 
     // If we're a group, grab the contents and call it good.
     if (match.group(firstNode)) {
-        const args = [animationArg, optionalArg, arg(firstNode.content)];
+        // The braces of the group are in the source, so the argument spans the group
+        const commandArg = arg(firstNode.content);
+        if (firstNode.position) {
+            commandArg.position = firstNode.position;
+        }
+        const args = [animationArg, optionalArg, commandArg];
         nodes.splice(origStartPos, pos - origStartPos + 1);
         return { args, nodesRemoved: pos - origStartPos + 1 + nodesRemoved };
     }

@@ -36,44 +36,63 @@ export const macros: MacroInfoRecord = {
     tikz: {
         signature: "o o m",
         argumentParser: tikzCommandArgumentParser,
-        renderInfo: { namedArguments: ["animation", "options", "command"] },
+        renderInfo: {
+            namedArguments: ["animation", "options", "command"],
+            inMathMode: false,
+        },
     },
 };
 
 export const environments: EnvInfoRecord = {
     tikzpicture: {
         signature: "o",
-        renderInfo: { pgfkeysArgs: true, tikzEnvironment: true },
+        renderInfo: {
+            pgfkeysArgs: true,
+            tikzEnvironment: true,
+            inMathMode: false,
+        },
         processContent: processTikzEnvironmentContent,
     },
     axis: {
         signature: "o",
-        renderInfo: { pgfkeysArgs: true, tikzEnvironment: true },
+        renderInfo: {
+            pgfkeysArgs: true,
+            tikzEnvironment: true,
+            inMathMode: false,
+        },
         processContent: processTikzEnvironmentContent,
     },
     scope: {
         signature: "o",
-        renderInfo: { pgfkeysArgs: true, tikzEnvironment: true },
+        renderInfo: {
+            pgfkeysArgs: true,
+            tikzEnvironment: true,
+            inMathMode: false,
+        },
         processContent: processTikzEnvironmentContent,
     },
     pgfonlayer: {
         signature: "m",
-        renderInfo: { tikzEnvironment: true },
+        renderInfo: { tikzEnvironment: true, inMathMode: false },
         processContent: processTikzEnvironmentContent,
     },
     pgflowlevelscope: {
         signature: "m",
-        renderInfo: { tikzEnvironment: true },
+        renderInfo: { tikzEnvironment: true, inMathMode: false },
         processContent: processTikzEnvironmentContent,
     },
     pgfviewboxscope: {
         signature: "m m m m m",
-        renderInfo: { tikzEnvironment: true },
+        renderInfo: { tikzEnvironment: true, inMathMode: false },
         processContent: processTikzEnvironmentContent,
     },
     pgftransparencygroup: {
         signature: "o",
-        renderInfo: { pgfkeysArgs: true, tikzEnvironment: true },
+        renderInfo: {
+            pgfkeysArgs: true,
+            tikzEnvironment: true,
+            inMathMode: false,
+        },
         processContent: processTikzEnvironmentContent,
     },
     behindforegroundpath: {

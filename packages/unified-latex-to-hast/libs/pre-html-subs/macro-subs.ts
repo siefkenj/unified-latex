@@ -65,6 +65,10 @@ export const macroReplacements: Record<
     textsubscript: factory("sub"),
     underline: factory("u", { className: "underline" }),
     mbox: factory("span", { className: "mbox" }),
+    // The last argument is the content; the first is a box specification like `to 1in`
+    hbox: factory("span", { className: "hbox" }),
+    vbox: factory("span", { className: "vbox" }),
+    vtop: factory("span", { className: "vtop" }),
     phantom: factory("span", { className: "phantom" }),
     part: createHeading("h1"),
     chapter: createHeading("h2"),

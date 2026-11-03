@@ -24,6 +24,16 @@ import the `.js` file. To explicitly access the commonjs export, import the `.cj
 
 # Types
 
+## `Argument`
+
+```typescript
+export interface Argument extends ContentNode {
+    type: "argument";
+    openMark: string;
+    closeMark: string;
+}
+```
+
 ## `ArgumentParser`
 
 ```typescript
@@ -39,48 +49,31 @@ export type ArgumentParser = (
 export type Ast = Node | Argument | Node[];
 ```
 
+## `Comment`
+
+```typescript
+export interface Comment extends BaseNode {
+    type: "comment";
+    content: string;
+    sameline?: boolean;
+    suffixParbreak?: boolean;
+    leadingWhitespace?: boolean;
+}
+```
+
+## `DisplayMath`
+
+```typescript
+export interface DisplayMath extends ContentNode {
+    type: "displaymath";
+}
+```
+
 ## `EnvInfo`
 
 ```typescript
 export type EnvInfo = {
-    renderInfo?: {
-        /**
-         * Whether the body of the environment should be treated as math mode
-         *
-         * @type {boolean}
-         */
-        inMathMode?: boolean;
-        /**
-         * Whether to align the environment contents based on `&` and `\\` delimiters
-         * (like a matrix or tabular environment).
-         *
-         * @type {boolean}
-         */
-        alignContent?: boolean;
-        /**
-         * Whether the arguments should be treated as pgfkeys-type arguments.
-         *
-         * @type {boolean}
-         */
-        pgfkeysArgs?: boolean;
-        /**
-         * A list of names to be given to each argument when processing. This list should
-         * be the same length as the number of arguments. `null` can appear any number of times
-         * for "un-named" arguments.
-         *
-         * This allows a consistent reference to macro arguments even if the macro signatures are redefined between
-         * packages.
-         *
-         * @type {((string|null)[])}
-         */
-        namedArguments?: (string | null)[];
-        /**
-         * Whether the body is tikz-environment like (e.g., a `tikzpicture` or `scope`, etc.)
-         *
-         * @type {boolean}
-         */
-        tikzEnvironment?: boolean;
-    };
+    renderInfo?: EnvRenderInfo;
     /**
      * Function to process the body of an environment. The return value of `processContent`
      * is treated as the new body.
@@ -102,85 +95,107 @@ export type EnvInfo = {
 export type EnvInfoRecord = Record<string, EnvInfo>;
 ```
 
+## `Environment`
+
+```typescript
+export interface Environment extends ContentNode {
+    type: "environment" | "mathenv";
+    env: string;
+    args?: Argument[];
+}
+```
+
+## `EnvRenderInfo`
+
+```typescript
+export interface EnvRenderInfo {
+    /**
+     * Whether the body of the environment should be treated as math mode
+     *
+     * @type {boolean}
+     */
+    inMathMode?: boolean;
+    /**
+     * Whether to align the environment contents based on `&` and `\\` delimiters
+     * (like a matrix or tabular environment).
+     *
+     * @type {boolean}
+     */
+    alignContent?: boolean;
+    /**
+     * Whether the arguments should be treated as pgfkeys-type arguments.
+     *
+     * @type {boolean}
+     */
+    pgfkeysArgs?: boolean;
+    /**
+     * A list of names to be given to each argument when processing. This list should
+     * be the same length as the number of arguments. `null` can appear any number of times
+     * for "un-named" arguments.
+     *
+     * This allows a consistent reference to macro arguments even if the macro signatures are redefined between
+     * packages.
+     *
+     * @type {((string|null)[])}
+     */
+    namedArguments?: (string | null)[];
+    /**
+     * Whether the body is tikz-environment like (e.g., a `tikzpicture` or `scope`, etc.)
+     *
+     * @type {boolean}
+     */
+    tikzEnvironment?: boolean;
+}
+```
+
 ## `GenericAst`
 
 ```typescript
 export type GenericAst = GenericNode | GenericNode[];
 ```
 
+## `GenericNode`
+
+```typescript
+export interface GenericNode {
+    [x: string]: any;
+    type: string;
+    _renderInfo?: object;
+}
+```
+
+## `Group`
+
+```typescript
+export interface Group extends ContentNode {
+    type: "group";
+}
+```
+
+## `InlineMath`
+
+```typescript
+export interface InlineMath extends ContentNode {
+    type: "inlinemath";
+}
+```
+
+## `Macro`
+
+```typescript
+export interface Macro extends BaseNode {
+    type: "macro";
+    content: string;
+    escapeToken?: string;
+    args?: Argument[];
+}
+```
+
 ## `MacroInfo`
 
 ```typescript
 export type MacroInfo = {
-    renderInfo?: {
-        /**
-         * Whether the macro's contents wraps along with the current
-         * paragraph or displays as it's own block.
-         *
-         * @type {boolean}
-         */
-        inParMode?: boolean;
-        /**
-         * Whether the arguments should be processed as pgfkeys-type arguments.
-         *
-         * @type {boolean}
-         */
-        pgfkeysArgs?: boolean;
-        /**
-         * Whether there should be line breaks after the macro
-         * (e.g., like the `\\` command.)
-         *
-         * @type {boolean}
-         */
-        breakAfter?: boolean;
-        /**
-         * Whether there should be line breaks before and after the macro
-         * (e.g., like the `\section{...}` command.)
-         *
-         * @type {boolean}
-         */
-        breakAround?: boolean;
-        /**
-         * Whether there should be line breaks before the macro.
-         *
-         * @type {boolean}
-         */
-        breakBefore?: boolean;
-        /**
-         * Whether the contents of the macro should be assumed to be in math mode.
-         *
-         * @type {boolean}
-         */
-        inMathMode?: boolean;
-        /**
-         * Whether the arguments should be rendered with a hanging indent when the wrap
-         * (like the arguments to \item in an enumerate environment.)
-         *
-         * @type {boolean}
-         */
-        hangingIndent?: boolean;
-        /**
-         * A list of names to be given to each argument when processing. This list should
-         * be the same length as the number of arguments. `null` can appear any number of times
-         * for "un-named" arguments.
-         *
-         * This allows a consistent reference to macro arguments even if the macro signatures are redefined between
-         * packages.
-         *
-         * @type {((string|null)[])}
-         */
-        namedArguments?: (string | null)[];
-        /**
-         * Whether the macro represents a tikz path command (e.g. `\draw (0,0) -- (1,1);`).
-         *
-         * @type {boolean}
-         */
-        tikzPathCommand?: boolean;
-        /**
-         * If `\sysdelims` is present, this contains the global information about the delimiters.
-         */
-        sysdelims?: (Ast.Node[] | null)[];
-    };
+    renderInfo?: MacroRenderInfo;
     /**
      * The macro signature as an xparse argument specification string.
      *
@@ -219,6 +234,91 @@ export type MacroInfo = {
 export type MacroInfoRecord = Record<string, MacroInfo>;
 ```
 
+## `MacroRenderInfo`
+
+```typescript
+export interface MacroRenderInfo {
+    /**
+     * Whether the macro's contents wraps along with the current
+     * paragraph or displays as it's own block.
+     *
+     * @type {boolean}
+     */
+    inParMode?: boolean;
+    /**
+     * Whether the arguments should be processed as pgfkeys-type arguments.
+     *
+     * @type {boolean}
+     */
+    pgfkeysArgs?: boolean;
+    /**
+     * Whether there should be line breaks after the macro
+     * (e.g., like the `\\` command.)
+     *
+     * @type {boolean}
+     */
+    breakAfter?: boolean;
+    /**
+     * Whether there should be line breaks before and after the macro
+     * (e.g., like the `\section{...}` command.)
+     *
+     * @type {boolean}
+     */
+    breakAround?: boolean;
+    /**
+     * Whether there should be line breaks before the macro.
+     *
+     * @type {boolean}
+     */
+    breakBefore?: boolean;
+    /**
+     * Whether the contents of the macro should be assumed to be in math mode.
+     *
+     * @type {boolean}
+     */
+    inMathMode?: boolean;
+    /**
+     * Per-argument version of `inMathMode`. This list should be the same length as the number
+     * of arguments. `true`/`false` force an argument into math/text mode while `null`
+     * means the argument is in whatever mode the macro is used in (or `inMathMode`, if it is set).
+     *
+     * For example, `\textcolor{blue}{x^2}` has its color argument in text mode, but its
+     * last argument is in math mode if the macro is used in math mode.
+     *
+     * @type {((boolean|null)[])}
+     */
+    argumentsInMathMode?: (boolean | null)[];
+    /**
+     * Whether the arguments should be rendered with a hanging indent when the wrap
+     * (like the arguments to \item in an enumerate environment.)
+     *
+     * @type {boolean}
+     */
+    hangingIndent?: boolean;
+    /**
+     * A list of names to be given to each argument when processing. This list should
+     * be the same length as the number of arguments. `null` can appear any number of times
+     * for "un-named" arguments.
+     *
+     * This allows a consistent reference to macro arguments even if the macro signatures are redefined between
+     * packages.
+     *
+     * @type {((string|null)[])}
+     */
+    namedArguments?: (string | null)[];
+    /**
+     * Whether the macro represents a tikz path command (e.g. `\draw (0,0) -- (1,1);`).
+     *
+     * @type {boolean}
+     */
+    tikzPathCommand?: boolean;
+    /**
+     * If `\sysdelims` is present, this contains the global information about the delimiters.
+     */
+    sysdelims?: (Ast.Node[] | null)[];
+}
+```
+
 ## `Node`
 
 ```typescript
@@ -235,4 +335,66 @@ export type Node =
     | DisplayMath
     | Group
     | Verb;
+```
+
+## `Parbreak`
+
+```typescript
+export interface Parbreak extends BaseNode {
+    type: "parbreak";
+}
+```
+
+## `Root`
+
+```typescript
+export interface Root extends ContentNode {
+    type: "root";
+}
+```
+
+## `String`
+
+```typescript
+export interface String extends BaseNode {
+    type: "string";
+    content: string;
+}
+```
+
+## `TypeGuard`
+
+```typescript
+export interface TypeGuard<T> {
+    (node: any): node is T;
+}
+```
+
+## `Verb`
+
+```typescript
+export interface Verb extends BaseNode {
+    type: "verb";
+    env: string;
+    escape: string;
+    content: string;
+}
+```
+
+## `VerbatimEnvironment`
+
+```typescript
+export interface VerbatimEnvironment extends BaseNode {
+    type: "verbatim";
+    env: string;
+    content: string;
+}
+```
+
+## `Whitespace`
+
+```typescript
+export interface Whitespace extends BaseNode {
+    type: "whitespace";
+}
 ```

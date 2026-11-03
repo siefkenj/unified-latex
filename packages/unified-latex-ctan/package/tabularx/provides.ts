@@ -6,5 +6,8 @@ import {
 export const macros: MacroInfoRecord = {};
 
 export const environments: EnvInfoRecord = {
-    tabularx: { signature: "m o m", renderInfo: { alignContent: true } },
+    tabularx: {
+        signature: "m o m",
+        renderInfo: { alignContent: true, inMathMode: false },
+    },
 };

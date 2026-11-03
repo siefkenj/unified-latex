@@ -22,9 +22,13 @@ export const macros: MacroInfoRecord = {
     },
     mathmbox: {
         signature: "m",
+        renderInfo: { inMathMode: true },
     },
+    shortintertext: { signature: "m", renderInfo: { inMathMode: false } },
     mathmakebox: {
         signature: "o o m",
+        // The width and position are not math
+        renderInfo: { argumentsInMathMode: [false, false, true] },
     },
     cramped: {
         signature: "o m",
@@ -97,6 +101,9 @@ export const macros: MacroInfoRecord = {
     },
     // amsmath
     text: { signature: "m", renderInfo: { inMathMode: false } },
+    boxed: { signature: "m" },
+    tag: { signature: "s m", renderInfo: { inMathMode: false } },
+    intertext: { signature: "m", renderInfo: { inMathMode: false } },
     dddot: { signature: "m" },
     ddddot: { signature: "m" },
     // amsbsy
@@ -117,7 +124,8 @@ export const macros: MacroInfoRecord = {
     },
     eqref: {
         signature: "m",
-    }
+        renderInfo: { inMathMode: false },
+    },
 };
 
 export const environments: EnvInfoRecord = {
@@ -201,8 +209,16 @@ export const environments: EnvInfoRecord = {
     "align*": { renderInfo: { inMathMode: true, alignContent: true } },
     align: { renderInfo: { inMathMode: true, alignContent: true } },
     aligned: { renderInfo: { inMathMode: true, alignContent: true } },
-    "alignat*": { renderInfo: { inMathMode: true, alignContent: true } },
-    alignat: { renderInfo: { inMathMode: true, alignContent: true } },
+    // The column count is only taken if it is a group, so that the body isn't
+    // mangled if it is missing
+    "alignat*": {
+        signature: "d{}",
+        renderInfo: { inMathMode: true, alignContent: true },
+    },
+    alignat: {
+        signature: "d{}",
+        renderInfo: { inMathMode: true, alignContent: true },
+    },
     "equation*": { renderInfo: { inMathMode: true } },
     equation: { renderInfo: { inMathMode: true } },
     "gather*": { renderInfo: { inMathMode: true } },
