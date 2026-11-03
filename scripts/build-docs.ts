@@ -3,7 +3,7 @@
  *
  * run with
  * ```
- * npx esr scripts/build-docs.ts
+ * node scripts/build-docs.ts
  * ```
  */
 
@@ -31,7 +31,7 @@ async function exists(filepath): Promise<boolean> {
     const { unified } = await import("unified");
     const inject = await (await import("mdast-util-inject")).default;
     const b = await import("mdast-builder");
-    const { getDataOnAllExports } = await import("./libs/get-symbols");
+    const { getDataOnAllExports } = await import("./libs/get-symbols.ts");
     const {
         gfmRemark,
         makeConstantsSection,
@@ -39,7 +39,7 @@ async function exists(filepath): Promise<boolean> {
         makeTypesSection,
         makePluginsSection,
     } = await (
-        await import("./libs/markdown-utils")
+        await import("./libs/markdown-utils.ts")
     ).default;
     type MdNode = ReturnType<typeof b.text>;
 
@@ -71,7 +71,10 @@ async function exists(filepath): Promise<boolean> {
         const readme = await generateReadme(file.getFilePath());
 
         console.log(
-            chalk.gray("       Writing to", path.relative(__dirname, outPath))
+            chalk.gray(
+                "       Writing to",
+                path.relative(import.meta.dirname, outPath)
+            )
         );
 
         await fs.writeFile(outPath, readme, { encoding: "utf-8" });
@@ -94,11 +97,11 @@ async function exists(filepath): Promise<boolean> {
                 : "{}"
         );
 
-        const accumulatedExports = getDataOnAllExports(sourceFile);
+        const accumulatedExports = await getDataOnAllExports(sourceFile);
         const constantsMd = makeConstantsSection(accumulatedExports.constants);
         const typesMd = makeTypesSection(accumulatedExports.types);
-        const funcsMd = makeFunctionsSection(accumulatedExports.funcs);
-        const pluginMd = makePluginsSection(accumulatedExports.plugins);
+        const funcsMd = await makeFunctionsSection(accumulatedExports.funcs);
+        const pluginMd = await makePluginsSection(accumulatedExports.plugins);
 
         // Grab the comments from index.ts
         const jsDoc = sourceFile.getLastToken().getFirstChild();

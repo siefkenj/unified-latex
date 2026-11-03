@@ -101,6 +101,17 @@ export interface MacroRenderInfo {
      */
     inMathMode?: boolean;
     /**
+     * Per-argument version of `inMathMode`. This list should be the same length as the number
+     * of arguments. `true`/`false` force an argument into math/text mode while `null`
+     * means the argument is in whatever mode the macro is used in (or `inMathMode`, if it is set).
+     *
+     * For example, `\textcolor{blue}{x^2}` has its color argument in text mode, but its
+     * last argument is in math mode if the macro is used in math mode.
+     *
+     * @type {((boolean|null)[])}
+     */
+    argumentsInMathMode?: (boolean | null)[];
+    /**
      * Whether the arguments should be rendered with a hanging indent when the wrap
      * (like the arguments to \item in an enumerate environment.)
      *

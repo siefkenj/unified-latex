@@ -107,7 +107,7 @@ export const macros: MacroInfoRecord = {
             namedArguments: [null, "label", null],
         },
     },
-    label: { signature: "d<> o m" }, // cleveref adds an optional argument to label; this gives maximum compatibility.
+    label: { signature: "d<> o m", renderInfo: { inMathMode: false } }, // cleveref adds an optional argument to label; this gives maximum compatibility.
     action: { signature: "d<> m" },
     beamerdefaultoverlayspecification: { signature: "m" },
 

@@ -17,6 +17,10 @@ export function parseMinimal(str: string): Ast.Root {
  *
  * The parsing assumes a math-mode context, so, for example, `^` and `_` are
  * parsed as macros (even though arguments are not attached to them).
+ *
+ * Whitespace next to groups, `&`, `^` and `_` is kept (in case the content turns out to
+ * be in text mode, e.g. the argument of `\text{...}`), but is marked with
+ * `_renderInfo.droppableInMath`.
  */
 export function parseMathMinimal(str: string): Ast.Node[] {
     return LatexPegParser.parse(str, { startRule: "math" });

@@ -53,12 +53,14 @@ function createMatchers(
 Parse the content of an align environment into an array of row objects.
 Each row object looks like
 
-     {
-       cells: [...],
-       colSeps: [...],
-       rowSep: ...,
-       trailingComment: ...
-     }
+```
+ {
+   cells: [...],
+   colSeps: [...],
+   rowSep: ...,
+   trailingComment: ...
+ }
+```
 
 `...` may be an ast node or `null`.
 

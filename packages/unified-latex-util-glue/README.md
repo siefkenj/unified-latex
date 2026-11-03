@@ -58,9 +58,9 @@ of the glue is returned along with information about how many nodes were consume
 
 The return object consists of
 
-*   `printedGlue` - the pretty-printed version of the glue
-*   `endIndex` - the index in `nodes` where the glue string terminates
-*   `partialSliceLen` - how far into the `Ast.String` node the glue string finished. For example `1ptXX` would parse as `1pt`, and the parsing would terminate partway through the string node.
+* `printedGlue` - the pretty-printed version of the glue
+* `endIndex` - the index in `nodes` where the glue string terminates
+* `partialSliceLen` - how far into the `Ast.String` node the glue string finished. For example `1ptXX` would parse as `1pt`, and the parsing would terminate partway through the string node.
 
 ```typescript
 function findGlue(

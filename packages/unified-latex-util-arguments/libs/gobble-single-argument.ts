@@ -89,6 +89,11 @@ export function gobbleSingleArgument(
                     openMark,
                     closeMark,
                 });
+                // A shorthand argument (e.g. the `1` in `\frac12`) has no braces in the
+                // source, so only a group gives the argument a position
+                if (match.group(currNode)) {
+                    setPosition(argument, currNode, currNode);
+                }
                 currPos++;
                 break;
             } else {
@@ -103,6 +108,11 @@ export function gobbleSingleArgument(
                         openMark,
                         closeMark,
                     });
+                    setPosition(
+                        argument,
+                        nodes[bracePos[0]],
+                        nodes[bracePos[1]]
+                    );
                     currPos = bracePos[1] + 1;
                     break;
                 }
@@ -117,6 +127,7 @@ export function gobbleSingleArgument(
                     openMark,
                     closeMark,
                 });
+                setPosition(argument, currNode, currNode);
                 currPos++;
                 break;
             }
@@ -132,6 +143,7 @@ export function gobbleSingleArgument(
                     openMark,
                     closeMark,
                 });
+                setPosition(argument, nodes[bracePos[0]], nodes[bracePos[1]]);
                 currPos = bracePos[1] + 1;
                 break;
             }
@@ -213,6 +225,34 @@ export function gobbleSingleArgument(
     const nodesRemoved = argument ? currPos - startPos : 0;
     nodes.splice(startPos, nodesRemoved);
     return { argument, nodesRemoved };
+}
+
+/**
+ * Give `argument` the position that spans from the start of `open` to the end of `close`,
+ * which must be the nodes holding its open and close marks (or a group, which holds both).
+ * The position is only set if it is known to include exactly the marks; e.g., a string that
+ * was split to separate out a mark keeps the position of the whole string.
+ */
+function setPosition(argument: Ast.Argument, open: Ast.Node, close: Ast.Node) {
+    if (!open.position || !close.position) {
+        return;
+    }
+    if (open !== close) {
+        const openLength =
+            open.position.end.offset - open.position.start.offset;
+        const closeLength =
+            close.position.end.offset - close.position.start.offset;
+        if (
+            openLength !== argument.openMark.length ||
+            closeLength !== argument.closeMark.length
+        ) {
+            return;
+        }
+    }
+    argument.position = {
+        start: { ...open.position.start },
+        end: { ...close.position.end },
+    };
 }
 
 function cloneStringNode(node: Ast.String, content: string): Ast.String {

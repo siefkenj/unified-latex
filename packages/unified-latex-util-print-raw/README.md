@@ -36,10 +36,10 @@ function printRaw(
 
 **Parameters**
 
-| Param   | Type                       | Description                                                                                                                     |
-| :------ | :------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| node    | `Printable \| Printable[]` |                                                                                                                                 |
-| options | `{ asArray: false; }`      | *   Setting `asArray` to `true` will return an array of strings and the symbol `linebreak`, so that printing can be customized. |
+| Param   | Type                       | Description                                                                                                                   |
+| :------ | :------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| node    | `Printable \| Printable[]` |                                                                                                                               |
+| options | `{ asArray: false; }`      | * Setting `asArray` to `true` will return an array of strings and the symbol `linebreak`, so that printing can be customized. |
 
 # Constants
 
