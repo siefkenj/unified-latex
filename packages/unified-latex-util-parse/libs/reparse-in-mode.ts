@@ -186,7 +186,7 @@ function restoreMacroNames(nodes: Ast.Node[], names: Set<string>) {
 /**
  * Whether `arg`, an argument of `macro`, is in math mode when `macro` is used in math
  * mode (`inMathMode === true`) or in text mode. An argument's own mode (e.g. from
- * `argumentsInMathMode`) takes precedence over the macro's mode, which takes precedence
+ * a per-argument `inMathMode`) takes precedence over the macro's mode, which takes precedence
  * over the mode the macro is used in.
  */
 export function argumentInMathMode(

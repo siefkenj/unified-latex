@@ -25,8 +25,8 @@
     - Macros whose arguments are text are marked `inMathMode: false` (e.g. the `\text...` font macros, boxes,
       references, citations, `\label`, `\hspace`, `\color`, `\url`, `\includegraphics`, `\index` and `\tikz`), as are
       the tikz environments.
-    - New `renderInfo.argumentsInMathMode` sets the mode of individual arguments (e.g. the color of `\textcolor` is
-      text, while its body is in the mode of its surroundings).
+    - `renderInfo.inMathMode` can be a list that sets the mode of individual arguments (e.g. the color of
+      `\textcolor` is text, while its body is in the mode of its surroundings).
     - Add the `natbib` and `biblatex` packages, and `\boxed`, `\tag`, `\intertext`, `\shortintertext`, `\mathop`,
       `\nameref`, `\textsuperscript`, `\textsubscript`, `\hbox`, `\vbox` and `\vtop`.
     - `alignat` and `eqnarray` (and their starred forms) are parsed as math environments. The column count of

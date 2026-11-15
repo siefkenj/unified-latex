@@ -10,7 +10,7 @@ export const macros: MacroInfoRecord = {
     },
     href: {
         signature: "o m m",
-        renderInfo: { argumentsInMathMode: [false, false, null] },
+        renderInfo: { inMathMode: [false, false, undefined] },
     },
     url: { signature: "m", renderInfo: { inMathMode: false } },
     nolinkurl: { signature: "m", renderInfo: { inMathMode: false } },
@@ -19,15 +19,15 @@ export const macros: MacroInfoRecord = {
     hyperdef: { signature: "m m m" },
     hyperref: {
         signature: "o m",
-        renderInfo: { argumentsInMathMode: [false, null] },
+        renderInfo: { inMathMode: [false, undefined] },
     },
     hyperlink: {
         signature: "m m",
-        renderInfo: { argumentsInMathMode: [false, null] },
+        renderInfo: { inMathMode: [false, undefined] },
     },
     hypertarget: {
         signature: "m m",
-        renderInfo: { argumentsInMathMode: [false, null] },
+        renderInfo: { inMathMode: [false, undefined] },
     },
     autoref: { signature: "s m", renderInfo: { inMathMode: false } },
     pageref: { signature: "s m", renderInfo: { inMathMode: false } },

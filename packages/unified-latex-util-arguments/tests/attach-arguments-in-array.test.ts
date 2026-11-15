@@ -343,7 +343,7 @@ describe("unified-latex-util-arguments", () => {
         attachMacroArgsInArray(nodes, {
             xxx: {
                 signature: "m m m",
-                renderInfo: { argumentsInMathMode: [false, null, true] },
+                renderInfo: { inMathMode: [false, undefined, true] },
             },
         });
         const args = (nodes[0] as any).args;
@@ -352,6 +352,8 @@ describe("unified-latex-util-arguments", () => {
             undefined,
             { inMathMode: true },
         ]);
+        // The per-argument modes aren't recorded on the macro itself
+        expect((nodes[0] as any)._renderInfo).toEqual({});
     });
     it("records the math mode of arguments that are already attached", () => {
         const nodes = strToNodes("\\xxx a b");
@@ -359,7 +361,7 @@ describe("unified-latex-util-arguments", () => {
         attachMacroArgsInArray(nodes, {
             xxx: {
                 signature: "m m",
-                renderInfo: { argumentsInMathMode: [false, null] },
+                renderInfo: { inMathMode: [false, undefined] },
             },
         });
         const args = (nodes[0] as any).args;
@@ -374,7 +376,7 @@ describe("unified-latex-util-arguments", () => {
         attachMacroArgsInArray(nodes, {
             xxx: {
                 signature: "o m m",
-                renderInfo: { argumentsInMathMode: [false, false, null] },
+                renderInfo: { inMathMode: [false, false, undefined] },
             },
         });
         const args = (nodes[0] as any).args;

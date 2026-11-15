@@ -1,4 +1,4 @@
-import { EnvInfo, MacroInfo } from "./info-specs";
+import { EnvRenderInfo, MacroRenderInfo } from "./info-specs";
 
 export type GenericAst = GenericNode | GenericNode[];
 
@@ -11,8 +11,10 @@ export interface GenericNode {
 // Abstract nodes
 interface BaseNode {
     type: string;
-    _renderInfo?: (MacroInfo["renderInfo"] | EnvInfo["renderInfo"]) & {
+    _renderInfo?: (Omit<MacroRenderInfo, "inMathMode"> | EnvRenderInfo) & {
         defaultArg?: string;
+        // A per-argument `inMathMode` is recorded on the arguments rather than on the macro
+        inMathMode?: boolean;
     } & Record<string, unknown>;
     position?: {
         start: { offset: number; line: number; column: number };

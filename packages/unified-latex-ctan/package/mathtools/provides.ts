@@ -28,7 +28,7 @@ export const macros: MacroInfoRecord = {
     mathmakebox: {
         signature: "o o m",
         // The width and position are not math
-        renderInfo: { argumentsInMathMode: [false, false, true] },
+        renderInfo: { inMathMode: [false, false, true] },
     },
     cramped: {
         signature: "o m",

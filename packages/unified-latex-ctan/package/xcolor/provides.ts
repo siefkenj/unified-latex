@@ -60,7 +60,7 @@ export const macros: MacroInfoRecord = {
         signature: "o m m",
         renderInfo: {
             inParMode: true,
-            argumentsInMathMode: [false, false, null],
+            inMathMode: [false, false, undefined],
         },
     },
     pagecolor: { signature: "o m" },

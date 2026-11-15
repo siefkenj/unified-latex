@@ -698,7 +698,7 @@ describe("unified-latex-util-parse math mode", () => {
                             foo: {
                                 signature: "m m",
                                 renderInfo: {
-                                    argumentsInMathMode: [false, null],
+                                    inMathMode: [false, undefined],
                                 },
                             },
                         },
@@ -1090,10 +1090,7 @@ describe("unified-latex-util-parse math mode", () => {
                 ) {
                     continue;
                 }
-                if (
-                    info.renderInfo?.inMathMode == null &&
-                    info.renderInfo?.argumentsInMathMode == null
-                ) {
+                if (info.renderInfo?.inMathMode == null) {
                     undeclared.push(name);
                 }
             }

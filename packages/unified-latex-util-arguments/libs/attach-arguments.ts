@@ -52,8 +52,16 @@ export function attachMacroArgsInArray(
         const macroName = macro.content;
         const macroInfo = macros[macroName];
 
-        // Add `._renderInfo` if we have any
-        updateRenderInfo(macro, macroInfo.renderInfo);
+        // Add `._renderInfo` if we have any. A per-argument `inMathMode` is recorded
+        // on the arguments instead (below).
+        const { inMathMode: argumentsInMathMode, ...renderInfo } =
+            macroInfo.renderInfo || {};
+        updateRenderInfo(
+            macro,
+            Array.isArray(argumentsInMathMode)
+                ? renderInfo
+                : macroInfo.renderInfo
+        );
 
         const signatureOrParser =
             macroInfo.argumentParser || macroInfo.signature;
@@ -85,8 +93,10 @@ export function attachMacroArgsInArray(
         // before may have been attached with a different signature, in which case
         // the modes can't be matched up with them.
         const args = macro.args;
-        const argumentsInMathMode = macroInfo.renderInfo?.argumentsInMathMode;
-        if (argumentsInMathMode?.length === args.length) {
+        if (
+            Array.isArray(argumentsInMathMode) &&
+            argumentsInMathMode.length === args.length
+        ) {
             argumentsInMathMode.forEach((inMathMode, i) => {
                 if (inMathMode != null) {
                     updateRenderInfo(args[i], { inMathMode });
