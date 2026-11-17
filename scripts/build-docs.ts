@@ -46,7 +46,9 @@ async function exists(filepath): Promise<boolean> {
     ///////////////////////////////////////////////////////////
     // Build the documentation for all exports
     ///////////////////////////////////////////////////////////
-    const project = new Project();
+    // Without `esModuleInterop`, default imports of `export =` modules (e.g. `trie-prefix-tree`)
+    // fail to resolve and their types become `any`.
+    const project = new Project({ compilerOptions: { esModuleInterop: true } });
     project.addSourceFilesAtPaths("./packages/**/*.ts");
 
     // Find all the files we want to process. These have th form .../unified-latex.../index.ts,

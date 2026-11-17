@@ -29,15 +29,7 @@ Efficiently search for a large number of strings using a prefix-tree.
 The longest match is returned.
 
 ```typescript
-function prefixMatch(
-  nodes: Ast.Node[],
-  prefixes: any,
-  options: {
-    startIndex?: number;
-    matchSubstrings?: boolean;
-    assumeOneCharStrings?: boolean;
-  }
-): { match: string; endNodeIndex: number; endNodePartialMatch: string | null };
+function prefixMatch(nodes: Ast.Node[], prefixes: string | string[] | { dump(spacer?: number): string; tree(): RawTree; addWord(word: string): ReturnType<typeof Trie>; removeWord(word: string): ReturnType<typeof Trie>; ... 7 more ...; getSubAnagrams(word: string): string[]; }, options: { startIndex?: number; matchSubstrings?: boolean; assumeOneCharStrings?: boolean; }): { match: string; endNodeIndex: number; endNodePartialMatch: string | null; }
 ```
 
 **Parameters**
@@ -45,7 +37,7 @@ function prefixMatch(
 | Param    | Type                              |
 | :------- | :-------------------------------- |
 | nodes    | `Ast.Node[]`                      |
-| prefixes | `any`                             |
+| prefixes | <span color='gray'>Omitted</span> |
 | options  | <span color='gray'>Omitted</span> |
 
 ## `scan(nodes, token, options)`
