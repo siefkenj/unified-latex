@@ -338,4 +338,51 @@ describe("unified-latex-util-arguments", () => {
             },
         ]);
     });
+    it("records the math mode of each argument", () => {
+        const nodes = strToNodes("\\xxx a b c");
+        attachMacroArgsInArray(nodes, {
+            xxx: {
+                signature: "m m m",
+                renderInfo: { inMathMode: [false, undefined, true] },
+            },
+        });
+        const args = (nodes[0] as any).args;
+        expect(args.map((arg: any) => arg._renderInfo)).toEqual([
+            { inMathMode: false },
+            undefined,
+            { inMathMode: true },
+        ]);
+        // The per-argument modes aren't recorded on the macro itself
+        expect((nodes[0] as any)._renderInfo).toEqual({});
+    });
+    it("records the math mode of arguments that are already attached", () => {
+        const nodes = strToNodes("\\xxx a b");
+        attachMacroArgsInArray(nodes, { xxx: { signature: "m m" } });
+        attachMacroArgsInArray(nodes, {
+            xxx: {
+                signature: "m m",
+                renderInfo: { inMathMode: [false, undefined] },
+            },
+        });
+        const args = (nodes[0] as any).args;
+        expect(args.map((arg: any) => arg._renderInfo)).toEqual([
+            { inMathMode: false },
+            undefined,
+        ]);
+    });
+    it("doesn't record the math mode of arguments that were attached with a different signature", () => {
+        const nodes = strToNodes("\\xxx a b");
+        attachMacroArgsInArray(nodes, { xxx: { signature: "m m" } });
+        attachMacroArgsInArray(nodes, {
+            xxx: {
+                signature: "o m m",
+                renderInfo: { inMathMode: [false, false, undefined] },
+            },
+        });
+        const args = (nodes[0] as any).args;
+        expect(args.map((arg: any) => arg._renderInfo)).toEqual([
+            undefined,
+            undefined,
+        ]);
+    });
 });

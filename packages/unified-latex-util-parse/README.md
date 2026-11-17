@@ -124,8 +124,15 @@ function unifiedLatexProcessAtLetterAndExplMacros(options: {
 
 ## `unifiedLatexProcessMacrosAndEnvironmentsWithMathReparse`
 
-Unified plugin to process macros and environments. Any environments that contain math content
-are reparsed (if needed) in math mode.
+Unified plugin to process macros and environments. Any macro arguments or environment
+bodies that are in a different mode (math mode vs. text mode) than the one they were
+parsed in are reparsed.
+
+The PEG grammar parses everything in the mode of its surroundings (except environment
+bodies, which are parsed in text mode). Since the tree is processed from the top down,
+the content of each array was parsed in the mode it is in, and only the arguments
+of macros that switch modes (e.g. `\text{...}` inside of math or `\ensuremath{...}`
+outside of math) and environment bodies need to be reparsed.
 
 ### Usage
 
@@ -145,12 +152,20 @@ are reparsed (if needed) in math mode.
 function unifiedLatexProcessMacrosAndEnvironmentsWithMathReparse(options: {
   environments: EnvInfoRecord;
   macros: MacroInfoRecord;
-}): (tree: Ast.Root) => void;
+}): (tree: Ast.Root, file: VFile) => void;
 ```
 
 ## `unifiedLatexReparseMath`
 
 Reparse math environments/macro contents that should have been parsed in math mode but weren't.
+Reparsed content has its macro arguments attached (and reparsed in the mode they are in)
+the same way as when parsing.
+
+Content is reparsed from the source string (the `value` of the file being processed), so
+the source should be provided (e.g., by using `processSync(str)` rather than `runSync(tree)`).
+Without it, or if the content was changed after parsing, the content is printed and the
+result is reparsed, which may give the wrong result. E.g., `\frac12 x` parsed in text
+mode gives `\frac` the arguments `12` and `x`, which are printed as `\frac{12}{x}`.
 
 ### Usage
 
@@ -159,18 +174,20 @@ Reparse math environments/macro contents that should have been parsed in math mo
 #### options
 
 ```typescript
-{ mathEnvs: string[]; mathMacros: string[]; }
+{ mathEnvs: string[]; mathMacros: string[]; macros?: MacroInfoRecord; environments?: EnvInfoRecord; }
 ```
 
 ### Type
 
-`Plugin<{ mathEnvs: string[]; mathMacros: string[]; }[], Ast.Root, Ast.Root>`
+`Plugin<{ mathEnvs: string[]; mathMacros: string[]; macros?: MacroInfoRecord; environments?: EnvInfoRecord; }[], Ast.Root, Ast.Root>`
 
 ```typescript
 function unifiedLatexReparseMath(options: {
   mathEnvs: string[];
   mathMacros: string[];
-}): (tree: Ast.Root) => void;
+  macros?: MacroInfoRecord;
+  environments?: EnvInfoRecord;
+}): (tree: Ast.Root, file?: { value?: unknown }) => void;
 ```
 
 # Functions
@@ -237,6 +254,10 @@ function.
 The parsing assumes a math-mode context, so, for example, `^` and `_` are
 parsed as macros (even though arguments are not attached to them).
 
+Whitespace next to groups, `&`, `^` and `_` is kept (in case the content turns out to
+be in text mode, e.g. the argument of `\text{...}`), but is marked with
+`_renderInfo.droppableInMath`.
+
 ```typescript
 function parseMathMinimal(str: String): Ast.Node[];
 ```
@@ -263,29 +284,47 @@ function parseMinimal(str: String): Ast.Root;
 | :---- | :------- |
 | str   | `String` |
 
-`unifiedLatexReparseMathConstructPlugin({
-    mathEnvs,
-    mathMacros,
-})`
----
+`processMacrosAndEnvironments(tree, {
+        macros,
+        environments,
+        source,
+        inMathMode: startInMathMode = false,
+    })`
+-------
 
-Construct the inner function for the `unifiedLatexReparseMath` plugin. This function should not be used by libraries.
+Attach the arguments of `macros` and environments in `tree` and reparse any macro arguments
+or environment bodies that are in a different mode than the one they were parsed in.
+`tree` must have been parsed in mode `inMathMode`, and `source` (if given) is the string
+it was parsed from. Content that has already been processed (macros with arguments attached
+and environments whose mode is recorded) is not reparsed, so `tree` can be processed again.
+
+Content is reparsed from `source`. If `source` is not given (or `tree` was changed after
+parsing so that it no longer matches `source`), the content is printed and the result is
+reparsed, which may give the wrong result (see `reparseInMode`).
 
 ```typescript
-function unifiedLatexReparseMathConstructPlugin({
-  mathEnvs,
-  mathMacros,
-}: {
-  mathEnvs: string[];
-  mathMacros: string[];
-}): (tree: Ast.Root) => void;
+function processMacrosAndEnvironments(
+  tree: Ast.Ast,
+  {
+    macros,
+    environments,
+    source,
+    inMathMode: startInMathMode = false,
+  }: {
+    macros: MacroInfoRecord;
+    environments: EnvInfoRecord;
+    source?: string;
+    inMathMode?: boolean;
+  }
+): void;
 ```
 
 **Parameters**
 
-| Param                                         | Type                              |
-| :-------------------------------------------- | :-------------------------------- |
-| {&#xA;    mathEnvs,&#xA;    mathMacros,&#xA;} | <span color='gray'>Omitted</span> |
+| Param                                                                                                                          | Type                              |
+| :----------------------------------------------------------------------------------------------------------------------------- | :-------------------------------- |
+| tree                                                                                                                           | `Ast.Ast`                         |
+| {&#xA;        macros,&#xA;        environments,&#xA;        source,&#xA;        inMathMode: startInMathMode = false,&#xA;    } | <span color='gray'>Omitted</span> |
 
 # Types
 

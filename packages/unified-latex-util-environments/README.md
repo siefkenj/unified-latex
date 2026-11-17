@@ -50,6 +50,25 @@ function unifiedLatexProcessEnvironments(options: {
 
 # Functions
 
+## `attachEnvironmentArgs(envNode, envInfo)`
+
+Attach the arguments specified by `envInfo.signature` to the environment, removing
+them from its body. Nothing is done if the arguments have already been attached.
+
+```typescript
+function attachEnvironmentArgs(
+  envNode: Ast.Environment,
+  envInfo: Ast.EnvInfo
+): void;
+```
+
+**Parameters**
+
+| Param   | Type              |
+| :------ | :---------------- |
+| envNode | `Ast.Environment` |
+| envInfo | `Ast.EnvInfo`     |
+
 ## `processEnvironment(envNode, envInfo)`
 
 Performs any needed processing on the environment (as specified by `envInfo`)

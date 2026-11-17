@@ -45,7 +45,7 @@ PluginOptions
 ```typescript
 function unifiedLatexToMdast(
   options: PluginOptions
-): (tree: Ast.Root, file: VFile) => Mdast.Root;
+): (tree: Ast.Root, file: any) => Mdast.Root;
 ```
 
 # Functions
@@ -58,11 +58,13 @@ directly with the `unifiedLatexToMdast` plugin.
 
 For example,
 
-    unified()
-         .use(unifiedLatexFromString)
-         .use(unifiedLatexToMdast)
-         .use(remarkStringify)
-         .processSync("\\LaTeX to convert")
+```
+unified()
+     .use(unifiedLatexFromString)
+     .use(unifiedLatexToMdast)
+     .use(remarkStringify)
+     .processSync("\\LaTeX to convert")
+```
 
 ```typescript
 function convertToMarkdown(

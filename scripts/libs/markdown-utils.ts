@@ -88,7 +88,7 @@ const forExport = (async () => {
     /**
      * Construct the body of the section for listing exported functions.
      */
-    function makeFunctionsSection(
+    async function makeFunctionsSection(
         funcs: {
             name: string;
             returnType: string;
@@ -102,9 +102,15 @@ const forExport = (async () => {
             }[];
         }[]
     ) {
-        const table = b.root(
-            funcs.flatMap(
-                ({ name, returnType, description, params, typeParameters }) => {
+        const sections = await Promise.all(
+            funcs.map(
+                async ({
+                    name,
+                    returnType,
+                    description,
+                    params,
+                    typeParameters,
+                }) => {
                     const genericParam = typeParameters
                         ? `<${typeParameters}>`
                         : "";
@@ -113,9 +119,12 @@ const forExport = (async () => {
                         .join(", ")}): ${returnType}`;
 
                     try {
-                        signature = Prettier.format(signature, {
-                            parser: "typescript",
-                        }).trim();
+                        signature = (
+                            await Prettier.format(signature, {
+                                parser: "typescript",
+                                trailingComma: "es5",
+                            })
+                        ).trim();
                     } catch {
                         console.warn("Failed to pretty-print", signature);
                     }
@@ -187,13 +196,13 @@ const forExport = (async () => {
                 }
             )
         );
-        return table;
+        return b.root(sections.flat());
     }
 
     /**
      * Construct the body of the section for listing exported functions.
      */
-    function makePluginsSection(
+    async function makePluginsSection(
         plugins: {
             name: string;
             returnType: string;
@@ -209,9 +218,9 @@ const forExport = (async () => {
             }[];
         }[]
     ) {
-        const table = b.root(
-            plugins.flatMap(
-                ({
+        const sections = await Promise.all(
+            plugins.map(
+                async ({
                     name,
                     returnType,
                     description,
@@ -228,9 +237,12 @@ const forExport = (async () => {
                         .join(", ")}): ${returnType}`;
 
                     try {
-                        signature = Prettier.format(signature, {
-                            parser: "typescript",
-                        }).trim();
+                        signature = (
+                            await Prettier.format(signature, {
+                                parser: "typescript",
+                                trailingComma: "es5",
+                            })
+                        ).trim();
                     } catch {}
 
                     const noOptions =
@@ -271,7 +283,7 @@ const forExport = (async () => {
                 }
             )
         );
-        return table;
+        return b.root(sections.flat());
     }
     return {
         gfmRemark,

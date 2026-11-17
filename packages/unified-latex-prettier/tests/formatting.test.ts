@@ -423,6 +423,63 @@ c
         }
     });
 
+    it("formats shorthand macro arguments nested inside math groups", async () => {
+        const STRINGS = [
+            {
+                inStr: "$\\frac{\\frac12}{a}$",
+                outStr: "$\\frac{\\frac{1}{2}}{a}$",
+            },
+            { inStr: "$\\sqrt{\\frac12}$", outStr: "$\\sqrt{\\frac{1}{2}}$" },
+            { inStr: "$\\boxed{\\frac12}$", outStr: "$\\boxed{\\frac{1}{2}}$" },
+            {
+                inStr: "$\\int_{\\frac12x}$",
+                outStr: "$\\int_{\\frac{1}{2}x}$",
+            },
+            {
+                inStr: "$\\phantom{\\frac 12}$",
+                outStr: "$\\phantom{\\frac{1}{2}}$",
+            },
+            {
+                inStr: "$\\text{\\url{my_url}}$",
+                outStr: "$\\text{\\url{my_url}}$",
+            },
+        ];
+
+        for (const { inStr, outStr } of STRINGS) {
+            await expect(inStr).toFormatAs(outStr, formatter);
+        }
+    });
+
+    it("keeps reference keys and file names inside math unchanged", async () => {
+        const STRINGS = [
+            "$\\cite{smith_2020}$",
+            "$\\includegraphics{a_b.png}$",
+            "$\\cpageref{eq:a_b}$",
+            "$\\nolinkurl{a_b}$",
+            "$\\hyperlink{a_b}{c d}$",
+            "$\\citep{smith_2020}$",
+            "$\\citep[see][p.~2]{smith_2020}$",
+            "$\\autocite{smith_2020}$",
+            "$\\nameref{sec:a_b}$",
+        ];
+
+        for (const str of STRINGS) {
+            await expect(str).toFormatAs(str, formatter);
+        }
+    });
+
+    it("keeps the whitespace in the arguments of unknown macros inside math", async () => {
+        const STRINGS = [
+            "$\\unknown{see \\emph{here} now}$",
+            "$\\unknown{see {\\bf here} now}$",
+            "$x \\unknown{if $y$ is {big} enough}$",
+        ];
+
+        for (const str of STRINGS) {
+            await expect(str).toFormatAs(str, formatter);
+        }
+    });
+
     it("comments at the end of an arguments list get a closing newline", async () => {
         const STRINGS = [
             {
@@ -453,6 +510,19 @@ c
             {
                 inStr: "\\begin{align}a\\\\\\hline bbb\\end{align}",
                 outStr: "\\begin{align}\n\ta   \\\\\n\t\\hline\n\tbbb\n\\end{align}",
+            },
+            {
+                inStr: "\\begin{alignat}{2}ab& c\\\\d&eee\\end{alignat}",
+                outStr: "\\begin{alignat}{2}\n\tab & c   \\\\\n\td  & eee\n\\end{alignat}",
+            },
+            {
+                inStr: "\\begin{eqnarray}a&=&b\\\\cc&=&d\\end{eqnarray}",
+                outStr: "\\begin{eqnarray}\n\ta  & = & b \\\\\n\tcc & = & d\n\\end{eqnarray}",
+            },
+            // A missing column count doesn't take the first token of the body
+            {
+                inStr: "\\begin{alignat}ab& c\\end{alignat}",
+                outStr: "\\begin{alignat}\n\tab & c\n\\end{alignat}",
             },
         ];
 

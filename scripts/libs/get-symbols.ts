@@ -1,6 +1,7 @@
 import {
     FunctionDeclaration,
     FunctionExpression,
+    InterfaceDeclaration,
     Node,
     SourceFile,
     ts,
@@ -11,7 +12,7 @@ import Prettier from "prettier";
 
 export { ts };
 
-export function getDataOnAllExports(sourceFile: SourceFile) {
+export async function getDataOnAllExports(sourceFile: SourceFile) {
     const accumulatedExports = getExports(sourceFile);
 
     return {
@@ -39,8 +40,10 @@ export function getDataOnAllExports(sourceFile: SourceFile) {
             const doc = declaration.getText();
             return { name, doc };
         }),
-        funcs: accumulatedExports.funcs.map(getFuncInfo),
-        plugins: accumulatedExports.plugins.map(getPluginInfo),
+        funcs: await Promise.all(accumulatedExports.funcs.map(getFuncInfo)),
+        plugins: await Promise.all(
+            accumulatedExports.plugins.map(getPluginInfo)
+        ),
     };
 }
 
@@ -48,7 +51,7 @@ function getExports(sourceFile: SourceFile) {
     const symbols = sourceFile.getExportSymbols();
     const accumulatedExports: {
         funcs: (FunctionDeclaration | FunctionExpression)[];
-        types: TypeAliasDeclaration[];
+        types: (TypeAliasDeclaration | InterfaceDeclaration)[];
         constants: VariableDeclaration[];
         plugins: FunctionExpression[];
     } = { funcs: [], types: [], constants: [], plugins: [] };
@@ -87,7 +90,10 @@ function getExports(sourceFile: SourceFile) {
                 accumulatedExports.constants.push(declaration);
             }
         }
-        if (Node.isTypeAliasDeclaration(declaration)) {
+        if (
+            Node.isTypeAliasDeclaration(declaration) ||
+            Node.isInterfaceDeclaration(declaration)
+        ) {
             accumulatedExports.types.push(declaration);
         }
     }
@@ -109,7 +115,9 @@ function getExports(sourceFile: SourceFile) {
     return accumulatedExports;
 }
 
-function getFuncInfo(declaration: FunctionDeclaration | FunctionExpression) {
+async function getFuncInfo(
+    declaration: FunctionDeclaration | FunctionExpression
+) {
     const name = declaration.getName();
     const returnType = declaration
         .getReturnType()
@@ -127,36 +135,44 @@ function getFuncInfo(declaration: FunctionDeclaration | FunctionExpression) {
         }
     }
 
-    const params = declaration.getParameters().map((p) => {
-        const name = p.getName();
-        let desc = paramInfo[name] || "";
-        const type = p
-            .getType()
-            .getApparentType()
-            .getText(p, ts.TypeFormatFlags.UseAliasDefinedOutsideCurrentScope);
-        let longType = "";
-        // If not description was given, we should see if there is one in the object
-        const symbol = p.getType().getApparentType().getSymbol();
-        if (symbol) {
-            longType = symbol.getDeclarations()[0]?.getText();
-            let lt = `type ${type} = ${longType}`;
-            try {
-                longType = Prettier.format(lt, {
-                    parser: "typescript",
-                }).trim();
-            } catch {
-                // If we cannot pretty-print the type, it is probably something funny, so just ignore it.
-                longType = "";
+    const params = await Promise.all(
+        declaration.getParameters().map(async (p) => {
+            const name = p.getName();
+            let desc = paramInfo[name] || "";
+            const type = p
+                .getType()
+                .getApparentType()
+                .getText(
+                    p,
+                    ts.TypeFormatFlags.UseAliasDefinedOutsideCurrentScope
+                );
+            let longType = "";
+            // If not description was given, we should see if there is one in the object
+            const symbol = p.getType().getApparentType().getSymbol();
+            if (symbol) {
+                longType = symbol.getDeclarations()[0]?.getText();
+                let lt = `type ${type} = ${longType}`;
+                try {
+                    longType = (
+                        await Prettier.format(lt, {
+                            parser: "typescript",
+                            trailingComma: "es5",
+                        })
+                    ).trim();
+                } catch {
+                    // If we cannot pretty-print the type, it is probably something funny, so just ignore it.
+                    longType = "";
+                }
             }
-        }
 
-        return {
-            name,
-            type,
-            desc,
-            longType,
-        };
-    });
+            return {
+                name,
+                type,
+                desc,
+                longType,
+            };
+        })
+    );
 
     if (Node.isFunctionExpression(declaration)) {
         description +=
@@ -171,7 +187,7 @@ function getFuncInfo(declaration: FunctionDeclaration | FunctionExpression) {
     return { name, returnType, description, params, typeParameters };
 }
 
-function getPluginInfo(declaration: FunctionExpression) {
+async function getPluginInfo(declaration: FunctionExpression) {
     const name = declaration.getName();
     const returnType = declaration
         .getReturnType()
@@ -189,36 +205,44 @@ function getPluginInfo(declaration: FunctionExpression) {
         }
     }
 
-    const params = declaration.getParameters().map((p) => {
-        const name = p.getName();
-        let desc = paramInfo[name] || "";
-        const type = p
-            .getType()
-            .getApparentType()
-            .getText(p, ts.TypeFormatFlags.UseAliasDefinedOutsideCurrentScope);
-        let longType = "";
-        // If not description was given, we should see if there is one in the object
-        const symbol = p.getType().getApparentType().getSymbol();
-        if (symbol) {
-            longType = symbol.getDeclarations()[0]?.getText();
-            let lt = `type ${type} = ${longType}`;
-            try {
-                longType = Prettier.format(lt, {
-                    parser: "typescript",
-                }).trim();
-            } catch {
-                // If we cannot pretty-print the type, it is probably something funny, so just ignore it.
-                longType = "";
+    const params = await Promise.all(
+        declaration.getParameters().map(async (p) => {
+            const name = p.getName();
+            let desc = paramInfo[name] || "";
+            const type = p
+                .getType()
+                .getApparentType()
+                .getText(
+                    p,
+                    ts.TypeFormatFlags.UseAliasDefinedOutsideCurrentScope
+                );
+            let longType = "";
+            // If not description was given, we should see if there is one in the object
+            const symbol = p.getType().getApparentType().getSymbol();
+            if (symbol) {
+                longType = symbol.getDeclarations()[0]?.getText();
+                let lt = `type ${type} = ${longType}`;
+                try {
+                    longType = (
+                        await Prettier.format(lt, {
+                            parser: "typescript",
+                            trailingComma: "es5",
+                        })
+                    ).trim();
+                } catch {
+                    // If we cannot pretty-print the type, it is probably something funny, so just ignore it.
+                    longType = "";
+                }
             }
-        }
 
-        return {
-            name,
-            type,
-            desc,
-            longType,
-        };
-    });
+            return {
+                name,
+                type,
+                desc,
+                longType,
+            };
+        })
+    );
 
     const contextualType = declaration.getContextualType();
     const pluginType = contextualType.getText(

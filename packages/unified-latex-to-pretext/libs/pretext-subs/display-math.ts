@@ -192,7 +192,8 @@ function buildMrow(parts: RowParts): Xast.Element {
 /**
  * Pull the column count off an `alignat` body.
  *
- * `alignat` has no registered signature, so `\begin{alignat}{2}` leaves the
+ * The column count is normally attached as the environment's argument, but if
+ * `alignat` had no signature when it was parsed, `\begin{alignat}{2}` leaves the
  * `{2}` sitting at the front of the environment's content.
  */
 function takeAlignatColumns(content: Ast.Node[]): {
@@ -226,9 +227,9 @@ export function displayMathToXast(
     const envName =
         node.type === "displaymath" ? "displaymath" : getEnvName(node.env);
     const starred = envName.endsWith("*");
-    const spec = MATH_ENV_SPECS[
-        starred ? envName.slice(0, -1) : envName
-    ] ?? { numbered: false };
+    const spec = MATH_ENV_SPECS[starred ? envName.slice(0, -1) : envName] ?? {
+        numbered: false,
+    };
     const numbered = spec.numbered && !starred;
 
     let content = node.content;
@@ -263,10 +264,15 @@ export function displayMathToXast(
     if (spec.alignment) {
         attributes["alignment"] = spec.alignment;
     }
-    if (spec.alignment === "alignat") {
-        const { columns, content: rest } = takeAlignatColumns(content);
-        content = rest;
-        if (columns) {
+    if (spec.alignment === "alignat" && node.type !== "displaymath") {
+        // The column count is the argument of `\begin{alignat}{2}`
+        let columns: string | undefined = printRaw(
+            node.args?.[0]?.content ?? []
+        ).trim();
+        if (!node.args?.length) {
+            ({ columns, content } = takeAlignatColumns(content));
+        }
+        if (columns && /^\d+$/.test(columns)) {
             attributes["alignat-columns"] = columns;
         }
     }

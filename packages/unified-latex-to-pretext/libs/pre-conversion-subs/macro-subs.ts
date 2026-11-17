@@ -170,6 +170,52 @@ export const macroReplacements: Record<
     Cref: xrefFactory("xref", "ref"),
     cite: xrefFactory("xref", "ref"),
     citep: xrefFactory("xref", "ref"),
+    // natbib
+    citet: xrefFactory("xref", "ref"),
+    citealt: xrefFactory("xref", "ref"),
+    citealp: xrefFactory("xref", "ref"),
+    citenum: xrefFactory("xref", "ref"),
+    Citet: xrefFactory("xref", "ref"),
+    Citep: xrefFactory("xref", "ref"),
+    Citealt: xrefFactory("xref", "ref"),
+    Citealp: xrefFactory("xref", "ref"),
+    // biblatex
+    Cite: xrefFactory("xref", "ref"),
+    parencite: xrefFactory("xref", "ref"),
+    Parencite: xrefFactory("xref", "ref"),
+    footcite: xrefFactory("xref", "ref"),
+    footcitetext: xrefFactory("xref", "ref"),
+    textcite: xrefFactory("xref", "ref"),
+    Textcite: xrefFactory("xref", "ref"),
+    smartcite: xrefFactory("xref", "ref"),
+    Smartcite: xrefFactory("xref", "ref"),
+    autocite: xrefFactory("xref", "ref"),
+    Autocite: xrefFactory("xref", "ref"),
+    supercite: xrefFactory("xref", "ref"),
+    // These print only part of a citation (e.g. the author), which PreTeXt can't do
+    ...Object.fromEntries(
+        [
+            "citeauthor",
+            "Citeauthor",
+            "citefullauthor",
+            "citeyear",
+            "citeyearpar",
+            "citetitle",
+            "citedate",
+            "citeurl",
+            "fullcite",
+            "footfullcite",
+        ].map((name) => [
+            name,
+            xrefFactory(
+                "xref",
+                "ref",
+                `Warning: There is no equivalent tag for "${name}", "xref" was used as a replacement.`
+            ),
+        ])
+    ),
+    nameref: xrefFactory("xref", "ref", "", { text: "title" }),
+    Nameref: xrefFactory("xref", "ref", "", { text: "title" }),
     index: (node) => {
         // Todo: we may want to add attributes for things like "see" and "seealso" that can be included in the index macro's arguments
         const args = getArgsContent(node);

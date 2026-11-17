@@ -222,23 +222,50 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
             );
         });
 
-        // These two are mis-typed as text-mode environments by the parser; see
-        // `normalizeMathEnvironments` in pre-conversion-subs/math-env-subs.ts.
         it("`alignat` and `eqnarray` are recognized as display math", () => {
             expect(process(String.raw`\begin{alignat}{2} a &= b & c &= d \end{alignat}`)).toEqual(
                 `<md alignment="alignat" alignat-columns="2" number="yes">` +
-                    `<mrow>a &#x26;= b &#x26; c &#x26;= d</mrow></md>`
+                    `<mrow>a&#x26;= b&#x26;c&#x26;= d</mrow></md>`
             );
             expect(process(String.raw`\begin{alignat*}{3} a &= b \end{alignat*}`)).toEqual(
-                `<md alignment="alignat" alignat-columns="3"><mrow>a &#x26;= b</mrow></md>`
+                `<md alignment="alignat" alignat-columns="3"><mrow>a&#x26;= b</mrow></md>`
             );
             expect(process(String.raw`\begin{eqnarray} a &=& b \end{eqnarray}`)).toEqual(
-                `<md alignment="align" number="yes"><mrow>a &#x26;=&#x26; b</mrow></md>`
+                `<md alignment="align" number="yes"><mrow>a&#x26;=&#x26;b</mrow></md>`
             );
-            // The star must survive: `eqnarray` has no renderInfo marking it as
-            // math, so `stripStarredEnvironments` would otherwise eat it.
+            // The star must survive `stripStarredEnvironments`
             expect(process(String.raw`\begin{eqnarray*} a &=& b \end{eqnarray*}`)).toEqual(
-                `<md alignment="align"><mrow>a &#x26;=&#x26; b</mrow></md>`
+                `<md alignment="align"><mrow>a&#x26;=&#x26;b</mrow></md>`
+            );
+        });
+
+        it("keeps the star of a math environment without render info", () => {
+            // Overriding `eqnarray*` drops the render info that says it is in math mode
+            html = processLatexViaUnified({
+                environments: { "eqnarray*": {} },
+            })
+                .use(unifiedLatexToPretext, { producePretextFragment: true })
+                .use(xmlCompilePlugin)
+                .processSync({
+                    value: String.raw`\begin{eqnarray*} a &=& b \end{eqnarray*}`,
+                }).value as string;
+            expect(html).toEqual(
+                `<md alignment="align"><mrow>a&#x26;=&#x26;b</mrow></md>`
+            );
+        });
+
+        it("finds the `alignat` column count when its argument is not attached", () => {
+            // Without a signature for `alignat`, the `{2}` stays in the body
+            html = processLatexViaUnified({
+                environments: { alignat: { renderInfo: { inMathMode: true } } },
+            })
+                .use(unifiedLatexToPretext, { producePretextFragment: true })
+                .use(xmlCompilePlugin)
+                .processSync({
+                    value: String.raw`\begin{alignat}{2} a &= b \end{alignat}`,
+                }).value as string;
+            expect(html).toEqual(
+                `<md alignment="alignat" alignat-columns="2" number="yes"><mrow>a&#x26;= b</mrow></md>`
             );
         });
     });
@@ -794,6 +821,38 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
         html = process(`See \\cite{foo} for more`);
         expect(await normalizeHtml(html)).toEqual(
             await normalizeHtml(`See <xref ref="foo" /> for more`)
+        );
+    });
+    it("Replaces natbib and biblatex citations with a xref", async () => {
+        html = process(
+            `See \\citet{foo}, \\textcite[p.~2]{bar} and \\citeauthor{baz}.\\nocite{qux}`
+        );
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `See <xref ref="foo" />, <xref ref="bar" /> and <xref ref="baz" />.`
+            )
+        );
+    });
+    it("Keeps the whitespace in the arguments of user-defined macros used in math", async () => {
+        html = process(
+            `\\newcommand{\\note}[1]{\\text{#1}}\n$x \\note{see \\emph{here} and {there} now}$`
+        );
+        expect(html).toContain(
+            `<m>x \\text{see \\emph{here} and {there} now}</m>`
+        );
+    });
+    it("Replaces \\nameref with a xref to the title", async () => {
+        html = process(`See \\nameref{sec:intro}`);
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(`See <xref ref="sec-intro" text="title" />`)
+        );
+    });
+    it("Keeps the content of text superscripts and TeX boxes", async () => {
+        html = process(
+            `5\\textsuperscript{th} H\\textsubscript{2}O \\hbox{a $b$} \\vbox to 1in{c} \\vtop{d}`
+        );
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(`5th H2O a <m>b</m> c d`)
         );
     });
     it("Falls back to <biblio type=\"raw\"> for unstructured entries", async () => {

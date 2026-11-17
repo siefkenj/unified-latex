@@ -91,7 +91,7 @@ PluginOptions
 ```typescript
 function unifiedLatexToPretext(
   options: PluginOptions
-): (tree: Ast.Root, file: VFile) => Xast.Root;
+): (tree: Ast.Root, file: any) => Xast.Root;
 ```
 
 ## `unifiedLatexWrapPars`
@@ -139,7 +139,7 @@ function xmlCompilePlugin(): void;
 ## `attachNeededRenderInfo(ast)`
 
 Attach `renderInfo` needed for converting some macros into their
-katex equivalents.
+mathjax equivalents.
 
 ```typescript
 function attachNeededRenderInfo(ast: Ast.Ast): void;
@@ -159,11 +159,13 @@ directly with the `unifiedLatexToPretext` plugin.
 
 For example,
 
-    unified()
-         .use(unifiedLatexFromString)
-         .use(unifiedLatexToPretext)
-         .use(rehypeStringify)
-         .processSync("\\LaTeX to convert")
+```
+unified()
+     .use(unifiedLatexFromString)
+     .use(unifiedLatexToPretext)
+     .use(rehypeStringify)
+     .processSync("\\LaTeX to convert")
+```
 
 ```typescript
 function convertToPretext(
@@ -179,15 +181,76 @@ function convertToPretext(
 | tree    | `Ast.Node \| Ast.Node[]` |
 | options | `PluginOptions`          |
 
+## `createPlusMacroReplacements(options)`
+
+Create `macroReplacements`-style functions for `\plus[attrs]{type}{ref}`
+and its type-free sugar `\include{ref}`.
+
+```typescript
+function createPlusMacroReplacements(
+  options: PlusIncludeOptions
+): Record<string, (node: Ast.Macro, info: VisitInfo, file?: VFile) => Ast.Node>;
+```
+
+**Parameters**
+
+| Param   | Type                 |
+| :------ | :------------------- |
+| options | `PlusIncludeOptions` |
+
+where
+
+```typescript
+type PlusIncludeOptions = {
+  /**
+   * The output format for includes. `"plus"` (default) produces
+   * `<plus:type ref="..."/>` elements; `"xinclude"` produces
+   * `<xi:include href="..."/>` elements.
+   */
+  format?: "plus" | "xinclude";
+  /**
+   * Map a ref to an href for `xinclude` output. Defaults to `` `${ref}.ptx` ``.
+   */
+  resolveHref?: (ref: string, type: string) => string;
+  /**
+   * Map a ref to its division/asset type. Used for `\include{ref}`, which
+   * doesn't carry a type. When not provided (or when it returns undefined),
+   * `\include{ref}` produces the generic `<plus:include ref="..."/>`.
+   */
+  resolveType?: (ref: string) => string | undefined;
+  /**
+   * Additional types (beyond `defaultPlusTypes`) that should not trigger an
+   * unknown-type warning.
+   */
+  extraTypes?: string[];
+};
+```
+
+## `parsePlusAttributes(nodes)`
+
+Parse the optional argument of `\plus` as a comma-separated key=value list.
+Values may be quoted; `\%` is unescaped to `%`; bare-number values of
+percentage attributes get a `%` appended; a bare key becomes `key="yes"`.
+
+```typescript
+function parsePlusAttributes(nodes: Ast.Node[]): Record<string, string>;
+```
+
+**Parameters**
+
+| Param | Type         |
+| :---- | :----------- |
+| nodes | `Ast.Node[]` |
+
 ## `wrapPars(nodes, options)`
 
 Wrap paragraphs in `<p>...</p>` tags.
 
 Paragraphs are inserted at
 
-*   parbreak tokens
-*   macros listed in `macrosThatBreakPars`
-*   environments not listed in `environmentsThatDontBreakPars`
+* parbreak tokens
+* macros listed in `macrosThatBreakPars`
+* environments not listed in `environmentsThatDontBreakPars`
 
 ```typescript
 function wrapPars(
@@ -208,11 +271,15 @@ function wrapPars(
 
 # Constants
 
-| Name                                   | Type                                                                |
-| :------------------------------------- | :------------------------------------------------------------------ |
-| `KATEX_SUPPORT`                        | `{ macros: any; environments: any; }`                               |
-| `katexSpecificEnvironmentReplacements` | `Record<string, (node: Ast.Environment) => Ast.Node \| Ast.Node[]>` |
-| `katexSpecificMacroReplacements`       | `Record<string, (node: Ast.Macro) => Ast.Node \| Ast.Node[]>`       |
+| Name                                     | Type                                                                | Description                                                                                                                                                                                                                                                                                                                                                              |
+| :--------------------------------------- | :------------------------------------------------------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `defaultPlusTypes`                       | `string[]`                                                          | Types recognized in `\plus{type}{ref}` without warning. The type is used&#xA;verbatim as the tag name after `plus:`, so these are PreTeXt element names.                                                                                                                                                                                                                 |
+| `environments`                           | `EnvInfoRecord`                                                     | Register environment signatures for PreTeXt-specific environments.&#xA;These are environments whose names don't exist in any CTAN package, so&#xA;the parser needs to be told to consume an optional `[title]` argument.&#xA;Add new environment names here when they are handled in environment-subs.ts&#xA;but not already defined in the unified-latex-ctan packages. |
+| `KATEX_SUPPORT`                          | `{ macros: any; environments: any; }`                               |                                                                                                                                                                                                                                                                                                                                                                          |
+| `macros`                                 | `MacroInfoRecord`                                                   | Register macro signatures for PreTeXt-specific macros.&#xA;Add new macro names here when they are handled in macro-subs.ts&#xA;but not already defined in the unified-latex-ctan packages.                                                                                                                                                                               |
+| `mathjaxSpecificEnvironmentReplacements` | `Record<string, (node: Ast.Environment) => Ast.Node \| Ast.Node[]>` |                                                                                                                                                                                                                                                                                                                                                                          |
+| `mathjaxSpecificMacroReplacements`       | `Record<string, (node: Ast.Macro) => Ast.Node \| Ast.Node[]>`       |                                                                                                                                                                                                                                                                                                                                                                          |
+| `plusMacros`                             | `Ast.MacroInfoRecord`                                               | Macro signatures for PreTeXt Plus modular-include macros.&#xA;`\plus[key=value,...]{type}{ref}` mirrors `<plus:type ref="..." key="value"/>`.                                                                                                                                                                                                                            |
 
 # Types
 
@@ -226,4 +293,44 @@ export type PluginOptions = HtmlLikePluginOptions & {
      */
     producePretextFragment?: boolean;
 };
+```
+
+## `PlusIncludeOptions`
+
+```typescript
+export type PlusIncludeOptions = {
+    /**
+     * The output format for includes. `"plus"` (default) produces
+     * `<plus:type ref="..."/>` elements; `"xinclude"` produces
+     * `<xi:include href="..."/>` elements.
+     */
+    format?: "plus" | "xinclude";
+    /**
+     * Map a ref to an href for `xinclude` output. Defaults to `` `${ref}.ptx` ``.
+     */
+    resolveHref?: (ref: string, type: string) => string;
+    /**
+     * Map a ref to its division/asset type. Used for `\include{ref}`, which
+     * doesn't carry a type. When not provided (or when it returns undefined),
+     * `\include{ref}` produces the generic `<plus:include ref="..."/>`.
+     */
+    resolveType?: (ref: string) => string | undefined;
+    /**
+     * Additional types (beyond `defaultPlusTypes`) that should not trigger an
+     * unknown-type warning.
+     */
+    extraTypes?: string[];
+};
+```
+
+## `PretextEnvInfoRecord`
+
+```typescript
+export type PretextEnvInfoRecord = Record<string, EnvInfo>;
+```
+
+## `PretextMacroInfoRecord`
+
+```typescript
+export type PretextMacroInfoRecord = Record<string, MacroInfo>;
 ```

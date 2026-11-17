@@ -35,9 +35,9 @@ function parse(str: String): ArgSpec.Node[];
 
 **Parameters**
 
-| Param | Type     | Description            |
-| :---- | :------- | ---------------------- |
-| str   | `String` | *   LaTeX string input |
+| Param | Type     | Description          |
+| :---- | :------- | -------------------- |
+| str   | `String` | * LaTeX string input |
 
 ## `printRaw(node, root)`
 

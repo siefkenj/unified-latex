@@ -28,13 +28,17 @@ import the `.js` file. To explicitly access the commonjs export, import the `.cj
 Returns a new AST with all comments removed. Care is taken to preserve whitespace.
 For example
 
-    x%
-    y
+```
+x%
+y
+```
 
 becomes `xy` but
 
-    x %
-    y
+```
+x %
+y
+```
 
 becomes `x y`
 

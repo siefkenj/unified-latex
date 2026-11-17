@@ -49,6 +49,36 @@ export const droppedMacros: Record<string, DroppedMacroSpec> = {
         behavior: { type: "discard" },
         warning: `Warning: There is no equivalent tag for "\\", an empty Ast.String was used as a replacement.`,
     },
+    // The last argument of the TeX box primitives is the content; the first is a
+    // box specification like `to 1in`
+    hbox: {
+        behavior: { type: "keep-content" },
+        warning: `Warning: There is no equivalent tag for "hbox", the content was used as a replacement.`,
+    },
+    vbox: {
+        behavior: { type: "keep-content" },
+        warning: `Warning: There is no equivalent tag for "vbox", the content was used as a replacement.`,
+    },
+    vtop: {
+        behavior: { type: "keep-content" },
+        warning: `Warning: There is no equivalent tag for "vtop", the content was used as a replacement.`,
+    },
+    textsuperscript: {
+        behavior: { type: "keep-content" },
+        warning: `Warning: There is no equivalent tag for "textsuperscript", the content was used as a replacement.`,
+    },
+    textsubscript: {
+        behavior: { type: "keep-content" },
+        warning: `Warning: There is no equivalent tag for "textsubscript", the content was used as a replacement.`,
+    },
+    citetext: {
+        behavior: { type: "keep-content" },
+        warning: `Warning: There is no equivalent tag for "citetext", the content was used as a replacement.`,
+    },
+    nocite: {
+        behavior: { type: "discard" },
+        warning: `Warning: There is no equivalent tag for "nocite", an empty Ast.String was used as a replacement.`,
+    },
     textnormal: {
         behavior: { type: "keep-content" },
         warning: `Warning: There is no equivalent tag for "textnormal", the content was used as a replacement.`,

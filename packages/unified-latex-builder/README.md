@@ -46,7 +46,10 @@ args([null, "b"], { braces: "[]{}" });
 will produce the same structure as if the the first "optional argument" were omitted in regular parsing.
 
 ```typescript
-function arg(args: CoercibleArgument | Ast.Node[], special: ArgumentSpecialOptions): Ast.Argument
+function arg(
+  args: CoercibleArgument | Ast.Node[],
+  special: ArgumentSpecialOptions
+): Ast.Argument;
 ```
 
 **Parameters**
@@ -55,6 +58,16 @@ function arg(args: CoercibleArgument | Ast.Node[], special: ArgumentSpecialOptio
 | :------ | :-------------------------------- |
 | args    | <span color='gray'>Omitted</span> |
 | special | `ArgumentSpecialOptions`          |
+
+where
+
+```typescript
+type ArgumentSpecialOptions = {
+  braces?: string;
+  openMark?: string;
+  closeMark?: string;
+};
+```
 
 ## `args(args, special)`
 
@@ -78,7 +91,10 @@ args([null, "b"], { braces: "[]{}" });
 will produce the same structure as if the the first "optional argument" were omitted in regular parsing.
 
 ```typescript
-function args(args: CoercibleArgument | CoercibleArgument[], special: ArgumentsSpecialOptions): Ast.Argument[]
+function args(
+  args: CoercibleArgument | CoercibleArgument[],
+  special: ArgumentsSpecialOptions
+): Ast.Argument[];
 ```
 
 **Parameters**
@@ -88,12 +104,27 @@ function args(args: CoercibleArgument | CoercibleArgument[], special: ArgumentsS
 | args    | <span color='gray'>Omitted</span> |
 | special | `ArgumentsSpecialOptions`         |
 
+where
+
+```typescript
+type ArgumentsSpecialOptions = {
+  braces?: string;
+  defaultOpenMark?: string;
+  defaultCloseMark?: string;
+};
+```
+
 ## `env(name, body, envArgs, special)`
 
 Create an Environment node.
 
 ```typescript
-function env(name: String, body: CoercibleNode | CoercibleNode[], envArgs: CoercibleArgument | CoercibleArgument[], special: {}): Ast.Environment
+function env(
+  name: String,
+  body: CoercibleNode | CoercibleNode[],
+  envArgs: CoercibleArgument | CoercibleArgument[],
+  special: {}
+): Ast.Environment;
 ```
 
 **Parameters**
@@ -111,7 +142,11 @@ Create a Macro with the given `name`. The macro
 may be followed by any number of arguments.
 
 ```typescript
-function m(name: String, marcoArgs: CoercibleArgument | CoercibleArgument[], special: MacroSpecialOptions): Ast.Macro
+function m(
+  name: String,
+  marcoArgs: CoercibleArgument | CoercibleArgument[],
+  special: MacroSpecialOptions
+): Ast.Macro;
 ```
 
 **Parameters**
@@ -122,12 +157,20 @@ function m(name: String, marcoArgs: CoercibleArgument | CoercibleArgument[], spe
 | marcoArgs | <span color='gray'>Omitted</span> |
 | special   | `MacroSpecialOptions`             |
 
+where
+
+```typescript
+type MacroSpecialOptions = {
+  escapeToken?: string;
+};
+```
+
 ## `s(value)`
 
 Create a String node from `value`
 
 ```typescript
-function s(value: string | Ast.String): Ast.String
+function s(value: string | Ast.String): Ast.String;
 ```
 
 **Parameters**

@@ -8,7 +8,7 @@ export const macros: MacroInfoRecord = {
     seealso: { signature: "m m" },
     seename: { signature: "m" },
     alsoname: { signature: "m" },
-    index: { signature: "m" },
+    index: { signature: "m", renderInfo: { inMathMode: false } },
 };
 
 export const environments: EnvInfoRecord = {};

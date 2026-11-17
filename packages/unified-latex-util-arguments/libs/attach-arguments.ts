@@ -52,8 +52,16 @@ export function attachMacroArgsInArray(
         const macroName = macro.content;
         const macroInfo = macros[macroName];
 
-        // Add `._renderInfo` if we have any
-        updateRenderInfo(macro, macroInfo.renderInfo);
+        // Add `._renderInfo` if we have any. A per-argument `inMathMode` is recorded
+        // on the arguments instead (below).
+        const { inMathMode: argumentsInMathMode, ...renderInfo } =
+            macroInfo.renderInfo || {};
+        updateRenderInfo(
+            macro,
+            Array.isArray(argumentsInMathMode)
+                ? renderInfo
+                : macroInfo.renderInfo
+        );
 
         const signatureOrParser =
             macroInfo.argumentParser || macroInfo.signature;
@@ -69,16 +77,32 @@ export function attachMacroArgsInArray(
         // We don't want to search for macro arguments if we already
         // found them. If the macro has arguments, we assume that
         // they've already been attached
-        if (macro.args != null) {
-            currIndex = macroIndex - 1;
-            continue;
+        if (macro.args == null) {
+            // `currIndex` is the position of the macro. We want to start
+            // looking for the arguments right after the macro
+            currIndex++;
+            const { args } = gobbleArguments(
+                nodes,
+                signatureOrParser,
+                currIndex
+            );
+            macro.args = args;
         }
-
-        // `currIndex` is the position of the macro. We want to start
-        // looking for the arguments right after the macro
-        currIndex++;
-        const { args } = gobbleArguments(nodes, signatureOrParser, currIndex);
-        macro.args = args;
+        // Arguments that have their own mode record it so that it can be found
+        // when walking the tree (e.g., in `visit`). Arguments that were attached
+        // before may have been attached with a different signature, in which case
+        // the modes can't be matched up with them.
+        const args = macro.args;
+        if (
+            Array.isArray(argumentsInMathMode) &&
+            argumentsInMathMode.length === args.length
+        ) {
+            argumentsInMathMode.forEach((inMathMode, i) => {
+                if (inMathMode != null) {
+                    updateRenderInfo(args[i], { inMathMode });
+                }
+            });
+        }
         // After we've gobbled the arguments, set
         // ourselves one space before the macro so we can continue.
         currIndex = macroIndex - 1;

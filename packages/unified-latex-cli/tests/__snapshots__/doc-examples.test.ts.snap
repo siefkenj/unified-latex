@@ -49,13 +49,14 @@ exports[`unified-latex-doc-examples > example using-unified.ts 1`] = `
     start: { offset: 9, line: 2, column: 9 },
     end: { offset: 16, line: 2, column: 16 }
   },
-  _renderInfo: { inParMode: true },
+  _renderInfo: { inParMode: true, inMathMode: false },
   args: [
     {
       type: 'argument',
       content: [Array],
       openMark: '{',
-      closeMark: '}'
+      closeMark: '}',
+      position: [Object]
     }
   ]
 }
@@ -67,13 +68,14 @@ exports[`unified-latex-doc-examples > example using-unified.ts 1`] = `
     start: { offset: 9, line: 2, column: 9 },
     end: { offset: 16, line: 2, column: 16 }
   },
-  _renderInfo: { inParMode: true },
+  _renderInfo: { inParMode: true, inMathMode: false },
   args: [
     {
       type: 'argument',
       content: [Array],
       openMark: '{',
-      closeMark: '}'
+      closeMark: '}',
+      position: [Object]
     }
   ]
 }
@@ -90,13 +92,14 @@ What an \\textit{\\emph{amazing}} formula!
     start: { offset: 9, line: 2, column: 9 },
     end: { offset: 16, line: 2, column: 16 }
   },
-  _renderInfo: { inParMode: true },
+  _renderInfo: { inParMode: true, inMathMode: false },
   args: [
     {
       type: 'argument',
       content: [Array],
       openMark: '{',
-      closeMark: '}'
+      closeMark: '}',
+      position: [Object]
     }
   ]
 }

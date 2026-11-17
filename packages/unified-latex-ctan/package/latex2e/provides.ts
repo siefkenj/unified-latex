@@ -4,6 +4,7 @@ import {
 } from "@unified-latex/unified-latex-types";
 import { trim } from "@unified-latex/unified-latex-util-trim";
 import { cleanEnumerateBody } from "../../utils/enumerate";
+import { boxArgumentParser } from "./libs/box-argument-parser";
 
 export const macros: MacroInfoRecord = {
     // Special
@@ -77,8 +78,11 @@ export const macros: MacroInfoRecord = {
     },
     // Spaces
     stretch: { signature: "m" },
-    hspace: { signature: "s m" },
-    vspace: { signature: "s m", renderInfo: { breakAround: true } },
+    hspace: { signature: "s m", renderInfo: { inMathMode: false } },
+    vspace: {
+        signature: "s m",
+        renderInfo: { breakAround: true, inMathMode: false },
+    },
     vfill: { renderInfo: { breakAround: true } },
     indent: { renderInfo: { breakAround: true } },
     phantom: { signature: "m" },
@@ -103,30 +107,58 @@ export const macros: MacroInfoRecord = {
     // Boxes
     newsavebox: {
         signature: "m",
-        renderInfo: { breakAround: true },
+        renderInfo: { breakAround: true, inMathMode: false },
     },
     sbox: {
         signature: "m m",
-        renderInfo: { breakAround: true },
+        renderInfo: { breakAround: true, inMathMode: false },
     },
     savebox: {
         signature: "m o o m",
-        renderInfo: { breakAround: true },
+        renderInfo: { breakAround: true, inMathMode: false },
     },
-    mbox: { signature: "m" },
-    makebox: { signature: "d() o o m", renderInfo: { breakAround: true } },
-    fbox: { signature: "m" },
-    framebox: { signature: "o o m", renderInfo: { breakAround: true } },
+    // TeX primitives. Their arguments are a box specification (e.g. `to 1in`) and their content.
+    hbox: {
+        argumentParser: boxArgumentParser,
+        renderInfo: { inMathMode: false },
+    },
+    vbox: {
+        argumentParser: boxArgumentParser,
+        renderInfo: { inMathMode: false },
+    },
+    vtop: {
+        argumentParser: boxArgumentParser,
+        renderInfo: { inMathMode: false },
+    },
+    mbox: { signature: "m", renderInfo: { inMathMode: false } },
+    makebox: {
+        signature: "d() o o m",
+        renderInfo: { breakAround: true, inMathMode: false },
+    },
+    fbox: { signature: "m", renderInfo: { inMathMode: false } },
+    framebox: {
+        signature: "o o m",
+        renderInfo: { breakAround: true, inMathMode: false },
+    },
     frame: { signature: "m", renderInfo: { breakAround: true } },
-    parbox: { signature: "o o o m m", renderInfo: { breakAround: true } },
-    raisebox: { signature: "m o o m" },
+    parbox: {
+        signature: "o o o m m",
+        renderInfo: { breakAround: true, inMathMode: false },
+    },
+    raisebox: { signature: "m o o m", renderInfo: { inMathMode: false } },
     marginpar: { signature: "o m", renderInfo: { breakAround: true } },
-    colorbox: { signature: "o m m", renderInfo: { breakAround: true } },
-    fcolorbox: { signature: "o m m", renderInfo: { breakAround: true } },
-    rotatebox: { signature: "o m m" },
-    scalebox: { signature: "m o m" },
-    reflectbox: { signature: "m" },
-    resizebox: { signature: "s m m m" },
+    colorbox: {
+        signature: "o m m",
+        renderInfo: { breakAround: true, inMathMode: false },
+    },
+    fcolorbox: {
+        signature: "o m m",
+        renderInfo: { breakAround: true, inMathMode: false },
+    },
+    rotatebox: { signature: "o m m", renderInfo: { inMathMode: false } },
+    scalebox: { signature: "m o m", renderInfo: { inMathMode: false } },
+    reflectbox: { signature: "m", renderInfo: { inMathMode: false } },
+    resizebox: { signature: "s m m m", renderInfo: { inMathMode: false } },
     // Define environments
     newenvironment: {
         signature: "s m o o m m",
@@ -166,8 +198,14 @@ export const macros: MacroInfoRecord = {
     },
     value: { signature: "m" },
     centering: { renderInfo: { breakAround: true } },
-    input: { signature: "m", renderInfo: { breakAround: true } },
-    include: { signature: "m", renderInfo: { breakAround: true } },
+    input: {
+        signature: "m",
+        renderInfo: { breakAround: true, inMathMode: false },
+    },
+    include: {
+        signature: "m",
+        renderInfo: { breakAround: true, inMathMode: false },
+    },
     includeonly: {
         signature: "m",
         renderInfo: { breakAround: true, pgfkeysArgs: true },
@@ -179,7 +217,11 @@ export const macros: MacroInfoRecord = {
     footnotetext: { signature: "o m", renderInfo: { inParMode: true } },
     caption: {
         signature: "o m",
-        renderInfo: { inParMode: true, breakAround: true, namedArguments: ["short", "captionText"], },
+        renderInfo: {
+            inParMode: true,
+            breakAround: true,
+            namedArguments: ["short", "captionText"],
+        },
     },
     // Math Commands
     sqrt: { signature: "o m", renderInfo: { inMathMode: true } },
@@ -210,7 +252,11 @@ export const macros: MacroInfoRecord = {
     // Graphics
     includegraphics: {
         signature: "s o o m",
-        renderInfo: { breakAround: true, pgfkeysArgs: true },
+        renderInfo: {
+            breakAround: true,
+            pgfkeysArgs: true,
+            inMathMode: false,
+        },
     },
     rule: { signature: "o m m" },
     // Sectioning
@@ -276,20 +322,55 @@ export const macros: MacroInfoRecord = {
     backmatter: { renderInfo: { breakAround: true, inParMode: true } },
     // Citing and references
     bibitem: { signature: "o m", renderInfo: { hangingIndent: true } },
-    cite: { signature: "o m" },
+    cite: { signature: "o m", renderInfo: { inMathMode: false } },
     // Fonts
-    textrm: { signature: "m", renderInfo: { inParMode: true } },
-    textit: { signature: "m", renderInfo: { inParMode: true } },
-    textmd: { signature: "m", renderInfo: { inParMode: true } },
-    textbf: { signature: "m", renderInfo: { inParMode: true } },
-    textup: { signature: "m", renderInfo: { inParMode: true } },
-    textsl: { signature: "m", renderInfo: { inParMode: true } },
-    textsf: { signature: "m", renderInfo: { inParMode: true } },
-    textsc: { signature: "m", renderInfo: { inParMode: true } },
-    texttt: { signature: "m", renderInfo: { inParMode: true } },
+    textrm: {
+        signature: "m",
+        renderInfo: { inParMode: true, inMathMode: false },
+    },
+    textit: {
+        signature: "m",
+        renderInfo: { inParMode: true, inMathMode: false },
+    },
+    textmd: {
+        signature: "m",
+        renderInfo: { inParMode: true, inMathMode: false },
+    },
+    textbf: {
+        signature: "m",
+        renderInfo: { inParMode: true, inMathMode: false },
+    },
+    textup: {
+        signature: "m",
+        renderInfo: { inParMode: true, inMathMode: false },
+    },
+    textsl: {
+        signature: "m",
+        renderInfo: { inParMode: true, inMathMode: false },
+    },
+    textsf: {
+        signature: "m",
+        renderInfo: { inParMode: true, inMathMode: false },
+    },
+    textsc: {
+        signature: "m",
+        renderInfo: { inParMode: true, inMathMode: false },
+    },
+    texttt: {
+        signature: "m",
+        renderInfo: { inParMode: true, inMathMode: false },
+    },
     underline: { signature: "m", renderInfo: { inParMode: true } },
-    emph: { signature: "m", renderInfo: { inParMode: true } },
-    textnormal: { signature: "m", renderInfo: { inParMode: true } },
+    emph: {
+        signature: "m",
+        renderInfo: { inParMode: true, inMathMode: false },
+    },
+    textnormal: {
+        signature: "m",
+        renderInfo: { inParMode: true, inMathMode: false },
+    },
+    textsuperscript: { signature: "m", renderInfo: { inMathMode: false } },
+    textsubscript: { signature: "m", renderInfo: { inMathMode: false } },
     uppercase: { signature: "m", renderInfo: { inParMode: true } },
     mathbf: { signature: "m" },
     mathsf: { signature: "m" },
@@ -298,6 +379,8 @@ export const macros: MacroInfoRecord = {
     mathnormal: { signature: "m" },
     mathcal: { signature: "m" },
     mathrm: { signature: "m" },
+    // Takes a single math field, like the math accents below
+    mathop: { signature: "m" },
     // Math accents (\DeclareMathAccent in fontdef.dtx -> fontmath.ltx):
     // each takes a single math field, i.e. one token or one group. The
     // field is the whole next token, so if `\xxx` is defined as
@@ -333,8 +416,8 @@ export const macros: MacroInfoRecord = {
     },
     // Other
     setlength: { signature: "m m", renderInfo: { breakAround: true } },
-    ref: { signature: "s m" },
-    label: { signature: "o m" }, // cleveref changes \label to have this signature
+    ref: { signature: "s m", renderInfo: { inMathMode: false } },
+    label: { signature: "o m", renderInfo: { inMathMode: false } }, // cleveref changes \label to have this signature
     printbibliography: { renderInfo: { breakAround: true } },
     addtocontents: { signature: "m m", renderInfo: { breakAround: true } },
     addcontentsline: { signature: "m m m", renderInfo: { breakAround: true } },
@@ -351,6 +434,8 @@ export const environments: EnvInfoRecord = {
         },
     },
     array: { signature: "o m", renderInfo: { alignContent: true } },
+    eqnarray: { renderInfo: { inMathMode: true, alignContent: true } },
+    "eqnarray*": { renderInfo: { inMathMode: true, alignContent: true } },
     description: { signature: "o", processContent: cleanEnumerateBody },
     enumerate: {
         signature: "o",
@@ -364,12 +449,18 @@ export const environments: EnvInfoRecord = {
     "figure*": { signature: "o" },
     filecontents: { signature: "o m" },
     "filecontents*": { signature: "o m" },
-    minipage: { signature: "o o o m" },
-    picture: { signature: "r() d()" },
-    tabbing: { renderInfo: { alignContent: true } },
+    minipage: { signature: "o o o m", renderInfo: { inMathMode: false } },
+    picture: { signature: "r() d()", renderInfo: { inMathMode: false } },
+    tabbing: { renderInfo: { alignContent: true, inMathMode: false } },
     table: { signature: "o" },
-    tabular: { signature: "o m", renderInfo: { alignContent: true } },
-    "tabular*": { signature: "m o m", renderInfo: { alignContent: true } },
+    tabular: {
+        signature: "o m",
+        renderInfo: { alignContent: true, inMathMode: false },
+    },
+    "tabular*": {
+        signature: "m o m",
+        renderInfo: { alignContent: true, inMathMode: false },
+    },
     thebibliography: {
         signature: "m",
         processContent: (nodes) => cleanEnumerateBody(nodes, "bibitem"),

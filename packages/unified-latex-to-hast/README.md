@@ -143,11 +143,13 @@ directly with the `unifiedLatexToHast` plugin.
 
 For example,
 
-    unified()
-         .use(unifiedLatexFromString)
-         .use(unifiedLatexToHast)
-         .use(rehypeStringify)
-         .processSync("\\LaTeX to convert")
+```
+unified()
+     .use(unifiedLatexFromString)
+     .use(unifiedLatexToHast)
+     .use(rehypeStringify)
+     .processSync("\\LaTeX to convert")
+```
 
 ```typescript
 function convertToHtml(
@@ -169,9 +171,9 @@ Wrap paragraphs in `<p>...</p>` tags.
 
 Paragraphs are inserted at
 
-*   parbreak tokens
-*   macros listed in `macrosThatBreakPars`
-*   environments not listed in `environmentsThatDontBreakPars`
+* parbreak tokens
+* macros listed in `macrosThatBreakPars`
+* environments not listed in `environmentsThatDontBreakPars`
 
 ```typescript
 function wrapPars(

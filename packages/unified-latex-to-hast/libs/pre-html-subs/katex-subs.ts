@@ -55,6 +55,26 @@ function wrapInDisplayMath(ast: Ast.Node | Ast.Node[]): Ast.Node {
     return { type: "displaymath", content };
 }
 
+/**
+ * katex doesn't support `eqnarray`, so replace it with the equivalent `darray`
+ * (an `array` whose cells are in display style, like those of `eqnarray`).
+ */
+function eqnarrayToArray(node: Ast.Environment): Ast.Node {
+    return wrapInDisplayMath({
+        type: "environment",
+        env: "darray",
+        args: [
+            {
+                type: "argument",
+                content: [{ type: "string", content: "rcl" }],
+                openMark: "{",
+                closeMark: "}",
+            },
+        ],
+        content: node.content,
+    });
+}
+
 export const katexSpecificEnvironmentReplacements: Record<
     string,
     (node: Ast.Environment) => Ast.Node | Ast.Node[]
@@ -67,6 +87,8 @@ export const katexSpecificEnvironmentReplacements: Record<
     "alignat*": wrapInDisplayMath,
     equation: wrapInDisplayMath,
     "equation*": wrapInDisplayMath,
+    eqnarray: eqnarrayToArray,
+    "eqnarray*": eqnarrayToArray,
 };
 
 /**

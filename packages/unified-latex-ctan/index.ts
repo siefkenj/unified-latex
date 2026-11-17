@@ -1,4 +1,5 @@
 import * as amsart from "./package/amsart";
+import * as biblatex from "./package/biblatex";
 import * as cleveref from "./package/cleveref";
 import * as exam from "./package/exam";
 import * as geometry from "./package/geometry";
@@ -8,6 +9,7 @@ import * as listings from "./package/listings";
 import * as makeidx from "./package/makeidx";
 import * as mathtools from "./package/mathtools";
 import * as minted from "./package/minted";
+import * as natbib from "./package/natbib";
 import * as nicematrix from "./package/nicematrix";
 import * as systeme from "./package/systeme";
 import * as tikz from "./package/tikz";
@@ -22,6 +24,7 @@ import * as multicol from "./package/multicol";
  */
 export const macroInfo = {
     amsart: amsart.macros,
+    biblatex: biblatex.macros,
     cleveref: cleveref.macros,
     exam: exam.macros,
     geometry: geometry.macros,
@@ -31,6 +34,7 @@ export const macroInfo = {
     makeidx: makeidx.macros,
     mathtools: mathtools.macros,
     minted: minted.macros,
+    natbib: natbib.macros,
     nicematrix: nicematrix.macros,
     systeme: systeme.macros,
     tikz: tikz.macros,
@@ -46,6 +50,7 @@ export const macroInfo = {
  */
 export const environmentInfo = {
     amsart: amsart.environments,
+    biblatex: biblatex.environments,
     cleveref: cleveref.environments,
     exam: exam.environments,
     geometry: geometry.environments,
@@ -55,6 +60,7 @@ export const environmentInfo = {
     makeidx: makeidx.environments,
     mathtools: mathtools.environments,
     minted: minted.environments,
+    natbib: natbib.environments,
     nicematrix: nicematrix.environments,
     systeme: systeme.environments,
     tikz: tikz.environments,

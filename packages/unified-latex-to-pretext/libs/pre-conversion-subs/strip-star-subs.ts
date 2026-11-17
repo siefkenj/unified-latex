@@ -27,7 +27,7 @@ export function stripStarredEnvironments(ast: Ast.Ast): void {
         if (!match.anyEnvironment(node)) {
             return;
         }
-        if (node._renderInfo?.inMathMode) {
+        if (node.type === "mathenv" || node._renderInfo?.inMathMode) {
             return;
         }
         if (node.env.endsWith("*")) {

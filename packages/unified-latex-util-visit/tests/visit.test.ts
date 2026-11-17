@@ -130,6 +130,112 @@ describe("unified-latex-util-visit", () => {
         );
         expect(received).toEqual(expected);
     });
+    it("passes in `inMathMode` context for arguments with their own mode", () => {
+        const arg = (content: string, inMathMode?: boolean): Ast.Argument => ({
+            type: "argument",
+            content: [{ type: "string", content }],
+            openMark: "{",
+            closeMark: "}",
+            ...(inMathMode == null ? {} : { _renderInfo: { inMathMode } }),
+        });
+        const ast: Ast.Root = {
+            type: "root",
+            content: [
+                {
+                    type: "inlinemath",
+                    content: [
+                        {
+                            type: "macro",
+                            content: "textcolor",
+                            args: [arg("blue", false), arg("x")],
+                        },
+                    ],
+                },
+                {
+                    type: "macro",
+                    content: "xxx",
+                    args: [arg("y", true), arg("z")],
+                },
+            ],
+        };
+        const modes: Record<string, [boolean?, boolean?]> = {};
+        visit(ast, (node, info) => {
+            if (node.type === "string") {
+                modes[node.content] = [
+                    info.context.inMathMode,
+                    info.context.hasMathModeAncestor,
+                ];
+            }
+        });
+        expect(modes).toEqual({
+            blue: [false, true],
+            x: [true, true],
+            y: [true, true],
+            z: [false, false],
+        });
+    });
+    it("passes in `inMathMode` context for the body of a `mathenv` without render info", () => {
+        const ast: Ast.Root = {
+            type: "root",
+            content: [
+                {
+                    type: "mathenv",
+                    env: "equation",
+                    content: [{ type: "string", content: "x" }],
+                },
+            ],
+        };
+        const modes: Record<string, boolean | undefined> = {};
+        visit(ast, (node, info) => {
+            if (node.type === "string") {
+                modes[node.content] = info.context.inMathMode;
+            }
+        });
+        expect(modes).toEqual({ x: true });
+    });
+    it("passes in text mode context for the arguments of environments", () => {
+        const arg = (
+            content: string,
+            openMark = "{",
+            closeMark = "}"
+        ): Ast.Argument => ({
+            type: "argument",
+            content: [{ type: "string", content }],
+            openMark,
+            closeMark,
+        });
+        const ast: Ast.Root = {
+            type: "root",
+            content: [
+                {
+                    type: "mathenv",
+                    env: "equation",
+                    content: [
+                        {
+                            type: "environment",
+                            env: "array",
+                            args: [arg("cc")],
+                            content: [{ type: "string", content: "x" }],
+                        },
+                    ],
+                },
+                {
+                    type: "environment",
+                    env: "aligned",
+                    args: [arg("t", "[", "]")],
+                    content: [{ type: "string", content: "y" }],
+                    _renderInfo: { inMathMode: true },
+                },
+            ],
+        };
+        const modes: Record<string, boolean | undefined> = {};
+        visit(ast, (node, info) => {
+            if (node.type === "string") {
+                modes[node.content] = info.context.inMathMode;
+            }
+        });
+        expect(modes).toEqual({ cc: false, x: true, t: false, y: true });
+    });
     it("issue #30 test function that accepts optional type should infer correctly", () => {
         // This issue cannot be checked by Jest because it is an issue related to typescript
         // types. It must be tested manually

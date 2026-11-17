@@ -76,6 +76,21 @@ describe("unified-latex-to-hast:unified-latex-to-hast", () => {
             normalizeHtml(`a <em class="emph">different</em> word`)
         );
     });
+    it("Can replace TeX box primitives", () => {
+        html = process(String.raw`a \hbox{b $c$ d} e`);
+        expect(normalizeHtml(html)).toEqual(
+            normalizeHtml(
+                `a <span class="hbox">b <span class="inline-math">c</span> d</span> e`
+            )
+        );
+
+        html = process(String.raw`a \vbox to 1in{b} \vtop{c}`);
+        expect(normalizeHtml(html)).toEqual(
+            normalizeHtml(
+                `a <span class="vbox">b</span> <span class="vtop">c</span>`
+            )
+        );
+    });
     it("Can replace headings", () => {
         html = process(String.raw`\chapter{My Chapter}`);
         expect(normalizeHtml(html)).toEqual(
@@ -236,6 +251,24 @@ describe("unified-latex-to-hast:unified-latex-to-hast", () => {
         ast = process(`\\[a\\\\b\\]`);
         expect(normalizeHtml(ast)).toEqual(
             normalizeHtml(`<div class="display-math">a\\\\b</div>`)
+        );
+    });
+
+    it("Replaces `eqnarray` with a `darray`, since KaTeX doesn't support it", () => {
+        let ast;
+
+        ast = process(`\\begin{eqnarray}a&=&b\\end{eqnarray}`);
+        expect(normalizeHtml(ast)).toEqual(
+            normalizeHtml(
+                `<div class="display-math">\\begin{darray}{rcl}a&#x26;=&#x26;b\\end{darray}</div>`
+            )
+        );
+
+        ast = process(`\\begin{eqnarray*}a&=&b\\end{eqnarray*}`);
+        expect(normalizeHtml(ast)).toEqual(
+            normalizeHtml(
+                `<div class="display-math">\\begin{darray}{rcl}a&#x26;=&#x26;b\\end{darray}</div>`
+            )
         );
     });
 

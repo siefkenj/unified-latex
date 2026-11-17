@@ -11,14 +11,25 @@ import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
  * including attaching arguments and possibly manipulating the environment's body.
  */
 export function processEnvironment(envNode: Ast.Environment, envInfo: EnvInfo) {
-    if (envInfo.signature && envNode.args == null) {
-        const { args } = gobbleArguments(envNode.content, envInfo.signature);
-        envNode.args = args;
-    }
+    attachEnvironmentArgs(envNode, envInfo);
 
     updateRenderInfo(envNode, envInfo.renderInfo);
     if (typeof envInfo.processContent === "function") {
         envNode.content = envInfo.processContent(envNode.content);
+    }
+}
+
+/**
+ * Attach the arguments specified by `envInfo.signature` to the environment, removing
+ * them from its body. Nothing is done if the arguments have already been attached.
+ */
+export function attachEnvironmentArgs(
+    envNode: Ast.Environment,
+    envInfo: EnvInfo
+) {
+    if (envInfo.signature && envNode.args == null) {
+        const { args } = gobbleArguments(envNode.content, envInfo.signature);
+        envNode.args = args;
     }
 }
 

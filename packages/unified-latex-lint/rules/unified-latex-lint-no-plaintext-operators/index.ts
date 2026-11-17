@@ -102,6 +102,95 @@ function matchesAtPos(
     return matched;
 }
 
+/**
+ * Macros whose arguments are operator names, so nothing inside them is plaintext.
+ */
+const isOperatorMacro = match.createMacroMatcher(["operatorname", "mathop"]);
+
+/**
+ * Font macros that set letters as a word (e.g. `\mathrm{sin}`), unlike `\mathnormal`, which
+ * sets them like plain math.
+ */
+const isWordFontMacro = match.createMacroMatcher([
+    "mathrm",
+    "mathit",
+    "mathbf",
+    "mathsf",
+    "mathtt",
+]);
+
+/**
+ * Font switches that set the rest of their group as a word (e.g. `{\rm sin}`).
+ */
+const isWordFontSwitch = match.createMacroMatcher([
+    "rm",
+    "it",
+    "bf",
+    "sf",
+    "tt",
+]);
+
+/**
+ * Spacing macros that may be part of a word (e.g. `\mathrm{arg\,max}`).
+ */
+const isSpacingMacro = match.createMacroMatcher([
+    ",",
+    ":",
+    ";",
+    "!",
+    " ",
+    "quad",
+    "qquad",
+]);
+
+/**
+ * Whether `nodes` are only letters, whitespace and spacing.
+ */
+function isWord(nodes: Ast.Node[]): boolean {
+    return nodes.every(
+        (node) =>
+            match.whitespace(node) ||
+            isSpacingMacro(node) ||
+            (match.anyString(node) && /^[a-zA-Z]+$/.test(node.content))
+    );
+}
+
+/**
+ * Whether `nodes` are deliberately set as a word: they are inside the argument of an operator
+ * macro, or they are the whole argument of a font macro and are a word.
+ */
+function isSetAsWord(
+    nodes: Ast.Node[],
+    parents: readonly (Ast.Node | Ast.Argument)[]
+): boolean {
+    if (parents.some((node) => isOperatorMacro(node))) {
+        return true;
+    }
+    const [arg, macro] = parents;
+    return arg?.type === "argument" && isWordFontMacro(macro) && isWord(nodes);
+}
+
+/**
+ * The groups in `nodes` that may be arguments of macros whose arguments aren't known (and so
+ * weren't attached), e.g. the `{sin}` in `\myop{sin}`. They may not be in math mode.
+ */
+function possibleArguments(nodes: Ast.Node[]): Ast.Group[] {
+    const groups: Ast.Group[] = [];
+    let afterUnknownMacro = false;
+    for (const node of nodes) {
+        if (match.anyMacro(node)) {
+            afterUnknownMacro = node.args == null;
+        } else if (match.group(node)) {
+            if (afterUnknownMacro) {
+                groups.push(node);
+            }
+        } else if (!match.whitespace(node) && !match.comment(node)) {
+            afterUnknownMacro = false;
+        }
+    }
+    return groups;
+}
+
 type PluginOptions = { fix?: boolean } | undefined;
 
 export const DESCRIPTION = `## Lint Rule
@@ -119,14 +208,33 @@ export const unifiedLatexLintNoPlaintextOperators = lintRule<
 >(
     { origin: "unified-latex-lint:no-plaintext-operators" },
     (tree, file, options) => {
+        const possibleArgs = new Set<Ast.Node | Ast.Argument>();
         visit(
             tree,
             (nodes, info) => {
                 if (!info.context.inMathMode) {
                     return;
                 }
+                for (const group of possibleArguments(nodes)) {
+                    possibleArgs.add(group);
+                }
+                // E.g. `\operatorname{sin}` or `\mathrm{sin}` are already set as words, and
+                // `\myop{sin}` may be too
+                if (
+                    isSetAsWord(nodes, info.parents) ||
+                    info.parents.some((node) => possibleArgs.has(node))
+                ) {
+                    return;
+                }
 
                 for (let i = 0; i < nodes.length; i++) {
+                    // E.g. `{\rm sin}` is set as a word
+                    if (
+                        isWordFontSwitch(nodes[i]) &&
+                        isWord(nodes.slice(i + 1))
+                    ) {
+                        break;
+                    }
                     const matched = matchesAtPos(nodes, i);
                     if (matched) {
                         file.message(

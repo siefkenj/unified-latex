@@ -97,9 +97,17 @@ export interface MacroRenderInfo {
     /**
      * Whether the contents of the macro should be assumed to be in math mode.
      *
-     * @type {boolean}
+     * A list sets the mode of each argument individually. It should be the same length as
+     * the number of arguments. `true`/`false` force an argument into math/text mode while `undefined`
+     * means the argument is in whatever mode the macro is used in. Write `undefined` out explicitly
+     * (e.g. `[false, undefined]`) rather than leaving a hole in the list.
+     *
+     * For example, `\textcolor{blue}{x^2}` has its color argument in text mode, but its
+     * last argument is in math mode if the macro is used in math mode.
+     *
+     * @type {(boolean|(boolean|undefined)[])}
      */
-    inMathMode?: boolean;
+    inMathMode?: boolean | (boolean | undefined)[];
     /**
      * Whether the arguments should be rendered with a hanging indent when the wrap
      * (like the arguments to \item in an enumerate environment.)
