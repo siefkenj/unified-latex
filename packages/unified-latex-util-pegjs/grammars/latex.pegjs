@@ -472,10 +472,12 @@ math_shift = s:"$" { return createNode("string", { content: s }); }
 alignment_tab = s:"&" { return createNode("string", { content: s }); }
 
 // catcode 5 (linux, os x, windows)
+// Note: PEG choice is ordered, so "\r\n" must be tried before "\r";
+// otherwise a CRLF is read as two newlines (a paragraph break).
 nl "newline"
-    = !"\r" "\n"
+    = "\r\n"
     / "\r"
-    / "\r\n"
+    / "\n"
 
 // catcode 6
 macro_parameter = s:"#" { return createNode("string", { content: s }); }

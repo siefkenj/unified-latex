@@ -139,4 +139,17 @@ describe("unified-latex-util-parse", () => {
         parsed = parseMath("\\x   #1    y");
         expect(printRaw(parsed)).toEqual("\\x #1 y");
     });
+
+    it("Parses CRLF and CR line endings the same as LF", () => {
+        // Offsets legitimately differ (`\r\n` is two characters), so ignore positions
+        const parseNoPos = (str: string) =>
+            JSON.parse(
+                JSON.stringify(parse(str), (key, value) =>
+                    key === "position" ? undefined : value
+                )
+            );
+        const lf = parseNoPos("a\nb\n\nc % comment\nd");
+        expect(parseNoPos("a\r\nb\r\n\r\nc % comment\r\nd")).toEqual(lf);
+        expect(parseNoPos("a\rb\r\rc % comment\rd")).toEqual(lf);
+    });
 });
