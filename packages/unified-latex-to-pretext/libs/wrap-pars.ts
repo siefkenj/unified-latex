@@ -1,6 +1,7 @@
 import { htmlLike } from "@unified-latex/unified-latex-util-html-like";
 import * as Ast from "@unified-latex/unified-latex-types";
 import { splitForPars } from "./split-for-pars";
+import { PAGE_BREAK_MARKER } from "./page-break-marker";
 
 /**
  * Wrap paragraphs in `<p>...</p>` tags.
@@ -39,11 +40,26 @@ export function wrapPars(
             // can lift them into `<title>`/`<subtitle>` on the slide.
             "frametitle",
             "framesubtitle",
+            // Beamer `\pause`: a paragraph continued after a pause is revealed
+            // separately, so it ends one `<p>`; `applyPauses` then finds the
+            // pause between blocks at the top of the slide.
+            "pause",
+            // A `\newpage` inside a worksheet divides it into `<page>`s, which
+            // sit beside paragraphs rather than inside one. Breaking the par
+            // here keeps the marker `splitWorksheetPages` looks for out of the
+            // `<p>` it would otherwise be swallowed by (see page-subs.ts).
+            PAGE_BREAK_MARKER,
         ],
+        // These become PreTeXt `TextParagraphItem`s -- `<ol>`/`<ul>`/`<dl>` --
+        // which live inside a `<p>`, so they must not split the paragraph they
+        // are part of. See `PARAGRAPH_LEVEL_TAGS` in
+        // unified-latex-plugin-to-pretext-like.ts, which makes the same call for
+        // the already-converted form of these environments.
         environmentsThatDontBreakPars = [
             "index",
             "itemize",
             "enumerate",
+            "description",
         ],
     } = options || {};
 
@@ -54,7 +70,17 @@ export function wrapPars(
 
     return parSplits.flatMap((part) => {
         if (part.wrapInPar) {
-            return htmlLike({ tag: "p", content: part.content });
+            // `workspace` comes from a `\vspace`/`\vfill`/`\vskip` that followed
+            // this paragraph inside a worksheet/handout/project-like environment
+            // (see vertical-space-subs.ts). `<p>` is one of the elements PreTeXt
+            // lets carry one.
+            return htmlLike({
+                tag: "p",
+                content: part.content,
+                attributes: part.workspace
+                    ? { workspace: part.workspace }
+                    : undefined,
+            });
         } else {
             return part.content;
         }

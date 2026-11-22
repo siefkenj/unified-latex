@@ -17,6 +17,10 @@ import { environmentReplacements as _environmentReplacements } from "./pre-conve
 import { examEnvironmentReplacements } from "./pre-conversion-subs/exam-subs";
 import { attachVerticalSpaceWorkspace } from "./pre-conversion-subs/vertical-space-subs";
 import {
+    hoistPageBreaks,
+    splitWorksheetPages,
+} from "./pre-conversion-subs/page-subs";
+import {
     attachNeededRenderInfo,
     mathjaxSpecificEnvironmentReplacements,
     mathjaxSpecificMacroReplacements,
@@ -28,6 +32,8 @@ import {
 } from "./pre-conversion-subs/plus-subs";
 import { streamingMacroReplacements } from "./pre-conversion-subs/streaming-command-subs";
 import { unifiedLatexWrapPars } from "./unified-latex-wrap-pars";
+import { removeWorkspaceMarkers } from "./workspace-marker";
+import { removePageBreakMarkers } from "./page-break-marker";
 import {
     breakOnBoundaries,
     isMappedEnviron,
@@ -36,13 +42,23 @@ import {
 } from "./pre-conversion-subs/break-on-boundaries";
 import { reportMacrosUnsupportedByMathjax } from "./pre-conversion-subs/report-unsupported-macro-mathjax";
 import {
+    convertTitleFrames,
+    flattenSlideshowStructure,
+    warnOnSlidesOutsideSections,
+} from "./pre-conversion-subs/beamer-subs";
+import { buildFrontmatter } from "./bibinfo";
+import { DocumentMetadata } from "./document-metadata";
+import {
     extractFromHtmlLike,
     htmlLike,
     isHtmlLikeTag,
 } from "@unified-latex/unified-latex-util-html-like";
 import { getArgsContent } from "@unified-latex/unified-latex-util-arguments";
 import { s } from "@unified-latex/unified-latex-builder";
-import { sanitizeXmlId } from "./pre-conversion-subs/utils";
+import {
+    hasMeaningfulContent,
+    sanitizeXmlId,
+} from "./pre-conversion-subs/utils";
 
 type EnvironmentReplacements = typeof _environmentReplacements;
 type MacroReplacements = typeof _macroReplacements;
@@ -78,6 +94,19 @@ export type PluginOptions = {
      * Not meant to be set directly -- inserted right after `<title>` when present.
      */
     frontmatter?: Ast.Macro | null;
+
+    /**
+     * Preamble information (class, title, subtitle, ...) gathered by
+     * `unifiedLatexToPretext` before the preamble is discarded. Not meant to
+     * be set directly.
+     */
+    metadata?: DocumentMetadata;
+
+    /**
+     * Whether the source is a slideshow (see `isSlideshowSource`), computed
+     * by `unifiedLatexToPretext`. Not meant to be set directly.
+     */
+    slideshow?: boolean;
 };
 
 /**
@@ -135,6 +164,12 @@ export const unifiedLatexToPretextLike: Plugin<
                 replacers: streamingMacroReplacements,
             });
 
+        // A slideshow has only sections of slides; drop or rename the deeper
+        // divisions before they become environments.
+        if (options?.slideshow) {
+            flattenSlideshowStructure(tree, file);
+        }
+
         // convert division macros into environments
         const warningMessages = breakOnBoundaries(tree);
 
@@ -150,9 +185,28 @@ export const unifiedLatexToPretextLike: Plugin<
         // Look for label macros and attach their content as an argument to their parent environment.
         attachAdditionalAttributes(tree);
 
-        // Look for vertical-spacing commands (\vspace, \vfil(l), \vskip) that trail the
-        // content of some environment/macro argument, and convert them into a `workspace`
-        // attribute on the container they trail (see vertical-space-subs.ts). Must run
+        // Beamer's title frame becomes the generated title slide (from
+        // `<frontmatter>`), plus a slide for anything else it held.
+        const hasTitleFrame = convertTitleFrames(
+            tree,
+            options?.metadata?.titlegraphic,
+            file
+        );
+        if (options?.slideshow) {
+            warnOnSlidesOutsideSections(tree, file);
+        }
+
+        // Turn `\newpage` and friends inside a worksheet/handout into the page-break
+        // markers that `splitWorksheetPages` (below) divides into `<page>` elements
+        // (see page-subs.ts). Must run before the vertical-space pass, so that a
+        // `\vfill` followed by a `\newpage` still reads as trailing the block it
+        // reserves workspace on, and before macro replacement would discard the
+        // page-break macros as having no PreTeXt equivalent.
+        hoistPageBreaks(tree);
+
+        // Look for vertical-spacing commands (\vspace, \vfil(l), \vskip) inside a
+        // worksheet/handout/project-like environment and move each one onto the block
+        // it follows, as a `workspace` attribute (see vertical-space-subs.ts). Must run
         // before division macros are wrapped in `<p>` tags and before environment/macro
         // replacement, since it records the attribute via `_renderInfo` on the raw node.
         attachVerticalSpaceWorkspace(tree);
@@ -237,10 +291,33 @@ export const unifiedLatexToPretextLike: Plugin<
         // pass: unwrap any `<p>` that has no meaningful content left.
         removeEmptyPars(tree);
 
+        // Group worksheet/handout content into `<page>` elements at the markers
+        // `hoistPageBreaks` left behind. Runs after every `wrapPars` call, so a
+        // `<page>` never ends up inside a `<p>`.
+        splitWorksheetPages(tree);
+
+        // Drop any `workspace-marker` no `wrapPars` call consumed -- see
+        // workspace-marker.ts. Must run after every `<p>`-producing pass.
+        removeWorkspaceMarkers(tree);
+
+        // Likewise for any page-break marker that didn't turn into a `<page>`.
+        removePageBreakMarkers(tree);
+
         // Wrap in enough tags to ensure a valid pretext document
         if (!producePretextFragment) {
             // choose a book or article tag
-            createValidPretextDoc(tree, options?.frontmatter);
+            createValidPretextDoc(tree, {
+                // A slideshow's title slide is generated from its
+                // `<frontmatter>`, so a deck with a title frame needs one even
+                // when it names no author or date.
+                frontmatter:
+                    options?.frontmatter ??
+                    (options?.slideshow && hasTitleFrame
+                        ? buildFrontmatter()
+                        : null),
+                metadata: options?.metadata ?? {},
+                slideshow: options?.slideshow ?? false,
+            });
 
             // wrap around with pretext tag
             tree.content = [
@@ -272,26 +349,6 @@ function removeEmptyPars(tree: Ast.Root): void {
 }
 
 /**
- * Whether `nodes` contains anything that should actually render as content,
- * as opposed to only whitespace/comments/parbreaks or empty strings/groups
- * left behind by a dropped macro (see `dropped-subs.ts`).
- */
-function hasMeaningfulContent(nodes: Ast.Node[]): boolean {
-    return nodes.some((node) => {
-        if (match.comment(node) || match.whitespace(node) || match.parbreak(node)) {
-            return false;
-        }
-        if (node.type === "string") {
-            return node.content.trim() !== "";
-        }
-        if (node.type === "group") {
-            return hasMeaningfulContent(node.content);
-        }
-        return true;
-    });
-}
-
-/**
  * Does the content contain multiple paragraphs? If so, it should be wrapped in `p` tags.
  */
 function shouldBeWrappedInPars(tree: Ast.Root): boolean {
@@ -312,10 +369,12 @@ function shouldBeWrappedInPars(tree: Ast.Root): boolean {
 
 function containsPar(content: Ast.Node[]): boolean {
     return content.some((node) => {
-        // Recurse into divisions and slides, whose content is wrapped by the
-        // pre-pass, so a parbreak nested inside one still triggers wrapping.
+        // Recurse into divisions, whose content is wrapped by the pre-pass,
+        // so a parbreak nested inside one still triggers wrapping. A slide
+        // holds only blocks, so its text always needs a `<p>` -- even in a
+        // deck with no blank line anywhere.
         if (isMappedEnviron(node) || isSlideEnviron(node)) {
-            return containsPar(node.content);
+            return !isMappedEnviron(node) || containsPar(node.content);
         }
 
         return match.parbreak(node) || match.macro(node, "par");
@@ -323,10 +382,23 @@ function containsPar(content: Ast.Node[]): boolean {
 }
 
 /**
- * Wrap the tree content in a book or article tag. `frontmatter`, when given,
- * is inserted right after `<title>` (see `bibinfo.ts`).
+ * Wrap the tree content in a book, article, or slideshow tag. The title
+ * (with any short title and subtitle) comes from the preamble `metadata`,
+ * falling back to a `\title` in the body. `frontmatter`, when given, is
+ * inserted right after them (see `bibinfo.ts`).
  */
-function createValidPretextDoc(tree: Ast.Root, frontmatter?: Ast.Macro | null): void {
+function createValidPretextDoc(
+    tree: Ast.Root,
+    {
+        frontmatter,
+        metadata,
+        slideshow,
+    }: {
+        frontmatter: Ast.Macro | null;
+        metadata: DocumentMetadata;
+        slideshow: boolean;
+    }
+): void {
     // A document may start with \book{Title}, \article{Title}, or
     // \slideshow{Title} instead of relying on \documentclass and \title.
     // breakOnBoundaries treats these as the outermost division, so by now
@@ -348,31 +420,13 @@ function createValidPretextDoc(tree: Ast.Root, frontmatter?: Ast.Macro | null): 
         return;
     }
 
-    let isBook: boolean = false;
-
-    // look for a \documentclass (this will need to change, as this info will be gotten earlier)
-    const docClass = findMacro(tree, "documentclass");
-
-    // check if there was a documentclass
-    if (docClass) {
-        const docClassArg = getArgsContent(docClass)[0];
-
-        // get the actual class
-        if (docClassArg) {
-            const docClassTitle = docClassArg[0] as Ast.String;
-
-            // memoirs will be books too
-            if (
-                docClassTitle.content == "book" ||
-                docClassTitle.content == "memoir"
-            ) {
-                isBook = true;
-            }
-        }
-    }
+    // memoirs will be books too
+    let isBook =
+        metadata.documentClass === "book" ||
+        metadata.documentClass === "memoir";
 
     // if we still don't know if it's a book, look for _chapters environments (since breakonboundaries was called before)
-    if (!isBook) {
+    if (!isBook && !slideshow) {
         visit(tree, (node) => {
             if (anyEnvironment(node) && node.env == "_chapter") {
                 isBook = true;
@@ -383,9 +437,13 @@ function createValidPretextDoc(tree: Ast.Root, frontmatter?: Ast.Macro | null): 
 
     // a book and article tag must have a title tag right after it
     // extract the title first
-    const title = findMacro(tree, "title");
+    const title = metadata.title ? null : findMacro(tree, "title");
 
-    if (title) {
+    if (metadata.title) {
+        tree.content.unshift(
+            htmlLike({ tag: "title", content: metadata.title })
+        );
+    } else if (title) {
         const titleArg = getArgsContent(title)[1];
 
         // get the actual title.
@@ -409,13 +467,27 @@ function createValidPretextDoc(tree: Ast.Root, frontmatter?: Ast.Macro | null): 
     }
 
     // <title> was just unshifted to index 0 above (every branch does it);
-    // <frontmatter> goes right after it.
-    if (frontmatter) {
-        tree.content.splice(1, 0, frontmatter);
+    // the schema's order after it is <subtitle>, <shorttitle>, <frontmatter>.
+    const afterTitle: Ast.Node[] = [];
+    if (metadata.subtitle) {
+        afterTitle.push(
+            htmlLike({ tag: "subtitle", content: metadata.subtitle })
+        );
     }
+    if (metadata.shortTitle) {
+        afterTitle.push(
+            htmlLike({ tag: "shorttitle", content: metadata.shortTitle })
+        );
+    }
+    if (frontmatter) {
+        afterTitle.push(frontmatter);
+    }
+    tree.content.splice(1, 0, ...afterTitle);
 
-    // now create a book or article tag
-    if (isBook) {
+    // now create a book, article, or slideshow tag
+    if (slideshow) {
+        tree.content = [htmlLike({ tag: "slideshow", content: tree.content })];
+    } else if (isBook) {
         tree.content = [htmlLike({ tag: "book", content: tree.content })];
     } else {
         tree.content = [htmlLike({ tag: "article", content: tree.content })];
@@ -497,10 +569,25 @@ function markAsBlockLevel(
           ? replacement
           : [replacement];
     for (const n of nodes) {
-        if (isHtmlLikeTag(n)) {
+        if (isHtmlLikeTag(n) && !isParagraphLevelTag(n)) {
             n._renderInfo = { ...n._renderInfo, isBlockLevel: true };
         }
     }
+}
+
+/**
+ * PreTeXt tags that belong *inside* a `<p>` rather than beside one: `List`
+ * (`<ol>`/`<ul>`/`<dl>`) and `MathDisplay` (`<md>`) are `TextParagraphItem`s in
+ * the RelaxNG schema, not `BlockText`. Marking one block-level would make
+ * `splitForPars` push it out of the paragraph it belongs to and emit it bare,
+ * which is invalid. Kept in sync with `environmentsThatDontBreakPars` in
+ * wrap-pars.ts, which is the same decision made one step earlier, before
+ * environment replacement has run.
+ */
+const PARAGRAPH_LEVEL_TAGS = new Set(["ol", "ul", "dl", "md"]);
+
+function isParagraphLevelTag(node: Ast.Node): boolean {
+    return PARAGRAPH_LEVEL_TAGS.has(extractFromHtmlLike(node as Ast.Macro).tag);
 }
 
 /**

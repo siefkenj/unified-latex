@@ -8,9 +8,14 @@ import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 import { match } from "@unified-latex/unified-latex-util-match";
 import { xmlCompilePlugin } from "../libs/convert-to-pretext";
 
-function normalizeHtml(str: string) {
+async function normalizeHtml(str: string) {
     try {
-        return Prettier.format(str, {
+        // `Prettier.format` is async, so it has to be awaited *inside* the try
+        // for the catch to see a parse failure. Valid PreTeXt is not always
+        // valid HTML -- `<p><ul>...</ul></p>` is legal here but Prettier's HTML
+        // parser rejects it -- and without the await those cases blow up with a
+        // SyntaxError instead of falling back to an exact string comparison.
+        return await Prettier.format(str, {
             parser: "html",
             plugins: ["@prettier/plugin-xml"],
         });
@@ -400,6 +405,62 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
         );
     });
 
+    it("Converts \\hline after a row into bottom=\"minor\" on that row", async () => {
+        html = process(
+            `\\begin{tabular}{l l}a & b\\\\\\hline c & d\\end{tabular}`
+        );
+
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `<tabular><row bottom="minor"><cell>a</cell><cell>b</cell></row><row><cell>c</cell><cell>d</cell></row></tabular>`
+            )
+        );
+    });
+
+    it("Converts \\hline after a row into bottom=\"minor\" even with whitespace/newlines around it", async () => {
+        html = process(
+            `\\begin{tabular}{l l}\na & b \\\\\n\\hline\nc & d\n\\end{tabular}`
+        );
+
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `<tabular><row bottom="minor"><cell>a</cell><cell>b</cell></row><row><cell>c</cell><cell>d</cell></row></tabular>`
+            )
+        );
+    });
+
+    it("Converts \\hline directly ending a row into bottom=\"minor\"", async () => {
+        html = process(`\\begin{tabular}{l l}a & b\\hline\\\\c & d\\end{tabular}`);
+
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `<tabular><row bottom="minor"><cell>a</cell><cell>b</cell></row><row><cell>c</cell><cell>d</cell></row></tabular>`
+            )
+        );
+    });
+
+    it("Converts a leading \\hline into top=\"minor\" on the tabular", async () => {
+        html = process(`\\begin{tabular}{l l}\\hline a & b\\\\c & d\\end{tabular}`);
+
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `<tabular top="minor"><row><cell>a</cell><cell>b</cell></row><row><cell>c</cell><cell>d</cell></row></tabular>`
+            )
+        );
+    });
+
+    it("Converts \\hline at the top and bottom of a tabular", async () => {
+        html = process(
+            `\\begin{tabular}{l l}\\hline a & b\\\\c & d\\\\\\hline\\end{tabular}`
+        );
+
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `<tabular top="minor"><row><cell>a</cell><cell>b</cell></row><row bottom="minor"><cell>c</cell><cell>d</cell></row></tabular>`
+            )
+        );
+    });
+
     it("Can wrap in <p>...</p> tags", async () => {
         html = process(`a\\par b`);
         expect(await normalizeHtml(html)).toEqual(
@@ -635,10 +696,117 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
             )
         );
     });
-    it("converts a trailing \\vfill into a workspace attribute inside a worksheet environment", async () => {
+    it("puts a trailing \\vfill on the paragraph it follows, not on the worksheet itself", async () => {
+        // `<worksheet>` takes only PrintoutAttributes (margins) in the PreTeXt
+        // schema -- `workspace` belongs on a block inside it.
         html = process(`\\begin{worksheet}\na\\vfill\n\\end{worksheet}`);
         expect(await normalizeHtml(html)).toEqual(
-            await normalizeHtml(`<worksheet workspace="1in"><p>a</p></worksheet>`)
+            await normalizeHtml(`<worksheet><p workspace="1in">a</p></worksheet>`)
+        );
+    });
+    it("puts a trailing \\vspace on the paragraph it follows inside a handout", async () => {
+        html = process(
+            `\\begin{handout}\nthis is a paragraph\n\\vspace{1in}\n\\end{handout}`
+        );
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `<handout><p workspace="1in">this is a paragraph</p></handout>`
+            )
+        );
+    });
+    it("puts a \\vspace between two paragraphs on the preceding paragraph, not on the enclosing block", async () => {
+        html = process(
+            `\\begin{handout}\\begin{thm}First para.\\vspace{1in}\n\nSecond para.\\end{thm}\\end{handout}`
+        );
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `<handout><theorem><statement>` +
+                    `<p workspace="1in">First para.</p><p>Second para.</p>` +
+                    `</statement></theorem></handout>`
+            )
+        );
+    });
+    it("puts a \\vspace separated by parbreaks on the paragraph before it", async () => {
+        html = process(
+            `\\begin{handout}Para one.\n\n\\vspace{1in}\n\nPara two.\\end{handout}`
+        );
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `<handout><p workspace="1in">Para one.</p><p>Para two.</p></handout>`
+            )
+        );
+    });
+    it("puts a \\vspace following a block environment on that block", async () => {
+        html = process(
+            `\\begin{handout}\\begin{dfn}a\\end{dfn}\\vspace{2in}\n\nMore text.\\end{handout}`
+        );
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `<handout>` +
+                    `<definition workspace="2in"><statement><p>a</p></statement></definition>` +
+                    `<p>More text.</p>` +
+                    `</handout>`
+            )
+        );
+    });
+    it("puts a \\vspace following an exercise on that exercise", async () => {
+        html = process(
+            `\\begin{worksheet}\\begin{exercise}Do it.\\end{exercise}\\vspace{2in}\\end{worksheet}`
+        );
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `<worksheet><exercise workspace="2in"><statement><p>Do it.</p></statement></exercise></worksheet>`
+            )
+        );
+    });
+    it("silently drops a \\vspace following a block that cannot carry a workspace", async () => {
+        html = process(
+            `\\begin{worksheet}\\begin{figure}x\\end{figure}\\vspace{1in}\\end{worksheet}`
+        );
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(`<worksheet><figure>x</figure></worksheet>`)
+        );
+    });
+    it("silently drops a \\vspace with nothing before it", async () => {
+        html = process(`\\begin{worksheet}\\vspace{1in}a\\end{worksheet}`);
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(`<worksheet><p>a</p></worksheet>`)
+        );
+    });
+    it("silently drops a vertical space that cannot reserve room", async () => {
+        // Negative, zero, and macro-valued lengths are formatting nudges, not
+        // requests for workspace -- PreTeXt would reject them and substitute 2in.
+        for (const spacer of [
+            `\\vspace{-1em}`,
+            `\\vspace{0pt}`,
+            `\\vspace{\\baselineskip}`,
+            `\\vskip -0.5em`,
+        ]) {
+            expect(
+                await normalizeHtml(
+                    process(`\\begin{worksheet}text${spacer}\\end{worksheet}`)
+                )
+            ).toEqual(await normalizeHtml(`<worksheet><p>text</p></worksheet>`));
+        }
+    });
+    it("reads a fractional \\vskip dimension and discards its glue modifiers", async () => {
+        expect(
+            await normalizeHtml(
+                process(`\\begin{worksheet}a\\vskip 1.5cm\\end{worksheet}`)
+            )
+        ).toEqual(
+            await normalizeHtml(`<worksheet><p workspace="1.5cm">a</p></worksheet>`)
+        );
+        expect(
+            await normalizeHtml(
+                process(
+                    `\\begin{worksheet}a\\vskip 1in plus 2fil minus 3pt b\\end{worksheet}`
+                )
+            )
+        ).toEqual(
+            await normalizeHtml(
+                `<worksheet><p workspace="1in">a</p><p>b</p></worksheet>`
+            )
         );
     });
     it("converts a trailing \\vspace into a workspace attribute inside a block environment nested in a handout", async () => {
@@ -997,6 +1165,12 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
                 `<figure><caption>My figure</caption><image source="example.png"/></figure>`
             )
         );
+        html = process(`\\includegraphics[width=50\\%, margins=10\\%]{example.png}`);
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `<image width="50%" margins="10%" source="example.png"/>`
+            )
+        );
     });
 
     it("Turns labels into xml:id attributes and refs into xrefs", async () => {
@@ -1018,8 +1192,12 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
         html = process(`\\section{Sec}\n\nSome text.\\vspace{1in}`);
         expect(await normalizeHtml(html)).toEqual(
             await normalizeHtml(
-                `<section><title>Sec</title>Some text.</section>`
+                `<section><title>Sec</title><p>Some text.</p></section>`
             )
+        );
+        // Dropping the spacer must not change how the rest is paragraphed.
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(process(`\\section{Sec}\n\nSome text.`))
         );
     });
     it("converts generator macros", async () => {
@@ -1072,6 +1250,65 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
             await normalizeHtml(`<pre>\nx = 1 + 2\n</pre>`)
         );
     });
+    // PreTeXt counts `<md>` (MathDisplay) as a `TextParagraphItem`: it lives
+    // inside a `<p>`, never beside one. A bare `<md>` next to a paragraph is
+    // rejected by the RelaxNG schema.
+    it("puts display math in the paragraph it follows", async () => {
+        html = process(`\\begin{thm}a\n\\begin{equation}x=1\\end{equation}\\end{thm}`);
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `<theorem><statement><p>a <md number="yes">x=1</md></p></statement></theorem>`
+            )
+        );
+    });
+    it("gives display math its own paragraph when nothing precedes it", async () => {
+        html = process(`\\begin{thm}a\n\n\\begin{equation}x=1\\end{equation}\\end{thm}`);
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `<theorem><statement><p>a</p><p><md number="yes">x=1</md></p></statement></theorem>`
+            )
+        );
+        expect(
+            await normalizeHtml(
+                process(`\\begin{thm}\\begin{equation}x=1\\end{equation}\\end{thm}`)
+            )
+        ).toEqual(
+            await normalizeHtml(
+                `<theorem><statement><p><md number="yes">x=1</md></p></statement></theorem>`
+            )
+        );
+    });
+    it("keeps a multi-line display in the paragraph it follows", async () => {
+        html = process(
+            `\\begin{thm}a\n\\begin{gather}x=1\\end{gather}\\end{thm}`
+        );
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `<theorem><statement><p>a <md alignment="gather" number="yes"><mrow>x=1</mrow></md></p></statement></theorem>`
+            )
+        );
+    });
+    it("puts a list in the paragraph it follows, the same as at top level", async () => {
+        // `List` is a `TextParagraphItem` too, so `<ul>`/`<ol>`/`<dl>` belong
+        // inside a `<p>`. (Prettier's HTML parser rejects `<p><ul>`, so
+        // `normalizeHtml` falls back to comparing the strings as-is here.)
+        html = process(`\\begin{thm}a\n\\begin{itemize}\\item q\\end{itemize}\\end{thm}`);
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `<theorem><statement><p>a <ul><li><p>q</p></li></ul></p></statement></theorem>`
+            )
+        );
+    });
+    it("keeps a block-level <pre> out of the paragraph it follows", async () => {
+        // The mirror of the display-math rule: `Preformatted` is `BlockText`,
+        // so `<pre>` sits beside paragraphs rather than inside one.
+        html = process(`\\begin{thm}a\n\\begin{verbatim}v\\end{verbatim}\\end{thm}`);
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `<theorem><statement><p>a</p><pre>v</pre></statement></theorem>`
+            )
+        );
+    });
     it("converts \\code{} macro to inline <c>", async () => {
         html = process(`inline \\code{x^2} code`);
         expect(await normalizeHtml(html)).toEqual(
@@ -1089,7 +1326,8 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
             await normalizeHtml(process(`\\footnote{a note\\vspace{1in}}`))
         ).toEqual(await normalizeHtml(`<fn>a note</fn>`));
     });
-    it("converts a trailing \\vspace inside a macro argument into a workspace attribute when nested in a worksheet", async () => {
+    it("silently drops a trailing \\vspace inside a macro argument even when nested in a worksheet", async () => {
+        // `<fn>` is not one of the elements PreTeXt lets carry a `workspace`.
         expect(
             await normalizeHtml(
                 process(
@@ -1098,7 +1336,7 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
             )
         ).toEqual(
             await normalizeHtml(
-                `<worksheet><p><fn workspace="1in">a note</fn></p></worksheet>`
+                `<worksheet><p><fn>a note</fn></p></worksheet>`
             )
         );
     });
@@ -1260,6 +1498,24 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
         html = process(`\\begin{sidebyside}\n\nLeft content.\n\nRight content.\n\\end{sidebyside}`);
         expect(await normalizeHtml(html)).toEqual(
             await normalizeHtml(`<sidebyside><p>Left content.</p><p>Right content.</p></sidebyside>`)
+        );
+    });
+    it("converts \\begin{sidebyside}[key=value,...] attributes", async () => {
+        html = process(`\\begin{sidebyside}[widths=30\\% 70\\%, valign=top]\n\nLeft.\n\nRight.\n\\end{sidebyside}`);
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `<sidebyside widths="30% 70%" valign="top"><p>Left.</p><p>Right.</p></sidebyside>`
+            )
+        );
+    });
+    it("converts \\begin{sbsgroup}[key=value,...] attributes", async () => {
+        html = process(
+            `\\begin{sbsgroup}[margins=10\\%]\n\\begin{sidebyside}\n\nA.\n\nB.\n\\end{sidebyside}\n\\end{sbsgroup}`
+        );
+        expect(await normalizeHtml(html)).toEqual(
+            await normalizeHtml(
+                `<sbsgroup margins="10%"><sidebyside><p>A.</p><p>B.</p></sidebyside></sbsgroup>`
+            )
         );
     });
     it("converts \\begin{program} to <program><input>", async () => {
@@ -1760,13 +2016,13 @@ describe("unified-latex-to-pretext:beamer", () => {
             .use(xmlCompilePlugin)
             .processSync({ value }).value as string;
 
-    it("converts a frame to a slide with the \\frametitle as a sibling <title> (a lone paragraph is not wrapped in <p>, like a division)", async () => {
+    it("converts a frame to a slide with the \\frametitle as a sibling <title> (a lone paragraph is still wrapped in <p>, since a slide holds only blocks)", async () => {
         const html = process(
             `\\begin{frame}\\frametitle{My Title}\nSome content.\n\\end{frame}`
         );
         expect(await normalizeHtml(html)).toEqual(
             await normalizeHtml(
-                `<slide><title>My Title</title>Some content.</slide>`
+                `<slide><title>My Title</title><p>Some content.</p></slide>`
             )
         );
     });
@@ -1777,7 +2033,7 @@ describe("unified-latex-to-pretext:beamer", () => {
         );
         expect(await normalizeHtml(html)).toEqual(
             await normalizeHtml(
-                `<slide><title>Braced Title</title><subtitle>Braced Sub</subtitle>Body.</slide>`
+                `<slide><title>Braced Title</title><subtitle>Braced Sub</subtitle><p>Body.</p></slide>`
             )
         );
     });
@@ -1862,13 +2118,13 @@ describe("unified-latex-to-pretext:beamer", () => {
         );
     });
 
-    it("does not crash on overlay specs attached to \\item", async () => {
+    it("reveals a list item by item when its \\item overlays start on successive slides", async () => {
         const html = process(
             `\\begin{itemize}\\item<1-> One\\item<2-> Two\\end{itemize}`
         );
         expect(await normalizeHtml(html)).toEqual(
             await normalizeHtml(
-                `<ul><li><p>One</p></li><li><p>Two</p></li></ul>`
+                `<ul pause="yes"><li><p>One</p></li><li><p>Two</p></li></ul>`
             )
         );
     });

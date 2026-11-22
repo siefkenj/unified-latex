@@ -202,6 +202,138 @@ describe("unified-latex-to-pretext:break-on-boundaries", () => {
         );
     });
 
+    it("puts a worksheet one level below the division it appears in", () => {
+        // A printout is terminal -- `(Page+ | PrintoutBlock+)`, where
+        // `PrintoutBlock = BlockDivision | Paragraphs` -- so it attaches under
+        // the section rather than beside it, and the `\subsection` that follows
+        // is its peer inside that section rather than its child.
+        value =
+            String.raw`\section{Sec}Hi.` +
+            String.raw`\worksheet{Lab}Do this.\subsection{Next}More.`;
+
+        const parser = getParser({ macros: pretextMacros });
+        const ast = parser.parse(value);
+
+        expect(breakOnBoundaries(ast)).toEqual({ messages: [] });
+
+        expect(printRaw(ast)).toEqual(
+            String.raw`\begin{_section}[Sec]Hi.` +
+                String.raw`\begin{_worksheet}[Lab]Do this.\end{_worksheet}` +
+                String.raw`\begin{_subsection}[Next]More.\end{_subsection}` +
+                String.raw`\end{_section}`
+        );
+    });
+
+    it("puts a handout one level below the division it appears in", () => {
+        value =
+            String.raw`\subsection{Sub}Hi.` +
+            String.raw`\handout{Notes}Read.\subsubsection{Next}More.`;
+
+        const parser = getParser({ macros: pretextMacros });
+        const ast = parser.parse(value);
+
+        expect(breakOnBoundaries(ast)).toEqual({ messages: [] });
+
+        expect(printRaw(ast)).toEqual(
+            String.raw`\begin{_subsection}[Sub]Hi.` +
+                String.raw`\begin{_handout}[Notes]Read.\end{_handout}` +
+                String.raw`\begin{_subsubsection}[Next]More.\end{_subsubsection}` +
+                String.raw`\end{_subsection}`
+        );
+    });
+
+    it("pins a printout to a named level with its optional argument", () => {
+        // `\worksheet[section]{...}` is a worksheet that stands *beside* the
+        // sections around it rather than inside one.
+        value =
+            String.raw`\section{Sec}Hi.` +
+            String.raw`\worksheet[section]{Lab}Do this.\subsection{Next}More.`;
+
+        const parser = getParser({ macros: pretextMacros });
+        const ast = parser.parse(value);
+
+        expect(breakOnBoundaries(ast)).toEqual({ messages: [] });
+
+        expect(printRaw(ast)).toEqual(
+            String.raw`\begin{_section}[Sec]Hi.\end{_section}` +
+                String.raw`\begin{_worksheet}[Lab]Do this.\end{_worksheet}` +
+                String.raw`\begin{_subsection}[Next]More.\end{_subsection}`
+        );
+    });
+
+    it("treats an optional argument that names no level as an ordinary short title", () => {
+        value = String.raw`\section{Sec}\worksheet[Short]{Lab}Do this.`;
+
+        const parser = getParser({ macros: pretextMacros });
+        const ast = parser.parse(value);
+
+        expect(breakOnBoundaries(ast)).toEqual({ messages: [] });
+
+        expect(printRaw(ast)).toEqual(
+            String.raw`\begin{_section}[Sec]` +
+                String.raw`\begin{_worksheet}[Lab]Do this.\end{_worksheet}` +
+                String.raw`\end{_section}`
+        );
+    });
+
+    it("ends a worksheet at the next division rather than nesting it", () => {
+        value = String.raw`\worksheet{Lab}Do this.\subsection{Next}More.`;
+
+        const parser = getParser({ macros: pretextMacros });
+        const ast = parser.parse(value);
+
+        expect(breakOnBoundaries(ast)).toEqual({ messages: [] });
+
+        expect(printRaw(ast)).toEqual(
+            String.raw`\begin{_worksheet}[Lab]Do this.\end{_worksheet}` +
+                String.raw`\begin{_subsection}[Next]More.\end{_subsection}`
+        );
+    });
+
+    it("ends a handout at the next division too", () => {
+        value = String.raw`\handout{Notes}Read this.\subsubsection{Next}More.`;
+
+        const parser = getParser({ macros: pretextMacros });
+        const ast = parser.parse(value);
+
+        expect(breakOnBoundaries(ast)).toEqual({ messages: [] });
+
+        expect(printRaw(ast)).toEqual(
+            String.raw`\begin{_handout}[Notes]Read this.\end{_handout}` +
+                String.raw`\begin{_subsubsection}[Next]More.\end{_subsubsection}`
+        );
+    });
+
+    it("keeps \\paragraphs inside a worksheet, since a printout may contain one", () => {
+        value = String.raw`\worksheet{Lab}Do this.\paragraphs{Aside}Note.`;
+
+        const parser = getParser({ macros: pretextMacros });
+        const ast = parser.parse(value);
+
+        expect(breakOnBoundaries(ast)).toEqual({ messages: [] });
+
+        expect(printRaw(ast)).toEqual(
+            String.raw`\begin{_worksheet}[Lab]Do this.` +
+                String.raw`\begin{_paragraphs}[Aside]Note.\end{_paragraphs}\end{_worksheet}`
+        );
+    });
+
+    it("ends a \\subsection[worksheet] at the next division as well", () => {
+        value = String.raw`\section{Sec}\subsection[worksheet]{Lab}Do this.\subsubsection{Next}More.`;
+
+        const parser = getParser({ macros: pretextMacros });
+        const ast = parser.parse(value);
+
+        expect(breakOnBoundaries(ast)).toEqual({ messages: [] });
+
+        expect(printRaw(ast)).toEqual(
+            String.raw`\begin{_section}[Sec]` +
+                String.raw`\begin{_worksheet}[Lab]Do this.\end{_worksheet}` +
+                String.raw`\begin{_subsubsection}[Next]More.\end{_subsubsection}` +
+                String.raw`\end{_section}`
+        );
+    });
+
     it("treats an unrecognized optional argument on a standard sectioning macro as an ordinary (ignored) short title", () => {
         value = String.raw`\subsection[Short title]{Long title}Body.`;
 

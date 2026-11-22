@@ -40,6 +40,20 @@
   `\citetext` is kept.
 - The `no-plaintext-operators` lint rule detects operators in groups in math (e.g. `${sin x}$` or `$x^{sin y}$`), in
   `\mathnormal{...}`, and in font macros and switches whose content isn't a single word (e.g. `\mathrm{a + sin b}`).
+- More PreTeXt conversion improvements:
+    - Worksheets and handouts: `\newpage`/`\pagebreak` divide them into `<page>`s; a worksheet or handout is placed
+      one level below the division it appears in (or at a level named in its optional argument) and ends at the next
+      division.
+    - Vertical space (`\vspace`, `\vfill`, fractional `\vskip`) becomes `workspace` on the block it follows, and is
+      dropped where PreTeXt has nowhere to put it.
+    - Display math and lists go inside the paragraph they follow; `<pre>` stays beside it.
+    - `\hline` in a `tabular` becomes `bottom="minor"` on the row above it, or `top="minor"` on the table when it
+      comes first.
+    - `sidebyside` and `sbsgroup` accept `key=value` options as attributes.
+    - Beamer: `\pause` and incremental overlays (`[<+->]`, `\item<+->`) become PreTeXt pauses; the title frame
+      becomes the slideshow title slide (title, subtitle, authors and institutions); `\frame{...}` converts like the
+      environment; outline frames are dropped; `\note` becomes an XML comment; and overlay specs such as
+      `\alert<2>{...}` are no longer read as the argument.
 - Windows (`\r\n`) and classic Mac (`\r`) line endings are parsed the same as `\n`. Previously a single `\r\n` was
   read as two newlines, so it started a new paragraph (e.g., every line became its own `<p>` in PreTeXt conversion).
 

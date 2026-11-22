@@ -2,6 +2,7 @@ import * as Ast from "@unified-latex/unified-latex-types";
 import { VisitInfo } from "@unified-latex/unified-latex-util-visit";
 import { VFile } from "vfile";
 import { s } from "@unified-latex/unified-latex-builder";
+import { match } from "@unified-latex/unified-latex-util-match";
 import { printRaw } from "@unified-latex/unified-latex-util-print-raw";
 import { VFileMessage } from "vfile-message";
 
@@ -59,6 +60,30 @@ export function getEnvName(env: Ast.Environment["env"]): string {
 }
 
 /**
+ * Whether `nodes` contains anything that should actually render as content, as
+ * opposed to only whitespace/comments/parbreaks or empty strings/groups left
+ * behind by a dropped macro (see `dropped-subs.ts`).
+ */
+export function hasMeaningfulContent(nodes: Ast.Node[]): boolean {
+    return nodes.some((node) => {
+        if (
+            match.comment(node) ||
+            match.whitespace(node) ||
+            match.parbreak(node)
+        ) {
+            return false;
+        }
+        if (node.type === "string") {
+            return node.content.trim() !== "";
+        }
+        if (node.type === "group") {
+            return hasMeaningfulContent(node.content);
+        }
+        return true;
+    });
+}
+
+/**
  * Sanitize a string for use in xml:id attributes and corresponding refs.
  */
 export function sanitizeXmlId(str: string) {
@@ -75,4 +100,52 @@ export function sanitizeXmlId(str: string) {
             default: return "";
         }
     });
+}
+
+/**
+ * Attributes whose bare-number values are percentages. `width=50` is
+ * normalized to `width="50%"` since a literal `%` starts a comment in LaTeX.
+ */
+const PERCENT_ATTRIBUTES = new Set(["width", "widths", "margin", "margins"]);
+
+/**
+ * Parse an optional argument as a comma-separated `key=value` list, e.g.
+ * `[widths=30\% 70\%, valign=top]`. Values may be quoted; `\%` is unescaped
+ * to `%`; bare-number values of percentage attributes get a `%` appended; a
+ * bare key becomes `key="yes"`.
+ */
+export function parseKeyValueAttributes(
+    nodes: Ast.Node[] | null
+): Record<string, string> {
+    const attributes: Record<string, string> = {};
+    if (!nodes) {
+        return attributes;
+    }
+    for (const entry of printRaw(nodes).split(",")) {
+        const keyValue = entry.trim();
+        if (!keyValue) {
+            continue;
+        }
+        const eqIndex = keyValue.indexOf("=");
+        if (eqIndex === -1) {
+            attributes[keyValue] = "yes";
+            continue;
+        }
+        const key = keyValue.slice(0, eqIndex).trim();
+        let value = keyValue.slice(eqIndex + 1).trim();
+        if (
+            (value.startsWith('"') && value.endsWith('"')) ||
+            (value.startsWith("'") && value.endsWith("'"))
+        ) {
+            value = value.slice(1, -1);
+        }
+        value = value.replace(/\\%/g, "%");
+        if (PERCENT_ATTRIBUTES.has(key) && /^\d+(\.\d+)?$/.test(value)) {
+            value += "%";
+        }
+        if (key) {
+            attributes[key] = value;
+        }
+    }
+    return attributes;
 }

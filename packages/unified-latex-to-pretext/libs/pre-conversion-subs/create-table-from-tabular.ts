@@ -6,9 +6,16 @@ import {
 } from "@unified-latex/unified-latex-ctan/package/tabularx";
 import { parseAlignEnvironment } from "@unified-latex/unified-latex-util-align";
 import { getArgsContent } from "@unified-latex/unified-latex-util-arguments";
+import { match } from "@unified-latex/unified-latex-util-match";
 import { trim } from "@unified-latex/unified-latex-util-trim";
 
 type Attributes = Record<string, string | Record<string, string>>;
+
+// `\hline` is a row separator (just like `\\`), so `parseAlignEnvironment`
+// reports a standalone `\hline` as its own zero-cell "row". We detect that
+// case and turn it into a `bottom="minor"` border on the preceding row
+// instead of emitting an empty `<row>`.
+const isHline = match.createMacroMatcher(["hline"]);
 
 /**
  * Convert env into a tabular in PreTeXt.
@@ -31,7 +38,33 @@ export function createTableFromTabular(env: Ast.Environment) {
     // number is the column's index in columnSpecs
     const columnRightBorder: Record<number, boolean> = {};
 
-    const tableBody = tabularBody.map((row) => {
+    // rows that will actually be emitted as `<row>` elements. A bare `\hline`
+    // (no cells) is folded into the `bottom` attribute of the row built just
+    // before it, rather than becoming an empty row of its own.
+    const rows: { attributes: Attributes; content: Ast.Node[] }[] = [];
+
+    // A "row" made up entirely of whitespace (e.g. the newline/space that
+    // sits between `\\` and `\hline`) still parses with a non-empty `cells`
+    // array -- each whitespace token becomes its own single-node cell -- so
+    // `cells.length === 0` alone isn't enough to detect a bare `\hline`.
+    const isEmptyRow = (cells: Ast.Node[][]) =>
+        cells.every((cell) => cell.every((node) => match.whitespace(node)));
+
+    for (const row of tabularBody) {
+        if (isEmptyRow(row.cells)) {
+            if (isHline(row.rowSep)) {
+                if (rows.length > 0) {
+                    rows[rows.length - 1].attributes["bottom"] = "minor";
+                } else {
+                    // A `\hline` before any content is a rule at the top of
+                    // the table.
+                    attributes["top"] = "minor";
+                }
+            }
+            continue;
+        }
+
+        const rowAttributes: Attributes = {};
         const content = row.cells.map((cell, i) => {
             const columnSpec = columnSpecs[i];
 
@@ -70,8 +103,22 @@ export function createTableFromTabular(env: Ast.Environment) {
                 content: cell,
             });
         });
-        return htmlLike({ tag: "row", content });
-    });
+
+        // `\hline` can also end a row directly (without a preceding `\\`).
+        if (isHline(row.rowSep)) {
+            rowAttributes["bottom"] = "minor";
+        }
+
+        rows.push({ attributes: rowAttributes, content });
+    }
+
+    const tableBody: Ast.Node[] = rows.map((row) =>
+        htmlLike({
+            tag: "row",
+            content: row.content,
+            attributes: row.attributes,
+        })
+    );
 
     // add col tags if needed
     if (notLeftAligned || Object.values(columnRightBorder).some((b) => b)) {

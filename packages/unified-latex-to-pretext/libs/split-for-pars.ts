@@ -1,6 +1,7 @@
 import * as Ast from "@unified-latex/unified-latex-types";
 import { match } from "@unified-latex/unified-latex-util-match";
 import { trim } from "@unified-latex/unified-latex-util-trim";
+import { getMarkerWorkspace, isWorkspaceMarker } from "./workspace-marker";
 
 /**
  * Takes an array of nodes and splits it into chunks that should be wrapped
@@ -14,8 +15,12 @@ export function splitForPars(
         macrosThatBreakPars: string[];
         environmentsThatDontBreakPars: string[];
     }
-): { content: Ast.Node[]; wrapInPar: boolean }[] {
-    const ret: { content: Ast.Node[]; wrapInPar: boolean }[] = [];
+): { content: Ast.Node[]; wrapInPar: boolean; workspace?: string }[] {
+    const ret: {
+        content: Ast.Node[];
+        wrapInPar: boolean;
+        workspace?: string;
+    }[] = [];
     let currBody: Ast.Node[] = [];
     trim(nodes);
 
@@ -40,7 +45,7 @@ export function splitForPars(
      * Push and clear the contents of `currBody` to the return array.
      * If there are any contents, it should be wrapped in an array.
      */
-    function pushBody() {
+    function pushBody(workspace?: string) {
         if (currBody.length > 0) {
             trim(currBody);
             // A chunk with no real content (only comments/whitespace) should
@@ -49,13 +54,43 @@ export function splitForPars(
                 (node) =>
                     node.type !== "comment" && node.type !== "whitespace"
             );
-            ret.push({ content: currBody, wrapInPar });
+            ret.push({ content: currBody, wrapInPar, workspace });
             currBody = [];
         }
     }
 
     for (const node of nodes) {
+        // A `workspace-marker` stands for a `\vspace` that should become a
+        // `workspace` attribute on the paragraph it follows (see
+        // vertical-space-subs.ts). It was inserted immediately after that
+        // content, so the paragraph being accumulated right now is the one it
+        // belongs to -- and, like the `\vspace` it replaced, it ends that
+        // paragraph. A marker with nothing accumulated has no paragraph to
+        // attach to and is simply dropped.
+        if (isWorkspaceMarker(node)) {
+            pushBody(getMarkerWorkspace(node));
+            continue;
+        }
         if (isParBreakingMacro(node)) {
+            pushBody();
+            ret.push({ content: [node], wrapInPar: false });
+            continue;
+        }
+        // A display-math environment becomes `<md>`, which PreTeXt counts as a
+        // `TextParagraphItem` -- it lives *inside* a `<p>`, never beside one, so
+        // a bare `<md>` next to a paragraph is schema-invalid. Keep it in the
+        // paragraph it follows rather than letting the environment check below
+        // treat it as a block boundary. (`\[...\]` and `$$...$$` parse as
+        // `displaymath` rather than `mathenv`, and already fall through.)
+        if (node.type === "mathenv") {
+            currBody.push(node);
+            continue;
+        }
+        // The mirror case: a `verbatim` environment becomes `<pre>`, which is
+        // `BlockText` and so must sit *beside* paragraphs rather than inside
+        // one. The parser gives it its own node type rather than `environment`,
+        // so it misses the check below and needs saying explicitly.
+        if (node.type === "verbatim") {
             pushBody();
             ret.push({ content: [node], wrapInPar: false });
             continue;

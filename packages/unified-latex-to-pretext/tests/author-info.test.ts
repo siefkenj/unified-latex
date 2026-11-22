@@ -12,9 +12,13 @@ import {
 import { VFile } from "vfile";
 import { toPretextWithLoggerFactory } from "../libs/pretext-subs/to-pretext";
 
-function normalizeHtml(str: string) {
+async function normalizeHtml(str: string) {
     try {
-        return Prettier.format(str, { parser: "html" });
+        // `Prettier.format` is async, so it has to be awaited *inside* the try
+        // for the catch to see a parse failure -- otherwise the rejection
+        // escapes and the test dies with a SyntaxError instead of falling back
+        // to an exact string comparison.
+        return await Prettier.format(str, { parser: "html" });
     } catch {
         console.warn("Could not format HTML string", str);
         return str;
