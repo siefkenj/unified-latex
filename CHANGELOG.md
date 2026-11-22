@@ -40,6 +40,8 @@
   `\citetext` is kept.
 - The `no-plaintext-operators` lint rule detects operators in groups in math (e.g. `${sin x}$` or `$x^{sin y}$`), in
   `\mathnormal{...}`, and in font macros and switches whose content isn't a single word (e.g. `\mathrm{a + sin b}`).
+- Windows (`\r\n`) and classic Mac (`\r`) line endings are parsed the same as `\n`. Previously a single `\r\n` was
+  read as two newlines, so it started a new paragraph (e.g., every line became its own `<p>` in PreTeXt conversion).
 
 ### v1.8.5
 
