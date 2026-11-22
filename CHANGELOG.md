@@ -54,6 +54,8 @@
       becomes the slideshow title slide (title, subtitle, authors and institutions); `\frame{...}` converts like the
       environment; outline frames are dropped; `\note` becomes an XML comment; and overlay specs such as
       `\alert<2>{...}` are no longer read as the argument.
+- Windows (`\r\n`) and classic Mac (`\r`) line endings are parsed the same as `\n`. Previously a single `\r\n` was
+  read as two newlines, so it started a new paragraph (e.g., every line became its own `<p>` in PreTeXt conversion).
 
 ### v1.8.5
 

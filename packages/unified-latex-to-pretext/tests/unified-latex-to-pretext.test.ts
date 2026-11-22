@@ -52,6 +52,12 @@ describe("unified-latex-to-pretext:unified-latex-to-pretext", () => {
         expect(html).toEqual("<p><alert>a</alert></p><p><alert>b</alert></p>");
     });
 
+    it("treats Windows (CRLF) and old Mac (CR) line endings like LF", () => {
+        // A single line ending is a space, not a paragraph break
+        expect(process("a\r\nb\r\n\r\nc")).toEqual("<p>a b</p><p>c</p>");
+        expect(process("a\rb\r\rc")).toEqual("<p>a b</p><p>c</p>");
+    });
+
     it("Can replace text-style macros", async () => {
         html = process(String.raw`a \textbf{different} word`);
         expect(await normalizeHtml(html)).toEqual(
