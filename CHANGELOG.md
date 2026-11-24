@@ -56,6 +56,8 @@
       `\alert<2>{...}` are no longer read as the argument.
 - Windows (`\r\n`) and classic Mac (`\r`) line endings are parsed the same as `\n`. Previously a single `\r\n` was
   read as two newlines, so it started a new paragraph (e.g., every line became its own `<p>` in PreTeXt conversion).
+- The bodies of `lstlisting` and `minted` environments are printed verbatim. Previously each `toString` pass added
+  blank lines inside them (#163).
 
 ### v1.8.5
 

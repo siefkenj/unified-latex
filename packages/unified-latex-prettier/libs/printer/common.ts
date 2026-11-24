@@ -117,6 +117,7 @@ export const {
     line,
     softline,
     hardline,
+    literalline,
     lineSuffix,
     lineSuffixBoundary,
     breakParent,
