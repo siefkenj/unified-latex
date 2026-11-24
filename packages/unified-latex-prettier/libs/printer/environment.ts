@@ -7,6 +7,8 @@ import {
     indent,
     hardline,
     line,
+    literalline,
+    join,
     ESCAPE,
     formatEnvSurround,
     joinWithSoftline,
@@ -29,6 +31,8 @@ export function printVerbatimEnvironment(
     return [env.start, node.content, env.end];
 }
 
+const VERBATIM_BODY_ENVIRONMENTS = new Set(["lstlisting", "minted"]);
+
 export function printEnvironment(
     path: PrettierTypes.AstPath,
     print: PrettierTypes.RecursivePrintFunc,
@@ -42,6 +46,15 @@ export function printEnvironment(
 
     const args = node.args ? path.map(print, "args" as any) : [];
     const env = formatEnvSurround(node);
+
+    if (VERBATIM_BODY_ENVIRONMENTS.has(node.env)) {
+        return [
+            env.start,
+            ...args,
+            join(literalline, printRaw(node.content).split("\n")),
+            env.end,
+        ];
+    }
 
     let content = path.map(print, "content");
     content = formatDocArray(node.content, content, options);

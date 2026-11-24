@@ -237,6 +237,22 @@ c
         }
     });
 
+    it("lstlisting and minted bodies are printed verbatim", async () => {
+        const STRINGS = [
+            "\\begin{lstlisting}\nint x;\n\\end{lstlisting}",
+            "\\begin{lstlisting}[float]\nint x;\n\\end{lstlisting}",
+            "\\begin{lstlisting}\n  a  b\n\n\tc\n\\end{lstlisting}",
+            "\\begin{minted}{python}\nx = 1\n\\end{minted}",
+            "\\begin{minted}[linenos]{python}\nx = 1\n\\end{minted}",
+            "\\begin{a}\n\t\\begin{lstlisting}\nint x;\n\\end{lstlisting}\n\\end{a}",
+        ];
+
+        for (const str of STRINGS) {
+            await expect(str).toFormatAs(str, formatter);
+            await expect(await formatter(str)).toFormatAs(str, formatter);
+        }
+    });
+
     it("comments at start of environments tests", async () => {
         const STRINGS = [
             {
